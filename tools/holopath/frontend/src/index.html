@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HoloPath — Hologram GIF Generator | Turn Images into Holograms</title>
+  <meta name="description" content="Free online hologram GIF generator. Upload any image, GIF, or video and transform it into a stunning animated hologram with scan lines, glow, glitch effects, and more. Supports pyramid, fan, and Pepper's Ghost layouts. No sign-up required.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/holopath/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="HoloPath — Hologram GIF Generator">
+  <meta property="og:description" content="Transform any image, GIF, or video into a stunning animated hologram. Multiple layouts for pyramid projectors, LED fans, and Pepper's Ghost displays. Free, instant, no sign-up.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/holopath/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/holopath/og-image.png">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HoloPath — Hologram GIF Generator">
+  <meta name="twitter:description" content="Turn any image into an animated hologram GIF with one click.">
+  <meta name="twitter:image" content="https://restless-forge.dev/tools/holopath/og-image.png">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- JSON-LD: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "HoloPath",
+    "url": "https://restless-forge.dev/tools/holopath",
+    "description": "Free online hologram GIF generator. Upload any image or GIF and transform it into animated holographic art.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "browserRequirements": "Requires JavaScript. All processing runs client-side.",
+    "author": { "@type": "Person", "name": "Ken", "url": "https://restless-forge.dev/about" }
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is HoloPath?",
+        "acceptedAnswer": { "@type": "Answer", "text": "HoloPath is a free online tool that transforms static images, animated GIFs, and videos into holographic animated GIFs with customisable effects like scan lines, glow, glitch, chromatic aberration, and more. It supports multiple output layouts for pyramid projectors, LED hologram fans, and Pepper's Ghost displays. All processing happens in your browser — no files are ever uploaded." }
+      },
+      {
+        "@type": "Question",
+        "name": "What file formats does HoloPath support?",
+        "acceptedAnswer": { "@type": "Answer", "text": "HoloPath accepts JPG, PNG, WebP, BMP, animated GIF, and video files (MP4, WebM, MOV) up to 15 MB. Video files are also supported — longer videos use more browser memory. Each frame is individually processed with hologram effects — all in your browser." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is HoloPath free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, HoloPath is completely free to use with no account required. Generated hologram GIFs can be downloaded instantly." }
+      }
+    ]
+  }
+  </script>
+
+  <!-- AdSense (replace pub ID after approval) -->
+  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
+     crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+  <!-- ─── Header ─── -->
+  <header class="header">
+    <h1 class="header__title">HOLO::PATH</h1>
+    <p class="header__sub">Image · GIF · Video → Hologram GIF</p>
+  </header>
+
+  <nav class="nav" aria-label="Main navigation">
+    <a href="/tools/holopath/" class="nav__link nav__link--active">Generator</a>
+    <a href="/tools/holopath/how-it-works.html" class="nav__link">How It Works</a>
+    <a href="/tools/holopath/faq.html" class="nav__link">FAQ</a>
+    <a href="/tools/holopath/articles/" class="nav__link">Articles</a>
+    <a href="/about" class="nav__link">About</a>
+    <a href="/" class="nav__link">Restless Forge</a>
+  </nav>
+
+  <!-- ─── Support Banner ─── -->
+  <div class="support-banner" id="support-banner">
+    <span class="support-banner__text">HoloPath is free &amp; open — if it's useful, consider supporting development</span>
+    <a class="support-banner__btn" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 21h18v-2H2v2zm2-4h14v-2H4v2zm-1-6l.5-2h15l.5 2h2l-1-4H2L1 11h2zm5-6h6V3H8v2z"/></svg>
+      Buy me a coffee
+    </a>
+    <a class="support-banner__btn support-banner__btn--alt" href="https://ko-fi.com/E1E21UH4DX" target="_blank" rel="noopener">Ko-fi</a>
+    <a class="support-banner__btn support-banner__btn--alt" href="https://substack.com/@stygnus" target="_blank" rel="noopener">Substack</a>
+    <button class="support-banner__close" id="close-support" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- ═══ Left Rail Ad ═══ -->
+  <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-client="ca-pub-5516736042033534"
+         data-ad-slot="8568993100"
+         data-ad-format="vertical"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+
+  <!-- ═══ Right Rail Ad ═══ -->
+  <aside class="ad-rail ad-rail--right" aria-label="Advertisement">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-client="ca-pub-5516736042033534"
+         data-ad-slot="2979965943"
+         data-ad-format="vertical"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+
+  <!-- ─── App ─── -->
+  <main class="app" id="app">
+
+    <!-- Left: Controls -->
+    <div>
+
+      <!-- Upload -->
+      <div class="panel" id="upload-section">
+        <h2 class="panel__title">⬡ Source</h2>
+        <div class="upload" id="drop-zone">
+          <span class="upload__icon">◈</span>
+          <div class="upload__label">Drop image / GIF / video or click to upload</div>
+          <p class="upload__name" id="file-name"></p>
+          <img class="upload__thumb" id="file-thumb" alt="preview">
+        </div>
+        <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,.bmp,.gif,.mp4,.webm,.mov,.m4v,.ogg">
+        <div class="source-badge" id="source-badge">
+          <span class="source-badge__tag" id="source-tag">—</span>
+          <span id="source-details"></span>
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div class="panel">
+        <h2 class="panel__title">⬡ Holo Preset</h2>
+        <div class="presets" id="presets"></div>
+
+        <div class="ctrl">
+          <div class="ctrl__header">Scan Lines <span class="ctrl__val" id="val-scan">60%</span></div>
+          <input type="range" id="scan-lines" min="0" max="100" value="60">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Glow Intensity <span class="ctrl__val" id="val-glow">70%</span></div>
+          <input type="range" id="glow" min="0" max="100" value="70">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Flicker <span class="ctrl__val" id="val-flicker">40%</span></div>
+          <input type="range" id="flicker" min="0" max="100" value="40">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Glitch <span class="ctrl__val" id="val-glitch">30%</span></div>
+          <input type="range" id="glitch" min="0" max="100" value="30">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Noise / Static <span class="ctrl__val" id="val-noise">25%</span></div>
+          <input type="range" id="noise" min="0" max="100" value="25">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Color Shift <span class="ctrl__val" id="val-shift">50%</span></div>
+          <input type="range" id="color-shift" min="0" max="100" value="50">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Edge Detect <span class="ctrl__val" id="val-edge">0%</span></div>
+          <input type="range" id="edge-detect" min="0" max="100" value="0">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Brightness <span class="ctrl__val" id="val-brightness">47%</span></div>
+          <input type="range" id="brightness" min="0" max="100" value="47">
+        </div>
+
+        <hr class="divider">
+
+        <div class="ctrl">
+          <div class="ctrl__header">Hue</div>
+          <select id="hue-select">
+            <option value="cyan">Cyan Hologram</option>
+            <option value="green">Green Matrix</option>
+            <option value="magenta">Magenta Neon</option>
+            <option value="blue">Blue Phantom</option>
+            <option value="rainbow">Rainbow Cycle</option>
+          </select>
+        </div>
+
+        <label class="check"><input type="checkbox" id="grid-overlay" checked> Grid Overlay</label>
+        <label class="check"><input type="checkbox" id="chrom-aberration" checked> Chromatic Aberration</label>
+        <label class="check"><input type="checkbox" id="wobble" checked> Float / Wobble</label>
+      </div>
+
+      <!-- Output settings -->
+      <div class="panel">
+        <h2 class="panel__title">⬡ Output</h2>
+
+        <div class="gif-opts" id="gif-opts">
+          <div class="ctrl__header" style="margin-bottom:6px;">Frame Mode</div>
+          <div class="frame-modes">
+            <button class="fmode active" data-mode="source" id="mode-source">Source Frames</button>
+            <button class="fmode" data-mode="custom" id="mode-custom">Custom Count</button>
+          </div>
+          <p class="gif-note" id="frame-note">Uses all source GIF frames with hologram on each</p>
+          <hr class="divider">
+        </div>
+
+        <div class="ctrl" id="frame-count-group">
+          <div class="ctrl__header">Frames <span class="ctrl__val" id="val-frames">24</span></div>
+          <input type="range" id="frame-count" min="8" max="120" value="24" step="4">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Speed (ms/frame) <span class="ctrl__val" id="val-speed">80</span></div>
+          <input type="range" id="speed" min="20" max="200" value="80" step="10">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl__header">Resolution</div>
+          <select id="resolution">
+            <option value="256">256px (fast)</option>
+            <option value="400">400px</option>
+            <option value="512" selected>512px</option>
+            <option value="640">640px</option>
+            <option value="800">800px (slow)</option>
+          </select>
+        </div>
+
+        <label class="check gif-opts" id="source-timing-row">
+          <input type="checkbox" id="use-source-timing" checked> Use source timing
+        </label>
+
+        <hr class="divider">
+
+        <label class="control">
+          <span class="label">Output Layout</span>
+          <select id="layout-mode">
+            <option value="pyramid4" selected>Pyramid 360° — 4-sided projector</option>
+            <option value="pyramid3">Pyramid 270° — 3-sided showcase</option>
+            <option value="fan">Hologram Fan — LED POV display</option>
+            <option value="peppers_ghost">Pepper's Ghost — 45° glass</option>
+            <option value="single">Single Image — no layout</option>
+          </select>
+        </label>
+        <p class="gif-note active" id="layout-note">4 rotations for pyramid projectors</p>
+
+        <label class="control">
+          <span class="label">Output Format</span>
+          <select id="output-format">
+            <option value="gif" selected>GIF — animated, universal</option>
+            <option value="video">Video (MP4/WebM) — smaller file</option>
+          </select>
+        </label>
+        <p class="gif-note" id="format-note"></p>
+
+        <button class="btn btn--primary" id="preview-btn" disabled>▶ Quick Preview</button>
+        <button class="btn btn--secondary" id="generate-btn" disabled>◉ Generate</button>
+      </div>
+    </div>
+
+    <!-- Right: Preview -->
+    <div class="preview">
+      <div class="preview__frame" id="preview-frame">
+        <div class="preview__empty" id="empty-state">
+          <div class="preview__empty-icon">◈</div>
+          <p class="preview__empty-hint">Upload an image or GIF to begin</p>
+        </div>
+        <canvas id="preview-canvas" style="display:none;max-width:100%;image-rendering:auto;"></canvas>
+        <img id="preview-img" alt="Hologram preview" style="display:none;">
+      </div>
+
+      <div class="progress" id="progress">
+        <div class="progress__bar"><div class="progress__fill" id="progress-fill"></div></div>
+        <p class="progress__text" id="progress-text">Initializing...</p>
+      </div>
+
+      <p class="status" id="status"></p>
+
+      <div class="download" id="download">
+        <button class="download__link" id="download-btn">⬇ Download Hologram</button>
+      </div>
+
+      <div class="stats" id="stats">
+        <div class="stats__grid" id="stats-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ─── SEO Content (condensed — full content on subpages) ─── -->
+  <section class="content" id="about">
+    <h2>About HoloPath</h2>
+    <p>HoloPath is a free hologram GIF generator that transforms any image, animated GIF, or short video into a stunning holographic animation. Choose from five presets — Classic, Cyberpunk, Ghost, Glitch, and Matrix — and five output layouts for pyramid projectors, LED hologram fans, Pepper's Ghost displays, or direct use. All processing happens entirely in your browser — your files are never uploaded to a server. <a href="/about">Learn more →</a></p>
+    <p>Supports JPG, PNG, WebP, BMP, animated GIF, and video formats including MP4, WebM, and MOV — all up to 15 MB. Real-time animated preview with instant parameter adjustment. <a href="/how-it-works">See how it works →</a></p>
+  </section>
+
+  <!-- ═══ AD SLOT ═══ -->
+  <aside class="ad-slot ad-slot--bottom">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-5516736042033534"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+
+  <footer class="footer">
+    <div style="text-align:center;margin-bottom:1rem;">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#d4a44e;">Support Restless Forge</span>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.5rem;">
+        <a href="https://ko-fi.com/E1E21UH4DX" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">Ko-fi</a>
+        <a href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">Buy Me a Coffee</a>
+        <a href="https://substack.com/@stygnus" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">Substack</a>
+        <a href="https://github.com/thekensman/" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">GitHub</a>
+      </div>
+    </div>
+    <nav class="footer__legal" aria-label="Footer navigation">
+      <a href="/">Restless Forge</a>
+      <a href="/tools/">All Tools</a>
+      <a href="/tools/holopath/how-it-works.html">How It Works</a>
+      <a href="/tools/holopath/faq.html">FAQ</a>
+      <a href="/tools/holopath/articles/">Articles</a>
+      <a href="/about">About</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;">Restless Forge</a> &mdash; HoloPath: Free hologram GIF generator.</p>
+  </footer>
+
+  <!-- noscript fallback for SEO bots -->
+  <noscript>
+    <div style="padding:40px;text-align:center;color:#aaa;font-family:monospace;">
+      <h1>HoloPath — Hologram GIF Generator</h1>
+      <p>Transform any image or GIF into an animated hologram. JavaScript is required to use this application.</p>
+    </div>
+  </noscript>
+
+  <!-- Error toast (hidden by default) -->
+  <div class="toast" id="error-toast" hidden>
+    <p id="error-msg"></p>
+  </div>
+
+  <script>
+    // Dismiss support banner (remember for session)
+    document.getElementById('close-support')?.addEventListener('click', function() {
+      document.getElementById('support-banner').style.display = 'none';
+      try { sessionStorage.setItem('hp-support-dismissed', '1'); } catch(e) {}
+    });
+    try { if (sessionStorage.getItem('hp-support-dismissed')) document.getElementById('support-banner').style.display = 'none'; } catch(e) {}
+  </script>
+
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

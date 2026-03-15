@@ -1,0 +1,24 @@
+{
+  "name": "what-is-my-time-worth",
+  "version": "1.0.0",
+  "description": "Real Hourly Wage Calculator — Know what your time is actually worth.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "@playwright/test": "^1.45.0",
+    "vitest": "^2.0.0",
+    "jsdom": "^24.0.0"
+  },
+  "author": "Kenneth Cross",
+  "license": "MIT"
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — HoloPath | Free Hologram GIF Generator</title>
+  <meta name="description" content="About HoloPath — a free tool that transforms images, GIFs, and videos into animated hologram GIFs for pyramid projectors, LED fans, and Pepper's Ghost displays." />
+  <link rel="canonical" href="https://restless-forge.dev/tools/holopath/about" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="About — HoloPath" />
+  <meta property="og:description" content="About HoloPath — a free hologram GIF generator supporting 5 output layouts for different display hardware." />
+  <meta property="og:url" content="https://restless-forge.dev/tools/holopath/about" />
+  <meta property="og:site_name" content="HoloPath" />
+  <meta property="og:image" content="https://restless-forge.dev/tools/holopath/og-image.png" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="stylesheet" href="/pages.css" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="/tools/holopath/" class="site-nav__link">Generator</a>
+    <a href="/tools/holopath/how-it-works.html" class="site-nav__link">How It Works</a>
+    <a href="/tools/holopath/faq.html" class="site-nav__link">FAQ</a>
+    <a href="/tools/holopath/articles/" class="site-nav__link">Articles</a>
+    <a href="/tools/holopath/about.html" class="site-nav__link site-nav__link--active">About</a>
+    <a href="/tools/holopath/contact.html" class="site-nav__link">Contact</a>
+  </nav>
+  <!-- ─── Support Banner ─── -->
+  <div class="support-banner" id="support-banner">
+    <span class="support-banner__text">HoloPath is free &amp; open — if it's useful, consider supporting development</span>
+    <a class="support-banner__btn" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 21h18v-2H2v2zm2-4h14v-2H4v2zm-1-6l.5-2h15l.5 2h2l-1-4H2L1 11h2zm5-6h6V3H8v2z"/></svg>
+      Buy me a coffee
+    </a>
+    <a class="support-banner__btn support-banner__btn--alt" href="https://ko-fi.com/E1E21UH4DX" target="_blank" rel="noopener">Ko-fi</a>
+    <a class="support-banner__btn support-banner__btn--alt" href="https://substack.com/@stygnus" target="_blank" rel="noopener">Substack</a>
+    <button class="support-banner__close" id="close-support" aria-label="Dismiss">&times;</button>
+  </div>
+  <main class="page-content" role="main">
+    <article class="article">
+      <h1>About HoloPath</h1>
+
+      <p>HoloPath was built out of frustration with the lack of good, free tools for
+      creating hologram content. Most hologram pyramid videos on YouTube were made with
+      expensive 3D software, and there was no simple way to take an existing image or
+      video and turn it into something you could project through a DIY hologram pyramid.</p>
+
+      <p>HoloPath solves this by providing a free, browser-based generator that applies
+      realistic holographic effects — scan lines, glow, chromatic aberration, glitch,
+      noise, and more — to any image, GIF, or short video. The output is formatted
+      specifically for hologram display hardware, not just for social media aesthetics.</p>
+
+      <h2>What Makes HoloPath Different</h2>
+
+      <p>Unlike simple Instagram-style hologram filters, HoloPath produces output in the
+      correct layout for actual hologram hardware. It supports <strong>five display
+      formats</strong>:</p>
+
+      <ul>
+        <li><strong>Pyramid 360°</strong> — the classic 4-sided layout for smartphone pyramid projectors</li>
+        <li><strong>Pyramid 270°</strong> — 3-sided layout for commercial showcase displays</li>
+        <li><strong>Hologram Fan</strong> — circular crop for LED persistence-of-vision fan displays</li>
+        <li><strong>Pepper's Ghost</strong> — positioned for angled glass or acrylic reflectors</li>
+        <li><strong>Single Image</strong> — direct hologram output for sharing or custom use</li>
+      </ul>
+
+      <p>Each frame runs through a 13-stage rendering pipeline built with JavaScript and
+      Canvas 2D, producing effects that look authentic rather than gimmicky. Five carefully
+      tuned presets (Classic, Cyberpunk, Ghost, Glitch, Matrix) provide a starting point,
+      and every parameter is adjustable.</p>
+
+      <h2>How It Works</h2>
+
+      <p>For <strong>static images</strong> (JPG, PNG, WebP, BMP), HoloPath generates animation
+      by varying effects like scan line position, flicker phase, and glitch offsets across
+      frames — creating the illusion of a live holographic display from a single photo.</p>
+
+      <p>For <strong>animated GIFs</strong>, each source frame is individually processed through
+      the hologram pipeline, preserving the original animation while adding all the
+      holographic effects.</p>
+
+      <p>For <strong>videos</strong> (MP4, WebM, MOV), frames are extracted in your browser via
+      the HTML5 video element at 10fps, processed through the hologram pipeline, and output as
+      an animated GIF. Longer videos use more browser memory but there is no hard duration limit.</p>
+
+      <h2>Privacy</h2>
+
+      <p>All processing happens entirely in your browser. Your files are never uploaded to a
+      server or stored anywhere. HoloPath is a static website with no backend — there is no
+      database, no user accounts, and no way for anyone to access your files. See the full
+      <a href="/privacy">Privacy Policy</a>.</p>
+
+      <h2>Support Development</h2>
+
+      <p>HoloPath is free and always will be. If you find it useful, consider supporting
+      the project to help cover hosting costs:</p>
+
+      <p>
+        <a href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://ko-fi.com/E1E21UH4DX" target="_blank" rel="noopener">❤️ Support on Ko-fi</a>
+      </p>
+
+      <p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Open the Generator →</a></p>
+    </article>
+  </main>
+
+  <aside class="ad-slot ad-slot--bottom">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-5516736042033534"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+
+    <footer class="footer">
+    <nav class="footer__legal" aria-label="Footer navigation">
+      <a href="/tools/holopath/how-it-works.html">How It Works</a>
+      <a href="/tools/holopath/faq.html">FAQ</a>
+      <a href="/tools/holopath/articles/">Articles</a>
+      <a href="/tools/holopath/about.html">About</a>
+      <a href="/tools/holopath/contact.html">Contact</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Use</a>
+    </nav>
+    <p class="footer__copy">&copy; 2026 HoloPath &mdash; Free hologram GIF generator.
+      <a class="footer__support" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Support this project &#9749;</a>
+    </p>
+  </footer>
+  <script>
+    document.getElementById('close-support')?.addEventListener('click', function() {
+      document.getElementById('support-banner').style.display = 'none';
+      try { sessionStorage.setItem('hp-support-dismissed', '1'); } catch(e) {}
+    });
+    try { if (sessionStorage.getItem('hp-support-dismissed')) document.getElementById('support-banner').style.display = 'none'; } catch(e) {}
+  </script>
+</body>
+</html>

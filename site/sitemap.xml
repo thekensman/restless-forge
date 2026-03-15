@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Global Pages -->
+  <url><loc>https://restless-forge.dev/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://restless-forge.dev/tools/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://restless-forge.dev/essays/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://restless-forge.dev/articles/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://restless-forge.dev/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://restless-forge.dev/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+
+  <!-- Essays -->
+  <url><loc>https://restless-forge.dev/essays/why-i-build-these-tools</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://restless-forge.dev/essays/the-time-value-philosophy</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://restless-forge.dev/essays/making-tools-for-the-restless</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
+  <!-- Tools -->
+  <url><loc>https://restless-forge.dev/tools/what-is-my-time-worth/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://restless-forge.dev/tools/sandpath/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+
+  <!-- HoloPath Sub-pages -->
+  <url><loc>https://restless-forge.dev/tools/holopath/about.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/faq.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/how-it-works.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/history-of-holograms.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/how-hologram-pyramids-work.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/best-hologram-projectors.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/optimizing-hologram-output.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/peppers-ghost-illusion.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/led-hologram-fans.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/creating-hologram-art.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/gif-vs-video-hologram.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/future-of-holographic-displays.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/diy-hologram-pyramid.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/hologram-effects-explained.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/holograms-in-pop-culture.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/best-images-for-holograms.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/hologram-displays-for-business.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/colour-theory-holographic-art.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+
+  <!-- What Is My Time Worth Sub-pages -->
+  <url><loc>https://restless-forge.dev/tools/what-is-my-time-worth/about/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://restless-forge.dev/tools/what-is-my-time-worth/faq/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://restless-forge.dev/tools/what-is-my-time-worth/blog/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+</urlset>

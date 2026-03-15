@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works — HoloPath | Hologram Effects &amp; Display Guide</title>
+  <meta name="description" content="Learn how HoloPath transforms images into hologram GIFs. Understand the 13-stage rendering pipeline, 5 output layouts, and how to set up DIY hologram displays at home." />
+  <link rel="canonical" href="https://restless-forge.dev/tools/holopath/how-it-works" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="How It Works — HoloPath" />
+  <meta property="og:description" content="Learn how HoloPath creates hologram GIFs and how to set up DIY hologram displays." />
+  <meta property="og:url" content="https://restless-forge.dev/tools/holopath/how-it-works" />
+  <meta property="og:site_name" content="HoloPath" />
+  <meta property="og:image" content="https://restless-forge.dev/tools/holopath/og-image.png" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="stylesheet" href="/pages.css" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="/tools/holopath/" class="site-nav__link">Generator</a>
+    <a href="/tools/holopath/how-it-works.html" class="site-nav__link site-nav__link--active">How It Works</a>
+    <a href="/tools/holopath/faq.html" class="site-nav__link">FAQ</a>
+    <a href="/tools/holopath/articles/" class="site-nav__link">Articles</a>
+    <a href="/tools/holopath/about.html" class="site-nav__link">About</a>
+    <a href="/tools/holopath/contact.html" class="site-nav__link">Contact</a>
+  </nav>
+  <!-- ─── Support Banner ─── -->
+  <div class="support-banner" id="support-banner">
+    <span class="support-banner__text">HoloPath is free &amp; open — if it's useful, consider supporting development</span>
+    <a class="support-banner__btn" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 21h18v-2H2v2zm2-4h14v-2H4v2zm-1-6l.5-2h15l.5 2h2l-1-4H2L1 11h2zm5-6h6V3H8v2z"/></svg>
+      Buy me a coffee
+    </a>
+    <a class="support-banner__btn support-banner__btn--alt" href="https://ko-fi.com/E1E21UH4DX" target="_blank" rel="noopener">Ko-fi</a>
+    <a class="support-banner__btn support-banner__btn--alt" href="https://substack.com/@stygnus" target="_blank" rel="noopener">Substack</a>
+    <button class="support-banner__close" id="close-support" aria-label="Dismiss">&times;</button>
+  </div>
+  <main class="page-content" role="main">
+    <article class="article">
+      <h1>How HoloPath Works</h1>
+
+      <p>HoloPath transforms ordinary images, GIFs, and videos into animated holograms through
+      a multi-stage rendering pipeline, then composes the result into the correct layout for
+      your display hardware. Everything runs entirely in your browser — no server processing,
+      no uploads, no waiting. Here's the full breakdown.</p>
+
+      <h2>Step 1: Input Parsing</h2>
+
+      <p>HoloPath accepts three types of input, each handled differently:</p>
+
+      <p><strong>Static images</strong> (JPG, PNG, WebP, BMP) are loaded and converted to RGBA.
+      Since there's only one frame, HoloPath generates animation by varying effect parameters
+      (scan line position, flicker phase, glitch offsets, noise seed) across the requested
+      number of output frames.</p>
+
+      <p><strong>Animated GIFs</strong> are parsed frame-by-frame using a custom JavaScript GIF
+      decoder with proper disposal method handling (leave, restore background, restore previous)
+      and LZW decompression. Each source frame becomes an independent input to the hologram
+      pipeline.</p>
+
+      <p><strong>Videos</strong> (MP4, WebM, MOV) are decoded by the browser's built-in HTML5
+      video decoder. Frames are extracted at 10fps by seeking through the video and capturing
+      each frame to a Canvas element, capped at 900 frames for browser memory safety. Each extracted
+      frame is fed into the hologram pipeline individually. No server upload is required —
+      your video never leaves your device.</p>
+
+      <h2>Step 2: The 13-Stage Hologram Pipeline</h2>
+
+      <p>Every frame passes through a configurable rendering pipeline built with JavaScript
+      and Canvas ImageData pixel manipulation. Each stage can be controlled independently,
+      and changes are reflected in real-time in the animated preview:</p>
+
+      <h3>1. Wobble</h3>
+      <p>Subtle horizontal offset that oscillates per frame, simulating a floating holographic
+      projection that isn't perfectly stable.</p>
+
+      <h3>2. Luminance Extraction</h3>
+      <p>The RGB image is converted to greyscale luminance values. This becomes the brightness
+      map that drives the holographic colouring.</p>
+
+      <h3>3. Edge Detection</h3>
+      <p>Sobel-like gradient operators detect edges in the image, producing the characteristic
+      "wireframe" look of many hologram styles. The strength is adjustable from subtle outlines
+      to dominant edge-only rendering.</p>
+
+      <h3>4. Hue Colorisation</h3>
+      <p>The greyscale luminance is re-coloured with the selected holographic hue. Options
+      include cyan, green, magenta, blue, and rainbow (which varies hue by vertical position).
+      The colorisation uses HSL-to-RGB conversion for natural-looking colour gradients.</p>
+
+      <h3>5. Flicker</h3>
+      <p>Sinusoidal brightness modulation that varies per frame, creating the unsteady glow of
+      a projection that's not quite stable — a hallmark of realistic hologram aesthetics.</p>
+
+      <h3>6. Colour Shift</h3>
+      <p>Per-row hue variation that creates subtle colour banding across the image. This
+      simulates the chromatic non-uniformity of real projection systems.</p>
+
+      <h3>7. Glow Boost</h3>
+      <p>Amplifies bright areas of the image, making highlights bloom outward. Creates the
+      characteristic "glowing from within" look of sci-fi holograms.</p>
+
+      <h3>8. Glitch</h3>
+      <p>Random horizontal displacement of image slices, simulating data corruption or signal
+      interference. The strength and frequency of glitch bands is adjustable.</p>
+
+      <h3>9. Scan Lines</h3>
+      <p>Periodic horizontal darkening that scrolls slowly downward across frames. This mimics
+      CRT-style scan lines and is the single most recognisable hologram visual cue.</p>
+
+      <h3>10. Noise / Static</h3>
+      <p>Random per-pixel brightness variation that changes every frame. Simulates the noise
+      floor of a projection system and adds visual texture.</p>
+
+      <h3>11. Chromatic Aberration</h3>
+      <p>Red and blue colour channels are shifted horizontally in opposite directions, creating
+      the colour-fringing effect seen in cheap optics and sci-fi holograms alike.</p>
+
+      <h3>12. Grid Overlay</h3>
+      <p>A subtle grid pattern overlaid on the image, simulating the pixel grid of a projection
+      surface. The grid scrolls slowly across frames.</p>
+
+      <h3>13. Scan Beam &amp; Vignette</h3>
+      <p>A moving highlight bar sweeps vertically across the image each loop, and a radial vignette
+      darkens the edges — both adding depth and directing attention to the centre.</p>
+
+      <h2>Step 3: Layout Compositing</h2>
+
+      <p>After the hologram effects are applied, each frame is composed into the selected
+      output layout. HoloPath supports five layouts, each designed for specific display hardware:</p>
+
+      <h3>Pyramid 360° (4-sided)</h3>
+      <p>Four copies of the hologram are placed on a square black canvas — one at top (normal),
+      bottom (rotated 180°), left (rotated 90° CW), and right (rotated 90° CCW). Each copy
+      faces inward toward the centre, where the pyramid's apex sits. This is the most popular
+      layout for DIY smartphone hologram pyramids.</p>
+
+      <h3>Pyramid 270° (3-sided)</h3>
+      <p>Three copies arranged for 3-sided pyramid showcases commonly used in retail and museums.
+      One copy faces up from top-centre, and two are angled at the bottom corners. The back side
+      is left blank since these displays sit against a wall.</p>
+
+      <h3>Hologram Fan (LED POV)</h3>
+      <p>The hologram is centred on a square black canvas with a circular mask applied. This
+      matches the circular sweep area of LED fan blades. Content outside the circle is blacked out
+      since the fan can't display it anyway.</p>
+
+      <h3>Pepper's Ghost</h3>
+      <p>The hologram is positioned in the lower-centre portion of a 16:9 landscape canvas.
+      This is optimised for Pepper's Ghost setups where a screen lies flat and a piece of glass
+      at 45° reflects the image upward toward the viewer.</p>
+
+      <h3>Single Image</h3>
+      <p>No layout compositing — just the raw hologrammed frame. Use this for social media
+      sharing, custom display setups, or as input to your own compositing workflow.</p>
+
+      <h2>Step 4: GIF Encoding</h2>
+
+      <p>All composed frames are quantised to 256 colours using median-cut quantisation, then
+      encoded into an animated GIF with LZW compression — all in JavaScript running in your
+      browser. The GIF loops infinitely and is available for instant download, with no server
+      round-trip needed.</p>
+
+      <h2>Setting Up Your Display</h2>
+
+      <h3>DIY Pyramid (Smartphone)</h3>
+      <p>Materials: 4 pieces of clear plastic (CD cases), tape. Cut four identical trapezoids
+      (approximately 1cm top, 6cm bottom, 3.5cm tall). Assemble into a truncated pyramid.
+      Place point-down on your phone, play the Pyramid 360° GIF fullscreen, dim the lights.</p>
+
+      <h3>DIY Pepper's Ghost</h3>
+      <p>Materials: clear acrylic or glass sheet, dark enclosure. Angle the glass at 45° between
+      the viewer and a hidden screen. Play the Pepper's Ghost GIF on the screen. The reflection
+      appears to float in mid-air inside the dark enclosure.</p>
+
+      <h3>LED Fan Display</h3>
+      <p>Most hologram fans accept GIF or MP4 files via SD card or Wi-Fi. Upload the Fan layout
+      GIF directly. If your fan requires MP4, convert with: <code>ffmpeg -i holopath-output.gif -c:v libx264 output.mp4</code></p>
+
+      <p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Create Your Hologram →</a></p>
+    </article>
+  </main>
+
+  <aside class="ad-slot ad-slot--bottom">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-5516736042033534"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+
+    <footer class="footer">
+    <nav class="footer__legal" aria-label="Footer navigation">
+      <a href="/tools/holopath/how-it-works.html">How It Works</a>
+      <a href="/tools/holopath/faq.html">FAQ</a>
+      <a href="/tools/holopath/articles/">Articles</a>
+      <a href="/tools/holopath/about.html">About</a>
+      <a href="/tools/holopath/contact.html">Contact</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Use</a>
+    </nav>
+    <p class="footer__copy">&copy; 2026 HoloPath &mdash; Free hologram GIF generator.
+      <a class="footer__support" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Support this project &#9749;</a>
+    </p>
+  </footer>
+  <script>
+    document.getElementById('close-support')?.addEventListener('click', function() {
+      document.getElementById('support-banner').style.display = 'none';
+      try { sessionStorage.setItem('hp-support-dismissed', '1'); } catch(e) {}
+    });
+    try { if (sessionStorage.getItem('hp-support-dismissed')) document.getElementById('support-banner').style.display = 'none'; } catch(e) {}
+  </script>
+</body>
+</html>

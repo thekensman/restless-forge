@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main pages -->
+  <url><loc>https://restless-forge.dev/tools/holopath/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/how-it-works</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/faq</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/contact</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <!-- Articles section -->
+  <url><loc>https://restless-forge.dev/tools/holopath/articles</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/history-of-holograms</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/how-hologram-pyramids-work</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/best-hologram-projectors</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/optimizing-hologram-output</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/peppers-ghost-illusion</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/led-hologram-fans</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/creating-hologram-art</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/gif-vs-video-hologram</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/future-of-holographic-displays</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/diy-hologram-pyramid</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/hologram-effects-explained</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/holograms-in-pop-culture</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/best-images-for-holograms</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/hologram-displays-for-business</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://restless-forge.dev/tools/holopath/articles/colour-theory-holographic-art</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+</urlset>

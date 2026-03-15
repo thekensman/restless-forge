@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://restless-forge.dev/tools/what-is-my-time-worth/sitemap.xml

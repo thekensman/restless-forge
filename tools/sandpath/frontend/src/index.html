@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebApplication">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ═══ PRIMARY SEO ═══ -->
+  <title>SandPath — Convert Images & SVGs to Sand Table Art (.thr / .gcode)</title>
+  <meta name="description" content="Free online tool to convert SVG, JPG, PNG, and WebP images into .thr and .gcode files for kinetic sand tables including Oasis Mini, Sisyphus, and ZenXY. Trace photos into clean vector sand art." />
+  <meta name="keywords" content="sand table converter, SVG to THR, image to sand art, Oasis Mini patterns, Sisyphus table files, theta rho converter, sand table gcode, kinetic sand art, ZenXY patterns, sandify alternative" />
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/" />
+
+  <!-- ═══ OPEN GRAPH (Facebook, LinkedIn, Discord) ═══ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SandPath — Images & SVGs to Sand Table Art" />
+  <meta property="og:description" content="Free online converter: turn any image or SVG into .thr/.gcode patterns for Oasis, Sisyphus, and ZenXY kinetic sand tables." />
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/" />
+  <meta property="og:site_name" content="SandPath" />
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- ═══ TWITTER CARD ═══ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SandPath — Images & SVGs to Sand Table Art" />
+  <meta name="twitter:description" content="Free online converter for kinetic sand tables. SVG, JPG, PNG → .thr/.gcode." />
+  <meta name="twitter:image" content="https://restless-forge.dev/tools/sandpath/og-image.png" />
+
+  <!-- ═══ STRUCTURED DATA — JSON-LD ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "SandPath",
+    "url": "https://restless-forge.dev/tools/sandpath",
+    "description": "Convert SVG vector art and raster images (JPG, PNG, WebP) to .thr and .gcode files for kinetic sand tables like Oasis Mini, Sisyphus, and ZenXY.",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "SVG to .thr (theta-rho) conversion",
+      "SVG to .gcode conversion",
+      "JPG/PNG/WebP image tracing to sand art",
+      "Edge detection, thresholding, and centerline trace modes",
+      "Support for Oasis Mini, Oasis One, Sisyphus, and ZenXY tables",
+      "Custom table dimensions",
+      "In-browser SVG preview"
+    ],
+    "screenshot": "https://restless-forge.dev/tools/sandpath/og-image.png",
+    "creator": {
+      "@type": "Person",
+      "name": "Ken",
+      "url": "https://restless-forge.dev/about"
+    }
+  }
+  </script>
+
+  <!-- ═══ FAQ STRUCTURED DATA ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I convert an image to a sand table pattern?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Upload any JPG, PNG, or WebP image to SandPath. Choose a trace mode (outline for photos, threshold for logos, centerline for line art), adjust the settings, then click Convert. SandPath will trace your image into vector paths and generate a .thr or .gcode file for your sand table."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What sand tables does SandPath support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SandPath supports Oasis Mini, Oasis One, Sisyphus Mini, Sisyphus Coffee Table, Sisyphus End Table, ZenXY, and any custom circular or rectangular table. Circular tables output .thr (theta-rho) files and rectangular tables output .gcode files."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a .thr file?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A .thr (theta-rho) file defines sand table paths in polar coordinates. Each line contains a theta angle and rho radius value. This format is used by Oasis and Sisyphus kinetic sand tables to draw patterns in sand."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is SandPath free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, SandPath is completely free. All conversion happens in your browser and on our server with no account required. No files are stored — everything is processed in memory and discarded after download."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- ═══ FAVICONS ═══ -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- ═══ PERFORMANCE ═══ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- ═══ AD PROVIDER (single load) ═══ -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
+     crossorigin="anonymous"></script>
+
+  <!-- ═══ NOSCRIPT FALLBACK ═══ -->
+  <noscript>
+    <style>.main { display: none; }</style>
+  </noscript>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <!-- ═══ SITE NAVIGATION ═══ -->
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="#converter" class="site-nav__link">Converter</a>
+    <a href="#how-to-use" class="site-nav__link">How to Use</a>
+    <a href="#supported-tables" class="site-nav__link">Supported Tables</a>
+    <a href="#faq" class="site-nav__link">FAQ</a>
+    <a href="#about" class="site-nav__link">About</a>
+    <a href="/privacy" class="site-nav__link">Privacy</a>
+    <a href="/" class="site-nav__link">Restless Forge</a>
+  </nav>
+
+  <header class="header" id="top">
+    <div class="header__orb" aria-hidden="true"></div>
+    <h1 class="header__title" itemprop="name">
+      <span class="header__sand">Sand</span><span class="header__path">Path</span>
+    </h1>
+    <p class="header__sub" itemprop="description">Convert images &amp; SVGs to sand table art &mdash; clean vector paths for Oasis, Sisyphus &amp; ZenXY</p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 1: INTRODUCTION (visible to all crawlers)
+       ═══════════════════════════════════════════════════ -->
+  <article class="seo-content seo-content--intro" aria-label="Introduction">
+    <h2>Free Sand Table Pattern Converter</h2>
+    <p>SandPath is a free, open-source web tool that converts images and SVG files into patterns for kinetic
+    sand tables. Whether you own an Oasis Mini, a Sisyphus Coffee Table, or a ZenXY build, SandPath produces
+    clean <strong>.thr</strong> (theta-rho) and <strong>.gcode</strong> output files ready to load onto your
+    table. No account, no installation, no file storage &mdash; everything is processed in memory and
+    discarded after you download your result.</p>
+
+    <h3 id="how-to-use">How to Use SandPath</h3>
+    <p>Converting a file takes three steps:</p>
+    <p><strong>Step 1 &mdash; Upload your file.</strong> Drag and drop an SVG vector file or a raster image
+    (JPG, PNG, WebP, BMP, GIF, or TIFF) onto the upload area below. SVG files are converted directly from
+    their path data. Raster images are first traced into vector paths using your choice of three tracing modes.</p>
+    <p><strong>Step 2 &mdash; Choose your settings.</strong> Select your sand table model from the device
+    dropdown, or enter custom dimensions. Adjust curve smoothness, fit mode, and padding to control how the
+    pattern fills the sand bed. For raster images, you can also choose a trace mode (Outline, Threshold, or
+    Centerline) and preview the traced paths before converting.</p>
+    <p><strong>Step 3 &mdash; Convert and download.</strong> Click the Convert button. SandPath generates
+    your .thr or .gcode file in seconds. Click Download to save it, then transfer it to your sand table
+    using the manufacturer&rsquo;s app or a USB drive.</p>
+  </article>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 2: THE CONVERTER TOOL
+       ═══════════════════════════════════════════════════ -->
+  <main class="main" role="main" id="converter">
+    <!-- ─── UPLOAD AREA ─── -->
+    <section class="upload" id="upload-section" aria-label="File upload">
+      <h2 class="sr-only">Upload your file</h2>
+      <div class="upload__circle" id="drop-zone" role="button" tabindex="0" aria-label="Drop a file here or click to browse">
+        <div class="upload__ripple" aria-hidden="true"></div>
+        <div class="upload__inner">
+          <svg class="upload__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M24 32V16m0 0l-7 7m7-7l7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="6" y="6" width="36" height="36" rx="8" stroke-linecap="round"/>
+          </svg>
+          <p class="upload__label">Drop your file here</p>
+          <p class="upload__hint">SVG, JPG, PNG, WebP, BMP, GIF</p>
+          <input type="file" id="file-input"
+                 accept=".svg,image/svg+xml,.jpg,.jpeg,.png,.webp,.bmp,.gif,.tiff,.tif,image/jpeg,image/png,image/webp,image/bmp,image/gif,image/tiff"
+                 hidden aria-label="Choose file to convert" />
+        </div>
+      </div>
+      <p class="upload__file-name" id="file-name" aria-live="polite"></p>
+      <div class="upload__badge" id="file-type-badge" hidden></div>
+    </section>
+
+    <!-- Noscript fallback for SEO crawlers -->
+    <noscript>
+      <section class="noscript-content" aria-label="About SandPath">
+        <h2>SandPath: Free Sand Table Pattern Converter</h2>
+        <p>SandPath converts SVG vector files and raster images (JPG, PNG, WebP, BMP, GIF, TIFF)
+        into .thr (theta-rho) and .gcode files for kinetic sand tables.</p>
+        <h3>Supported Sand Tables</h3>
+        <ul>
+          <li><strong>Oasis Mini</strong> — 6.5" circular table by Grounded (.thr output)</li>
+          <li><strong>Oasis One</strong> — 18.5" circular table by Grounded (.thr output)</li>
+          <li><strong>Sisyphus Mini</strong> — 15.5" circular table (.thr output)</li>
+          <li><strong>Sisyphus Coffee Table</strong> — 24.5" circular table (.thr output)</li>
+          <li><strong>Sisyphus End Table</strong> — 18" circular table (.thr output)</li>
+          <li><strong>ZenXY</strong> — V1 Engineering rectangular table (.gcode output)</li>
+          <li><strong>Custom</strong> — any circular or rectangular sand table with user-defined dimensions</li>
+        </ul>
+        <h3>Image Tracing Modes</h3>
+        <p>When converting raster images, SandPath offers three vectorisation modes:</p>
+        <ul>
+          <li><strong>Outline</strong> — Sobel edge detection, best for photographs and complex artwork</li>
+          <li><strong>Threshold</strong> — black/white cutoff, best for logos and silhouettes</li>
+          <li><strong>Centerline</strong> — skeleton thinning, best for line drawings and sketches</li>
+        </ul>
+        <p>Unlike raster importers that produce horizontal scanlines, SandPath traces actual
+        vector paths for clean, continuous sand art patterns.</p>
+      </section>
+    </noscript>
+
+    <!-- ─── IMAGE TRACING SETTINGS ─── -->
+    <section class="settings settings--trace" id="trace-section" style="display:none" aria-label="Image tracing settings">
+      <h2 class="settings__title">
+        <svg class="settings__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true">
+          <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Image Tracing
+      </h2>
+      <p class="settings__desc">Your image will be traced into vector paths before conversion.</p>
+
+      <div class="field">
+        <label class="field__label" for="trace-mode">Trace Mode</label>
+        <select class="field__select" id="trace-mode">
+          <option value="outline" selected>Outline — edge detection (photos, complex art)</option>
+          <option value="threshold">Threshold — black/white cutoff (logos, silhouettes)</option>
+          <option value="centerline">Centerline — thin lines (line drawings, sketches)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="threshold-range">
+          Threshold: <span id="threshold-value">128</span>
+        </label>
+        <input class="field__range" type="range" id="threshold-range" min="10" max="245" value="128" step="1" />
+        <div class="field__range-labels"><span>More detail</span><span>Less detail</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="blur-range">
+          Noise Reduction: <span id="blur-value">1.0</span>
+        </label>
+        <input class="field__range" type="range" id="blur-range" min="0" max="5" value="1" step="0.5" />
+        <div class="field__range-labels"><span>None</span><span>Heavy</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="detail-range">
+          Path Detail: <span id="detail-value">1.5</span>
+        </label>
+        <input class="field__range" type="range" id="detail-range" min="0.3" max="5" value="1.5" step="0.1" />
+        <div class="field__range-labels"><span>Fine</span><span>Coarse</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="dimension-range">
+          Working Resolution: <span id="dimension-value">800</span>px
+        </label>
+        <input class="field__range" type="range" id="dimension-range" min="200" max="1600" value="800" step="100" />
+        <div class="field__range-labels"><span>Fast</span><span>Detailed</span></div>
+      </div>
+
+      <div class="field field--row">
+        <label class="field__checkbox">
+          <input type="checkbox" id="invert-check" />
+          <span class="field__checkmark"></span>
+          Invert image (dark-on-light artwork)
+        </label>
+      </div>
+
+      <button class="btn btn--preview" id="preview-btn" disabled>
+        <span class="btn__text">Preview Trace</span>
+        <span class="btn__spinner"></span>
+      </button>
+    </section>
+
+    <!-- ─── SVG PREVIEW ─── -->
+    <section class="preview" id="preview-section" style="display:none" aria-label="Trace preview">
+      <h2 class="preview__title">Trace Preview</h2>
+      <div class="preview__frame" id="preview-frame"></div>
+      <div class="preview__stats" id="preview-stats" aria-live="polite"></div>
+      <button class="btn btn--again-sm" id="retrace-btn">Adjust &amp; Re-trace</button>
+    </section>
+
+    <!-- ─── DEVICE & OUTPUT SETTINGS ─── -->
+    <section class="settings" id="settings-section" aria-label="Output settings">
+      <h2 class="settings__title">
+        <svg class="settings__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true">
+          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Output Settings
+      </h2>
+
+      <div class="field">
+        <label class="field__label" for="device-select">Device</label>
+        <select class="field__select" id="device-select"></select>
+      </div>
+
+      <div class="field field--custom" id="custom-fields" style="display:none">
+        <label class="field__label" for="custom-width">Width (mm)</label>
+        <input class="field__input" type="number" id="custom-width" value="300" min="10" max="5000" />
+        <label class="field__label" for="custom-height">Height (mm)</label>
+        <input class="field__input" type="number" id="custom-height" value="300" min="10" max="5000" />
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="fit-select">Fit Mode</label>
+        <select class="field__select" id="fit-select">
+          <option value="cover" selected>Cover — fill the bed, clip corners</option>
+          <option value="contain">Contain — fit entirely, no clipping</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="samples-range">
+          Curve Smoothness: <span id="samples-value">16</span>
+        </label>
+        <input class="field__range" type="range" id="samples-range" min="4" max="48" value="16" step="4" />
+        <div class="field__range-labels"><span>Fast</span><span>Smooth</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="rho-range">
+          Max Radius: <span id="rho-value">0.95</span>
+        </label>
+        <input class="field__range" type="range" id="rho-range" min="0.5" max="1.0" value="0.95" step="0.01" />
+        <div class="field__range-labels"><span>Inset</span><span>Edge</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="padding-range">
+          Padding: <span id="padding-value">0%</span>
+        </label>
+        <input class="field__range" type="range" id="padding-range" min="0" max="0.2" value="0" step="0.01" />
+        <div class="field__range-labels"><span>None</span><span>20%</span></div>
+      </div>
+
+      <button class="btn btn--convert" id="convert-btn" disabled>
+        <span class="btn__text">Convert</span>
+        <span class="btn__spinner"></span>
+      </button>
+    </section>
+
+    <!-- ─── RESULTS ─── -->
+    <section class="results" id="results-section" style="display:none" aria-label="Conversion results">
+      <h2 class="results__title">Ready</h2>
+      <div class="stats" id="stats-grid" aria-live="polite"></div>
+      <div class="results__buttons">
+        <button class="btn btn--download" id="download-btn">
+          Download <span id="download-ext">.thr</span>
+        </button>
+        <button class="btn btn--download-svg" id="download-svg-btn" style="display:none">
+          Download .svg
+        </button>
+      </div>
+      <button class="btn btn--again" id="again-btn">Convert Another</button>
+    </section>
+
+    <!-- ─── ERROR ─── -->
+    <div class="error-toast" id="error-toast" hidden role="alert">
+      <p id="error-msg"></p>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 3: DETAILED CONTENT ARTICLES
+       ═══════════════════════════════════════════════════ -->
+  <article class="seo-content" aria-label="How SandPath works">
+    <h2>How SandPath Works Under the Hood</h2>
+    <p>SandPath is built differently from other sand table pattern tools. Instead of converting raster images
+    into horizontal scanlines (which look unnatural in sand), SandPath uses proper vector-based conversion
+    to produce continuous, flowing paths that look hand-drawn.</p>
+
+    <h3>SVG Conversion</h3>
+    <p>When you upload an SVG file, SandPath parses the actual path data from the SVG markup. It handles all
+    standard SVG path commands including line segments, quadratic and cubic B&eacute;zier curves, elliptical arcs,
+    and compound subpaths. Each curve is sampled into smooth point sequences, and the paths are reordered using
+    nearest-neighbour sorting to minimise travel lines (the ugly straight lines between separate shapes). The
+    result is a file where the ball moves in clean, continuous strokes with minimal visible transitions.</p>
+
+    <h3>Image Tracing and Vectorisation</h3>
+    <p>For raster images like photographs and PNGs, SandPath first converts the image into vector paths through
+    a tracing process. Three tracing modes are available, each suited to different types of source material:</p>
+    <p>The <strong>Outline</strong> mode uses Sobel edge detection to find the boundaries and contours in a
+    photograph or complex artwork. This produces a sketch-like result that captures the major features of the
+    image without filling solid areas.</p>
+    <p>The <strong>Threshold</strong> mode applies a brightness cutoff to separate the image into black and white
+    regions, then traces the boundaries between those regions using marching squares contour extraction. This works
+    best for high-contrast images like logos, silhouettes, and text.</p>
+    <p>The <strong>Centerline</strong> mode skeletonises the image, reducing shapes to their thinnest possible
+    single-pixel lines before tracing. This is ideal for line drawings, handwriting, and sketches where you want
+    the ball to trace along the middle of each stroke rather than around its outline.</p>
+    <p>After tracing, the resulting vector paths go through Douglas-Peucker simplification to reduce point count
+    while preserving shape accuracy. The simplified paths are then converted to your sand table&rsquo;s native
+    format just like an SVG would be.</p>
+
+    <h3 id="supported-tables">Supported Sand Tables and Output Formats</h3>
+    <p>SandPath supports the most popular kinetic sand tables on the market. Circular tables receive
+    <strong>.thr files</strong> (theta-rho format, where each line contains a polar coordinate pair), and
+    rectangular tables receive <strong>.gcode files</strong> (standard CNC G-code with G0/G1 linear moves
+    in millimetre coordinates).</p>
+    <p>The supported devices are:</p>
+    <p><strong>Oasis Mini</strong> by Grounded &mdash; a 6.5-inch circular table, one of the most popular
+    entry-level sand tables. Uses .thr output with a maximum rho of 0.97.</p>
+    <p><strong>Oasis One</strong> by Grounded &mdash; the larger 18.5-inch sibling. Also uses .thr output.</p>
+    <p><strong>Sisyphus Mini</strong> &mdash; a 15.5-inch circular table by Sisyphus Industries. Uses .thr output.</p>
+    <p><strong>Sisyphus Coffee Table</strong> &mdash; a 24.5-inch circular table built into a full-size coffee
+    table. The largest Sisyphus model, using .thr output.</p>
+    <p><strong>Sisyphus End Table</strong> &mdash; an 18-inch circular table in end-table form. Uses .thr output.</p>
+    <p><strong>ZenXY</strong> by V1 Engineering &mdash; an open-source rectangular sand table that you build
+    yourself. This is the only rectangular table in the lineup and outputs .gcode instead of .thr. Build sizes
+    vary, so SandPath lets you enter custom width and height in millimetres.</p>
+    <p><strong>Custom tables</strong> &mdash; if your table isn&rsquo;t listed, you can select &ldquo;Custom
+    Circular&rdquo; or &ldquo;Custom Rectangular&rdquo; and enter your table&rsquo;s exact dimensions. SandPath
+    will generate the appropriate output format for the shape you select.</p>
+  </article>
+
+  <article class="seo-content" aria-label="Getting started guide">
+    <h2>Getting Started with Sand Table Art</h2>
+    <p>Kinetic sand tables use a steel ball guided by magnets beneath a bed of fine sand to draw continuous
+    patterns. The ball follows paths defined in theta-rho (.thr) or G-code (.gcode) files, tracing geometric
+    designs, organic curves, and even converted photographs into the sand surface. The results are
+    mesmerising &mdash; each pattern erases the last as the ball traces its new path through the sand.</p>
+
+    <h3>What is a Theta-Rho (.thr) File?</h3>
+    <p>Theta-rho is a polar coordinate format where each line contains an angle (theta, in radians) and a
+    radius (rho, normalised from 0 to 1). The ball spirals outward and inward following these coordinates.
+    This format is used by circular tables from Oasis (Grounded) and Sisyphus Industries. SandPath converts
+    your SVG paths and traced images into this format automatically, handling coordinate transformation, path
+    ordering, and boundary clipping so the ball never moves beyond the edge of the sand bed.</p>
+
+    <h3>What is G-code?</h3>
+    <p>G-code is the standard language for CNC (computer numerical control) machines and has been in use since
+    the 1950s. Rectangular sand tables like the ZenXY by V1 Engineering use G-code with simple linear move
+    commands: G0 for rapid travel (moving the ball without drawing) and G1 for drawing moves. Coordinates
+    are specified in millimetres with absolute positioning. SandPath generates clean G-code with proper headers,
+    metric unit declaration (G21), and absolute positioning mode (G90) so the file can be loaded directly
+    without any manual editing.</p>
+
+    <h3>Tips for Great Sand Art Patterns</h3>
+    <p>The best sand table patterns use continuous, flowing paths with minimal lift-and-travel moves. When
+    converting images, start with the Outline trace mode for photographs and switch to Threshold for
+    high-contrast logos. The Path Detail slider controls simplification: coarser settings produce smaller files
+    with smoother curves, while finer settings capture more detail at the cost of larger files and longer draw
+    times. For SVG files, designs with single continuous strokes produce the cleanest results. Avoid very fine
+    details smaller than the ball diameter (typically 10&ndash;15 mm on most tables) as they will not resolve
+    clearly in the sand.</p>
+
+    <h3 id="faq">Frequently Asked Questions</h3>
+    <p><strong>Do I need to create an account?</strong> No. SandPath requires no sign-up, login, or payment.
+    Upload a file, convert it, and download the result. The entire process takes seconds.</p>
+    <p><strong>Are my files stored on the server?</strong> No. All processing happens in memory. Your uploaded
+    file and the generated output are discarded immediately after conversion. Nothing is ever written to disk
+    or retained after your session.</p>
+    <p><strong>Can I convert photographs?</strong> Yes. Upload any JPG, PNG, or WebP image and SandPath will
+    trace it into vector paths using edge detection, thresholding, or centerline extraction before converting
+    to your table&rsquo;s format. You can preview the traced result before committing to a conversion.</p>
+    <p><strong>What file types can I upload?</strong> SandPath accepts SVG vector files and raster images in
+    JPG, JPEG, PNG, WebP, BMP, GIF, and TIFF formats. SVGs are converted directly from their path data.
+    Raster images go through the tracing pipeline first.</p>
+    <p><strong>My pattern has ugly straight lines between shapes. How do I fix this?</strong> These are travel
+    lines &mdash; the path the ball takes between separate shapes. SandPath minimises these using nearest-neighbour
+    path ordering. If they&rsquo;re still visible, try using SVGs with fewer separate shapes, or increase the
+    curve smoothness setting.</p>
+    <p><strong>Can I use SandPath on my phone?</strong> Yes. SandPath is fully responsive and works on any
+    device with a modern web browser, including phones and tablets. The upload area accepts files from your
+    device&rsquo;s file picker.</p>
+  </article>
+
+  <!-- ═══════════════════════════════════════════════════
+       SINGLE AD SLOT — below all content, above footer
+       ═══════════════════════════════════════════════════ -->
+  <aside class="ad-slot ad-slot--bottom" id="ad-bottom">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-5516736042033534"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 4: ABOUT, PRIVACY POLICY, TERMS
+       (essential trust pages for AdSense approval)
+       ═══════════════════════════════════════════════════ -->
+  <section class="legal-content" id="about" aria-label="About SandPath">
+    <h2>About SandPath</h2>
+    <p>SandPath was created by a kinetic sand table enthusiast who was frustrated with the existing tools for
+    converting images and vector art into sand table patterns. Most converters either produce ugly scanline
+    patterns, require desktop software installation, or charge subscription fees for basic conversions.</p>
+    <p>SandPath solves these problems by providing a free, browser-based converter that uses proper vector path
+    parsing and image tracing to generate clean, continuous patterns. The tool is open source and the code is
+    available on <a href="https://github.com/thekensman/sandpath" target="_blank" rel="noopener">GitHub</a>.
+    Contributions, bug reports, and feature requests are welcome.</p>
+    <p>SandPath is not affiliated with, endorsed by, or connected to Oasis (Grounded), Sisyphus Industries,
+    or V1 Engineering. All product names and trademarks are the property of their respective owners.</p>
+    <p>If you find SandPath useful, consider <a href="https://buymeacoffee.com/stygnus" target="_blank"
+    rel="noopener">buying the developer a coffee</a> to help cover hosting costs and support continued
+    development.</p>
+  </section>
+
+  <section class="legal-content" id="privacy" aria-label="Privacy policy">
+    <h2>Privacy Policy</h2>
+    <p><strong>Last updated:</strong> February 2026</p>
+    <p><strong>Data collection:</strong> SandPath does not collect, store, or transmit any personal information.
+    No account creation is required. No cookies are set by SandPath itself (third-party services like Google
+    AdSense may set their own cookies as described below).</p>
+    <p><strong>File handling:</strong> Files you upload for conversion are processed entirely in server memory.
+    No uploaded files or generated outputs are written to disk or retained after the HTTP response completes.
+    There is no database, no file storage, and no way for anyone (including the site operator) to access your
+    files after conversion.</p>
+    <p><strong>Advertising:</strong> SandPath uses Google AdSense to display advertisements. Google may use
+    cookies and web beacons to serve ads based on your prior visits to this and other websites. You can opt out
+    of personalised advertising by visiting
+    <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google&rsquo;s Ads Settings</a>.
+    For more information about how Google uses data from partner sites, see
+    <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google&rsquo;s
+    privacy policy</a>.</p>
+    <p><strong>Analytics:</strong> SandPath does not use Google Analytics or any other analytics tracking service.
+    Server access logs (IP address, requested URL, timestamp) are retained for up to 14 days for security and
+    debugging purposes, then automatically deleted via log rotation.</p>
+    <p><strong>Third-party links:</strong> This site contains links to GitHub, Buy Me a Coffee, Ko-fi, and Google.
+    These external sites have their own privacy policies and SandPath is not responsible for their content or
+    practices.</p>
+    <p><strong>Contact:</strong> For privacy-related questions, please open an issue on the
+    <a href="https://github.com/thekensman/sandpath" target="_blank" rel="noopener">SandPath GitHub repository</a>.</p>
+  </section>
+
+  <section class="legal-content" id="terms" aria-label="Terms of use">
+    <h2>Terms of Use</h2>
+    <p>SandPath is provided free of charge, as-is, with no warranty of any kind. By using this tool you agree
+    to the following terms:</p>
+    <p><strong>Acceptable use:</strong> You may use SandPath to convert any images and SVG files that you have
+    the legal right to use. You are responsible for ensuring that your uploaded content does not infringe on
+    any third-party copyright, trademark, or other intellectual property rights.</p>
+    <p><strong>No warranty:</strong> SandPath is provided &ldquo;as is&rdquo; without warranty of any kind,
+    express or implied. The developer does not guarantee that the service will be available, uninterrupted,
+    or error-free. Use of generated files on your sand table is at your own risk.</p>
+    <p><strong>Limitation of liability:</strong> In no event shall the developer of SandPath be liable for any
+    damages arising from the use of this tool, including but not limited to damage to your sand table, loss of
+    data, or any indirect or consequential damages.</p>
+    <p><strong>Changes:</strong> These terms may be updated at any time. Continued use of SandPath after changes
+    constitutes acceptance of the revised terms.</p>
+  </section>
+
+  <footer class="footer">
+    <div style="text-align:center;margin-bottom:1rem;">
+      <span style="font-family:Outfit,sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#d4a44a;">Support Restless Forge</span>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.5rem;">
+        <a href="https://ko-fi.com/E1E21UH4DX" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Ko-fi</a>
+        <a href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Buy Me a Coffee</a>
+        <a href="https://substack.com/@stygnus" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Substack</a>
+        <a href="https://github.com/thekensman/" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">GitHub</a>
+      </div>
+    </div>
+    <nav class="footer__legal" aria-label="Legal pages">
+      <a href="/">Restless Forge</a>
+      <a href="/tools/">All Tools</a>
+      <a href="#about">About</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; SandPath: Free SVG &amp; image to sand table converter.</p>
+  </footer>
+
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>
