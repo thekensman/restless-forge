@@ -45,6 +45,8 @@ npm ci --silent
 npm run build
 mkdir -p "${DIST_DIR}/tools/sandpath"
 cp -r dist/* "${DIST_DIR}/tools/sandpath/"
+cd "${SCRIPT_DIR}/tools/sandpath/"
+cp -r ${SCRIPT_DIR}/tools/sandpath/backend "${DIST_DIR}/tools/sandpath/backend"
 echo "  → SandPath built successfully"
 
 # ── Summary ──
