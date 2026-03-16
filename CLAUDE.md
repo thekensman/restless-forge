@@ -10,7 +10,7 @@ Restless Forge consolidates three tool-based websites into a single domain (rest
 2. **HoloPath** — Hologram GIF generator (formerly holopath.art)
 3. **SandPath** — Image/SVG to sand table converter (formerly sandpath.art)
 
-Global support pages (about, privacy, terms, FAQ, essays, articles) live at the domain root.
+Global support pages (about, contact, privacy, terms, FAQ, essays, articles) live at the domain root.
 
 ## Repository Layout
 
@@ -33,7 +33,8 @@ restless-forge/
 - **Vite base paths**: Each tool's `vite.config.ts` sets `base: '/tools/[name]/'` so assets load from the correct subdirectory
 - **Global pages**: Static HTML in `site/` — no build step, just copy to dist
 - **Per-tool identity**: Each tool keeps its own CSS, fonts, and visual theme
-- **Shared footer**: All tools link to global about/privacy/terms and include the same donation footer
+- **Shared footer**: All tools link to global about/contact/privacy/terms and include the same donation footer
+- **Shared components via JS**: Nav and footer are generated from `shared.js` files (one per context: global site, WIMTW sub-pages, HoloPath sub-pages) so changes only need to be made in one place
 - **SandPath backend**: Python FastAPI proxied through nginx at `/api/`
 
 ## Development Workflow
@@ -82,6 +83,7 @@ Each tool runs on its own dev port (3000, 5173, 5174). During development, inter
 |---|---|
 | `/` | `site/index.html` |
 | `/about` | `site/about.html` (nginx: try `$uri.html`) |
+| `/contact` | `site/contact.html` |
 | `/privacy` | `site/privacy.html` |
 | `/terms` | `site/terms.html` |
 | `/faq` | `site/faq.html` |
@@ -112,8 +114,15 @@ cd tools/sandpath/backend && python run_tests.py
 
 ## Common Tasks
 
+### Update global nav/footer links
+Edit the shared.js file for the relevant context:
+- **Global site pages**: `site/shared.js` — nav and footer for all pages in `site/`
+- **WIMTW sub-pages**: `tools/what-is-my-time-worth/frontend/public/shared.js` — header and footer for about, faq, articles, contact, privacy, terms
+- **HoloPath sub-pages**: `tools/holopath/frontend/public/shared.js` — nav, support banner, and footer for all pages in `public/`
+- **Tool main apps** (Vite index.html): These are NOT shared-component driven. Edit nav/footer directly in `tools/[name]/frontend/src/index.html`
+
 ### Update donation links
-Edit the inline footer in each tool's `index.html` (search for "Support Restless Forge") and in `site/styles.css` / global page footers.
+Edit the shared.js files above for sub-pages, and the inline footer in each tool's `src/index.html` for main apps.
 
 ### Update AdSense publisher ID
 Search for `ca-pub-5516736042033534` across all HTML files.
