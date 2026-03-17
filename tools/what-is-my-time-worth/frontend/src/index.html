@@ -96,6 +96,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
+  <script src="shared.js"></script>
 
   <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
@@ -125,36 +126,17 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </aside>
 
-  <header class="header">
-    <div class="header__inner">
-      <div class="header__brand">
-        <span class="header__logo">⏱</span>
-        <h1 class="header__title">What Is My Time Worth?</h1>
+  <script>document.write(wimtwHeader())</script>
+
+  <div class="hero">
+    <div class="hero__inner">
+      <div class="hero__brand">
+        <span class="hero__logo">⏱</span>
+        <h1 class="hero__title">What Is My Time Worth?</h1>
       </div>
-      <p class="header__tagline">Your salary says one thing. The math says another.</p>
-      <div class="header__support">
-        <span class="header__support-label">Support this free tool</span>
-        <a class="header__support-link" href="https://restlessforge.substack.com" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M22.539 8.242H1.46V6h21.08v2.242zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.236h21.08V0z"/></svg>
-          Substack
-        </a>
-        <a class="header__support-link" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          Ko-fi
-        </a>
-        <a class="header__support-link" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">☕ Buy Me a Coffee</a>
-      </div>
-      <nav class="header__sitenav" aria-label="Site navigation">
-        <a href="/tools/what-is-my-time-worth/articles/">Articles</a>
-        <a href="/tools/what-is-my-time-worth/faq/">FAQ</a>
-        <a href="/about">About</a>
-        <a href="/contact">Contact</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/">Restless Forge</a>
-      </nav>
+      <p class="hero__tagline">Your salary says one thing. The math says another.</p>
     </div>
-  </header>
+  </div>
 
   <main class="main">
     <nav class="tabs" role="tablist">
@@ -669,27 +651,7 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </aside>
 
-  <footer class="footer">
-    <div style="text-align:center;margin-bottom:1rem;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#d4a44e;">Support Restless Forge</span>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.5rem;">
-        <a href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Ko-fi</a>
-        <a href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Buy Me a Coffee</a>
-        <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Substack</a>
-        <a href="https://github.com/thekensman/" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">GitHub</a>
-      </div>
-    </div>
-    <div class="footer__links">
-      <a class="footer__link" href="/">Restless Forge</a>
-      <a class="footer__link" href="/tools/">All Tools</a>
-      <a class="footer__link" href="/about">About</a>
-      <a class="footer__link" href="/contact">Contact</a>
-      <a class="footer__link" href="/tools/what-is-my-time-worth/faq/">FAQ</a>
-      <a class="footer__link" href="/privacy">Privacy</a>
-      <a class="footer__link" href="/terms">Terms</a>
-    </div>
-    <p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> — What Is My Time Worth? Your numbers, your browser, your life.</p>
-  </footer>
+  <script>document.write(wimtwFooter())</script>
 
   <script type="module" src="./app.ts"></script>
 </body>

@@ -1,5 +1,5 @@
 /* shared.js — HoloPath shared nav, support banner & footer
-   Single source of truth for all HoloPath sub-pages.
+   Single source of truth for ALL HoloPath pages (main app + sub-pages).
    Include in <head>, then call hpNav() / hpFooter() via inline <script> tags. */
 (function () {
   'use strict';
@@ -19,25 +19,35 @@
     [base + '/articles/', 'Articles'],
     [base + '/about.html', 'About'],
     [base + '/contact.html', 'Contact'],
+    ['/', 'Restless Forge'],
   ];
 
   var footerLinks = [
+    ['/', 'Restless Forge'],
+    ['/tools/', 'All Tools'],
     [base + '/how-it-works.html', 'How It Works'],
     [base + '/faq.html', 'FAQ'],
     [base + '/articles/', 'Articles'],
     [base + '/about.html', 'About'],
     [base + '/contact.html', 'Contact'],
-    ['/privacy', 'Privacy Policy'],
-    ['/terms', 'Terms of Use'],
+    ['/privacy', 'Privacy'],
+    ['/terms', 'Terms'],
+  ];
+
+  var donateLinks = [
+    ['https://ko-fi.com/restless-forge', 'Ko-fi'],
+    ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee'],
+    ['https://substack.com/@restlessforge', 'Substack'],
+    ['https://github.com/thekensman/', 'GitHub'],
   ];
 
   window.hpNav = function () {
     var links = navLinks.map(function (l) {
-      var cls = 'site-nav__link' + (active(l[0]) ? ' site-nav__link--active' : '');
+      var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '');
       return '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
     }).join('');
 
-    return '<nav class="site-nav" aria-label="Main navigation">' + links + '</nav>' +
+    return '<nav class="nav" aria-label="Main navigation">' + links + '</nav>' +
       '<div class="support-banner" id="support-banner">' +
       '<span class="support-banner__text">HoloPath is free &amp; open — if it\'s useful, consider supporting development</span>' +
       '<a class="support-banner__btn" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">' +
@@ -49,14 +59,19 @@
   };
 
   window.hpFooter = function () {
+    var donate = donateLinks.map(function (l) {
+      return '<a href="' + l[0] + '" target="_blank" rel="noopener" class="footer__donate-link">' + l[1] + '</a>';
+    }).join('');
+
     var links = footerLinks.map(function (l) {
       return '<a href="' + l[0] + '">' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
+      '<div class="footer__donate"><span class="footer__donate-label">Support Restless Forge</span>' +
+      '<div class="footer__donate-links">' + donate + '</div></div>' +
       '<nav class="footer__legal" aria-label="Footer navigation">' + links + '</nav>' +
-      '<p class="footer__copy">&copy; 2026 HoloPath &mdash; Free hologram GIF generator. ' +
-      '<a class="footer__support" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">Support this project &#9749;</a></p>' +
+      '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;">Restless Forge</a> &mdash; HoloPath: Free hologram GIF generator.</p>' +
       '</footer>';
   };
 

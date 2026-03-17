@@ -1,5 +1,5 @@
 /* shared.js — What Is My Time Worth? shared header & footer
-   Single source of truth for all WIMTW sub-pages (about, faq, articles, etc.).
+   Single source of truth for ALL WIMTW pages (main app + sub-pages).
    Include in <head>, then call wimtwHeader() / wimtwFooter() via inline <script> tags. */
 (function () {
   'use strict';
@@ -15,21 +15,30 @@
     [base + '/', 'Calculator'],
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
-    ['/about', 'About'],
     [base + '/contact/', 'Contact'],
-    ['/contact', 'Restless Forge'],
+    ['/about', 'About'],
+    ['/privacy', 'Privacy'],
+    ['/terms', 'Terms'],
+    ['/', 'Restless Forge'],
+  ];
+
+  var footerLinks = [
+    ['/', 'Restless Forge'],
+    ['/tools/', 'All Tools'],
+    [base + '/', 'Calculator'],
+    [base + '/articles/', 'Articles'],
+    [base + '/faq/', 'FAQ'],
+    [base + '/contact/', 'Contact'],
+    ['/about', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
   ];
 
-  var footerLinks = [
-    [base + '/', 'Calculator'],
-    [base + '/articles/', 'Articles'],
-    [base + '/faq/', 'FAQ'],
-    ['/about', 'About'],
-    [base + '/contact/', 'Contact'],
-    ['/privacy', 'Privacy'],
-    ['/terms', 'Terms'],
+  var donateLinks = [
+    ['https://ko-fi.com/restless-forge', 'Ko-fi'],
+    ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee'],
+    ['https://substack.com/@restlessforge', 'Substack'],
+    ['https://github.com/thekensman/', 'GitHub'],
   ];
 
   var substackSvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M22.539 8.242H1.46V6h21.08v2.242zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.236h21.08V0z"/></svg>';
@@ -55,14 +64,19 @@
   };
 
   window.wimtwFooter = function () {
-    var links = footerLinks.map(function (l) {
-      return '<a href="' + l[0] + '">' + l[1] + '</a>';
-    }).join(' &nbsp;·&nbsp; ');
+    var donate = donateLinks.map(function (l) {
+      return '<a href="' + l[0] + '" target="_blank" rel="noopener" class="footer__donate-link">' + l[1] + '</a>';
+    }).join('');
 
-    return '<footer>' +
-      '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px 0">' + links + '</div>' +
-      '<p style="margin-top:8px">&copy; 2026 What Is My Time Worth? — ' +
-      '<a href="https://restless-forge.dev/tools/what-is-my-time-worth">whatismytimeworth.app</a></p>' +
+    var links = footerLinks.map(function (l) {
+      return '<a class="footer__link" href="' + l[0] + '">' + l[1] + '</a>';
+    }).join('');
+
+    return '<footer class="footer">' +
+      '<div class="footer__donate"><span class="footer__donate-label">Support Restless Forge</span>' +
+      '<div class="footer__donate-links">' + donate + '</div></div>' +
+      '<div class="footer__links">' + links + '</div>' +
+      '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; What Is My Time Worth? Your numbers, your browser, your life.</p>' +
       '</footer>';
   };
 })();

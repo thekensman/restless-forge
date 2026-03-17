@@ -78,6 +78,7 @@
      crossorigin="anonymous"></script>
 
   <link rel="stylesheet" href="./styles.css">
+  <script src="shared.js"></script>
 </head>
 <body>
 
@@ -87,27 +88,7 @@
     <p class="header__sub">Image · GIF · Video → Hologram GIF</p>
   </header>
 
-  <nav class="nav" aria-label="Main navigation">
-    <a href="/tools/holopath/" class="nav__link nav__link--active">Generator</a>
-    <a href="/tools/holopath/how-it-works.html" class="nav__link">How It Works</a>
-    <a href="/tools/holopath/faq.html" class="nav__link">FAQ</a>
-    <a href="/tools/holopath/articles/" class="nav__link">Articles</a>
-    <a href="/about" class="nav__link">About</a>
-    <a href="/contact" class="nav__link">Contact</a>
-    <a href="/" class="nav__link">Restless Forge</a>
-  </nav>
-
-  <!-- ─── Support Banner ─── -->
-  <div class="support-banner" id="support-banner">
-    <span class="support-banner__text">HoloPath is free &amp; open — if it's useful, consider supporting development</span>
-    <a class="support-banner__btn" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 21h18v-2H2v2zm2-4h14v-2H4v2zm-1-6l.5-2h15l.5 2h2l-1-4H2L1 11h2zm5-6h6V3H8v2z"/></svg>
-      Buy me a coffee
-    </a>
-    <a class="support-banner__btn support-banner__btn--alt" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">Ko-fi</a>
-    <a class="support-banner__btn support-banner__btn--alt" href="https://substack.com/@restlessforge" target="_blank" rel="noopener">Substack</a>
-    <button class="support-banner__close" id="close-support" aria-label="Dismiss">&times;</button>
-  </div>
+  <script>document.write(hpNav())</script>
 
   <!-- ═══ Left Rail Ad ═══ -->
   <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
@@ -318,29 +299,7 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </aside>
 
-  <footer class="footer">
-    <div style="text-align:center;margin-bottom:1rem;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#d4a44e;">Support Restless Forge</span>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.5rem;">
-        <a href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">Ko-fi</a>
-        <a href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">Buy Me a Coffee</a>
-        <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">Substack</a>
-        <a href="https://github.com/thekensman/" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a7770;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;">GitHub</a>
-      </div>
-    </div>
-    <nav class="footer__legal" aria-label="Footer navigation">
-      <a href="/">Restless Forge</a>
-      <a href="/tools/">All Tools</a>
-      <a href="/tools/holopath/how-it-works.html">How It Works</a>
-      <a href="/tools/holopath/faq.html">FAQ</a>
-      <a href="/tools/holopath/articles/">Articles</a>
-      <a href="/about">About</a>
-      <a href="/contact">Contact</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/terms">Terms</a>
-    </nav>
-    <p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;">Restless Forge</a> &mdash; HoloPath: Free hologram GIF generator.</p>
-  </footer>
+  <script>document.write(hpFooter())</script>
 
   <!-- noscript fallback for SEO bots -->
   <noscript>
@@ -354,15 +313,6 @@
   <div class="toast" id="error-toast" hidden>
     <p id="error-msg"></p>
   </div>
-
-  <script>
-    // Dismiss support banner (remember for session)
-    document.getElementById('close-support')?.addEventListener('click', function() {
-      document.getElementById('support-banner').style.display = 'none';
-      try { sessionStorage.setItem('hp-support-dismissed', '1'); } catch(e) {}
-    });
-    try { if (sessionStorage.getItem('hp-support-dismissed')) document.getElementById('support-banner').style.display = 'none'; } catch(e) {}
-  </script>
 
   <script type="module" src="./app.ts"></script>
 </body>

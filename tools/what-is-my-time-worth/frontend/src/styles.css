@@ -62,70 +62,67 @@ a:hover { text-decoration: underline; }
   padding: 8px 24px;
 }
 
-/* ─── Header Support Links ─── */
-.header__support {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: 14px;
-  flex-wrap: wrap;
+/* ─── Site Header (shared with sub-pages via shared.js) ─── */
+.site-header { border-bottom: 1px solid var(--border); padding: 20px 24px; }
+.site-header__inner { max-width: var(--max-w); margin: 0 auto; }
+.site-header__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.site-header__brand {
+  font-family: var(--font-mono); font-size: 15px; color: var(--text);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0; text-decoration: none;
 }
-.header__support-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+.site-header__brand:hover { color: var(--accent); text-decoration: none; }
+.nav-toggle {
+  display: none; background: none; border: 1px solid var(--border);
+  color: var(--text); font-size: 18px; padding: 4px 10px;
+  border-radius: 3px; cursor: pointer; line-height: 1;
 }
-.header__support-link {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  text-decoration: none;
-  transition: color 0.15s;
+.site-header__nav {
+  display: flex; gap: 4px; font-family: var(--font-mono); font-size: 13px;
+  align-items: center; flex-wrap: wrap;
 }
-.header__support-link:hover { color: var(--accent); text-decoration: none; }
+.site-header__nav a {
+  color: var(--text); padding: 5px 10px; border-radius: 3px;
+  transition: background 0.15s, color 0.15s; text-decoration: none;
+}
+.site-header__nav a:hover { color: var(--accent); background: rgba(212, 164, 78, 0.08); text-decoration: none; }
+.site-header__nav a.active { color: var(--accent); background: rgba(212, 164, 78, 0.12); }
+@media (max-width: 640px) {
+  .nav-toggle { display: block; }
+  .site-header__nav {
+    display: none; flex-direction: column; align-items: stretch; gap: 0;
+    padding: 10px 0 4px; border-top: 1px solid var(--border); margin-top: 14px;
+  }
+  .site-header__nav.open { display: flex; }
+  .site-header__nav a { padding: 11px 4px; border-radius: 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .site-header__nav a:last-child { border-bottom: none; }
+}
+.site-header__support {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.site-header__support-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted);
+}
+.site-header__support-link {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+  display: flex; align-items: center; gap: 5px; text-decoration: none; transition: color 0.15s;
+}
+.site-header__support-link:hover { color: var(--accent); text-decoration: none; }
 
-/* ─── Header Site Nav ─── */
-.header__sitenav {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-family: var(--font-mono);
-  font-size: 13px;
-}
-.header__sitenav a {
-  color: var(--text);
-  padding: 5px 10px;
-  border-radius: 3px;
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-}
-.header__sitenav a:hover {
-  color: var(--accent);
-  background: rgba(212, 164, 78, 0.08);
-  text-decoration: none;
-}
-
-/* ─── Header ─── */
-.header { border-bottom: 1px solid var(--border); padding: 36px 24px 28px; }
-.header__inner { max-width: var(--max-w); margin: 0 auto; }
-.header__brand { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
-.header__logo { font-size: 28px; line-height: 1; }
-.header__title {
+/* ─── Hero (main calculator page only) ─── */
+.hero { border-bottom: 1px solid var(--border); padding: 28px 24px; text-align: center; }
+.hero__inner { max-width: var(--max-w); margin: 0 auto; }
+.hero__brand { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 8px; }
+.hero__logo { font-size: 28px; line-height: 1; }
+.hero__title {
   font-family: var(--font-mono);
   font-size: clamp(20px, 3.5vw, 30px);
   font-weight: 400;
   color: var(--text);
   letter-spacing: -0.3px;
 }
-.header__tagline { font-style: italic; color: var(--text-dim); font-size: 16px; }
+.hero__tagline { font-style: italic; color: var(--text-dim); font-size: 16px; }
 
 /* ─── Tabs ─── */
 .tabs {
@@ -513,6 +510,13 @@ select option { background: var(--bg-card); color: var(--text); }
 }
 .about__text { font-size: 14px; color: var(--text-dim); line-height: 1.75; margin-bottom: 10px; }
 .about__text--dim { font-size: 12px; color: var(--text-muted); }
+
+/* ─── Footer Donate ─── */
+.footer__donate { text-align: center; margin-bottom: 1rem; }
+.footer__donate-label { display: block; font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 0.5rem; }
+.footer__donate-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+.footer__donate-link { font-size: 0.8rem; color: var(--text-dim); border: 1px solid var(--border); padding: 0.3rem 0.8rem; border-radius: 6px; text-decoration: none; transition: color 0.2s, border-color 0.2s; }
+.footer__donate-link:hover { color: var(--accent); border-color: var(--accent-dim); }
 
 /* ─── Footer ─── */
 .footer { border-top: 1px solid var(--border); padding: 22px 24px; text-align: center; }

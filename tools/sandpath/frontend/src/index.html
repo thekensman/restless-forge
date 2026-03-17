@@ -112,6 +112,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
+  <script src="shared.js"></script>
 
   <!-- ═══ AD PROVIDER (single load) ═══ -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
@@ -126,16 +127,7 @@
   <div class="grain"></div>
 
   <!-- ═══ SITE NAVIGATION ═══ -->
-  <nav class="site-nav" aria-label="Main navigation">
-    <a href="#converter" class="site-nav__link">Converter</a>
-    <a href="#how-to-use" class="site-nav__link">How to Use</a>
-    <a href="#supported-tables" class="site-nav__link">Supported Tables</a>
-    <a href="#faq" class="site-nav__link">FAQ</a>
-    <a href="#about" class="site-nav__link">About</a>
-    <a href="/privacy" class="site-nav__link">Privacy</a>
-    <a href="/contact" class="site-nav__link">Contact</a>
-    <a href="/" class="site-nav__link">Restless Forge</a>
-  </nav>
+  <script>document.write(spNav())</script>
 
   <header class="header" id="top">
     <div class="header__orb" aria-hidden="true"></div>
@@ -559,26 +551,7 @@
     constitutes acceptance of the revised terms.</p>
   </section>
 
-  <footer class="footer">
-    <div style="text-align:center;margin-bottom:1rem;">
-      <span style="font-family:Outfit,sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#d4a44a;">Support Restless Forge</span>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.5rem;">
-        <a href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Ko-fi</a>
-        <a href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Buy Me a Coffee</a>
-        <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">Substack</a>
-        <a href="https://github.com/thekensman/" target="_blank" rel="noopener" style="font-size:.8rem;color:#7a766a;border:1px solid #252a35;padding:.3rem .8rem;border-radius:6px;text-decoration:none;">GitHub</a>
-      </div>
-    </div>
-    <nav class="footer__legal" aria-label="Legal pages">
-      <a href="/">Restless Forge</a>
-      <a href="/tools/">All Tools</a>
-      <a href="#about">About</a>
-      <a href="/contact">Contact</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/terms">Terms</a>
-    </nav>
-    <p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; SandPath: Free SVG &amp; image to sand table converter.</p>
-  </footer>
+  <script>document.write(spFooter())</script>
 
   <script type="module" src="./app.ts"></script>
 </body>

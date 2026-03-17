@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════════════
+   What Is My Time Worth? — Shared Sub-page Styles
+   Common CSS for all static HTML pages (about, faq, etc.)
+   Pages can add inline <style> for page-specific extras.
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --bg: #0b0d12;
+  --surface: #151820;
+  --card: #1a1e28;
+  --border: #252a35;
+  --accent: #d4a44e;
+  --text: #d8d4cc;
+  --muted: #6b7280;
+  --dim: #4a4840;
+  --red: #d45d5d;
+  --font-body: "Lora", Georgia, serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Site Header ── */
+.site-header { border-bottom: 1px solid var(--border); padding: 20px 24px; }
+.site-header__inner { max-width: 820px; margin: 0 auto; }
+.site-header__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.site-header__brand {
+  font-family: var(--font-mono); font-size: 15px; color: var(--text);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.site-header__brand:hover { text-decoration: none; color: var(--accent); }
+.nav-toggle {
+  display: none; background: none; border: 1px solid var(--border);
+  color: var(--text); font-size: 18px; padding: 4px 10px;
+  border-radius: 3px; cursor: pointer; line-height: 1;
+}
+.site-header__nav {
+  display: flex; gap: 4px; font-family: var(--font-mono); font-size: 13px;
+  align-items: center; flex-wrap: wrap;
+}
+.site-header__nav a {
+  color: var(--text); padding: 5px 10px; border-radius: 3px;
+  transition: background 0.15s, color 0.15s; text-decoration: none;
+}
+.site-header__nav a:hover { color: var(--accent); background: rgba(212, 164, 78, 0.08); }
+.site-header__nav a.active { color: var(--accent); background: rgba(212, 164, 78, 0.12); }
+
+@media (max-width: 640px) {
+  .nav-toggle { display: block; }
+  .site-header__nav {
+    display: none; flex-direction: column; align-items: stretch; gap: 0;
+    padding: 10px 0 4px; border-top: 1px solid var(--border); margin-top: 14px;
+  }
+  .site-header__nav.open { display: flex; }
+  .site-header__nav a {
+    padding: 11px 4px; border-radius: 0;
+    border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .site-header__nav a:last-child { border-bottom: none; }
+}
+
+.site-header__support {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.site-header__support-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--dim);
+}
+.site-header__support-link {
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; gap: 5px; text-decoration: none;
+  transition: color 0.15s;
+}
+.site-header__support-link:hover { color: var(--accent); }
+
+/* ── Content ── */
+main { max-width: 820px; margin: 0 auto; padding: 52px 24px 40px; }
+h1 {
+  font-family: var(--font-mono); font-size: clamp(24px, 4vw, 38px);
+  font-weight: 400; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 10px;
+}
+.page-sub {
+  font-style: italic; color: var(--muted); font-size: 15px;
+  margin-bottom: 36px; padding-left: 16px;
+  border-left: 2px solid var(--accent); line-height: 1.6;
+}
+h2 {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--accent);
+  margin: 40px 0 14px; display: flex; align-items: center; gap: 10px;
+}
+h2::before {
+  content: ''; display: inline-block; width: 18px; height: 1px;
+  background: var(--accent); flex-shrink: 0;
+}
+h2:first-of-type { margin-top: 0; }
+p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+p:last-child { margin-bottom: 0; }
+ul { font-size: 14px; color: var(--muted); line-height: 1.8; margin: 0 0 14px 20px; }
+ul li { margin-bottom: 6px; }
+strong { color: #d8d4cc; font-weight: 600; }
+.info-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); border-radius: 3px; padding: 22px 24px; margin: 28px 0;
+}
+.info-box p { margin-bottom: 0; }
+.support-nudge {
+  margin-top: 40px; padding: 24px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 3px;
+  text-align: center; font-size: 14px; color: var(--muted);
+}
+.support-nudge a { font-weight: 600; }
+
+/* ── Ad Slot ── */
+.ad-slot { max-width: 820px; margin: 0 auto; padding: 20px 24px 0; text-align: center; }
+
+/* ── Footer Donate ── */
+.footer__donate { text-align: center; margin-bottom: 14px; }
+.footer__donate-label {
+  display: block; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px;
+}
+.footer__donate-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.footer__donate-link {
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border); padding: 4px 12px; border-radius: 3px;
+  text-decoration: none; transition: color 0.15s, border-color 0.15s;
+}
+.footer__donate-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Footer ── */
+.footer {
+  border-top: 1px solid var(--border); padding: 22px 24px;
+  text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--dim);
+}
+.footer a { color: var(--muted); }
+.footer a:hover { color: var(--accent); }
+.footer__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin-bottom: 10px; }
+.footer__links a { white-space: nowrap; }
+.footer__copy { margin-top: 6px; }
