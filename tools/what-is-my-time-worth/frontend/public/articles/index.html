@@ -12,46 +12,8 @@
   <meta property="og:title" content="Articles — What Is My Time Worth?">
   <meta property="og:url" content="https://restless-forge.dev/tools/what-is-my-time-worth/articles/">
   <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/tools/what-is-my-time-worth/pages.css">
   <style>
-    :root{--bg:#0b0d12;--surface:#151820;--card:#1a1e28;--border:#252a35;--accent:#d4a44e;--text:#d8d4cc;--muted:#6b7280;--dim:#4a4840;--font-body:"Lora",Georgia,serif;--font-mono:"IBM Plex Mono","Courier New",monospace}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{font-size:16px;scroll-behavior:smooth}
-    body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-
-    /* ── Site Header ── */
-    .site-header{border-bottom:1px solid var(--border);padding:20px 24px}
-    .site-header__inner{max-width:820px;margin:0 auto}
-    .site-header__top{display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .site-header__brand{font-family:var(--font-mono);font-size:15px;color:var(--text);display:flex;align-items:center;gap:10px;flex-shrink:0}
-    .site-header__brand:hover{text-decoration:none;color:var(--accent)}
-    .nav-toggle{display:none;background:none;border:1px solid var(--border);color:var(--text);font-size:18px;padding:4px 10px;border-radius:3px;cursor:pointer;line-height:1}
-    .site-header__nav{display:flex;gap:4px;font-family:var(--font-mono);font-size:13px;align-items:center;flex-wrap:wrap}
-    .site-header__nav a{color:var(--text);padding:5px 10px;border-radius:3px;transition:background 0.15s,color 0.15s;text-decoration:none}
-    .site-header__nav a:hover{color:var(--accent);background:rgba(212,164,78,0.08)}
-    .site-header__nav a.active{color:var(--accent);background:rgba(212,164,78,0.12)}
-    @media(max-width:640px){
-      .nav-toggle{display:block}
-      .site-header__nav{display:none;flex-direction:column;align-items:stretch;gap:0;padding:10px 0 4px;border-top:1px solid var(--border);margin-top:14px}
-      .site-header__nav.open{display:flex}
-      .site-header__nav a{padding:11px 4px;border-radius:0;border-bottom:1px solid var(--border);font-size:14px}
-      .site-header__nav a:last-child{border-bottom:none}
-    }
-    .site-header__support{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-    .site-header__support-label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
-    .site-header__support-link{font-family:var(--font-mono);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;text-decoration:none;transition:color 0.15s}
-    .site-header__support-link:hover{color:var(--accent)}
-
-    /* ── Content ── */
-    main{max-width:820px;margin:0 auto;padding:52px 24px 40px}
-    h1{font-family:var(--font-mono);font-size:clamp(24px,4vw,38px);font-weight:400;color:var(--accent);letter-spacing:-0.5px;margin-bottom:10px}
-    .page-sub{font-style:italic;color:var(--muted);font-size:15px;margin-bottom:40px;padding-left:16px;border-left:2px solid var(--accent);line-height:1.6}
-
     /* ── Post List ── */
     .post-list{display:flex;flex-direction:column;gap:0}
     .post-item{display:block;padding:28px 0;border-bottom:1px solid var(--border);text-decoration:none}
@@ -62,60 +24,26 @@
     .post-item__title{font-family:var(--font-mono);font-size:16px;font-weight:400;color:var(--text);margin-bottom:10px;line-height:1.4;transition:color 0.15s}
     .post-item__excerpt{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px}
     .post-item__read{font-family:var(--font-mono);font-size:12px;color:var(--accent)}
-
     /* ── Subscribe CTA ── */
     .subscribe-box{margin-top:48px;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:3px;padding:28px 24px;text-align:center}
     .subscribe-box p{font-size:14px;color:var(--muted);margin-bottom:18px;font-style:italic}
     .subscribe-btn{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--bg);background:var(--accent);padding:11px 24px;border-radius:3px;text-decoration:none;transition:opacity 0.15s}
     .subscribe-btn:hover{opacity:0.85;text-decoration:none}
     .subscribe-note{margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--dim)}
-
-    /* ── Ad Slot ── */
-    .ad-slot{max-width:820px;margin:0 auto;padding:20px 24px 0;text-align:center}
-
-    /* ── Footer ── */
-    footer{border-top:1px solid var(--border);padding:22px 24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--dim)}
-    footer a{color:var(--muted)}
-    footer a:hover{color:var(--accent)}
   </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+  
+  <script src="/tools/what-is-my-time-worth/shared.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="site-header__inner">
-      <div class="site-header__top">
-        <a class="site-header__brand" href="/">⏱ What Is My Time Worth?</a>
-        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" onclick="var n=document.getElementById('site-nav');var open=n.classList.toggle('open');this.setAttribute('aria-expanded',open)">☰</button>
-        <nav class="site-header__nav" id="site-nav" aria-label="Site navigation">
-          <a href="/">Calculator</a>
-          <a href="/tools/what-is-my-time-worth/articles/" class="active">Articles</a>
-          <a href="/tools/what-is-my-time-worth/faq/">FAQ</a>
-          <a href="/about">About</a>
-          <a href="/tools/what-is-my-time-worth/contact/">Contact</a>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-        </nav>
-      </div>
-      <div class="site-header__support">
-        <span class="site-header__support-label">Support this free tool</span>
-        <a class="site-header__support-link" href="https://restlessforge.substack.com" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M22.539 8.242H1.46V6h21.08v2.242zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.236h21.08V0z"/></svg>
-          Substack
-        </a>
-        <a class="site-header__support-link" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          Ko-fi
-        </a>
-        <a class="site-header__support-link" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">☕ Buy Me a Coffee</a>
-      </div>
-    </div>
-  </header>
+  <script>document.write(wimtwHeader())</script>
 
   <main>
     <h1>Articles</h1>
     <p class="page-sub">Personal finance, time value, and the hidden math of work.</p>
 
     <div class="post-list">
-      <a class="post-item" href="/articles/life-energy-and-ymoyl/">
+      <a class="post-item" href="/tools/what-is-my-time-worth/articles/life-energy-and-ymoyl/">
         <div class="post-item__meta">
           <span>March 2026</span>
           <span class="post-item__tag">Philosophy</span>
@@ -144,17 +72,6 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
-  <footer>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px 0">
-      <a href="/">Calculator</a> &nbsp;·&nbsp;
-      <a href="/tools/what-is-my-time-worth/articles/">Articles</a> &nbsp;·&nbsp;
-      <a href="/tools/what-is-my-time-worth/faq/">FAQ</a> &nbsp;·&nbsp;
-      <a href="/about">About</a> &nbsp;·&nbsp;
-      <a href="/tools/what-is-my-time-worth/contact/">Contact</a> &nbsp;·&nbsp;
-      <a href="/privacy">Privacy</a> &nbsp;·&nbsp;
-      <a href="/terms">Terms</a>
-    </div>
-    <p style="margin-top:8px">&copy; 2026 What Is My Time Worth? — <a href="https://restless-forge.dev/tools/what-is-my-time-worth">whatismytimeworth.app</a></p>
-  </footer>
+  <script>document.write(wimtwFooter())</script>
 </body>
 </html>

@@ -40,7 +40,7 @@ a { color: var(--cyan); text-decoration: underline; text-underline-offset: 2px; 
 a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
 
 /* ─── Navigation ─── */
-.site-nav {
+.nav {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -54,7 +54,7 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   z-index: 100;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
 }
-.site-nav__link {
+.nav__link {
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.82rem;
@@ -67,22 +67,22 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   display: inline-flex;
   align-items: center;
 }
-.site-nav__link:hover {
+.nav__link:hover {
   color: var(--cyan);
   background: rgba(0, 255, 242, 0.06);
   text-shadow: none;
 }
-.site-nav__link--active {
+.nav__link--active {
   color: var(--cyan);
   background: rgba(0, 255, 242, 0.1);
 }
 
 @media (max-width: 480px) {
-  .site-nav {
+  .nav {
     gap: 0.15rem;
     padding: 0.5rem 0.5rem;
   }
-  .site-nav__link {
+  .nav__link {
     font-size: 0.75rem;
     padding: 0.4rem 0.5rem;
   }
@@ -272,6 +272,40 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   max-width: 740px;
   width: 100%;
   padding: 0 1.5rem;
+}
+
+/* ─── Footer Donate ─── */
+.footer__donate {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.footer__donate-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cyan-dim);
+  margin-bottom: 0.5rem;
+}
+.footer__donate-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.footer__donate-link {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border: 1px solid rgba(0, 255, 242, 0.12);
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s;
+}
+.footer__donate-link:hover {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+  text-shadow: none;
 }
 
 /* ─── Footer ─── */
