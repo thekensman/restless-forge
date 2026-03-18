@@ -76,6 +76,11 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   color: var(--cyan);
   background: rgba(0, 255, 242, 0.1);
 }
+.nav__link--restless {
+  margin-left: 4px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(0, 255, 242, 0.2);
+}
 
 @media (max-width: 480px) {
   .nav {
@@ -344,6 +349,7 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   justify-content: center;
   gap: 1.5rem;
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;
 }
 .footer__legal a {
   color: var(--text-muted);
@@ -351,6 +357,11 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   font-size: 0.8rem;
 }
 .footer__legal a:hover { color: var(--cyan); text-shadow: none; }
+.footer__legal a.footer-restless {
+  margin-left: 4px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(0, 255, 242, 0.2);
+}
 .footer__copy {
   color: rgba(136, 136, 160, 0.5);
   font-size: 0.75rem;
