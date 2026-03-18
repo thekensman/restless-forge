@@ -16,7 +16,7 @@
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
     [base + '/contact/', 'Contact'],
-    ['/about', 'About'],
+    [base + '/about', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/', 'Restless Forge'],
@@ -29,7 +29,7 @@
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
     [base + '/contact/', 'Contact'],
-    ['/about', 'About'],
+    [base + '/about', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
   ];
