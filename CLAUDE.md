@@ -17,6 +17,7 @@ Global support pages (about, contact, privacy, terms, FAQ, essays, articles) liv
 ```
 restless-forge/
 ├── site/           → Static HTML/CSS for global pages (landing, about, privacy, etc.)
+│   └── shared.js   → Global nav/footer + rf* shared utilities for all tool pages
 ├── tools/          → Tool source code (each has its own frontend/ directory)
 │   ├── what-is-my-time-worth/frontend/  → Vite + TS, base: /tools/what-is-my-time-worth/
 │   ├── holopath/frontend/               → Vite + TS, base: /tools/holopath/
@@ -34,8 +35,22 @@ restless-forge/
 - **Global pages**: Static HTML in `site/` — no build step, just copy to dist
 - **Per-tool identity**: Each tool keeps its own CSS, fonts, and visual theme
 - **Shared footer**: All tools link to global about/contact/privacy/terms and include the same donation footer
-- **Shared components via JS**: Nav and footer are generated from `shared.js` files (one per context: global site, WIMTW sub-pages, HoloPath sub-pages) so changes only need to be made in one place
+- **Shared components via JS**: Nav and footer are generated from `shared.js` files. `site/shared.js` is the global root that also exposes `rf*` utilities. Tool-specific `public/shared.js` files depend on it.
 - **SandPath backend**: Python FastAPI proxied through nginx at `/api/`
+
+## Shared Resource Architecture
+
+`site/shared.js` (served at `/shared.js`) is the single source of truth for:
+- `window.rfDonateLinks` — array of [url, label] donation links
+- `window.rfDonateHtml()` — renders the standard "Support Restless Forge" donate block
+- `window.rfNavSep` — `<span class="nav-sep">|</span>` separator between tool and RF nav links
+- `window.rfFooterSep` — `<span class="footer-sep">|</span>` separator for footer
+- `window.rfNav()` — global site navigation
+- `window.rfFooter()` — global site footer
+
+Every tool page (both main app and sub-pages) loads `/shared.js` first, then its own `shared.js`. This ensures the `rf*` globals are available when the tool's nav/footer functions run.
+
+Vite dev servers each include a `configureServer` plugin that serves `site/shared.js` at `/shared.js` so local development works without nginx.
 
 ## Development Workflow
 
@@ -47,7 +62,7 @@ npm install
 npm run dev
 ```
 
-Each tool runs on its own dev port (3000, 5173, 5174). During development, internal links like `/about` won't resolve — that's expected; they work in production behind nginx.
+Each tool runs on its own dev port (3000, 5173, 5174). Sub-pages (about, faq, etc.) are served correctly thanks to `appType: 'mpa'` in each tool's `vite.config.ts`. Global links like `/about` won't resolve in dev — that's expected; they work in production behind nginx.
 
 ### Building everything
 
@@ -58,11 +73,31 @@ Each tool runs on its own dev port (3000, 5173, 5174). During development, inter
 ### Adding a new tool
 
 1. Create `tools/new-tool/frontend/` with standard Vite + TS setup
-2. Set `base: '/tools/new-tool/'` in `vite.config.ts`
-3. Add build step in `build.sh`
-4. Add tool card to `site/index.html` and `site/tools/index.html`
-5. Add URL to `site/sitemap.xml`
-6. Update nginx config if the tool needs API proxying
+2. Set `base: '/tools/new-tool/'` in `vite.config.ts`; also add `appType: 'mpa'`
+3. Add the `/shared.js` dev plugin to `vite.config.ts`:
+   ```ts
+   import { readFileSync } from "fs";
+   import { fileURLToPath } from "url";
+   import { resolve, dirname } from "path";
+   const __dirname = dirname(fileURLToPath(import.meta.url));
+   const siteSharedJs = resolve(__dirname, "../../../site/shared.js");
+   // In defineConfig server.plugins:
+   { name: "serve-site-shared-js",
+     configureServer(server) {
+       server.middlewares.use("/shared.js", (_req, res) => {
+         res.setHeader("Content-Type", "application/javascript");
+         res.end(readFileSync(siteSharedJs, "utf-8"));
+       });
+     } }
+   ```
+4. In `src/index.html`, add `<script src="/shared.js"></script>` before the tool's own `<script src="shared.js"></script>`
+5. Create `frontend/public/shared.js` with tool-specific nav/footer functions that use `window.rfDonateHtml()`, `window.rfNavSep`, and `window.rfFooterSep`
+6. In every static HTML file under `frontend/public/`, add `<script src="/shared.js"></script>` before the tool's shared.js include
+7. Add build step in `build.sh` (copy pattern from WIMTW or HoloPath)
+8. Add `bust_cache "${DIST_DIR}/tools/new-tool" "/tools/new-tool"` in build.sh cache-bust section
+9. Add tool card to `site/index.html` and `site/tools/index.html`
+10. Add URL to `site/sitemap.xml`
+11. Update nginx config if the tool needs API proxying
 
 ### Adding an essay
 
@@ -76,12 +111,14 @@ Each tool runs on its own dev port (3000, 5173, 5174). During development, inter
 - **Tools**: TypeScript → Vite build → `tools/[name]/frontend/dist/`
 - **Global pages**: Static files in `site/` — no compilation
 - **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`
+- **Cache-busting**: `build.sh` injects content-hash `?v=HASH` into HTML references for `shared.js`, `pages.css`, and the global `/shared.js` so stale cached files are never served after updates
 
 ## URL Routing
 
 | URL Pattern | Source |
 |---|---|
 | `/` | `site/index.html` |
+| `/shared.js` | `site/shared.js` (global shared utilities) |
 | `/about` | `site/about.html` (nginx: try `$uri.html`) |
 | `/contact` | `site/contact.html` |
 | `/privacy` | `site/privacy.html` |
@@ -119,10 +156,10 @@ Edit the shared.js file for the relevant context:
 - **Global site pages**: `site/shared.js` — nav and footer for all pages in `site/`
 - **WIMTW sub-pages**: `tools/what-is-my-time-worth/frontend/public/shared.js` — header and footer for about, faq, articles, contact, privacy, terms
 - **HoloPath sub-pages**: `tools/holopath/frontend/public/shared.js` — nav, support banner, and footer for all pages in `public/`
-- **Tool main apps** (Vite index.html): These are NOT shared-component driven. Edit nav/footer directly in `tools/[name]/frontend/src/index.html`
+- **Tool main apps** (Vite index.html): Each tool's `src/index.html` includes both `/shared.js` and its own `shared.js` — nav/footer logic lives in the tool's `public/shared.js`
 
 ### Update donation links
-Edit the shared.js files above for sub-pages, and the inline footer in each tool's `src/index.html` for main apps.
+Edit `window.rfDonateLinks` in `site/shared.js` — this is the single source of truth. All tool footers use `window.rfDonateHtml()` which reads from this array.
 
 ### Update AdSense publisher ID
 Search for `ca-pub-5516736042033534` across all HTML files.
@@ -142,7 +179,9 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## Gotchas
 
-- **Vite base paths matter**: If you reset a tool's `vite.config.ts`, re-add the `base` property or assets won't load in production
+- **Vite base paths matter**: If you reset a tool's `vite.config.ts`, re-add the `base` and `appType: 'mpa'` properties or sub-pages and assets won't work correctly
+- **`appType: 'mpa'` required**: Without this, Vite's dev server falls back to serving the main SPA (`src/index.html`) for all routes, overriding static sub-pages in `public/`
+- **Load order matters**: `/shared.js` must be loaded before a tool's `shared.js` or `window.rfDonateHtml` etc. will be undefined
 - **SandPath needs its backend**: Unlike the other tools, SandPath has API calls to a Python backend on port 8000
 - **nginx rate limiting**: The API has a 15 req/min limit per IP — adjust in `nginx/restless-forge.conf` if needed
 - **Old domain redirects**: Keep SSL certs renewed for holopath.art, sandpath.art, whatismytimeworth.app as long as 301 redirects are active
