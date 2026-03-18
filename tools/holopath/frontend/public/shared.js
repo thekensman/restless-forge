@@ -44,8 +44,9 @@
 
   window.hpNav = function () {
     var links = navLinks.map(function (l) {
-      var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '') + (l[0] === '/' ? ' nav__link--restless' : '');
-      return '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
+      var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '');
+      var sep = (l[0] === '/') ? '<span class="nav-sep" aria-hidden="true">|</span>' : '';
+      return sep + '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
     }).join('');
 
     return '<nav class="nav" aria-label="Main navigation">' + links + '</nav>' +
@@ -65,8 +66,8 @@
     }).join('');
 
     var links = footerLinks.map(function (l) {
-      var cls = l[0] === '/' ? ' class="footer-restless"' : '';
-      return '<a href="' + l[0] + '"' + cls + '>' + l[1] + '</a>';
+      var sep = (l[0] === '/') ? '<span class="footer-sep" aria-hidden="true">|</span>' : '';
+      return sep + '<a href="' + l[0] + '">' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
