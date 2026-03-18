@@ -16,7 +16,7 @@
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
     [base + '/contact/', 'Contact'],
-    [base + '/about', 'About'],
+    [base + '/about/', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/', 'Restless Forge'],
@@ -28,7 +28,7 @@
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
     [base + '/contact/', 'Contact'],
-    [base + '/about', 'About'],
+    [base + '/about/', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/', 'Restless Forge'],
@@ -47,11 +47,9 @@
 
   window.wimtwHeader = function () {
     var links = navLinks.map(function (l) {
-      var classes = [];
-      if (active(l[0])) classes.push('active');
-      if (l[0] === '/') classes.push('nav-restless');
-      var cls = classes.length ? ' class="' + classes.join(' ') + '"' : '';
-      return '<a href="' + l[0] + '"' + cls + '>' + l[1] + '</a>';
+      var cls = active(l[0]) ? ' class="active"' : '';
+      var sep = (l[0] === '/') ? '<span class="nav-sep" aria-hidden="true">|</span>' : '';
+      return sep + '<a href="' + l[0] + '"' + cls + '>' + l[1] + '</a>';
     }).join('');
 
     return '<header class="site-header"><div class="site-header__inner">' +
@@ -74,8 +72,8 @@
     }).join('');
 
     var links = footerLinks.map(function (l) {
-      var extraCls = l[0] === '/' ? ' footer__link--restless' : '';
-      return '<a class="footer__link' + extraCls + '" href="' + l[0] + '">' + l[1] + '</a>';
+      var sep = (l[0] === '/') ? '<span class="footer-sep" aria-hidden="true">|</span>' : '';
+      return sep + '<a class="footer__link" href="' + l[0] + '">' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
