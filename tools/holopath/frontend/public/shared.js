@@ -20,6 +20,7 @@
     [base + '/about.html', 'About'],
     [base + '/contact.html', 'Contact'],
     ['/', 'Restless Forge'],
+    ['/tools/', 'All Tools'],
   ];
 
   var footerLinks = [
