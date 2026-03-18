@@ -23,8 +23,6 @@
   ];
 
   var footerLinks = [
-    ['/', 'Restless Forge'],
-    ['/tools/', 'All Tools'],
     [base + '/', 'Calculator'],
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
@@ -32,6 +30,8 @@
     [base + '/about', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
+    ['/', 'Restless Forge'],
+    ['/tools/', 'All Tools'],
   ];
 
   var donateLinks = [
@@ -46,7 +46,11 @@
 
   window.wimtwHeader = function () {
     var links = navLinks.map(function (l) {
-      return '<a href="' + l[0] + '"' + (active(l[0]) ? ' class="active"' : '') + '>' + l[1] + '</a>';
+      var classes = [];
+      if (active(l[0])) classes.push('active');
+      if (l[0] === '/') classes.push('nav-restless');
+      var cls = classes.length ? ' class="' + classes.join(' ') + '"' : '';
+      return '<a href="' + l[0] + '"' + cls + '>' + l[1] + '</a>';
     }).join('');
 
     return '<header class="site-header"><div class="site-header__inner">' +
@@ -69,7 +73,8 @@
     }).join('');
 
     var links = footerLinks.map(function (l) {
-      return '<a class="footer__link" href="' + l[0] + '">' + l[1] + '</a>';
+      var extraCls = l[0] === '/' ? ' footer__link--restless' : '';
+      return '<a class="footer__link' + extraCls + '" href="' + l[0] + '">' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +

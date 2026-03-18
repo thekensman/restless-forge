@@ -23,8 +23,6 @@
   ];
 
   var footerLinks = [
-    ['/', 'Restless Forge'],
-    ['/tools/', 'All Tools'],
     [base + '/how-it-works.html', 'How It Works'],
     [base + '/faq.html', 'FAQ'],
     [base + '/articles/', 'Articles'],
@@ -32,6 +30,8 @@
     [base + '/contact.html', 'Contact'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
+    ['/', 'Restless Forge'],
+    ['/tools/', 'All Tools'],
   ];
 
   var donateLinks = [
@@ -43,7 +43,7 @@
 
   window.hpNav = function () {
     var links = navLinks.map(function (l) {
-      var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '');
+      var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '') + (l[0] === '/' ? ' nav__link--restless' : '');
       return '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
     }).join('');
 
@@ -64,7 +64,8 @@
     }).join('');
 
     var links = footerLinks.map(function (l) {
-      return '<a href="' + l[0] + '">' + l[1] + '</a>';
+      var cls = l[0] === '/' ? ' class="footer-restless"' : '';
+      return '<a href="' + l[0] + '"' + cls + '>' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
