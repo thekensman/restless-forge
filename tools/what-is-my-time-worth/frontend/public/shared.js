@@ -20,6 +20,7 @@
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/', 'Restless Forge'],
+    ['/tools/', 'All Tools'],
   ];
 
   var footerLinks = [
