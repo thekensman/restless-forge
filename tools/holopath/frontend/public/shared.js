@@ -73,6 +73,13 @@
 
   /* Support banner dismiss logic */
   document.addEventListener('DOMContentLoaded', function () {
+    // Auto-inject nav and footer into standard placeholder elements.
+    // HTML pages only need <div id="hp-nav"></div> and <div id="hp-footer"></div>.
+    var navEl = document.getElementById('hp-nav');
+    if (navEl) navEl.outerHTML = window.hpNav();
+    var footerEl = document.getElementById('hp-footer');
+    if (footerEl) footerEl.outerHTML = window.hpFooter();
+
     var close = document.getElementById('close-support');
     if (close) {
       close.addEventListener('click', function () {

@@ -90,4 +90,14 @@
       '<p class="site-footer__copy">&copy; 2026 Restless Forge. All rights reserved.</p>' +
       '</div></footer>';
   };
+
+  // Auto-inject nav and footer into standard placeholder elements.
+  // HTML pages only need <div id="rf-nav"></div> and <div id="rf-footer"></div>;
+  // no inline scripts required.
+  document.addEventListener('DOMContentLoaded', function () {
+    var navEl = document.getElementById('rf-nav');
+    if (navEl) navEl.outerHTML = window.rfNav();
+    var footerEl = document.getElementById('rf-footer');
+    if (footerEl) footerEl.outerHTML = window.rfFooter();
+  });
 })();
