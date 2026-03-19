@@ -1,5 +1,6 @@
 /* shared.js — Restless Forge global nav & footer
    Single source of truth for all global site pages.
+   Also exposes rf* utilities (rfDonateHtml, rfNavSep, rfFooterSep) used by tool pages.
    Include in <head>, then call rfNav() / rfFooter() via inline <script> tags. */
 (function () {
   'use strict';
@@ -29,6 +30,30 @@
     ['/terms', 'Terms'],
     ['/faq', 'FAQ'],
   ];
+
+  // ── RF Shared Utilities ──
+  // Available to all tool pages that include /shared.js before their own shared.js.
+
+  window.rfDonateLinks = [
+    ['https://ko-fi.com/restless-forge', 'Ko-fi'],
+    ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee'],
+    ['https://substack.com/@restlessforge', 'Substack'],
+    ['https://github.com/thekensman/', 'GitHub'],
+  ];
+
+  // Renders the "Support Restless Forge" donate block used in tool page footers.
+  // Requires .footer__donate / .footer__donate-link CSS from the tool's pages.css.
+  window.rfDonateHtml = function () {
+    var links = window.rfDonateLinks.map(function (l) {
+      return '<a href="' + l[0] + '" target="_blank" rel="noopener" class="footer__donate-link">' + l[1] + '</a>';
+    }).join('');
+    return '<div class="footer__donate"><span class="footer__donate-label">Support Restless Forge</span>' +
+      '<div class="footer__donate-links">' + links + '</div></div>';
+  };
+
+  // Separator spans used between tool links and RF links in nav / footer.
+  window.rfNavSep    = '<span class="nav-sep" aria-hidden="true">|</span>';
+  window.rfFooterSep = '<span class="footer-sep" aria-hidden="true">|</span>';
 
   var support = [
     ['https://ko-fi.com/restless-forge', 'Ko-fi'],

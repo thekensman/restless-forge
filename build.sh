@@ -71,6 +71,13 @@ bust_cache() {
 bust_cache "${DIST_DIR}/tools/what-is-my-time-worth" "/tools/what-is-my-time-worth"
 bust_cache "${DIST_DIR}/tools/holopath"               "/tools/holopath"
 
+# Cache-bust the global /shared.js across ALL html files in dist
+site_shared_hash=$(md5sum "${DIST_DIR}/shared.js" | cut -c1-8)
+find "${DIST_DIR}" -name "*.html" -exec sed -i \
+  -e "s|\"/shared\.js\"|\"/shared.js?v=${site_shared_hash}\"|g" \
+  {} \;
+echo "  → /shared.js?v=${site_shared_hash}"
+
 # ── Summary ──
 echo ""
 echo "[7/7] Build complete!"

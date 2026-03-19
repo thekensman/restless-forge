@@ -1,5 +1,6 @@
 /* shared.js — HoloPath shared nav, support banner & footer
    Single source of truth for ALL HoloPath pages (main app + sub-pages).
+   Requires /shared.js (site/shared.js) to be loaded first for rf* utilities.
    Include in <head>, then call hpNav() / hpFooter() via inline <script> tags. */
 (function () {
   'use strict';
@@ -35,18 +36,12 @@
     ['/tools/', 'All Tools'],
   ];
 
-  var donateLinks = [
-    ['https://ko-fi.com/restless-forge', 'Ko-fi'],
-    ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee'],
-    ['https://substack.com/@restlessforge', 'Substack'],
-    ['https://github.com/thekensman/', 'GitHub'],
-  ];
-
   window.hpNav = function () {
+    var sep = (window.rfNavSep !== undefined) ? window.rfNavSep : '<span class="nav-sep" aria-hidden="true">|</span>';
     var links = navLinks.map(function (l) {
       var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '');
-      var sep = (l[0] === '/') ? '<span class="nav-sep" aria-hidden="true">|</span>' : '';
-      return sep + '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
+      var prefix = (l[0] === '/') ? sep : '';
+      return prefix + '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
     }).join('');
 
     return '<nav class="nav" aria-label="Main navigation">' + links + '</nav>' +
@@ -61,18 +56,16 @@
   };
 
   window.hpFooter = function () {
-    var donate = donateLinks.map(function (l) {
-      return '<a href="' + l[0] + '" target="_blank" rel="noopener" class="footer__donate-link">' + l[1] + '</a>';
-    }).join('');
+    var sep = (window.rfFooterSep !== undefined) ? window.rfFooterSep : '<span class="footer-sep" aria-hidden="true">|</span>';
+    var donateHtml = (typeof window.rfDonateHtml === 'function') ? window.rfDonateHtml() : '';
 
     var links = footerLinks.map(function (l) {
-      var sep = (l[0] === '/') ? '<span class="footer-sep" aria-hidden="true">|</span>' : '';
-      return sep + '<a href="' + l[0] + '">' + l[1] + '</a>';
+      var prefix = (l[0] === '/') ? sep : '';
+      return prefix + '<a href="' + l[0] + '">' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
-      '<div class="footer__donate"><span class="footer__donate-label">Support Restless Forge</span>' +
-      '<div class="footer__donate-links">' + donate + '</div></div>' +
+      donateHtml +
       '<nav class="footer__legal" aria-label="Footer navigation">' + links + '</nav>' +
       '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;">Restless Forge</a> &mdash; HoloPath: Free hologram GIF generator.</p>' +
       '</footer>';
