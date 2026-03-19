@@ -1,0 +1,14 @@
+{
+  "name": "restless-forge",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"rf,wimtw,hp\" --prefix-colors \"cyan,yellow,magenta\" \"vite\" \"npm run dev --prefix tools/what-is-my-time-worth/frontend\" \"npm run dev --prefix tools/holopath/frontend\"",
+    "dev:site": "vite",
+    "dev:wimtw": "npm run dev --prefix tools/what-is-my-time-worth/frontend",
+    "dev:holopath": "npm run dev --prefix tools/holopath/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "vite": "^5.4.0"
+  }
+}

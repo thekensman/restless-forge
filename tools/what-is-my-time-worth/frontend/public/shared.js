@@ -76,4 +76,13 @@
       '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; What Is My Time Worth? Your numbers, your browser, your life.</p>' +
       '</footer>';
   };
+
+  // Auto-inject header and footer into standard placeholder elements.
+  // HTML pages only need <div id="wimtw-header"></div> and <div id="wimtw-footer"></div>.
+  document.addEventListener('DOMContentLoaded', function () {
+    var headerEl = document.getElementById('wimtw-header');
+    if (headerEl) headerEl.outerHTML = window.wimtwHeader();
+    var footerEl = document.getElementById('wimtw-footer');
+    if (footerEl) footerEl.outerHTML = window.wimtwFooter();
+  });
 })();
