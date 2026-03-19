@@ -28,15 +28,20 @@ export default defineConfig({
           res.end(readFileSync(siteSharedJs, "utf-8"));
         });
 
-        // Resolve directory requests to their index.html from publicDir
-        server.middlewares.use((req, _res, next) => {
-          if (req.url?.startsWith(base)) {
-            const sub = req.url.slice(base.length).split("?")[0];
-            const dir = sub.endsWith("/") ? sub : sub + "/";
-            if (dir !== "/") {
-              const idx = resolve(publicDir, `.${dir}index.html`);
-              if (existsSync(idx)) req.url = base + dir + "index.html";
-            }
+        // Resolve directory requests to their publicDir index.html.
+        // See WIMTW vite.config.ts for full explanation.
+        server.middlewares.use((req, res, next) => {
+          let urlPath = (req.url ?? "/").split("?")[0];
+
+          if (urlPath.startsWith(base + "/")) urlPath = urlPath.slice(base.length);
+
+          if (!urlPath.endsWith("/") || urlPath === "/") { next(); return; }
+
+          const idx = resolve(publicDir, urlPath.slice(1) + "index.html");
+          if (existsSync(idx)) {
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.end(readFileSync(idx, "utf-8"));
+            return;
           }
           next();
         });

@@ -25,17 +25,28 @@ export default defineConfig({
           res.end(readFileSync(siteSharedJs, "utf-8"));
         });
 
-        // Resolve directory requests to their index.html from publicDir
-        // (needed because appType:'mpa' disables SPA fallback and Vite's
-        // sirv may not do dir-index resolution with a non-root base path)
-        server.middlewares.use((req, _res, next) => {
-          if (req.url?.startsWith(base)) {
-            const sub = req.url.slice(base.length).split("?")[0];
-            const dir = sub.endsWith("/") ? sub : sub + "/";
-            if (dir !== "/") {
-              const idx = resolve(publicDir, `.${dir}index.html`);
-              if (existsSync(idx)) req.url = base + dir + "index.html";
-            }
+        // Resolve directory requests to their publicDir index.html.
+        //
+        // Vite's baseMiddleware strips the base path before plugin middlewares
+        // run, so req.url is already base-stripped (e.g. "/about/" not
+        // "/tools/what-is-my-time-worth/about/"). Vite's sirv is also
+        // configured with extensions:[] so it won't do dir-index resolution
+        // on its own. We serve the file directly to bypass both issues.
+        server.middlewares.use((req, res, next) => {
+          let urlPath = (req.url ?? "/").split("?")[0];
+
+          // Strip base prefix in case it hasn't been stripped yet (e.g. direct
+          // access without going through Vite's baseMiddleware).
+          if (urlPath.startsWith(base + "/")) urlPath = urlPath.slice(base.length);
+
+          // Only act on directory-style requests (trailing slash, non-root).
+          if (!urlPath.endsWith("/") || urlPath === "/") { next(); return; }
+
+          const idx = resolve(publicDir, urlPath.slice(1) + "index.html");
+          if (existsSync(idx)) {
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.end(readFileSync(idx, "utf-8"));
+            return;
           }
           next();
         });
