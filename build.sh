@@ -27,6 +27,14 @@ npm ci --silent
 npm run build
 mkdir -p "${DIST_DIR}/tools/what-is-my-time-worth"
 cp -r dist/* "${DIST_DIR}/tools/what-is-my-time-worth/"
+# Copy sub-page HTML directly (Vite only bundles src/index.html; sub-pages are static)
+find "${SCRIPT_DIR}/tools/what-is-my-time-worth/frontend/src" -name "*.html" \
+  ! -path "*/src/index.html" | while IFS= read -r f; do
+  rel="${f#${SCRIPT_DIR}/tools/what-is-my-time-worth/frontend/src/}"
+  dest="${DIST_DIR}/tools/what-is-my-time-worth/${rel}"
+  mkdir -p "$(dirname "$dest")"
+  cp "$f" "$dest"
+done
 echo "  → What Is My Time Worth built successfully"
 
 # ── Build HoloPath ──
@@ -36,6 +44,14 @@ npm ci --silent
 npm run build
 mkdir -p "${DIST_DIR}/tools/holopath"
 cp -r dist/* "${DIST_DIR}/tools/holopath/"
+# Copy sub-page HTML directly (Vite only bundles src/index.html; sub-pages are static)
+find "${SCRIPT_DIR}/tools/holopath/frontend/src" -name "*.html" \
+  ! -path "*/src/index.html" | while IFS= read -r f; do
+  rel="${f#${SCRIPT_DIR}/tools/holopath/frontend/src/}"
+  dest="${DIST_DIR}/tools/holopath/${rel}"
+  mkdir -p "$(dirname "$dest")"
+  cp "$f" "$dest"
+done
 echo "  → HoloPath built successfully"
 
 # ── Build SandPath ──
