@@ -4,8 +4,10 @@ import { dirname } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// TODO: Replace TOOL_NAME with your tool's directory name (e.g. "my-tool")
+//       Replace PORT with an unused port (WIMTW=3000, HoloPath=5173, SandPath=5174)
 export default defineToolConfig({
-  base: "/tools/what-is-my-time-worth",
-  port: 3000,
+  base: "/tools/TOOL_NAME",
+  port: PORT,
   dir: __dirname,
 });

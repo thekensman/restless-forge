@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- TODO: update title, description, canonical URL, OG tags -->
+  <title>TOOL_LABEL — Restless Forge</title>
+  <meta name="description" content="TODO: page description">
+  <link rel="canonical" href="https://restless-forge.dev/tools/TOOL_NAME/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="TOOL_LABEL">
+  <meta property="og:description" content="TODO: OG description">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/TOOL_NAME/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/TOOL_NAME/og-image.png">
+
+  <!-- Favicons (add to public/) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "TOOL_LABEL",
+    "url": "https://restless-forge.dev/tools/TOOL_NAME",
+    "description": "TODO",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+  <!-- AdSense — replace pub ID if needed -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (absolute URLs — served from public/, not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/TOOL_NAME/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="TOOL_PREFIX-header"></div>
+
+  <main>
+    <!-- TODO: tool UI -->
+    <h1>TOOL_LABEL</h1>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="TOOL_PREFIX-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>
