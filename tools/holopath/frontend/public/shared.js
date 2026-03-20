@@ -15,21 +15,21 @@
 
   var navLinks = [
     [base + '/', 'Generator'],
-    [base + '/how-it-works.html', 'How It Works'],
-    [base + '/faq.html', 'FAQ'],
+    [base + '/how-it-works/', 'How It Works'],
+    [base + '/faq/', 'FAQ'],
     [base + '/articles/', 'Articles'],
-    [base + '/about.html', 'About'],
-    [base + '/contact.html', 'Contact'],
+    [base + '/about/', 'About'],
+    [base + '/contact/', 'Contact'],
     ['/', 'Restless Forge'],
     ['/tools/', 'All Tools'],
   ];
 
   var footerLinks = [
-    [base + '/how-it-works.html', 'How It Works'],
-    [base + '/faq.html', 'FAQ'],
+    [base + '/how-it-works/', 'How It Works'],
+    [base + '/faq/', 'FAQ'],
     [base + '/articles/', 'Articles'],
-    [base + '/about.html', 'About'],
-    [base + '/contact.html', 'Contact'],
+    [base + '/about/', 'About'],
+    [base + '/contact/', 'Contact'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/', 'Restless Forge'],
