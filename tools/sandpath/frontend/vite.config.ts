@@ -1,20 +1,11 @@
-import { defineConfig } from "vite";
+import { defineToolConfig } from "../../vite-tool-config.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-export default defineConfig({
-  root: "src",
-  publicDir: "../public",
-  base: "/tools/sandpath/",
-  build: {
-    outDir: "../dist",
-    emptyOutDir: true,
-  },
-  server: {
-    port: 5174,
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:8000",
-        changeOrigin: true,
-      },
-    },
-  },
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+export default defineToolConfig({
+  base: "/tools/sandpath",
+  port: 5174,
+  dir: __dirname,
 });

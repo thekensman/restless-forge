@@ -1,23 +1,17 @@
 /**
- * SandPath — Frontend application (v2)
+ * SandPath — Frontend application
  *
+ * All processing runs in the browser. No server calls.
  * Dual pipeline:
- *   SVG files   → /api/convert       → .thr/.gcode
- *   Raster imgs → /api/convert-image  → .thr/.gcode  (with SVG preview)
+ *   SVG files   → converter.ts  → .thr/.gcode
+ *   Raster imgs → vectorizer.ts → SVG → converter.ts → .thr/.gcode
  */
 
-// ─── Types ───────────────────────────────────────────────────
+import { DEVICE_LIST, type DeviceProfile } from "./devices.js";
+import { convert } from "./converter.js";
+import { vectorize } from "./vectorizer.js";
 
-interface DeviceInfo {
-  id: string;
-  name: string;
-  description: string;
-  shape: string;
-  width_mm: number;
-  height_mm: number;
-  max_rho: number;
-  output_format: string;
-}
+// ─── Types ───────────────────────────────────────────────────
 
 interface ConvertStats {
   points?: number;
@@ -40,10 +34,9 @@ type FileMode = "svg" | "image";
 
 // ─── Constants ───────────────────────────────────────────────
 
-const API = "/api";
-const SVG_EXTS = new Set([".svg"]);
+const SVG_EXTS  = new Set([".svg"]);
 const SVG_MIMES = new Set(["image/svg+xml"]);
-const IMG_EXTS = new Set([".jpg",".jpeg",".png",".webp",".bmp",".gif",".tiff",".tif"]);
+const IMG_EXTS  = new Set([".jpg",".jpeg",".png",".webp",".bmp",".gif",".tiff",".tif"]);
 const IMG_MIMES = new Set(["image/jpeg","image/png","image/webp","image/bmp","image/gif","image/tiff"]);
 
 // ─── DOM refs ────────────────────────────────────────────────
@@ -97,7 +90,7 @@ const errorMsg        = $<HTMLParagraphElement>("#error-msg");
 
 // ─── State ───────────────────────────────────────────────────
 
-let devices: DeviceInfo[] = [];
+let devices: DeviceProfile[] = [];
 let selectedFile: File | null = null;
 let fileMode: FileMode = "svg";
 let lastBlob: Blob | null = null;
@@ -117,7 +110,7 @@ function setLoading(btn: HTMLButtonElement, on: boolean) {
   btn.disabled = on;
 }
 
-function getDevice(): DeviceInfo | undefined {
+function getDevice(): DeviceProfile | undefined {
   return devices.find(d => d.id === deviceSelect.value);
 }
 
@@ -130,42 +123,40 @@ function detectFileMode(file: File): FileMode {
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
+  a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
 }
 
-// ─── Load devices ────────────────────────────────────────────
+function getCustomDevice(base: DeviceProfile): DeviceProfile {
+  if (!base.id.startsWith("custom_")) return base;
+  return {
+    ...base,
+    width_mm: parseFloat(customWidth.value) || base.width_mm,
+    height_mm: parseFloat(customHeight.value) || base.height_mm,
+  };
+}
 
-async function loadDevices() {
-  try {
-    const res = await fetch(`${API}/devices`);
-    if (!res.ok) throw new Error();
-    devices = (await res.json()) as DeviceInfo[];
-    deviceSelect.innerHTML = "";
+// ─── Device list ─────────────────────────────────────────────
 
-    const addGroup = (label: string, items: DeviceInfo[]) => {
-      const g = document.createElement("optgroup");
-      g.label = label;
-      items.forEach(d => {
-        const o = document.createElement("option");
-        o.value = d.id;
-        o.textContent = `${d.name} — ${d.description}`;
-        g.appendChild(o);
-      });
-      deviceSelect.appendChild(g);
-    };
+function loadDevices() {
+  devices = DEVICE_LIST;
+  deviceSelect.innerHTML = "";
 
-    addGroup("⬤  Circular tables", devices.filter(d => d.shape === "circular"));
-    addGroup("▬  Rectangular tables", devices.filter(d => d.shape === "rectangular"));
-    updateDeviceUI();
-  } catch {
-    const o = document.createElement("option");
-    o.value = "oasis_mini";
-    o.textContent = "Oasis Mini (API loading…)";
-    deviceSelect.appendChild(o);
-  }
+  const addGroup = (label: string, items: DeviceProfile[]) => {
+    const g = document.createElement("optgroup");
+    g.label = label;
+    items.forEach(d => {
+      const o = document.createElement("option");
+      o.value = d.id;
+      o.textContent = `${d.name} — ${d.description}`;
+      g.appendChild(o);
+    });
+    deviceSelect.appendChild(g);
+  };
+
+  addGroup("⬤  Circular tables", devices.filter(d => d.shape === "circular"));
+  addGroup("▬  Rectangular tables", devices.filter(d => d.shape === "rectangular"));
+  updateDeviceUI();
 }
 
 function updateDeviceUI() {
@@ -181,9 +172,8 @@ function updateDeviceUI() {
 
 function handleFile(file: File) {
   const ext = "." + file.name.split(".").pop()?.toLowerCase();
-  const allExts = new Set([...SVG_EXTS, ...IMG_EXTS]);
-
-  if (!allExts.has(ext) && !SVG_MIMES.has(file.type) && !IMG_MIMES.has(file.type)) {
+  if (!new Set([...SVG_EXTS, ...IMG_EXTS]).has(ext)
+      && !SVG_MIMES.has(file.type) && !IMG_MIMES.has(file.type)) {
     showError("Unsupported file. Upload SVG, JPG, PNG, WebP, BMP, GIF, or TIFF.");
     return;
   }
@@ -194,7 +184,6 @@ function handleFile(file: File) {
 
   selectedFile = file;
   fileMode = detectFileMode(file);
-
   fileNameEl.textContent = file.name;
   dropZone.classList.add("has-file");
 
@@ -234,30 +223,29 @@ rhoRange.addEventListener("input", () => { rhoValue.textContent = parseFloat(rho
 paddingRange.addEventListener("input", () => { paddingValue.textContent = `${Math.round(parseFloat(paddingRange.value) * 100)}%`; });
 deviceSelect.addEventListener("change", updateDeviceUI);
 
-// ─── Build image form data ───────────────────────────────────
+// ─── Vectorize opts from UI ───────────────────────────────────
 
-function buildImageForm(svgOnly: boolean): FormData {
-  const f = new FormData();
-  f.append("file", selectedFile!);
-  f.append("trace_mode", traceModeSelect.value);
-  f.append("threshold", thresholdRange.value);
-  f.append("blur", blurRange.value);
-  f.append("invert", invertCheck.checked ? "true" : "false");
-  f.append("detail", detailRange.value);
-  f.append("max_dimension", dimensionRange.value);
-  f.append("line_width", "2.0");
-  f.append("device_id", deviceSelect.value);
-  f.append("fit", fitSelect.value);
-  f.append("samples", samplesRange.value);
-  f.append("padding", paddingRange.value);
+function getVectorizeOpts() {
+  return {
+    mode: traceModeSelect.value,
+    threshold: parseInt(thresholdRange.value),
+    blur: parseFloat(blurRange.value),
+    invert: invertCheck.checked,
+    detail: parseFloat(detailRange.value),
+    maxDimension: parseInt(dimensionRange.value),
+    lineWidth: 2.0,
+  };
+}
+
+function getConvertOpts() {
+  const dev = getDevice()!;
   const rho = parseFloat(rhoRange.value);
-  if (rho !== (getDevice()?.max_rho ?? 0.95)) f.append("max_rho", String(rho));
-  if (deviceSelect.value.startsWith("custom_")) {
-    f.append("custom_width_mm", customWidth.value);
-    f.append("custom_height_mm", customHeight.value);
-  }
-  f.append("svg_only", svgOnly ? "true" : "false");
-  return f;
+  return {
+    fit: fitSelect.value as "cover" | "contain",
+    samples: parseInt(samplesRange.value),
+    maxRhoOverride: rho !== dev.max_rho ? rho : null,
+    padding: parseFloat(paddingRange.value),
+  };
 }
 
 // ─── Preview trace ───────────────────────────────────────────
@@ -269,17 +257,9 @@ async function doPreview() {
   resultsSection.style.display = "none";
 
   try {
-    const res = await fetch(`${API}/convert-image`, { method: "POST", body: buildImageForm(true) });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || `Server error ${res.status}`);
-    }
+    const result = await vectorize(selectedFile, getVectorizeOpts());
+    const { svgText, width, height, pathCount, pointCount } = result;
 
-    const statsH = res.headers.get("X-Stats");
-    let stats: ConvertStats = {};
-    if (statsH) try { stats = JSON.parse(statsH); } catch {}
-
-    const svgText = await res.text();
     lastSvgBlob = new Blob([svgText], { type: "image/svg+xml" });
     previewFrame.innerHTML = svgText;
 
@@ -292,11 +272,12 @@ async function doPreview() {
       svgEl.style.maxHeight = "360px";
     }
 
-    const parts: string[] = [];
-    if (stats.image_size) parts.push(`Size: ${stats.image_size}`);
-    if (stats.paths) parts.push(`Paths: ${stats.paths.toLocaleString()}`);
-    if (stats.points) parts.push(`Points: ${stats.points.toLocaleString()}`);
-    if (stats.trace_mode) parts.push(`Mode: ${stats.trace_mode}`);
+    const parts: string[] = [
+      `Size: ${width}×${height}`,
+      `Paths: ${pathCount.toLocaleString()}`,
+      `Points: ${pointCount.toLocaleString()}`,
+      `Mode: ${traceModeSelect.value}`,
+    ];
     previewStats.textContent = parts.join("  •  ");
 
     previewSection.style.display = "flex";
@@ -322,41 +303,33 @@ async function doConvert() {
   resultsSection.style.display = "none";
 
   try {
-    let res: Response;
+    const baseDevice = getDevice()!;
+    const device = getCustomDevice(baseDevice);
+    const convertOpts = getConvertOpts();
+
+    let svgText: string;
+    let traceStats: ConvertStats = {};
 
     if (fileMode === "svg") {
-      const f = new FormData();
-      f.append("file", selectedFile);
-      f.append("device_id", deviceSelect.value);
-      f.append("fit", fitSelect.value);
-      f.append("samples", samplesRange.value);
-      f.append("padding", paddingRange.value);
-      const rho = parseFloat(rhoRange.value);
-      if (rho !== (getDevice()?.max_rho ?? 0.95)) f.append("max_rho", String(rho));
-      if (deviceSelect.value.startsWith("custom_")) {
-        f.append("custom_width_mm", customWidth.value);
-        f.append("custom_height_mm", customHeight.value);
-      }
-      res = await fetch(`${API}/convert`, { method: "POST", body: f });
+      svgText = await selectedFile.text();
     } else {
-      res = await fetch(`${API}/convert-image`, { method: "POST", body: buildImageForm(false) });
+      // Vectorize first; preserve intermediate SVG for download
+      const vResult = await vectorize(selectedFile, getVectorizeOpts());
+      svgText = vResult.svgText;
+      lastSvgBlob = new Blob([svgText], { type: "image/svg+xml" });
+      traceStats = {
+        image_size: `${vResult.width}×${vResult.height}`,
+        trace_mode: traceModeSelect.value,
+        traced_paths: vResult.pathCount,
+        traced_points: vResult.pointCount,
+      };
     }
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || `Server error ${res.status}`);
-    }
+    const result = convert(svgText, device, convertOpts);
+    lastBlob = new Blob([result.output], { type: "text/plain" });
+    lastFilename = result.filename;
 
-    const statsH = res.headers.get("X-Stats");
-    let stats: ConvertStats = {};
-    if (statsH) try { stats = JSON.parse(statsH); } catch {}
-
-    const cd = res.headers.get("Content-Disposition") || "";
-    const m = cd.match(/filename="?([^"]+)"?/);
-    lastFilename = m ? m[1] : "output.thr";
-
-    lastBlob = await res.blob();
-    showResults(stats);
+    showResults({ ...traceStats, ...result.stats } as ConvertStats);
   } catch (err: unknown) {
     showError(err instanceof Error ? err.message : "Conversion failed");
   } finally {
@@ -373,19 +346,19 @@ function showResults(stats: ConvertStats) {
   resultsSection.scrollIntoView({ behavior: "smooth", block: "center" });
 
   const entries: [string, string | number][] = [];
-  if (stats.image_size)     entries.push(["Image size",    stats.image_size]);
-  if (stats.trace_mode)     entries.push(["Trace mode",    stats.trace_mode]);
-  if (stats.traced_paths != null)  entries.push(["Traced paths",  stats.traced_paths.toLocaleString()]);
-  if (stats.traced_points != null) entries.push(["Traced points", stats.traced_points.toLocaleString()]);
-  if (stats.points != null) entries.push(["Output points", stats.points.toLocaleString()]);
-  if (stats.subpaths != null) entries.push(["Subpaths",     stats.subpaths]);
-  if (stats.content_size)   entries.push(["Content size",  stats.content_size]);
-  if (stats.fit)            entries.push(["Fit mode",      stats.fit]);
-  if (stats.max_rho != null) entries.push(["Max ρ",        stats.max_rho.toFixed(2)]);
-  if (stats.polar_radius != null) entries.push(["Polar radius", stats.polar_radius]);
-  if (stats.scale != null)  entries.push(["Scale",         stats.scale]);
+  if (stats.image_size)           entries.push(["Image size",    stats.image_size]);
+  if (stats.trace_mode)           entries.push(["Trace mode",    stats.trace_mode]);
+  if (stats.traced_paths != null) entries.push(["Traced paths",  stats.traced_paths.toLocaleString()]);
+  if (stats.traced_points != null)entries.push(["Traced points", stats.traced_points.toLocaleString()]);
+  if (stats.points != null)       entries.push(["Output points", stats.points.toLocaleString()]);
+  if (stats.subpaths != null)     entries.push(["Subpaths",      stats.subpaths]);
+  if (stats.content_size)         entries.push(["Content size",  stats.content_size]);
+  if (stats.fit)                  entries.push(["Fit mode",      stats.fit]);
+  if (stats.max_rho != null)      entries.push(["Max ρ",         (stats.max_rho as number).toFixed(2)]);
+  if (stats.polar_radius != null) entries.push(["Polar radius",  stats.polar_radius]);
+  if (stats.scale != null)        entries.push(["Scale",         stats.scale]);
   if (stats.clipped_points != null) entries.push(["Clipped pts", stats.clipped_points.toLocaleString()]);
-  if (stats.bed_size)       entries.push(["Bed size",      stats.bed_size]);
+  if (stats.bed_size)             entries.push(["Bed size",      stats.bed_size]);
 
   statsGrid.innerHTML = entries
     .map(([l, v]) => `<div class="stat"><div class="stat__label">${l}</div><div class="stat__value">${v}</div></div>`)
@@ -400,9 +373,7 @@ downloadBtn.addEventListener("click", () => { if (lastBlob) triggerDownload(last
 downloadSvgBtn.addEventListener("click", () => { if (lastSvgBlob) triggerDownload(lastSvgBlob, "traced.svg"); });
 
 againBtn.addEventListener("click", () => {
-  selectedFile = null;
-  lastBlob = null;
-  lastSvgBlob = null;
+  selectedFile = null; lastBlob = null; lastSvgBlob = null;
   fileNameEl.textContent = "";
   fileTypeBadge.hidden = true;
   dropZone.classList.remove("has-file");

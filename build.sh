@@ -68,15 +68,9 @@ build_vite_tool "What Is My Time Worth" "what-is-my-time-worth"
 echo "[4/7] Building HoloPath..."
 build_vite_tool "HoloPath" "holopath"
 
-# ── Build SandPath (custom: has a Python backend, no sub-pages) ──
+# ── Build SandPath ──
 echo "[5/7] Building SandPath..."
-cd "${SCRIPT_DIR}/tools/sandpath/frontend"
-npm ci --silent
-npm run build
-mkdir -p "${DIST_DIR}/tools/sandpath"
-cp -r dist/* "${DIST_DIR}/tools/sandpath/"
-cp -r "${SCRIPT_DIR}/tools/sandpath/backend" "${DIST_DIR}/tools/sandpath/backend"
-echo "  → SandPath built successfully"
+build_vite_tool "SandPath" "sandpath"
 
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
