@@ -8,15 +8,21 @@ import {
   calculateRealWage,
   calculateDecision,
   calculateFinancialContext,
+  calculateQueueTotals,
+  normalizeToMonthly,
   compareJobs,
   STATE_TAX_RATES,
   DECISION_PRESETS,
+  FREQUENCY_LABELS,
   fmtCurrency,
   fmtPercent,
   fmtHoursMinutes,
   fmtNumber,
   type WageInputs,
+  type WageResult,
   type DecisionInputs,
+  type DecisionQueueItem,
+  type Frequency,
   type JobInputs,
   type FinancialContextInputs,
 } from "./engine";
@@ -45,8 +51,10 @@ function setText(id: string, text: string): void {
 // ─── Module-level shared state ────────────────────────────────
 
 let calculatedRealWage: number = 0;
-let calculatedDiscretionaryWage: number = 0;
+let calculatedWageResult: WageResult | null = null;
+let calculatedMonthlyDiscretionary: number = 0;
 let decisionWageManuallyEdited: boolean = false;
+let decisionQueue: DecisionQueueItem[] = [];
 
 // ─── State Dropdowns ─────────────────────────────────────────
 
@@ -96,13 +104,10 @@ function initTabs(): void {
       panel.hidden = false;
       panel.classList.add("panel--active");
 
-      // Cross-tab state: push real/discretionary wage to decision tab
+      // Cross-tab state: push real wage to decision tab
       if (target === "decision" && !decisionWageManuallyEdited) {
-        const wageToUse = calculatedDiscretionaryWage > 0
-          ? calculatedDiscretionaryWage
-          : calculatedRealWage;
-        if (wageToUse > 0) {
-          ($(  "d-wage") as HTMLInputElement).value = wageToUse.toFixed(2);
+        if (calculatedRealWage > 0) {
+          ($(  "d-wage") as HTMLInputElement).value = calculatedRealWage.toFixed(2);
           updateDecisionWageHint();
         }
       }
@@ -115,14 +120,14 @@ function initTabs(): void {
 // ─── Preset Tiles ────────────────────────────────────────────
 
 function renderPresets(): void {
+  const regularPresets = DECISION_PRESETS.filter((p) => p.defaultFrequency !== "one-time");
+  const bigPresets = DECISION_PRESETS.filter((p) => p.defaultFrequency === "one-time");
+
   const grid = $("preset-grid");
-  grid.innerHTML = DECISION_PRESETS.map(
-    (p) => `
-    <button class="preset-tile" data-preset="${p.id}">
-      <span class="preset-tile__icon">${p.icon}</span>
-      ${p.label}
-    </button>`
-  ).join("");
+  grid.innerHTML =
+    regularPresets.map((p) => `<button class="preset-tile" data-preset="${p.id}"><span class="preset-tile__icon">${p.icon}</span>${p.label}</button>`).join("") +
+    `<div class="preset-group-label">Big Decisions</div>` +
+    bigPresets.map((p) => `<button class="preset-tile preset-tile--big" data-preset="${p.id}"><span class="preset-tile__icon">${p.icon}</span>${p.label}</button>`).join("");
 
   grid.addEventListener("click", (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-preset]");
@@ -134,6 +139,7 @@ function renderPresets(): void {
     ($(  "d-cost") as HTMLInputElement).value = String(preset.cost);
     ($(  "d-task") as HTMLInputElement).value = preset.label;
     ($(  "d-enjoyment") as HTMLSelectElement).value = preset.defaultEnjoyment;
+    ($(  "d-frequency") as HTMLSelectElement).value = preset.defaultFrequency;
 
     recalculate("decision");
   });
@@ -144,10 +150,8 @@ function renderPresets(): void {
 function updateDecisionWageHint(): void {
   const hint = document.getElementById("d-wage-hint");
   if (!hint) return;
-  if (calculatedDiscretionaryWage > 0) {
-    hint.textContent = `Using discretionary wage (after fixed obligations). Real wage: ${fmtCurrency(calculatedRealWage, 2)}/hr.`;
-  } else if (calculatedRealWage > 0) {
-    hint.textContent = "Auto-filled from Tab 1. Fill Financial Reality to use discretionary wage.";
+  if (calculatedRealWage > 0) {
+    hint.textContent = "Auto-filled from Tab 1. Decisions use your real wage; Financial Reality below sets your discretionary budget.";
   } else {
     hint.textContent = "Auto-filled from Tab 1 if you've calculated there.";
   }
@@ -180,6 +184,7 @@ function updateWage(): void {
   };
 
   const r = calculateRealWage(inputs);
+  calculatedWageResult = r;
   calculatedRealWage = r.realHourlyWage;
 
   // ── Progressive disclosure summary labels ──
@@ -207,59 +212,11 @@ function updateWage(): void {
       `${inputs.workDaysPerWeek}d × ${inputs.contractedHoursPerDay || 8}h/wk · ${fmtNumber(r.workingDaysPerYear)} working days`;
   }
 
-  // ── Financial Reality (optional) ──
-  const finContext: FinancialContextInputs = {
-    monthlyRent: numVal("w-rent"),
-    monthlyDebtPayments: numVal("w-debt"),
-    monthlyInsurance: numVal("w-insurance"),
-    monthlyUtilities: numVal("w-utilities"),
-    monthlySubscriptions: numVal("w-subscriptions"),
-    monthlyGroceries: numVal("w-groceries"),
-  };
-  const hasFinancialContext = Object.values(finContext).some((v) => v > 0);
-
-  const finResultEl = document.getElementById("financial-result");
-  const stressCallout = document.getElementById("stress-callout");
-
-  if (hasFinancialContext && finResultEl) {
-    const fin = calculateFinancialContext(r, finContext);
-    calculatedDiscretionaryWage = fin.discretionaryHourlyWage;
-
-    setText("res-discretionary-wage", fmtCurrency(fin.discretionaryHourlyWage, 2));
-    setText(
-      "res-financial-context",
-      `${fmtPercent(fin.discretionaryPercentOfReal)} of your real wage remains after obligations`
-    );
-
-    if (stressCallout) {
-      stressCallout.style.display = "block";
-      stressCallout.className = `financial-stress financial-stress--${fin.financialStressLevel}`;
-      const statusEl = document.getElementById("stress-status");
-      const msgEl = document.getElementById("stress-message");
-      const stressMessages: Record<typeof fin.financialStressLevel, [string, string]> = {
-        comfortable: ["✓ Comfortable", "You have flexibility. Real wage improvements become real choices."],
-        stable:      ["◎ Stable", "Your obligations match your income. You're breaking even after bills."],
-        stressed:    ["⚠ Stressed", "Your obligations exceed your actual earnings. You may be drawing on savings."],
-        critical:    ["🔴 Critical", "Your obligations far exceed your earnings. Current trajectory is unsustainable."],
-      };
-      const [status, msg] = stressMessages[fin.financialStressLevel];
-      if (statusEl) statusEl.textContent = status;
-      if (msgEl) msgEl.textContent = msg;
-    }
-
-    finResultEl.style.display = "block";
-  } else {
-    calculatedDiscretionaryWage = 0;
-    if (finResultEl) finResultEl.style.display = "none";
-    if (stressCallout) stressCallout.style.display = "none";
-  }
-
   // Auto-push updated wage to decision tab if not manually edited
   if (!decisionWageManuallyEdited) {
-    const wageToUse = calculatedDiscretionaryWage > 0 ? calculatedDiscretionaryWage : calculatedRealWage;
-    if (wageToUse > 0) {
+    if (calculatedRealWage > 0) {
       const dWageEl = document.getElementById("d-wage") as HTMLInputElement | null;
-      if (dWageEl) dWageEl.value = wageToUse.toFixed(2);
+      if (dWageEl) dWageEl.value = calculatedRealWage.toFixed(2);
       updateDecisionWageHint();
     }
   }
@@ -334,41 +291,224 @@ function initEnergyConverter(): void {
 
 // ─── Tab 2: Decision ─────────────────────────────────────────
 
-function updateDecision(): void {
-  const wage = numVal("d-wage");
-  if (wage <= 0) {
-    setText("res-verdict", "Enter your wage");
-    return;
+function updateFinancialReality(): void {
+  const finContext: FinancialContextInputs = {
+    monthlyRent: numVal("w-rent"),
+    monthlyDebtPayments: numVal("w-debt"),
+    monthlyInsurance: numVal("w-insurance"),
+    monthlyUtilities: numVal("w-utilities"),
+    monthlySubscriptions: numVal("w-subscriptions"),
+    monthlyGroceries: numVal("w-groceries"),
+    monthlySavings: numVal("w-savings"),
+  };
+  const hasFinancialContext = Object.values(finContext).some((v) => v > 0);
+  const finResultEl = document.getElementById("financial-result");
+  const stressCallout = document.getElementById("stress-callout");
+
+  if (hasFinancialContext && calculatedWageResult && finResultEl) {
+    const fin = calculateFinancialContext(calculatedWageResult, finContext);
+    calculatedMonthlyDiscretionary = fin.monthlyAfterFixed;
+
+    setText("res-discretionary-wage", fmtCurrency(fin.discretionaryHourlyWage, 2) + "/hr");
+    setText("res-discretionary-budget", fmtCurrency(fin.monthlyAfterFixed) + "/mo");
+    setText(
+      "res-financial-context",
+      `${fmtPercent(fin.discretionaryPercentOfReal)} of your real wage remains after obligations`
+    );
+
+    if (stressCallout) {
+      stressCallout.style.display = "block";
+      stressCallout.className = `financial-stress financial-stress--${fin.financialStressLevel}`;
+      const statusEl = document.getElementById("stress-status");
+      const msgEl = document.getElementById("stress-message");
+      const stressMessages: Record<typeof fin.financialStressLevel, [string, string]> = {
+        comfortable: ["✓ Comfortable", "You have flexibility. Real wage improvements become real choices."],
+        stable:      ["◎ Stable", "Your obligations match your income. You're breaking even after bills."],
+        stressed:    ["⚠ Stressed", "Your obligations exceed your actual earnings. You may be drawing on savings."],
+        critical:    ["🔴 Critical", "Your obligations far exceed your earnings. Current trajectory is unsustainable."],
+      };
+      const [status, msg] = stressMessages[fin.financialStressLevel];
+      if (statusEl) statusEl.textContent = status;
+      if (msgEl) msgEl.textContent = msg;
+    }
+    finResultEl.style.display = "block";
+  } else {
+    calculatedMonthlyDiscretionary = 0;
+    if (finResultEl) finResultEl.style.display = "none";
+    if (stressCallout) stressCallout.style.display = "none";
   }
+}
+
+function updateDecision(): void {
+  // ── Financial Reality ──
+  updateFinancialReality();
+
+  // ── Single-item verdict ──
+  const wage = numVal("d-wage");
+  const heroEl = document.getElementById("decision-hero");
+  const compBox = document.getElementById("decision-comparison-box");
+
+  if (wage <= 0) {
+    if (heroEl) {
+      heroEl.className = "result-card result-card--hero";
+      setText("res-verdict", "Enter your wage");
+      setText("res-verdict-savings", "");
+    }
+    if (compBox) compBox.style.display = "none";
+  } else {
+    const inputs: DecisionInputs = {
+      realHourlyWage: wage,
+      taskDescription: strVal("d-task"),
+      hoursToComplete: numVal("d-hours"),
+      costToHire: numVal("d-cost"),
+      enjoyment: strVal("d-enjoyment") as DecisionInputs["enjoyment"],
+    };
+
+    const r = calculateDecision(inputs);
+    if (heroEl) {
+      heroEl.className = "result-card result-card--hero";
+      if (r.verdict === "hire") {
+        setText("res-verdict", "Hire someone");
+        heroEl.classList.add("verdict-hire");
+      } else {
+        setText("res-verdict", "Do it yourself");
+        heroEl.classList.add("verdict-diy");
+      }
+      setText("res-verdict-savings", `You save ${fmtCurrency(r.savings, 2)} by ${r.verdict === "hire" ? "hiring" : "doing it yourself"}`);
+    }
+    if (compBox) compBox.style.display = "";
+    setText("res-diy-time-cost", fmtCurrency(r.diyTimeCost, 2));
+    setText("res-diy-multiplier", `×${r.enjoymentMultiplier}`);
+    setText("res-diy-adjusted", fmtCurrency(r.adjustedTimeCost, 2));
+    setText("res-hire-cost", fmtCurrency(r.hireCost, 2));
+    setText("res-hire-time-saved", fmtHoursMinutes(inputs.hoursToComplete));
+    setText("res-hire-total", fmtCurrency(r.hireCost, 2));
+    setText("res-explanation", r.explanation);
+  }
+
+  // ── Queue ──
+  renderQueueTable();
+  renderQueueTotals();
+}
+
+function addToQueue(): void {
+  const wage = numVal("d-wage");
+  if (wage <= 0) return;
 
   const inputs: DecisionInputs = {
     realHourlyWage: wage,
-    taskDescription: strVal("d-task"),
+    taskDescription: strVal("d-task") || "Task",
     hoursToComplete: numVal("d-hours"),
     costToHire: numVal("d-cost"),
     enjoyment: strVal("d-enjoyment") as DecisionInputs["enjoyment"],
   };
+  const frequency = strVal("d-frequency") as Frequency;
+  const result = calculateDecision(inputs);
 
-  const r = calculateDecision(inputs);
-  const heroEl = $("decision-hero");
+  decisionQueue.push({ id: Date.now().toString(), inputs, frequency, result });
 
-  heroEl.className = "result-card result-card--hero";
-  if (r.verdict === "hire") {
-    setText("res-verdict", "Hire someone");
-    heroEl.classList.add("verdict-hire");
-  } else {
-    setText("res-verdict", "Do it yourself");
-    heroEl.classList.add("verdict-diy");
+  // Reset form to defaults
+  ($(  "d-task") as HTMLInputElement).value = "";
+  ($(  "d-hours") as HTMLInputElement).value = "2";
+  ($(  "d-cost") as HTMLInputElement).value = "75";
+  ($(  "d-frequency") as HTMLSelectElement).value = "monthly";
+  ($(  "d-enjoyment") as HTMLSelectElement).value = "neutral";
+
+  updateDecision();
+}
+
+function renderQueueTable(): void {
+  const section = document.getElementById("decision-queue-section");
+  const tbody = document.getElementById("queue-tbody");
+  if (!section || !tbody) return;
+
+  if (decisionQueue.length === 0) {
+    section.style.display = "none";
+    return;
   }
-  setText("res-verdict-savings", `You save ${fmtCurrency(r.savings, 2)} by ${r.verdict === "hire" ? "hiring" : "doing it yourself"}`);
+  section.style.display = "block";
 
-  setText("res-diy-time-cost", fmtCurrency(r.diyTimeCost, 2));
-  setText("res-diy-multiplier", `×${r.enjoymentMultiplier}`);
-  setText("res-diy-adjusted", fmtCurrency(r.adjustedTimeCost, 2));
-  setText("res-hire-cost", fmtCurrency(r.hireCost, 2));
-  setText("res-hire-time-saved", fmtHoursMinutes(inputs.hoursToComplete));
-  setText("res-hire-total", fmtCurrency(r.hireCost, 2));
-  setText("res-explanation", r.explanation);
+  tbody.innerHTML = decisionQueue.map((item) => {
+    const { inputs, frequency, result } = item;
+    const monthlyCost = normalizeToMonthly(inputs.costToHire, frequency);
+    const monthlyAdj = normalizeToMonthly(result.adjustedTimeCost, frequency);
+    const enjoymentLabels: Record<DecisionInputs["enjoyment"], string> = {
+      avoid: "😩 Avoid", dislike: "😕 Dislike", neutral: "😐 Neutral", enjoy: "😊 Enjoy", love: "😍 Love",
+    };
+    const costCell = monthlyCost !== null
+      ? fmtCurrency(monthlyCost) + "<small>/mo</small>"
+      : fmtCurrency(inputs.costToHire);
+    const adjCell = monthlyAdj !== null
+      ? fmtCurrency(monthlyAdj) + "<small>/mo</small>"
+      : fmtCurrency(result.adjustedTimeCost);
+
+    return `<tr class="queue-row queue-row--${result.verdict}">
+      <td class="queue-row__task">${inputs.taskDescription}</td>
+      <td>${FREQUENCY_LABELS[frequency]}</td>
+      <td>${inputs.hoursToComplete}h</td>
+      <td>${enjoymentLabels[inputs.enjoyment]}</td>
+      <td><span class="verdict-badge verdict-badge--${result.verdict}">${result.verdict === "hire" ? "Hire" : "DIY"}</span></td>
+      <td>${adjCell}</td>
+      <td>${costCell}</td>
+      <td><button class="queue-remove" data-id="${item.id}" aria-label="Remove">✕</button></td>
+    </tr>`;
+  }).join("");
+
+  tbody.querySelectorAll<HTMLButtonElement>(".queue-remove").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      decisionQueue = decisionQueue.filter((item) => item.id !== btn.dataset.id);
+      updateDecision();
+    });
+  });
+}
+
+function renderQueueTotals(): void {
+  if (decisionQueue.length === 0) return;
+
+  const totals = calculateQueueTotals(decisionQueue);
+  const hasMonthly = decisionQueue.some((i) => i.frequency !== "one-time");
+  const hasOneTime = decisionQueue.some((i) => i.frequency === "one-time");
+
+  const monthlySection = document.getElementById("queue-totals-monthly");
+  if (monthlySection) monthlySection.style.display = hasMonthly ? "block" : "none";
+
+  if (hasMonthly) {
+    setText("qt-hire-all-cost", fmtCurrency(totals.monthly.hireAllCost) + "/mo");
+    setText("qt-hire-all-hours", fmtHoursMinutes(totals.monthly.hireAllHours) + " freed");
+    setText("qt-verdict-cost", fmtCurrency(totals.monthly.verdictCost) + "/mo");
+    setText("qt-verdict-hours", fmtHoursMinutes(totals.monthly.verdictHours) + " freed");
+
+    const remainingRow = document.getElementById("qt-remaining-row");
+    if (remainingRow) {
+      if (calculatedMonthlyDiscretionary !== 0) {
+        const remaining = calculatedMonthlyDiscretionary - totals.monthly.verdictCost;
+        setText("qt-remaining", fmtCurrency(remaining) + "/mo");
+        const remEl = document.getElementById("qt-remaining");
+        if (remEl) {
+          remEl.className = remaining >= 0 ? "qt-remaining--positive" : "qt-remaining--negative";
+        }
+        remainingRow.style.display = "";
+      } else {
+        remainingRow.style.display = "none";
+      }
+    }
+  }
+
+  const oneTimeSection = document.getElementById("queue-totals-one-time");
+  if (oneTimeSection) oneTimeSection.style.display = hasOneTime ? "block" : "none";
+
+  if (hasOneTime) {
+    setText("qt-ot-hire-all", fmtCurrency(totals.oneTime.hireAllCost));
+    setText("qt-ot-hire-all-hours", fmtHoursMinutes(totals.oneTime.hireAllHours) + " freed");
+    setText("qt-ot-verdict", fmtCurrency(totals.oneTime.verdictCost));
+    setText("qt-ot-verdict-hours", fmtHoursMinutes(totals.oneTime.verdictHours) + " freed");
+  }
+}
+
+function initAddToQueue(): void {
+  const btn = document.getElementById("add-to-queue-btn");
+  if (!btn) return;
+  btn.addEventListener("click", addToQueue);
 }
 
 // ─── Tab 3: Compare ──────────────────────────────────────────
@@ -550,7 +690,7 @@ function initInputListeners(): void {
     events.forEach((evt) => {
       el.addEventListener(evt, () => {
         if (el.id === "d-wage") decisionWageManuallyEdited = true;
-        recalculate(el.dataset.calc);
+        recalculate(el.dataset.calc as string);
       });
     });
   });
@@ -575,6 +715,7 @@ function init(): void {
   initCopyFromA();
   initScrollButton();
   initBreakdown();
+  initAddToQueue();
   recalculate("wage");
 }
 
