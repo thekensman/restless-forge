@@ -1013,3 +1013,4 @@ details.breakdown[open] > summary::before { transform: rotate(90deg); }
 
 .qt-remaining--positive { color: #3ecf8e; }
 .qt-remaining--negative { color: #e05c5c; }
+.qt-remaining--over-budget { color: var(--text-dim); font-style: italic; font-size: 12px; }

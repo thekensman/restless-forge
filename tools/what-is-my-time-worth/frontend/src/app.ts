@@ -309,12 +309,21 @@ function updateFinancialReality(): void {
     const fin = calculateFinancialContext(calculatedWageResult, finContext);
     calculatedMonthlyDiscretionary = fin.monthlyAfterFixed;
 
-    setText("res-discretionary-wage", fmtCurrency(fin.discretionaryHourlyWage, 2) + "/hr");
-    setText("res-discretionary-budget", fmtCurrency(fin.monthlyAfterFixed) + "/mo");
-    setText(
-      "res-financial-context",
-      `${fmtPercent(fin.discretionaryPercentOfReal)} of your real wage remains after obligations`
-    );
+    if (fin.monthlyAfterFixed > 0) {
+      setText("res-discretionary-wage", fmtCurrency(fin.discretionaryHourlyWage, 2) + "/hr");
+      setText("res-discretionary-budget", fmtCurrency(fin.monthlyAfterFixed) + "/mo");
+      setText(
+        "res-financial-context",
+        `${fmtPercent(fin.discretionaryPercentOfReal)} of your real wage remains after obligations`
+      );
+    } else {
+      setText("res-discretionary-wage", "—");
+      setText("res-discretionary-budget", "—");
+      setText(
+        "res-financial-context",
+        "Obligations currently exceed take-home. Your hourly wage is unchanged — knowing it matters more, not less."
+      );
+    }
 
     if (stressCallout) {
       stressCallout.style.display = "block";
@@ -324,8 +333,8 @@ function updateFinancialReality(): void {
       const stressMessages: Record<typeof fin.financialStressLevel, [string, string]> = {
         comfortable: ["✓ Comfortable", "You have flexibility. Real wage improvements become real choices."],
         stable:      ["◎ Stable", "Your obligations match your income. You're breaking even after bills."],
-        stressed:    ["⚠ Stressed", "Your obligations exceed your actual earnings. You may be drawing on savings."],
-        critical:    ["🔴 Critical", "Your obligations far exceed your earnings. Current trajectory is unsustainable."],
+        stressed:    ["◎ Tight", "Obligations are close to take-home. Your real wage is your most powerful tool right now — knowing it helps prioritize."],
+        critical:    ["→ Under pressure", "Obligations exceed current take-home. That doesn't lower your time's value — it raises the stakes of spending it well."],
       };
       const [status, msg] = stressMessages[fin.financialStressLevel];
       if (statusEl) statusEl.textContent = status;
@@ -480,12 +489,15 @@ function renderQueueTotals(): void {
 
     const remainingRow = document.getElementById("qt-remaining-row");
     if (remainingRow) {
-      if (calculatedMonthlyDiscretionary !== 0) {
+      if (calculatedMonthlyDiscretionary > 0) {
         const remaining = calculatedMonthlyDiscretionary - totals.monthly.verdictCost;
-        setText("qt-remaining", fmtCurrency(remaining) + "/mo");
         const remEl = document.getElementById("qt-remaining");
-        if (remEl) {
-          remEl.className = remaining >= 0 ? "qt-remaining--positive" : "qt-remaining--negative";
+        if (remaining >= 0) {
+          setText("qt-remaining", fmtCurrency(remaining) + "/mo");
+          if (remEl) remEl.className = "qt-remaining--positive";
+        } else {
+          setText("qt-remaining", "Hiring costs exceed your discretionary budget");
+          if (remEl) remEl.className = "qt-remaining--over-budget";
         }
         remainingRow.style.display = "";
       } else {
