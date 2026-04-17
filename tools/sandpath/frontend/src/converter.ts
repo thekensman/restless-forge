@@ -94,8 +94,8 @@ function parsePath(d: string): Segment[][] {
       while (more()) {
         let x = nf(), y = nf();
         if (rel) { x += cx; y += cy; }
-        const x1 = lc ? 2 * cx - lc[0] : cx;
-        const y1 = lc ? 2 * cy - lc[1] : cy;
+        const x1: number = lc ? 2 * cx - lc[0] : cx;
+        const y1: number = lc ? 2 * cy - lc[1] : cy;
         cur.push(["Q", cx, cy, x1, y1, x, y]);
         lc = [x1, y1]; cx = x; cy = y;
       }
@@ -110,8 +110,8 @@ function parsePath(d: string): Segment[][] {
       while (more()) {
         let x2 = nf(), y2 = nf(), x = nf(), y = nf();
         if (rel) { x2 += cx; y2 += cy; x += cx; y += cy; }
-        const x1 = lc ? 2 * cx - lc[0] : cx;
-        const y1 = lc ? 2 * cy - lc[1] : cy;
+        const x1: number = lc ? 2 * cx - lc[0] : cx;
+        const y1: number = lc ? 2 * cy - lc[1] : cy;
         cur.push(["C", cx, cy, x1, y1, x2, y2, x, y]);
         lc = [x2, y2]; cx = x; cy = y;
       }

@@ -136,7 +136,6 @@ function gaussianBlur(pixels: Uint8Array, w: number, h: number, radius: number):
   // Build a Gaussian kernel of size 2*ceil(2*sigma)+1
   const sigma = Math.max(0.1, radius);
   const kHalf = Math.ceil(2 * sigma);
-  const kSize = 2 * kHalf + 1;
   const kernel: number[] = [];
   let kSum = 0;
   for (let k = -kHalf; k <= kHalf; k++) {
