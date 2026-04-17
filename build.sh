@@ -102,6 +102,15 @@ find "${DIST_DIR}" -name "*.html" -exec sed -i \
   {} \;
 echo "  → /shared.js?v=${site_shared_hash}"
 
+# Cache-bust the shared /tool-chrome.css across ALL html files in dist
+if [ -f "${DIST_DIR}/tool-chrome.css" ]; then
+  site_chrome_hash=$(md5sum "${DIST_DIR}/tool-chrome.css" | cut -c1-8)
+  find "${DIST_DIR}" -name "*.html" -exec sed -i \
+    -e "s|\"/tool-chrome\.css\"|\"/tool-chrome.css?v=${site_chrome_hash}\"|g" \
+    {} \;
+  echo "  → /tool-chrome.css?v=${site_chrome_hash}"
+fi
+
 # ── Summary ──
 echo ""
 echo "[7/7] Build complete!"

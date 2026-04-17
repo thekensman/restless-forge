@@ -84,6 +84,23 @@ Every tool page (both main app and sub-pages) loads `/shared.js` first, then its
 
 Vite dev servers each include a `configureServer` plugin that serves `site/shared.js` at `/shared.js` so local development works without nginx.
 
+### Standardized tool chrome (`site/tool-chrome.css`)
+
+`site/tool-chrome.css` (served at `/tool-chrome.css`) is the single source of
+truth for the visual styling of the `.site-header` / `.footer` markup that each
+tool's `public/shared.js` injects. Tools opt in by:
+
+1. Adding `<link rel="stylesheet" href="/tool-chrome.css">` to every HTML page
+2. Defining the `--rf-*` design tokens in their own `:root` (aliasing their
+   theme tokens to `--rf-bg`, `--rf-text`, `--rf-muted`, `--rf-dim`,
+   `--rf-accent`, `--rf-border`, `--rf-font-mono`). See
+   `tools/sandpath/frontend/src/styles.css` for an example.
+3. Generating `.site-header` / `.footer` markup in their `public/shared.js`
+   (the format is shown in `tools/template/frontend/public/shared.js`).
+
+Same pattern as `/shared.js`: served by the Vite dev middleware in
+`tools/vite-tool-config.ts` and cache-busted by `build.sh`.
+
 ## Development Workflow
 
 ### Working on a specific tool

@@ -1,13 +1,15 @@
-"use strict";
 /**
- * SandPath — Frontend application (v2)
+ * SandPath — Frontend application
  *
+ * All processing runs in the browser. No server calls.
  * Dual pipeline:
- *   SVG files   → /api/convert       → .thr/.gcode
- *   Raster imgs → /api/convert-image  → .thr/.gcode  (with SVG preview)
+ *   SVG files   → converter.ts  → .thr/.gcode
+ *   Raster imgs → vectorizer.ts → SVG → converter.ts → .thr/.gcode
  */
+import { DEVICE_LIST } from "./devices.js";
+import { convert } from "./converter.js";
+import { vectorize } from "./vectorizer.js";
 // ─── Constants ───────────────────────────────────────────────
-const API = "/api";
 const SVG_EXTS = new Set([".svg"]);
 const SVG_MIMES = new Set(["image/svg+xml"]);
 const IMG_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".tiff", ".tif"]);
@@ -88,35 +90,33 @@ function triggerDownload(blob, filename) {
     a.click();
     URL.revokeObjectURL(url);
 }
-// ─── Load devices ────────────────────────────────────────────
-async function loadDevices() {
-    try {
-        const res = await fetch(`${API}/devices`);
-        if (!res.ok)
-            throw new Error();
-        devices = (await res.json());
-        deviceSelect.innerHTML = "";
-        const addGroup = (label, items) => {
-            const g = document.createElement("optgroup");
-            g.label = label;
-            items.forEach(d => {
-                const o = document.createElement("option");
-                o.value = d.id;
-                o.textContent = `${d.name} — ${d.description}`;
-                g.appendChild(o);
-            });
-            deviceSelect.appendChild(g);
-        };
-        addGroup("⬤  Circular tables", devices.filter(d => d.shape === "circular"));
-        addGroup("▬  Rectangular tables", devices.filter(d => d.shape === "rectangular"));
-        updateDeviceUI();
-    }
-    catch {
-        const o = document.createElement("option");
-        o.value = "oasis_mini";
-        o.textContent = "Oasis Mini (API loading…)";
-        deviceSelect.appendChild(o);
-    }
+function getCustomDevice(base) {
+    if (!base.id.startsWith("custom_"))
+        return base;
+    return {
+        ...base,
+        width_mm: parseFloat(customWidth.value) || base.width_mm,
+        height_mm: parseFloat(customHeight.value) || base.height_mm,
+    };
+}
+// ─── Device list ─────────────────────────────────────────────
+function loadDevices() {
+    devices = DEVICE_LIST;
+    deviceSelect.innerHTML = "";
+    const addGroup = (label, items) => {
+        const g = document.createElement("optgroup");
+        g.label = label;
+        items.forEach(d => {
+            const o = document.createElement("option");
+            o.value = d.id;
+            o.textContent = `${d.name} — ${d.description}`;
+            g.appendChild(o);
+        });
+        deviceSelect.appendChild(g);
+    };
+    addGroup("⬤  Circular tables", devices.filter(d => d.shape === "circular"));
+    addGroup("▬  Rectangular tables", devices.filter(d => d.shape === "rectangular"));
+    updateDeviceUI();
 }
 function updateDeviceUI() {
     const dev = getDevice();
@@ -130,8 +130,8 @@ function updateDeviceUI() {
 // ─── File handling ───────────────────────────────────────────
 function handleFile(file) {
     const ext = "." + file.name.split(".").pop()?.toLowerCase();
-    const allExts = new Set([...SVG_EXTS, ...IMG_EXTS]);
-    if (!allExts.has(ext) && !SVG_MIMES.has(file.type) && !IMG_MIMES.has(file.type)) {
+    if (!new Set([...SVG_EXTS, ...IMG_EXTS]).has(ext)
+        && !SVG_MIMES.has(file.type) && !IMG_MIMES.has(file.type)) {
         showError("Unsupported file. Upload SVG, JPG, PNG, WebP, BMP, GIF, or TIFF.");
         return;
     }
@@ -175,30 +175,27 @@ samplesRange.addEventListener("input", () => { samplesValue.textContent = sample
 rhoRange.addEventListener("input", () => { rhoValue.textContent = parseFloat(rhoRange.value).toFixed(2); });
 paddingRange.addEventListener("input", () => { paddingValue.textContent = `${Math.round(parseFloat(paddingRange.value) * 100)}%`; });
 deviceSelect.addEventListener("change", updateDeviceUI);
-// ─── Build image form data ───────────────────────────────────
-function buildImageForm(svgOnly) {
-    const f = new FormData();
-    f.append("file", selectedFile);
-    f.append("trace_mode", traceModeSelect.value);
-    f.append("threshold", thresholdRange.value);
-    f.append("blur", blurRange.value);
-    f.append("invert", invertCheck.checked ? "true" : "false");
-    f.append("detail", detailRange.value);
-    f.append("max_dimension", dimensionRange.value);
-    f.append("line_width", "2.0");
-    f.append("device_id", deviceSelect.value);
-    f.append("fit", fitSelect.value);
-    f.append("samples", samplesRange.value);
-    f.append("padding", paddingRange.value);
+// ─── Vectorize opts from UI ───────────────────────────────────
+function getVectorizeOpts() {
+    return {
+        mode: traceModeSelect.value,
+        threshold: parseInt(thresholdRange.value),
+        blur: parseFloat(blurRange.value),
+        invert: invertCheck.checked,
+        detail: parseFloat(detailRange.value),
+        maxDimension: parseInt(dimensionRange.value),
+        lineWidth: 2.0,
+    };
+}
+function getConvertOpts() {
+    const dev = getDevice();
     const rho = parseFloat(rhoRange.value);
-    if (rho !== (getDevice()?.max_rho ?? 0.95))
-        f.append("max_rho", String(rho));
-    if (deviceSelect.value.startsWith("custom_")) {
-        f.append("custom_width_mm", customWidth.value);
-        f.append("custom_height_mm", customHeight.value);
-    }
-    f.append("svg_only", svgOnly ? "true" : "false");
-    return f;
+    return {
+        fit: fitSelect.value,
+        samples: parseInt(samplesRange.value),
+        maxRhoOverride: rho !== dev.max_rho ? rho : null,
+        padding: parseFloat(paddingRange.value),
+    };
 }
 // ─── Preview trace ───────────────────────────────────────────
 async function doPreview() {
@@ -208,19 +205,8 @@ async function doPreview() {
     previewSection.style.display = "none";
     resultsSection.style.display = "none";
     try {
-        const res = await fetch(`${API}/convert-image`, { method: "POST", body: buildImageForm(true) });
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({ detail: res.statusText }));
-            throw new Error(err.detail || `Server error ${res.status}`);
-        }
-        const statsH = res.headers.get("X-Stats");
-        let stats = {};
-        if (statsH)
-            try {
-                stats = JSON.parse(statsH);
-            }
-            catch { }
-        const svgText = await res.text();
+        const result = await vectorize(selectedFile, getVectorizeOpts());
+        const { svgText, width, height, pathCount, pointCount } = result;
         lastSvgBlob = new Blob([svgText], { type: "image/svg+xml" });
         previewFrame.innerHTML = svgText;
         const svgEl = previewFrame.querySelector("svg");
@@ -231,15 +217,12 @@ async function doPreview() {
             svgEl.style.height = "auto";
             svgEl.style.maxHeight = "360px";
         }
-        const parts = [];
-        if (stats.image_size)
-            parts.push(`Size: ${stats.image_size}`);
-        if (stats.paths)
-            parts.push(`Paths: ${stats.paths.toLocaleString()}`);
-        if (stats.points)
-            parts.push(`Points: ${stats.points.toLocaleString()}`);
-        if (stats.trace_mode)
-            parts.push(`Mode: ${stats.trace_mode}`);
+        const parts = [
+            `Size: ${width}×${height}`,
+            `Paths: ${pathCount.toLocaleString()}`,
+            `Points: ${pointCount.toLocaleString()}`,
+            `Mode: ${traceModeSelect.value}`,
+        ];
         previewStats.textContent = parts.join("  •  ");
         previewSection.style.display = "flex";
         previewSection.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -263,42 +246,30 @@ async function doConvert() {
     setLoading(convertBtn, true);
     resultsSection.style.display = "none";
     try {
-        let res;
+        const baseDevice = getDevice();
+        const device = getCustomDevice(baseDevice);
+        const convertOpts = getConvertOpts();
+        let svgText;
+        let traceStats = {};
         if (fileMode === "svg") {
-            const f = new FormData();
-            f.append("file", selectedFile);
-            f.append("device_id", deviceSelect.value);
-            f.append("fit", fitSelect.value);
-            f.append("samples", samplesRange.value);
-            f.append("padding", paddingRange.value);
-            const rho = parseFloat(rhoRange.value);
-            if (rho !== (getDevice()?.max_rho ?? 0.95))
-                f.append("max_rho", String(rho));
-            if (deviceSelect.value.startsWith("custom_")) {
-                f.append("custom_width_mm", customWidth.value);
-                f.append("custom_height_mm", customHeight.value);
-            }
-            res = await fetch(`${API}/convert`, { method: "POST", body: f });
+            svgText = await selectedFile.text();
         }
         else {
-            res = await fetch(`${API}/convert-image`, { method: "POST", body: buildImageForm(false) });
+            // Vectorize first; preserve intermediate SVG for download
+            const vResult = await vectorize(selectedFile, getVectorizeOpts());
+            svgText = vResult.svgText;
+            lastSvgBlob = new Blob([svgText], { type: "image/svg+xml" });
+            traceStats = {
+                image_size: `${vResult.width}×${vResult.height}`,
+                trace_mode: traceModeSelect.value,
+                traced_paths: vResult.pathCount,
+                traced_points: vResult.pointCount,
+            };
         }
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({ detail: res.statusText }));
-            throw new Error(err.detail || `Server error ${res.status}`);
-        }
-        const statsH = res.headers.get("X-Stats");
-        let stats = {};
-        if (statsH)
-            try {
-                stats = JSON.parse(statsH);
-            }
-            catch { }
-        const cd = res.headers.get("Content-Disposition") || "";
-        const m = cd.match(/filename="?([^"]+)"?/);
-        lastFilename = m ? m[1] : "output.thr";
-        lastBlob = await res.blob();
-        showResults(stats);
+        const result = convert(svgText, device, convertOpts);
+        lastBlob = new Blob([result.output], { type: "text/plain" });
+        lastFilename = result.filename;
+        showResults({ ...traceStats, ...result.stats });
     }
     catch (err) {
         showError(err instanceof Error ? err.message : "Conversion failed");

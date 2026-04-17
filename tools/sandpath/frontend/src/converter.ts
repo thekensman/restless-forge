@@ -359,27 +359,70 @@ export function convert(
 
   if (device.shape === "circular") {
     // 4. Polar radius
+    //
+    // For a circular bed there are no rectangular "corners" to crop, so the
+    // useful difference between cover and contain is how aggressively we fill
+    // the disk:
+    //   contain → fits every traced point inside the disk (safe default for
+    //             asymmetric content like a watch + chain — nothing clips)
+    //   cover   → scales up further so the SHORT bbox side reaches the edge,
+    //             accepting that points beyond the inscribed circle clip
+    //
+    // Previously cover used halfShort with the bbox center, which silently
+    // dropped large arcs of off-center content (e.g. the bottom of a watch
+    // when the chain pulled the bbox center upward). Anchoring both modes to
+    // the actual max distance from center keeps the polar center honest.
+    const maxDist = Math.max(
+      ...allLists.flatMap(p => p.map(([x, y]) => Math.hypot(x - ccx, y - ccy)))
+    );
     let polarR: number;
     if (fit === "cover") {
       const halfShort = Math.min(cw, ch) / 2;
-      polarR = halfShort > 0.001 ? halfShort / effectiveRho : 1;
+      // Use halfShort when it actually contains the content (centered, square
+      // artwork). Otherwise fall back to maxDist so off-center content is not
+      // truncated.
+      polarR = (halfShort > 0.001 && halfShort >= maxDist)
+        ? halfShort / effectiveRho
+        : (maxDist > 0.001 ? maxDist / effectiveRho : 1);
     } else {
-      const maxDist = Math.max(...allLists.flatMap(p => p.map(([x, y]) => Math.hypot(x - ccx, y - ccy))));
       polarR = maxDist > 0.001 ? maxDist / effectiveRho : 1;
     }
 
     // 5. Optimise order
     const order = optimizeOrder(allLists);
 
-    // 6. Convert to theta-rho
+    // 6. Convert to theta-rho.
+    //
+    // Theta-rho output has no "pen up" — every consecutive point is drawn as
+    // a continuous arc. When subpaths are concatenated the table sweeps from
+    // the previous endpoint to the next start across whatever angle the unwrap
+    // chose, leaving large visible curves between unrelated shapes (the "extra
+    // loops" the user sees). Retracting through rho=0 between subpaths turns
+    // those connections into short radial moves through the centre, which are
+    // far less visible in sand than long off-axis arcs.
+    const toPolar = (x: number, y: number): [number, number] => {
+      const dx = x - ccx, dy = y - ccy;
+      const rho = Math.min(Math.hypot(dx, dy) / polarR, effectiveRho);
+      const theta = Math.atan2(dy, dx) + Math.PI / 2;
+      return [theta, rho];
+    };
+
     let tr: [number, number][] = [];
-    for (const idx of order) {
-      for (const [x, y] of allLists[idx]) {
-        const dx = x - ccx, dy = y - ccy;
-        const rho = Math.min(Math.hypot(dx, dy) / polarR, effectiveRho);
-        const theta = Math.atan2(dy, dx) + Math.PI / 2;
-        tr.push([theta, rho]);
+    for (let oi = 0; oi < order.length; oi++) {
+      const path = allLists[order[oi]];
+      if (!path.length) continue;
+
+      const polarPath = path.map(([x, y]) => toPolar(x, y));
+
+      if (oi > 0) {
+        // Lift through centre: prev_theta@0 → next_theta@0 → next_start.
+        // Holding rho=0 keeps the ball on a single point while theta winds.
+        const prev = tr[tr.length - 1];
+        const next = polarPath[0];
+        tr.push([prev[0], 0]);
+        tr.push([next[0], 0]);
       }
+      tr.push(...polarPath);
     }
     tr = unwrapTheta(tr);
 
