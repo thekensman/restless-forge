@@ -31,8 +31,9 @@ export interface ToolConfigOptions {
 
 export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
   const srcDir = resolve(dir, "src");
-  // site/shared.js lives three levels up from tools/<name>/frontend/
-  const siteSharedJs = resolve(dir, "../../../site/shared.js");
+  // site/shared.js + tool-chrome.css live three levels up from tools/<name>/frontend/
+  const siteSharedJs    = resolve(dir, "../../../site/shared.js");
+  const siteToolChrome  = resolve(dir, "../../../site/tool-chrome.css");
 
   return defineConfig({
     root: "src",
@@ -56,6 +57,13 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
           server.middlewares.use("/shared.js", (_req, res) => {
             res.setHeader("Content-Type", "application/javascript");
             res.end(readFileSync(siteSharedJs, "utf-8"));
+          });
+
+          // Serve site/tool-chrome.css at /tool-chrome.css — shared header/footer
+          // styles used by every tool that opts into the standardized chrome.
+          server.middlewares.use("/tool-chrome.css", (_req, res) => {
+            res.setHeader("Content-Type", "text/css");
+            res.end(readFileSync(siteToolChrome, "utf-8"));
           });
 
           // Serve sub-page HTML raw from src/ without Vite's HTML transform.

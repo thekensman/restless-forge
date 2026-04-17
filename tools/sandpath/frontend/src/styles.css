@@ -22,6 +22,15 @@
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Outfit", system-ui, sans-serif;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Aliases consumed by /tool-chrome.css (shared header & footer). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text-bright);
+  --rf-muted: var(--text);
+  --rf-dim: var(--text-muted);
+  --rf-accent: var(--sand);
+  --rf-border: #2a2a35;
+  --rf-font-mono: var(--font-body);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

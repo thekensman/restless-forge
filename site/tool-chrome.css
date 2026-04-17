@@ -1,0 +1,150 @@
+/* ═══════════════════════════════════════════════════════
+   tool-chrome.css — Restless Forge tool header & footer
+   ─────────────────────────────────────────────────────────
+   Shared visual chrome for the standardized tool layout.
+   Lives at site/tool-chrome.css and is served at /tool-chrome.css
+   (real file in production via nginx; vite-tool-config.ts middleware
+   bridges this in dev).
+
+   Markup is generated per-tool in <tool>/public/shared.js. The class
+   names below are the contract — every tool that opts in must:
+     1. <link rel="stylesheet" href="/tool-chrome.css">
+     2. Define the --rf-* design tokens listed below in :root
+     3. Render markup matching .site-header / .footer structure
+
+   Design tokens consumed (each tool aliases its own theme):
+     --rf-bg          page background
+     --rf-text        primary text color
+     --rf-muted       secondary text color
+     --rf-dim         tertiary / very subtle text
+     --rf-accent      brand accent (link hover, active state)
+     --rf-border      divider color
+     --rf-font-mono   nav / footer monospace family
+   ═════════════════════════════════════════════════════════ */
+
+/* ─── Site Header ─── */
+.site-header {
+  border-bottom: 1px solid var(--rf-border);
+  padding: 20px 24px;
+  background: var(--rf-bg);
+}
+.site-header__inner { max-width: 1100px; margin: 0 auto; }
+.site-header__top {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.site-header__brand {
+  font-family: var(--rf-font-mono);
+  font-size: 15px; color: var(--rf-text);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  text-decoration: none;
+}
+.site-header__brand:hover { color: var(--rf-accent); text-decoration: none; }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--rf-border);
+  color: var(--rf-text);
+  font-size: 18px; padding: 4px 10px;
+  border-radius: 3px; cursor: pointer; line-height: 1;
+}
+
+.site-header__nav {
+  display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+  font-family: var(--rf-font-mono); font-size: 13px;
+}
+.site-header__nav a {
+  color: var(--rf-text);
+  padding: 5px 10px; border-radius: 3px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.site-header__nav a:hover {
+  color: var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 10%, transparent);
+  text-decoration: none;
+}
+.site-header__nav a.active {
+  color: var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 14%, transparent);
+}
+
+.nav-sep { color: var(--rf-muted); padding: 0 4px; user-select: none; }
+
+@media (max-width: 640px) {
+  .nav-toggle { display: block; }
+  .site-header__nav {
+    display: none; flex-direction: column; align-items: stretch; gap: 0;
+    padding: 10px 0 4px;
+    border-top: 1px solid var(--rf-border);
+    margin-top: 14px;
+  }
+  .site-header__nav.open { display: flex; }
+  .site-header__nav a {
+    padding: 11px 4px; border-radius: 0;
+    border-bottom: 1px solid var(--rf-border);
+    font-size: 14px;
+  }
+  .site-header__nav a:last-child { border-bottom: none; }
+  .site-header__nav .nav-sep { display: none; }
+}
+
+/* ─── Header support strip ─── */
+.site-header__support {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--rf-border);
+}
+.site-header__support-label {
+  font-family: var(--rf-font-mono); font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--rf-dim);
+}
+.site-header__support-link {
+  font-family: var(--rf-font-mono); font-size: 12px;
+  color: var(--rf-muted);
+  display: flex; align-items: center; gap: 5px;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.site-header__support-link:hover { color: var(--rf-accent); text-decoration: none; }
+
+/* ─── Footer (donate block + legal links) ─── */
+.footer__donate { text-align: center; margin-bottom: 14px; }
+.footer__donate-label {
+  display: block;
+  font-family: var(--rf-font-mono); font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--rf-dim); margin-bottom: 8px;
+}
+.footer__donate-links {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+}
+.footer__donate-link {
+  font-family: var(--rf-font-mono); font-size: 11px;
+  color: var(--rf-muted);
+  border: 1px solid var(--rf-border);
+  padding: 4px 12px; border-radius: 3px;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.footer__donate-link:hover { color: var(--rf-accent); border-color: var(--rf-accent); }
+
+.footer__links {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 4px 14px; align-items: center; margin-bottom: 10px;
+}
+.footer__links a { white-space: nowrap; }
+.footer__link {
+  font-family: var(--rf-font-mono); font-size: 11px;
+  color: var(--rf-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer__link:hover { color: var(--rf-accent); text-decoration: none; }
+.footer-sep { color: var(--rf-muted); padding: 0 2px; user-select: none; }
+.footer__copy {
+  font-family: var(--rf-font-mono); font-size: 11px;
+  color: var(--rf-dim);
+  margin-top: 6px;
+}
