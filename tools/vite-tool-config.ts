@@ -35,6 +35,19 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
   const siteSharedJs    = resolve(dir, "../../../site/shared.js");
   const siteToolChrome  = resolve(dir, "../../../site/tool-chrome.css");
 
+  // URLs that are SITE-global, not tool-scoped. Vite's default HTML asset
+  // handling rewrites every absolute `/foo` href/src to `${base}/foo` during
+  // build. For these shared resources we want the original root-relative URL
+  // preserved so the single file at the domain root is served across all tools.
+  //
+  // Naively replacing `${base}${url}` → `${url}` in the post-transform breaks
+  // tool-local URLs that happen to be the full rebased form in the source
+  // (e.g. `/tools/<name>/shared.js`). We sentinel-mark the site-global URLs
+  // in a PRE-transform so Vite's HTML processor leaves them alone, then
+  // restore them in the POST-transform.
+  const SITE_GLOBAL_URLS = ["/shared.js", "/tool-chrome.css"];
+  const sentinel = (url: string) => `__RF_SITE__${url}`;
+
   return defineConfig({
     root: "src",
     publicDir: "../public",
@@ -49,6 +62,36 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
     },
     server: { port },
     plugins: [
+      {
+        // Before Vite's HTML processor rebases absolute URLs, swap site-global
+        // URLs for a sentinel that doesn't start with `/` so Vite ignores it.
+        name: "site-global-urls-pre",
+        transformIndexHtml: {
+          order: "pre",
+          handler(html) {
+            let out = html;
+            for (const url of SITE_GLOBAL_URLS) {
+              out = out.split(`"${url}"`).join(`"${sentinel(url)}"`);
+            }
+            return out;
+          },
+        },
+      },
+      {
+        // After Vite is done, replace the sentinel with the original absolute
+        // URL so the browser fetches the shared file from the domain root.
+        name: "site-global-urls-post",
+        transformIndexHtml: {
+          order: "post",
+          handler(html) {
+            let out = html;
+            for (const url of SITE_GLOBAL_URLS) {
+              out = out.split(`"${sentinel(url)}"`).join(`"${url}"`);
+            }
+            return out;
+          },
+        },
+      },
       {
         name: "tool-dev-middleware",
         configureServer(server) {
