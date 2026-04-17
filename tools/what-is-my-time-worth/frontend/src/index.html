@@ -97,7 +97,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <script src="/shared.js"></script>
-  <script src="shared.js"></script>
+  <script src="/tools/what-is-my-time-worth/shared.js"></script>
 
   <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
@@ -127,7 +127,7 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </aside>
 
-  <script>document.write(wimtwHeader())</script>
+  <div id="wimtw-header"></div>
 
   <div class="hero">
     <div class="hero__inner">
@@ -267,45 +267,6 @@
             </div>
           </details>
 
-          <!-- Financial Reality — starts closed, optional -->
-          <details class="section-collapsible" id="financial-reality-section">
-            <summary class="section-toggle">
-              Financial Reality
-              <span class="section-toggle__summary section-toggle__optional">(optional)</span>
-            </summary>
-            <div class="section-content">
-              <p class="section-intro">What remains of your real wage after your fixed obligations? Filling these in reveals your true discretionary hourly wage.</p>
-              <div class="field">
-                <label for="w-rent">Monthly rent or mortgage</label>
-                <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-rent" value="0" min="0" step="100" data-calc="wage"></div>
-              </div>
-              <div class="field">
-                <label for="w-debt">Monthly debt payments</label>
-                <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-debt" value="0" min="0" step="50" data-calc="wage"></div>
-                <span class="field__hint">Car loans, student loans, credit cards.</span>
-              </div>
-              <div class="field">
-                <label for="w-insurance">Monthly insurance (non-payroll)</label>
-                <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-insurance" value="0" min="0" step="25" data-calc="wage"></div>
-                <span class="field__hint">Health, auto, life — not deducted from paycheck.</span>
-              </div>
-              <div class="field">
-                <label for="w-utilities">Monthly utilities</label>
-                <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-utilities" value="0" min="0" step="25" data-calc="wage"></div>
-                <span class="field__hint">Electric, gas, water, internet, phone.</span>
-              </div>
-              <div class="field">
-                <label for="w-subscriptions">Monthly subscriptions</label>
-                <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-subscriptions" value="0" min="0" step="10" data-calc="wage"></div>
-                <span class="field__hint">Streaming, software, gym, etc.</span>
-              </div>
-              <div class="field">
-                <label for="w-groceries">Monthly groceries</label>
-                <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-groceries" value="0" min="0" step="50" data-calc="wage"></div>
-                <span class="field__hint">Non-work food. Work meals are above.</span>
-              </div>
-            </div>
-          </details>
         </div>
 
         <!-- Results column -->
@@ -314,17 +275,6 @@
             <div class="result-card__label">Your Real Hourly Wage</div>
             <div class="result-card__value" id="res-real-wage">—</div>
             <div class="result-card__note" id="res-wage-gap-note"></div>
-          </div>
-
-          <!-- Discretionary wage (hidden until Financial Reality filled) -->
-          <div class="result-card result-card--financial" id="financial-result" style="display:none">
-            <div class="result-card__label">Discretionary Hourly Wage</div>
-            <div class="result-card__value" id="res-discretionary-wage">—</div>
-            <div class="result-card__note" id="res-financial-context"></div>
-            <div class="financial-stress" id="stress-callout" style="display:none">
-              <div class="financial-stress__status" id="stress-status"></div>
-              <div class="financial-stress__message" id="stress-message"></div>
-            </div>
           </div>
 
           <!-- Gap bar -->
@@ -462,9 +412,71 @@
 
     <!-- ═══ TAB 2: IS IT WORTH MY TIME? ═══ -->
     <section class="panel" id="panel-decision" role="tabpanel" hidden>
+
+      <!-- Financial Reality (moved from Tab 1) -->
+      <details class="section-collapsible decision-financial-reality" id="financial-reality-section">
+        <summary class="section-toggle">
+          Financial Reality
+          <span class="section-toggle__summary section-toggle__optional">(optional — sets your discretionary budget)</span>
+        </summary>
+        <div class="section-content decision-fr-grid">
+          <div class="decision-fr-inputs">
+            <p class="section-intro">What remains of your real wage after fixed obligations? This becomes the budget ceiling for your hiring decisions.</p>
+            <div class="field">
+              <label for="w-rent">Rent or mortgage</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-rent" value="0" min="0" step="100" data-calc="decision"><span class="input-suffix">/mo</span></div>
+            </div>
+            <div class="field">
+              <label for="w-debt">Debt payments</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-debt" value="0" min="0" step="50" data-calc="decision"><span class="input-suffix">/mo</span></div>
+              <span class="field__hint">Car loans, student loans, credit cards.</span>
+            </div>
+            <div class="field">
+              <label for="w-insurance">Insurance (non-payroll)</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-insurance" value="0" min="0" step="25" data-calc="decision"><span class="input-suffix">/mo</span></div>
+              <span class="field__hint">Health, auto, life — not deducted from paycheck.</span>
+            </div>
+            <div class="field">
+              <label for="w-utilities">Utilities</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-utilities" value="0" min="0" step="25" data-calc="decision"><span class="input-suffix">/mo</span></div>
+              <span class="field__hint">Electric, gas, water, internet, phone.</span>
+            </div>
+            <div class="field">
+              <label for="w-subscriptions">Subscriptions</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-subscriptions" value="0" min="0" step="10" data-calc="decision"><span class="input-suffix">/mo</span></div>
+              <span class="field__hint">Streaming, software, gym, etc.</span>
+            </div>
+            <div class="field">
+              <label for="w-groceries">Groceries</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-groceries" value="0" min="0" step="50" data-calc="decision"><span class="input-suffix">/mo</span></div>
+              <span class="field__hint">Non-work food. Work meals are on Tab 1.</span>
+            </div>
+            <div class="field">
+              <label for="w-savings">Savings &amp; retirement</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="w-savings" value="0" min="0" step="50" data-calc="decision"><span class="input-suffix">/mo</span></div>
+              <span class="field__hint">401k, IRA, emergency fund contributions.</span>
+            </div>
+          </div>
+          <div class="decision-fr-results">
+            <div class="result-card result-card--financial" id="financial-result" style="display:none">
+              <div class="result-card__label">Discretionary hourly wage</div>
+              <div class="result-card__value" id="res-discretionary-wage">—</div>
+              <div class="result-card__label" style="margin-top:0.75rem">Discretionary monthly budget</div>
+              <div class="result-card__value" id="res-discretionary-budget">—</div>
+              <div class="result-card__note" id="res-financial-context"></div>
+              <div class="financial-stress" id="stress-callout" style="display:none">
+                <div class="financial-stress__status" id="stress-status"></div>
+                <div class="financial-stress__message" id="stress-message"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+
       <div class="panel__grid">
+        <!-- Left: form + presets -->
         <div class="card">
-          <h2 class="card__title">The Question</h2>
+          <h2 class="card__title">Evaluate a Task</h2>
           <div class="field">
             <label for="d-wage">Your real hourly wage</label>
             <div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-wage" value="0" min="0" step="0.5" data-calc="decision"></div>
@@ -474,13 +486,26 @@
             <label for="d-task">What's the task?</label>
             <input type="text" id="d-task" placeholder="e.g. Mow the lawn" class="text-input" data-calc="decision">
           </div>
-          <div class="field">
-            <label for="d-hours">Time to do it yourself</label>
-            <div class="input-group"><input type="number" id="d-hours" value="2" min="0" step="0.25" data-calc="decision"><span class="input-suffix">hrs</span></div>
+          <div class="field-row">
+            <div class="field">
+              <label for="d-hours">Time to DIY</label>
+              <div class="input-group"><input type="number" id="d-hours" value="2" min="0" step="0.25" data-calc="decision"><span class="input-suffix">hrs</span></div>
+            </div>
+            <div class="field">
+              <label for="d-cost">Cost to hire</label>
+              <div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-cost" value="75" min="0" step="5" data-calc="decision"></div>
+            </div>
           </div>
           <div class="field">
-            <label for="d-cost">Cost to hire / buy</label>
-            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-cost" value="75" min="0" step="5" data-calc="decision"></div>
+            <label for="d-frequency">How often?</label>
+            <select id="d-frequency" data-calc="decision">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Every 2 weeks</option>
+              <option value="monthly" selected>Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="annual">Annual</option>
+              <option value="one-time">One-time</option>
+            </select>
           </div>
           <div class="field">
             <label for="d-enjoyment">How do you feel about this task?</label>
@@ -492,11 +517,13 @@
               <option value="love">Love it 😍</option>
             </select>
           </div>
+          <button id="add-to-queue-btn" class="add-to-queue-btn">+ Add to Decision Queue</button>
 
           <h2 class="card__title card__title--spaced">Quick Decisions</h2>
           <div class="preset-grid" id="preset-grid"></div>
         </div>
 
+        <!-- Right: verdict + queue -->
         <div class="results-column" id="decision-results">
           <div class="result-card result-card--hero" id="decision-hero">
             <div class="result-card__label">Verdict</div>
@@ -504,7 +531,7 @@
             <div class="result-card__note" id="res-verdict-savings"></div>
           </div>
 
-          <div class="comparison-box">
+          <div class="comparison-box" id="decision-comparison-box">
             <div class="comparison-side">
               <div class="comparison-side__title">🔧 DIY</div>
               <div class="comparison-side__row"><span>Time cost</span><span id="res-diy-time-cost">—</span></div>
@@ -521,6 +548,58 @@
           </div>
 
           <div class="explanation-box" id="res-explanation"></div>
+
+          <!-- Decision Queue (hidden until items added) -->
+          <div id="decision-queue-section" style="display:none">
+            <h3 class="queue-heading">Decision Queue</h3>
+            <div class="queue-table-wrap">
+              <table class="queue-table">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Freq</th>
+                    <th>Hrs</th>
+                    <th>Feeling</th>
+                    <th>Verdict</th>
+                    <th>DIY cost</th>
+                    <th>Hire cost</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="queue-tbody"></tbody>
+              </table>
+            </div>
+
+            <!-- Monthly totals -->
+            <div class="queue-totals" id="queue-totals-monthly">
+              <div class="queue-totals__title">Monthly recurring</div>
+              <div class="queue-totals__row">
+                <span>If you hired everything</span>
+                <span><strong id="qt-hire-all-cost">—</strong> <span class="qt-sub" id="qt-hire-all-hours"></span></span>
+              </div>
+              <div class="queue-totals__row">
+                <span>Based on your verdicts</span>
+                <span><strong id="qt-verdict-cost">—</strong> <span class="qt-sub" id="qt-verdict-hours"></span></span>
+              </div>
+              <div class="queue-totals__row queue-totals__row--remaining" id="qt-remaining-row">
+                <span>Remaining discretionary</span>
+                <strong id="qt-remaining">—</strong>
+              </div>
+            </div>
+
+            <!-- One-time totals -->
+            <div class="queue-totals" id="queue-totals-one-time">
+              <div class="queue-totals__title">One-time decisions</div>
+              <div class="queue-totals__row">
+                <span>If you hired everything</span>
+                <span><strong id="qt-ot-hire-all">—</strong> <span class="qt-sub" id="qt-ot-hire-all-hours"></span></span>
+              </div>
+              <div class="queue-totals__row">
+                <span>Based on your verdicts</span>
+                <span><strong id="qt-ot-verdict">—</strong> <span class="qt-sub" id="qt-ot-verdict-hours"></span></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -652,7 +731,7 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </aside>
 
-  <script>document.write(wimtwFooter())</script>
+  <div id="wimtw-footer"></div>
 
   <script type="module" src="./app.ts"></script>
 </body>

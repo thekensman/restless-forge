@@ -20,34 +20,57 @@ mkdir -p "${DIST_DIR}"
 echo "[2/7] Copying global site pages..."
 cp -r "${SCRIPT_DIR}/site/"* "${DIST_DIR}/"
 
-# ── Build What Is My Time Worth ──
-echo "[3/7] Building What Is My Time Worth..."
-cd "${SCRIPT_DIR}/tools/what-is-my-time-worth/frontend"
-npm ci --silent
-npm run build
-mkdir -p "${DIST_DIR}/tools/what-is-my-time-worth"
-cp -r dist/* "${DIST_DIR}/tools/what-is-my-time-worth/"
-echo "  → What Is My Time Worth built successfully"
+# ─────────────────────────────────────────────────────────────────────────────
+# build_vite_tool <label> <dir-name>
+#
+# Builds a standard Vite tool frontend (src/ + public/ convention) and copies
+# the output into dist/tools/<dir-name>/.
+#
+# Convention expected in tools/<dir-name>/frontend/:
+#   src/index.html          — TypeScript SPA entry (Vite-bundled)
+#   src/<page>/index.html   — Static sub-pages (copied as-is, not bundled)
+#   public/                 — Static assets (shared.js, pages.css, favicons…)
+#   vite.config.ts          — Calls defineToolConfig() from tools/vite-tool-config.ts
+#
+# To add a new Vite tool: call this function with its label and directory name,
+# then add a bust_cache call in the cache-busting section below.
+# ─────────────────────────────────────────────────────────────────────────────
+build_vite_tool() {
+  local label="$1"
+  local name="$2"   # directory name under tools/ and dist/tools/
+  local frontend="${SCRIPT_DIR}/tools/${name}/frontend"
 
-# ── Build HoloPath ──
+  cd "${frontend}"
+  npm ci --silent
+  npm run build
+
+  mkdir -p "${DIST_DIR}/tools/${name}"
+  cp -r dist/* "${DIST_DIR}/tools/${name}/"
+
+  # Copy sub-page HTML directly — Vite only bundles src/index.html.
+  # Sub-pages are static HTML (IIFE scripts, public/-relative CSS) and are
+  # excluded from Rollup to avoid bundling warnings. Copy them verbatim here.
+  find "${frontend}/src" -name "*.html" ! -path "*/src/index.html" \
+    | while IFS= read -r f; do
+        rel="${f#${frontend}/src/}"
+        dest="${DIST_DIR}/tools/${name}/${rel}"
+        mkdir -p "$(dirname "$dest")"
+        cp "$f" "$dest"
+      done
+
+  echo "  → ${label} built successfully"
+}
+
+# ── Build Vite tools ──
+echo "[3/7] Building What Is My Time Worth..."
+build_vite_tool "What Is My Time Worth" "what-is-my-time-worth"
+
 echo "[4/7] Building HoloPath..."
-cd "${SCRIPT_DIR}/tools/holopath/frontend"
-npm ci --silent
-npm run build
-mkdir -p "${DIST_DIR}/tools/holopath"
-cp -r dist/* "${DIST_DIR}/tools/holopath/"
-echo "  → HoloPath built successfully"
+build_vite_tool "HoloPath" "holopath"
 
 # ── Build SandPath ──
 echo "[5/7] Building SandPath..."
-cd "${SCRIPT_DIR}/tools/sandpath/frontend"
-npm ci --silent
-npm run build
-mkdir -p "${DIST_DIR}/tools/sandpath"
-cp -r dist/* "${DIST_DIR}/tools/sandpath/"
-cd "${SCRIPT_DIR}/tools/sandpath/"
-cp -r ${SCRIPT_DIR}/tools/sandpath/backend "${DIST_DIR}/tools/sandpath/backend"
-echo "  → SandPath built successfully"
+build_vite_tool "SandPath" "sandpath"
 
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
@@ -70,6 +93,7 @@ bust_cache() {
 
 bust_cache "${DIST_DIR}/tools/what-is-my-time-worth" "/tools/what-is-my-time-worth"
 bust_cache "${DIST_DIR}/tools/holopath"               "/tools/holopath"
+# Add a bust_cache call here for each new tool.
 
 # Cache-bust the global /shared.js across ALL html files in dist
 site_shared_hash=$(md5sum "${DIST_DIR}/shared.js" | cut -c1-8)

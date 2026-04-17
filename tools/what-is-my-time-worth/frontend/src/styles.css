@@ -846,3 +846,171 @@ details.breakdown[open] > summary::before { transform: rotate(90deg); }
   border-top-color: transparent;
   border-bottom-color: var(--border);
 }
+
+/* ─── Financial Reality on Tab 2 ────────────────────────────── */
+
+.decision-financial-reality {
+  margin-bottom: 1.5rem;
+}
+
+.decision-fr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .decision-fr-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Add to Queue button ────────────────────────────────────── */
+
+.add-to-queue-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.add-to-queue-btn:hover { opacity: 0.85; }
+
+/* ─── Preset big-decision label ──────────────────────────────── */
+
+.preset-group-label {
+  width: 100%;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.preset-tile--big {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+}
+
+/* ─── Decision Queue ─────────────────────────────────────────── */
+
+.queue-heading {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 1.5rem 0 0.75rem;
+}
+
+.queue-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
+.queue-table th {
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-weight: 500;
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.queue-table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  vertical-align: middle;
+}
+
+.queue-row__task { font-weight: 500; color: var(--text); }
+
+.queue-row:last-child td { border-bottom: none; }
+
+.queue-row--hire { background: color-mix(in srgb, #3ecf8e 4%, transparent); }
+.queue-row--diy  { background: color-mix(in srgb, #f4a261 4%, transparent); }
+
+.verdict-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.verdict-badge--hire { background: color-mix(in srgb, #3ecf8e 20%, transparent); color: #3ecf8e; }
+.verdict-badge--diy  { background: color-mix(in srgb, #f4a261 20%, transparent); color: #c97a3a; }
+
+.queue-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+.queue-remove:hover { color: #e05c5c; background: color-mix(in srgb, #e05c5c 12%, transparent); }
+
+/* ─── Queue totals panel ─────────────────────────────────────── */
+
+.queue-totals {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.queue-totals__title {
+  background: var(--surface-raised);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.queue-totals__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+.queue-totals__row:last-child { border-bottom: none; }
+.queue-totals__row span:first-child { color: var(--text-muted); }
+
+.queue-totals__row--remaining {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  font-weight: 600;
+}
+
+.qt-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 0.4rem;
+}
+
+.qt-remaining--positive { color: #3ecf8e; }
+.qt-remaining--negative { color: #e05c5c; }
+.qt-remaining--over-budget { color: var(--text-dim); font-style: italic; font-size: 12px; }
