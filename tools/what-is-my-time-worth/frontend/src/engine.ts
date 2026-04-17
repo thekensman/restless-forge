@@ -450,6 +450,7 @@ export interface FinancialContextInputs {
   monthlyUtilities: number;
   monthlySubscriptions: number;
   monthlyGroceries: number;
+  monthlySavings: number;
 }
 
 export interface FinancialContextResult {
@@ -473,7 +474,8 @@ export function calculateFinancialContext(
     context.monthlyInsurance +
     context.monthlyUtilities +
     context.monthlySubscriptions +
-    context.monthlyGroceries;
+    context.monthlyGroceries +
+    context.monthlySavings;
 
   const annualFixedCosts = totalMonthlyObligations * 12;
   const monthlyTakeHome = wageResult.actualAnnualEarnings / 12;
@@ -516,6 +518,83 @@ export function calculateFinancialContext(
   };
 }
 
+// ─── Decision Queue ───────────────────────────────────────────
+
+export type Frequency = "weekly" | "biweekly" | "monthly" | "quarterly" | "annual" | "one-time";
+
+export const FREQUENCY_LABELS: Record<Frequency, string> = {
+  weekly: "Weekly",
+  biweekly: "Every 2 wks",
+  monthly: "Monthly",
+  quarterly: "Quarterly",
+  annual: "Annual",
+  "one-time": "One-time",
+};
+
+// Returns null for one-time items (excluded from monthly totals)
+export function normalizeToMonthly(amount: number, frequency: Frequency): number | null {
+  const multipliers: Record<Frequency, number | null> = {
+    weekly: 52 / 12,
+    biweekly: 26 / 12,
+    monthly: 1,
+    quarterly: 1 / 3,
+    annual: 1 / 12,
+    "one-time": null,
+  };
+  const m = multipliers[frequency];
+  return m !== null ? amount * m : null;
+}
+
+export interface DecisionQueueItem {
+  id: string;
+  inputs: DecisionInputs;
+  frequency: Frequency;
+  result: DecisionResult;
+}
+
+export interface QueueTotals {
+  monthly: {
+    hireAllCost: number;
+    hireAllHours: number;
+    verdictCost: number;
+    verdictHours: number;
+  };
+  oneTime: {
+    hireAllCost: number;
+    hireAllHours: number;
+    verdictCost: number;
+    verdictHours: number;
+  };
+}
+
+export function calculateQueueTotals(items: DecisionQueueItem[]): QueueTotals {
+  const totals: QueueTotals = {
+    monthly: { hireAllCost: 0, hireAllHours: 0, verdictCost: 0, verdictHours: 0 },
+    oneTime: { hireAllCost: 0, hireAllHours: 0, verdictCost: 0, verdictHours: 0 },
+  };
+
+  for (const item of items) {
+    const { frequency, inputs, result } = item;
+    if (frequency === "one-time") {
+      totals.oneTime.hireAllCost += inputs.costToHire;
+      totals.oneTime.hireAllHours += inputs.hoursToComplete;
+      if (result.verdict === "hire") {
+        totals.oneTime.verdictCost += inputs.costToHire;
+        totals.oneTime.verdictHours += inputs.hoursToComplete;
+      }
+    } else {
+      totals.monthly.hireAllCost += normalizeToMonthly(inputs.costToHire, frequency)!;
+      totals.monthly.hireAllHours += normalizeToMonthly(inputs.hoursToComplete, frequency)!;
+      if (result.verdict === "hire") {
+        totals.monthly.verdictCost += normalizeToMonthly(inputs.costToHire, frequency)!;
+        totals.monthly.verdictHours += normalizeToMonthly(inputs.hoursToComplete, frequency)!;
+      }
+    }
+  }
+
+  return totals;
+}
+
 // ─── Decision Presets ────────────────────────────────────────
 
 export interface DecisionPreset {
@@ -525,21 +604,26 @@ export interface DecisionPreset {
   hours: number;
   cost: number;
   defaultEnjoyment: DecisionInputs["enjoyment"];
+  defaultFrequency: Frequency;
 }
 
 export const DECISION_PRESETS: DecisionPreset[] = [
-  { id: "mow", icon: "🌿", label: "Mow the lawn", hours: 1.5, cost: 50, defaultEnjoyment: "dislike" },
-  { id: "clean", icon: "🏠", label: "Clean the house", hours: 3, cost: 120, defaultEnjoyment: "dislike" },
-  { id: "cook", icon: "🍳", label: "Cook vs. order", hours: 1.5, cost: 35, defaultEnjoyment: "neutral" },
-  { id: "taxes", icon: "📋", label: "DIY taxes", hours: 8, cost: 250, defaultEnjoyment: "avoid" },
-  { id: "oil", icon: "🚗", label: "Oil change", hours: 1, cost: 45, defaultEnjoyment: "neutral" },
-  { id: "grocery", icon: "🛒", label: "Grocery pickup", hours: 1, cost: 5, defaultEnjoyment: "neutral" },
-  { id: "laundry", icon: "👔", label: "Laundry service", hours: 2, cost: 30, defaultEnjoyment: "dislike" },
-  { id: "carwash", icon: "🚿", label: "Hand car wash", hours: 1, cost: 25, defaultEnjoyment: "neutral" },
-  { id: "dogwalk", icon: "🐕", label: "Dog walker", hours: 0.75, cost: 20, defaultEnjoyment: "enjoy" },
-  { id: "assemble", icon: "🔧", label: "Furniture assembly", hours: 3, cost: 80, defaultEnjoyment: "avoid" },
-  { id: "shovel", icon: "❄️", label: "Snow removal", hours: 1, cost: 40, defaultEnjoyment: "avoid" },
-  { id: "tutor", icon: "📚", label: "Tutor your kid", hours: 2, cost: 60, defaultEnjoyment: "neutral" },
+  { id: "mow",      icon: "🌿", label: "Mow the lawn",        hours: 1.5,  cost: 50,   defaultEnjoyment: "dislike", defaultFrequency: "weekly" },
+  { id: "clean",    icon: "🏠", label: "Clean the house",      hours: 3,    cost: 120,  defaultEnjoyment: "dislike", defaultFrequency: "biweekly" },
+  { id: "cook",     icon: "🍳", label: "Cook vs. order",       hours: 1.5,  cost: 35,   defaultEnjoyment: "neutral", defaultFrequency: "weekly" },
+  { id: "taxes",    icon: "📋", label: "DIY taxes",            hours: 8,    cost: 250,  defaultEnjoyment: "avoid",   defaultFrequency: "annual" },
+  { id: "oil",      icon: "🚗", label: "Oil change",           hours: 1,    cost: 45,   defaultEnjoyment: "neutral", defaultFrequency: "quarterly" },
+  { id: "grocery",  icon: "🛒", label: "Grocery pickup",       hours: 1,    cost: 5,    defaultEnjoyment: "neutral", defaultFrequency: "weekly" },
+  { id: "laundry",  icon: "👔", label: "Laundry service",      hours: 2,    cost: 30,   defaultEnjoyment: "dislike", defaultFrequency: "monthly" },
+  { id: "carwash",  icon: "🚿", label: "Hand car wash",        hours: 1,    cost: 25,   defaultEnjoyment: "neutral", defaultFrequency: "monthly" },
+  { id: "dogwalk",  icon: "🐕", label: "Dog walker",           hours: 0.75, cost: 20,   defaultEnjoyment: "enjoy",   defaultFrequency: "weekly" },
+  { id: "assemble", icon: "🔧", label: "Furniture assembly",   hours: 3,    cost: 80,   defaultEnjoyment: "avoid",   defaultFrequency: "one-time" },
+  { id: "shovel",   icon: "❄️", label: "Snow removal",         hours: 1,    cost: 40,   defaultEnjoyment: "avoid",   defaultFrequency: "weekly" },
+  { id: "tutor",    icon: "📚", label: "Tutor your kid",       hours: 2,    cost: 60,   defaultEnjoyment: "neutral", defaultFrequency: "weekly" },
+  // Big decisions
+  { id: "move",     icon: "📦", label: "Hire movers",          hours: 40,   cost: 3500, defaultEnjoyment: "avoid",   defaultFrequency: "one-time" },
+  { id: "trade-in", icon: "🚙", label: "Car trade-in process", hours: 10,   cost: 200,  defaultEnjoyment: "neutral", defaultFrequency: "one-time" },
+  { id: "refi",     icon: "🏦", label: "Refinance (broker)",   hours: 20,   cost: 500,  defaultEnjoyment: "avoid",   defaultFrequency: "one-time" },
 ];
 
 // ─── State Tax Rates ─────────────────────────────────────────

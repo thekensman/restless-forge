@@ -95,7 +95,7 @@
         "name": "Is SandPath free to use?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, SandPath is completely free. All conversion happens in your browser and on our server with no account required. No files are stored — everything is processed in memory and discarded after download."
+          "text": "Yes, SandPath is completely free. All conversion happens entirely in your browser — no files are ever uploaded to a server. No account required."
         }
       }
     ]
@@ -112,7 +112,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
-  <script src="shared.js"></script>
+  <script src="/shared.js"></script>
+  <script src="/tools/sandpath/shared.js"></script>
 
   <!-- ═══ AD PROVIDER (single load) ═══ -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
@@ -126,8 +127,8 @@
 <body>
   <div class="grain"></div>
 
-  <!-- ═══ SITE NAVIGATION ═══ -->
-  <script>document.write(spNav())</script>
+  <!-- Header auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="sp-header"></div>
 
   <header class="header" id="top">
     <div class="header__orb" aria-hidden="true"></div>
@@ -145,8 +146,8 @@
     <p>SandPath is a free, open-source web tool that converts images and SVG files into patterns for kinetic
     sand tables. Whether you own an Oasis Mini, a Sisyphus Coffee Table, or a ZenXY build, SandPath produces
     clean <strong>.thr</strong> (theta-rho) and <strong>.gcode</strong> output files ready to load onto your
-    table. No account, no installation, no file storage &mdash; everything is processed in memory and
-    discarded after you download your result.</p>
+    table. No account, no installation, no uploads &mdash; everything runs in your browser and your files
+    never leave your device.</p>
 
     <h3 id="how-to-use">How to Use SandPath</h3>
     <p>Converting a file takes three steps:</p>
@@ -456,9 +457,9 @@
     <h3 id="faq">Frequently Asked Questions</h3>
     <p><strong>Do I need to create an account?</strong> No. SandPath requires no sign-up, login, or payment.
     Upload a file, convert it, and download the result. The entire process takes seconds.</p>
-    <p><strong>Are my files stored on the server?</strong> No. All processing happens in memory. Your uploaded
-    file and the generated output are discarded immediately after conversion. Nothing is ever written to disk
-    or retained after your session.</p>
+    <p><strong>Are my files stored on the server?</strong> There is no server. All processing happens
+    entirely in your browser using JavaScript. Your files are never uploaded anywhere &mdash; they stay on
+    your device from upload to download.</p>
     <p><strong>Can I convert photographs?</strong> Yes. Upload any JPG, PNG, or WebP image and SandPath will
     trace it into vector paths using edge detection, thresholding, or centerline extraction before converting
     to your table&rsquo;s format. You can preview the traced result before committing to a conversion.</p>
@@ -513,10 +514,9 @@
     <p><strong>Data collection:</strong> SandPath does not collect, store, or transmit any personal information.
     No account creation is required. No cookies are set by SandPath itself (third-party services like Google
     AdSense may set their own cookies as described below).</p>
-    <p><strong>File handling:</strong> Files you upload for conversion are processed entirely in server memory.
-    No uploaded files or generated outputs are written to disk or retained after the HTTP response completes.
-    There is no database, no file storage, and no way for anyone (including the site operator) to access your
-    files after conversion.</p>
+    <p><strong>File handling:</strong> SandPath processes all files entirely in your browser using JavaScript.
+    No files are ever uploaded to a server. Your images and SVGs never leave your device &mdash; all
+    conversion happens locally, and no data is transmitted or stored anywhere.</p>
     <p><strong>Advertising:</strong> SandPath uses Google AdSense to display advertisements. Google may use
     cookies and web beacons to serve ads based on your prior visits to this and other websites. You can opt out
     of personalised advertising by visiting
@@ -551,7 +551,8 @@
     constitutes acceptance of the revised terms.</p>
   </section>
 
-  <script>document.write(spFooter())</script>
+  <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="sp-footer"></div>
 
   <script type="module" src="./app.ts"></script>
 </body>
