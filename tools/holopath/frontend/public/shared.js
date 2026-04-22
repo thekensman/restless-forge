@@ -1,18 +1,25 @@
-/* shared.js — HoloPath shared nav, support banner & footer
+/* shared.js — HoloPath shared header & footer
    Single source of truth for ALL HoloPath pages (main app + sub-pages).
    Requires /shared.js (site/shared.js) to be loaded first for rf* utilities.
-   Include in <head>, then call hpNav() / hpFooter() via inline <script> tags. */
+
+   Every HTML page just needs:
+     <div id="hp-nav"></div>
+     <div id="hp-footer"></div>
+   and this script auto-injects on DOMContentLoaded. */
 (function () {
   'use strict';
   var p = window.location.pathname;
   var base = '/tools/holopath';
 
   function active(href) {
+    if (href.startsWith('#')) return false;
     if (href === base + '/') return p === base + '/' || p === base + '/index.html';
     if (href.endsWith('/')) return p.startsWith(href);
     return p === href || p === href.replace('.html', '');
   }
 
+  // Tool links on the left, RF global links on the right.
+  // The '/' entry (Restless Forge) triggers the rfNavSep separator.
   var navLinks = [
     [base + '/', 'Generator'],
     [base + '/how-it-works/', 'How It Works'],
@@ -36,62 +43,58 @@
     ['/tools/', 'All Tools'],
   ];
 
-  window.hpNav = function () {
-    var sep = (window.rfNavSep !== undefined) ? window.rfNavSep : '<span class="nav-sep" aria-hidden="true">|</span>';
+  var substackSvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M22.539 8.242H1.46V6h21.08v2.242zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.236h21.08V0z"/></svg>';
+  var heartSvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+
+  window.hpHeader = function () {
+    var sep = (window.rfNavSep !== undefined) ? window.rfNavSep
+      : '<span class="nav-sep" aria-hidden="true">|</span>';
     var links = navLinks.map(function (l) {
-      var cls = 'nav__link' + (active(l[0]) ? ' nav__link--active' : '');
+      var cls = active(l[0]) ? ' class="active"' : '';
       var prefix = (l[0] === '/') ? sep : '';
-      return prefix + '<a href="' + l[0] + '" class="' + cls + '">' + l[1] + '</a>';
+      var target = l[0].startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+      return prefix + '<a href="' + l[0] + '"' + cls + target + '>' + l[1] + '</a>';
     }).join('');
 
-    return '<nav class="nav" aria-label="Main navigation">' + links + '</nav>' +
-      '<div class="support-banner" id="support-banner">' +
-      '<span class="support-banner__text">HoloPath is free &amp; open — if it\'s useful, consider supporting development</span>' +
-      '<a class="support-banner__btn" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">' +
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 21h18v-2H2v2zm2-4h14v-2H4v2zm-1-6l.5-2h15l.5 2h2l-1-4H2L1 11h2zm5-6h6V3H8v2z"/></svg> Buy me a coffee</a>' +
-      '<a class="support-banner__btn support-banner__btn--alt" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">Ko-fi</a>' +
-      '<a class="support-banner__btn support-banner__btn--alt" href="https://substack.com/@restlessforge" target="_blank" rel="noopener">Substack</a>' +
-      '<button class="support-banner__close" id="close-support" aria-label="Dismiss">&times;</button>' +
-      '</div>';
+    return '<header class="site-header"><div class="site-header__inner">' +
+      '<div class="site-header__top">' +
+      '<a class="site-header__brand" href="' + base + '/">&#x25C8; HoloPath</a>' +
+      '<button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"' +
+      ' onclick="var n=document.getElementById(\'site-nav\');var open=n.classList.toggle(\'open\');this.setAttribute(\'aria-expanded\',open)">&#9776;</button>' +
+      '<nav class="site-header__nav" id="site-nav" aria-label="Site navigation">' + links + '</nav>' +
+      '</div>' +
+      '<div class="site-header__support">' +
+      '<span class="site-header__support-label">Support this free tool</span>' +
+      '<a class="site-header__support-link" href="https://restlessforge.substack.com" target="_blank" rel="noopener">' + substackSvg + ' Substack</a>' +
+      '<a class="site-header__support-link" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">' + heartSvg + ' Ko-fi</a>' +
+      '<a class="site-header__support-link" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">&#x2615; Buy Me a Coffee</a>' +
+      '</div></div></header>';
   };
 
   window.hpFooter = function () {
-    var sep = (window.rfFooterSep !== undefined) ? window.rfFooterSep : '<span class="footer-sep" aria-hidden="true">|</span>';
+    var sep = (window.rfFooterSep !== undefined) ? window.rfFooterSep
+      : '<span class="footer-sep" aria-hidden="true">|</span>';
     var donateHtml = (typeof window.rfDonateHtml === 'function') ? window.rfDonateHtml() : '';
 
     var links = footerLinks.map(function (l) {
       var prefix = (l[0] === '/') ? sep : '';
-      return prefix + '<a href="' + l[0] + '">' + l[1] + '</a>';
+      var target = l[0].startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+      return prefix + '<a class="footer__link" href="' + l[0] + '"' + target + '>' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
       donateHtml +
-      '<nav class="footer__legal" aria-label="Footer navigation">' + links + '</nav>' +
-      '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;">Restless Forge</a> &mdash; HoloPath: Free hologram GIF generator.</p>' +
+      '<div class="footer__links">' + links + '</div>' +
+      '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; HoloPath: Free hologram GIF generator.</p>' +
       '</footer>';
   };
 
-  /* Support banner dismiss logic */
+  // Auto-inject header and footer into placeholder elements.
+  // Supports legacy `hp-nav` alongside the standard `hp-header` ID.
   document.addEventListener('DOMContentLoaded', function () {
-    // Auto-inject nav and footer into standard placeholder elements.
-    // HTML pages only need <div id="hp-nav"></div> and <div id="hp-footer"></div>.
-    var navEl = document.getElementById('hp-nav');
-    if (navEl) navEl.outerHTML = window.hpNav();
+    var headerEl = document.getElementById('hp-header') || document.getElementById('hp-nav');
+    if (headerEl) headerEl.outerHTML = window.hpHeader();
     var footerEl = document.getElementById('hp-footer');
     if (footerEl) footerEl.outerHTML = window.hpFooter();
-
-    var close = document.getElementById('close-support');
-    if (close) {
-      close.addEventListener('click', function () {
-        document.getElementById('support-banner').style.display = 'none';
-        try { sessionStorage.setItem('hp-support-dismissed', '1'); } catch (e) {}
-      });
-    }
-    try {
-      if (sessionStorage.getItem('hp-support-dismissed')) {
-        var banner = document.getElementById('support-banner');
-        if (banner) banner.style.display = 'none';
-      }
-    } catch (e) {}
   });
 })();

@@ -18,6 +18,15 @@
   --glow: 0 0 20px rgba(0, 255, 242, 0.3);
   --font-display: 'Orbitron', monospace;
   --font-mono: 'Share Tech Mono', monospace;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--dark);
+  --rf-text: var(--text);
+  --rf-muted: var(--text);
+  --rf-dim: var(--text-dim);
+  --rf-accent: var(--cyan);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-mono);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -65,48 +74,7 @@ body::after {
   opacity: 0.7;
 }
 
-/* ─── Nav ─── */
-
-.nav {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--dark);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
-}
-
-.nav__link {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  text-decoration: none;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 0.45rem 0.75rem;
-  border-radius: 4px;
-  transition: color 0.2s, background 0.2s;
-  white-space: nowrap;
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-}
-
-.nav__link:hover {
-  color: var(--cyan);
-  background: rgba(0,255,242,0.06);
-}
-
-.nav__link--active {
-  color: var(--cyan);
-  background: rgba(0,255,242,0.1);
-}
+/* Nav + support banner now live in site/tool-chrome.css (shared across tools). */
 
 @media (max-width: 480px) {
   .nav {
@@ -653,69 +621,6 @@ select:focus { border-color: var(--cyan); }
 @media (min-width: 1540px) {
   .ad-rail { display: block; }
 }
-
-/* ─── Support Banner ─── */
-
-.support-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: linear-gradient(90deg, rgba(0,255,242,0.04), rgba(255,0,255,0.04));
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.support-banner__text {
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-}
-
-.support-banner__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 1px;
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 3px;
-  text-decoration: none;
-  transition: all 0.2s;
-  background: transparent;
-}
-
-.support-banner__btn:hover {
-  background: rgba(255, 215, 0, 0.08);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
-}
-
-.support-banner__btn--alt {
-  color: var(--cyan-dim);
-  border-color: rgba(0, 255, 242, 0.2);
-}
-
-.support-banner__btn--alt:hover {
-  background: rgba(0, 255, 242, 0.06);
-  box-shadow: 0 0 12px rgba(0, 255, 242, 0.15);
-}
-
-.support-banner__close {
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0 4px;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-}
-
-.support-banner__close:hover { opacity: 1; }
 
 /* Footer support link */
 .footer__support {
