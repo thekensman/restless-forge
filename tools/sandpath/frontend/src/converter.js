@@ -431,17 +431,13 @@ export function convert(svgText, device, opts = {}) {
         else {
             polarR = maxDist > 0.001 ? maxDist / effectiveRho : 1;
         }
-        // 5. Optimise order
+        // 5. Optimise order (nearest-neighbour minimises travel between subpaths)
         const order = optimizeOrder(allLists);
-        // 6. Convert to theta-rho.
-        //
-        // Theta-rho output has no "pen up" — every consecutive point is drawn as
-        // a continuous arc. When subpaths are concatenated the table sweeps from
-        // the previous endpoint to the next start across whatever angle the unwrap
-        // chose, leaving large visible curves between unrelated shapes (the "extra
-        // loops" the user sees). Retracting through rho=0 between subpaths turns
-        // those connections into short radial moves through the centre, which are
-        // far less visible in sand than long off-axis arcs.
+        // 6. Convert to theta-rho. Consecutive points are drawn as arcs — there
+        // is no pen-up. Nearest-neighbour ordering keeps subpath transitions
+        // short; trying to retract through rho=0 between every subpath creates
+        // a visible starburst of radial spokes, which is worse than the short
+        // chord that naturally connects nearby endpoints.
         const toPolar = (x, y) => {
             const dx = x - ccx, dy = y - ccy;
             const rho = Math.min(Math.hypot(dx, dy) / polarR, effectiveRho);
@@ -449,20 +445,12 @@ export function convert(svgText, device, opts = {}) {
             return [theta, rho];
         };
         let tr = [];
-        for (let oi = 0; oi < order.length; oi++) {
-            const path = allLists[order[oi]];
+        for (const idx of order) {
+            const path = allLists[idx];
             if (!path.length)
                 continue;
-            const polarPath = path.map(([x, y]) => toPolar(x, y));
-            if (oi > 0) {
-                // Lift through centre: prev_theta@0 → next_theta@0 → next_start.
-                // Holding rho=0 keeps the ball on a single point while theta winds.
-                const prev = tr[tr.length - 1];
-                const next = polarPath[0];
-                tr.push([prev[0], 0]);
-                tr.push([next[0], 0]);
-            }
-            tr.push(...polarPath);
+            for (const [x, y] of path)
+                tr.push(toPolar(x, y));
         }
         tr = unwrapTheta(tr);
         const clipped = tr.filter(([, r]) => r >= effectiveRho - 0.0001).length;
