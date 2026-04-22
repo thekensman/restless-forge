@@ -472,28 +472,13 @@ select:focus { border-color: var(--cyan); }
   box-shadow: 0 0 20px rgba(255,0,0,0.2);
 }
 
-/* ─── Footer Donate ─── */
-.footer__donate { text-align: center; margin-bottom: 1rem; }
-.footer__donate-label { display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.5rem; }
-.footer__donate-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
-.footer__donate-link { font-size: 0.8rem; color: var(--text-dim); border: 1px solid var(--border); padding: 0.3rem 0.8rem; border-radius: 6px; text-decoration: none; transition: color 0.2s, border-color 0.2s; }
-.footer__donate-link:hover { color: var(--cyan); border-color: var(--cyan-dim); }
-
-/* ─── Footer ─── */
+/* ─── Footer (outer container; donate/links/copy live in site/tool-chrome.css) ─── */
 
 .footer {
   text-align: center;
   padding: 2rem 1rem 1.5rem;
   border-top: 1px solid var(--border);
   margin-top: 40px;
-}
-.footer__links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.2rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
 }
 .footer__coffee {
   display: inline-flex;
@@ -505,12 +490,6 @@ select:focus { border-color: var(--cyan); }
 }
 .footer__coffee:hover { color: #fff; }
 .footer__coffee svg { opacity: 0.8; }
-.footer__link {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-size: 0.82rem;
-}
-.footer__link:hover { color: var(--cyan); }
 .footer__legal {
   display: flex;
   justify-content: center;

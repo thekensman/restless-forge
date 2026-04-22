@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About — TOOL_LABEL</title>
-  <meta name="description" content="About TOOL_LABEL.">
-  <link rel="canonical" href="https://restless-forge.dev/tools/TOOL_NAME/about/">
+  <title>About — __TOOL_LABEL__</title>
+  <meta name="description" content="About __TOOL_LABEL__.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/__TOOL_NAME__/about/">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <meta property="og:title" content="About — TOOL_LABEL">
-  <meta property="og:url" content="https://restless-forge.dev/tools/TOOL_NAME/about/">
+  <meta property="og:title" content="About — __TOOL_LABEL__">
+  <meta property="og:url" content="https://restless-forge.dev/tools/__TOOL_NAME__/about/">
   <meta property="og:type" content="website">
 
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
   <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
-  <link rel="stylesheet" href="/tools/TOOL_NAME/pages.css">
+  <link rel="stylesheet" href="/tools/__TOOL_NAME__/pages.css">
 
   <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
   <script src="/shared.js"></script>
-  <script src="/tools/TOOL_NAME/shared.js"></script>
+  <script src="/tools/__TOOL_NAME__/shared.js"></script>
 </head>
 <body>
   <!-- Header auto-injected by DOMContentLoaded in public/shared.js -->
-  <div id="TOOL_PREFIX-header"></div>
+  <div id="__TOOL_PREFIX__-header"></div>
 
   <main>
-    <h1>About TOOL_LABEL</h1>
+    <h1>About __TOOL_LABEL__</h1>
     <p class="page-sub">TODO: subtitle</p>
 
     <h2>What It Does</h2>
@@ -38,6 +40,6 @@
   </main>
 
   <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
-  <div id="TOOL_PREFIX-footer"></div>
+  <div id="__TOOL_PREFIX__-footer"></div>
 </body>
 </html>

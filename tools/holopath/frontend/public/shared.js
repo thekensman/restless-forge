@@ -89,10 +89,8 @@
       '</footer>';
   };
 
-  // Auto-inject header and footer into placeholder elements.
-  // Supports legacy `hp-nav` alongside the standard `hp-header` ID.
   document.addEventListener('DOMContentLoaded', function () {
-    var headerEl = document.getElementById('hp-header') || document.getElementById('hp-nav');
+    var headerEl = document.getElementById('hp-header');
     if (headerEl) headerEl.outerHTML = window.hpHeader();
     var footerEl = document.getElementById('hp-footer');
     if (footerEl) footerEl.outerHTML = window.hpFooter();
