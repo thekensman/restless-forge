@@ -1,237 +1,207 @@
 # Adding a New Tool to Restless Forge
 
-This guide walks through integrating a new Vite + TypeScript tool into the monorepo, following the same conventions as WIMTW and HoloPath.
+Every new tool follows the same recipe. The fast path uses
+`scripts/new-tool.sh`; the manual path is here as a reference for when you
+need to deviate.
 
-## Quick reference — placeholders used in this guide
-
-| Placeholder     | Example                  | Meaning                                |
-|-----------------|--------------------------|----------------------------------------|
-| `TOOL_NAME`     | `my-tool`                | Directory name under `tools/` and URL slug |
-| `TOOL_LABEL`    | `My Tool`                | Human-readable display name            |
-| `TOOL_PREFIX`   | `mt`                     | Short JS/HTML identifier for functions/IDs |
-| `TOOL_EMOJI`    | `🔧`                     | Emoji shown in the header brand        |
-| `PORT`          | `5175`                   | Unique dev server port (see below)     |
-
-**Ports in use:** WIMTW=3000, HoloPath=5173, SandPath=5174. Pick the next available.
-
----
-
-## Step 1 — Copy the template
+## Fast path (one command + a few edits)
 
 ```bash
-cp -r tools/template/frontend tools/TOOL_NAME/frontend
+scripts/new-tool.sh <tool-name> "<tool-label>" <prefix> <port> "<emoji>"
+# example:
+scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 ```
 
-Then do a global find-and-replace inside that directory:
+This copies `tools/template/frontend/` to `tools/<tool-name>/frontend/`,
+replaces every placeholder, and runs `npm install`. It prints the remaining
+manual wiring at the end:
+
+1. **build.sh** — add the tool to the build + cache-bust section.
+2. **Root `package.json`** — add the tool to the `concurrently` list in the
+   `dev` script and to the root `test` script; optionally add a `dev:<prefix>`
+   alias.
+3. **Root `vite.config.ts`** — add the proxy entry.
+4. **site/index.html + site/tools/index.html** — add a tool card.
+5. **site/sitemap.xml** — add the tool URLs.
+
+After the edits, `npm run dev` from repo root will start your new tool on
+the port you chose, proxied at `http://localhost:8080/tools/<tool-name>/`.
+
+---
+
+## Placeholder reference
+
+The template uses distinctive `__TOKEN__` placeholders so a single find/
+replace can't accidentally match surrounding text:
+
+| Placeholder        | Example       | Meaning                                     |
+|--------------------|---------------|---------------------------------------------|
+| `__TOOL_NAME__`    | `tattoo-safe` | Directory name under `tools/` + URL slug    |
+| `__TOOL_LABEL__`   | `TattooSafe`  | Display name (header brand, titles)         |
+| `__TOOL_PREFIX__`  | `ts`          | Identifier prefix (placeholder IDs, JS fns) |
+| `__TOOL_PORT__`    | `5175`        | Dev-server port (unique per tool)           |
+| `__TOOL_EMOJI__`   | `🛡️`          | Small emoji/glyph in the header brand       |
+
+**Ports in use:** WIMTW=3000, HoloPath=5173, SandPath=5174. Use 5175+
+for new tools.
+
+---
+
+## Manual path (what the scaffolder does under the hood)
+
+### 1. Copy the template
 
 ```bash
-cd tools/TOOL_NAME/frontend
-# Replace all placeholders (adjust values as needed)
-grep -rl 'TOOL_NAME'   . | xargs sed -i 's|TOOL_NAME|my-tool|g'
-grep -rl 'TOOL_LABEL'  . | xargs sed -i 's|TOOL_LABEL|My Tool|g'
-grep -rl 'TOOL_PREFIX' . | xargs sed -i 's|TOOL_PREFIX|mt|g'
-grep -rl 'TOOL_EMOJI'  . | xargs sed -i 's|TOOL_EMOJI|🔧|g'
-grep -rl 'PORT'        . | xargs sed -i 's|PORT|5175|g'
+cp -r tools/template/frontend tools/<tool-name>/frontend
+cd tools/<tool-name>/frontend
+
+sed -i 's|__TOOL_NAME__|<tool-name>|g'  $(find . -type f)
+sed -i 's|__TOOL_LABEL__|<tool-label>|g' $(find . -type f)
+sed -i 's|__TOOL_PREFIX__|<prefix>|g'    $(find . -type f)
+sed -i 's|__TOOL_PORT__|<port>|g'        $(find . -type f)
+sed -i 's|__TOOL_EMOJI__|<emoji>|g'      $(find . -type f)
+
+npm install
 ```
 
----
-
-## Step 2 — Add sub-pages
-
-Copy the `src/about/index.html` template for each sub-page you need:
+### 2. What comes with the template
 
 ```
-src/
-├── index.html              ← TypeScript SPA — Vite bundles this
-├── about/index.html        ← Static sub-page — copied as-is by build.sh
-├── faq/index.html
-├── contact/index.html
-├── privacy/index.html      ← Optional: link to /privacy instead
-├── terms/index.html        ← Optional: link to /terms instead
-└── articles/
-    ├── index.html
-    └── my-article/index.html
+frontend/
+├── package.json              ← dev/build/test scripts, vite + vitest + jsdom
+├── tsconfig.json             ← target ES2022, strict
+├── vite.config.ts            ← calls defineToolConfig({ base, port, dir })
+├── src/
+│   ├── index.html            ← Main app, opts into /tool-chrome.css + /shared.js
+│   ├── styles.css            ← :root defines --rf-* aliases + main-app styles
+│   ├── app.ts                ← TS entry stub
+│   └── about/index.html      ← Example static sub-page
+└── public/
+    ├── shared.js             ← .site-header / .footer renderer
+    └── pages.css             ← :root defines --rf-* aliases + sub-page styles
 ```
 
-Every sub-page follows the same pattern:
+### 3. Customize the theme
 
-```html
-<link rel="stylesheet" href="/tools/TOOL_NAME/pages.css">
-<script src="/shared.js"></script>
-<script src="/tools/TOOL_NAME/shared.js"></script>
-...
-<div id="TOOL_PREFIX-header"></div>
-<main><!-- page content --></main>
-<div id="TOOL_PREFIX-footer"></div>
-```
+In both `src/styles.css` and `public/pages.css`, the `:root` block defines
+your tool's native tokens (`--bg`, `--text`, `--accent`, etc.) AND a block
+of `--rf-*` aliases used by the shared header/footer:
 
-**Why absolute URLs?** Sub-page HTML is served raw (not Vite-processed) because it contains non-module IIFE scripts and CSS from `public/` that Vite can't bundle. Absolute URLs like `/tools/TOOL_NAME/shared.js` are resolved correctly by the dev server and nginx in production.
+```css
+:root {
+  /* native tokens */
+  --bg: #0b0d12;
+  --text: #d8d4cc;
+  --accent: #d4a44e;
+  /* ... */
 
----
-
-## Step 3 — Add static assets to `public/`
-
-```
-public/
-├── shared.js       ← Tool nav/footer (already created by template)
-├── pages.css       ← Sub-page styles (copy from WIMTW or HoloPath and adapt)
-├── favicon-32.png
-├── apple-touch-icon.png
-├── og-image.png
-├── robots.txt
-├── sitemap.xml
-└── ads.txt
-```
-
-Copy `pages.css` from an existing tool as a starting point — it has all the shared header/footer/content styles. Customize colours and fonts with CSS custom properties.
-
----
-
-## Step 4 — Update `public/shared.js`
-
-The template `public/shared.js` is a working starting point. The key things to update:
-
-1. **`navLinks` / `footerLinks`** — list the pages for your tool. Pages at `'/'` get a separator automatically.
-2. **`window.TOOL_PREFIXHeader()`** — returns the full header HTML string.
-3. **`window.TOOL_PREFIXFooter()`** — returns the full footer HTML string.
-4. **`DOMContentLoaded`** — auto-injects into `<div id="TOOL_PREFIX-header">` and `<div id="TOOL_PREFIX-footer">`.
-
-The `rf*` globals (`rfNavSep`, `rfFooterSep`, `rfDonateHtml`) come from `site/shared.js`, which is loaded first via `<script src="/shared.js">`.
-
----
-
-## Step 5 — Update `build.sh`
-
-Add two lines — one to build the tool, one to cache-bust it:
-
-```bash
-# In the "Build Vite tools" section:
-echo "[N/7] Building My Tool..."
-build_vite_tool "My Tool" "my-tool"
-
-# In the "Cache-bust" section:
-bust_cache "${DIST_DIR}/tools/my-tool" "/tools/my-tool"
-```
-
-The `build_vite_tool` function (already defined in `build.sh`) handles:
-- `npm ci && npm run build`
-- Copying Vite output (`dist/`) to `dist/tools/TOOL_NAME/`
-- Copying sub-page HTML from `src/` (bypassing Vite bundling)
-
-Also update the summary at the bottom of `build.sh` to mention your tool.
-
----
-
-## Step 6 — Update the root dev server
-
-In `vite.config.ts` (repo root), add a proxy entry:
-
-```ts
-proxy: {
-  // ... existing entries ...
-  "/tools/my-tool": {
-    target: "http://localhost:PORT",
-    changeOrigin: true,
-    ws: true,
-  },
-},
-```
-
-In `package.json` (repo root), add your tool's dev server to the `dev` script:
-
-```json
-"dev": "concurrently ... \"npm run dev --prefix tools/my-tool/frontend\""
-```
-
----
-
-## Step 7 — Add to the site
-
-1. **Tool card** — add a card to `site/index.html` (landing page) and `site/tools/index.html` (all-tools hub). Follow the existing card pattern.
-2. **Sitemap** — add your tool's URLs to `site/sitemap.xml`.
-3. **nginx** — if your tool needs API proxying, add a `location` block in `nginx/restless-forge.conf`.
-
----
-
-## Step 8 — Initialize npm
-
-```bash
-cd tools/TOOL_NAME/frontend
-npm init -y
-npm install --save-dev vite typescript
-```
-
-Add to `package.json`:
-
-```json
-{
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "type": "module"
+  /* aliases consumed by site/tool-chrome.css */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text);
+  --rf-muted: var(--text-muted);
+  --rf-dim: var(--text-dim);
+  --rf-accent: var(--accent);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-mono);
 }
 ```
 
-Create `tsconfig.json` — copy from WIMTW or HoloPath and adjust as needed.
+All 7 aliases are required. Don't redefine `.site-header*`, `.nav-toggle`,
+`.footer__donate*`, `.footer__link*`, `.nav-sep`, `.footer-sep`, or the
+`@media (max-width: 640px)` collapse rule — `site/tool-chrome.css` owns them.
 
----
+### 4. Add more sub-pages (optional)
 
-## Step 9 — Local development
+Sub-pages live under `src/` using directory-style URLs:
+
+```
+src/
+├── index.html
+├── about/index.html
+├── faq/index.html
+├── contact/index.html
+└── articles/
+    ├── index.html
+    └── my-first-article/index.html
+```
+
+Every sub-page HTML file must contain:
+
+```html
+<link rel="stylesheet" href="/tool-chrome.css">
+<link rel="stylesheet" href="/tools/<tool-name>/pages.css">
+<script src="/shared.js"></script>
+<script src="/tools/<tool-name>/shared.js"></script>
+...
+<div id="<prefix>-header"></div>
+<main>...</main>
+<div id="<prefix>-footer"></div>
+```
+
+The absolute URLs are preserved through Vite's build via the sentinel
+`transformIndexHtml` plugins in `tools/vite-tool-config.ts`.
+
+### 5. Wire the tool into the monorepo
+
+**`build.sh`** — add two lines:
 
 ```bash
-# Run just this tool
-cd tools/TOOL_NAME/frontend
-npm run dev
-# Visit http://localhost:PORT/tools/TOOL_NAME/
+echo "[N/7] Building <Tool Label>..."
+build_vite_tool "<Tool Label>" "<tool-name>"
 
-# Or run everything at once from the repo root
-npm run dev
-# Visit http://localhost:8080/tools/TOOL_NAME/
+# ...and in the cache-bust section:
+bust_cache "${DIST_DIR}/tools/<tool-name>" "/tools/<tool-name>"
 ```
 
-Sub-pages (e.g. `/tools/TOOL_NAME/about/`) are served raw by the dev middleware in `vite-tool-config.ts` — no Vite transform, CSS and JS load via their absolute URLs.
+**Root `package.json`** — add to `dev` and `test`:
+
+```json
+"dev": "concurrently ... \"npm run dev --prefix tools/<tool-name>/frontend\"",
+"test": "... && npm test --prefix tools/<tool-name>/frontend",
+"dev:<prefix>": "npm run dev --prefix tools/<tool-name>/frontend"
+```
+
+**Root `vite.config.ts`** — add a proxy entry:
+
+```ts
+"/tools/<tool-name>": {
+  target: "http://localhost:<port>",
+  changeOrigin: true,
+  ws: true,
+},
+```
+
+### 6. Add to the site
+
+- Tool cards in `site/index.html` and `site/tools/index.html`.
+- URLs in `site/sitemap.xml`.
 
 ---
 
-## Checklist
+## Verification checklist
 
-- [ ] `tools/TOOL_NAME/frontend/vite.config.ts` — uses `defineToolConfig`, unique port
-- [ ] `tools/TOOL_NAME/frontend/src/index.html` — TypeScript SPA, absolute shared.js URL
-- [ ] `tools/TOOL_NAME/frontend/src/*/index.html` — sub-pages, absolute CSS/JS URLs, placeholder divs
-- [ ] `tools/TOOL_NAME/frontend/public/shared.js` — nav/footer functions + DOMContentLoaded injection
-- [ ] `tools/TOOL_NAME/frontend/public/pages.css` — sub-page styles
-- [ ] `tools/TOOL_NAME/frontend/public/` — favicons, og-image.png, robots.txt, sitemap.xml
-- [ ] `build.sh` — `build_vite_tool` call + `bust_cache` call
-- [ ] `vite.config.ts` (root) — proxy entry for dev server
-- [ ] `package.json` (root) — tool added to `dev` script
-- [ ] `site/index.html` — tool card added
-- [ ] `site/tools/index.html` — tool card added
-- [ ] `site/sitemap.xml` — tool URLs added
+Run from repo root:
 
----
-
-## Architecture reference
-
-```
-tools/TOOL_NAME/frontend/
-├── src/                     ← Vite root (MPA mode)
-│   ├── index.html           ← Only Rollup entry — TypeScript SPA
-│   ├── app.ts               ← TypeScript entry point
-│   ├── styles.css           ← Main app styles (Vite-processed)
-│   └── <page>/index.html   ← Sub-pages (static, NOT Rollup inputs)
-└── public/                  ← Static assets (NOT navigable pages in dev)
-    ├── shared.js            ← Tool nav/footer (IIFE, depends on /shared.js)
-    ├── pages.css            ← Sub-page styles
-    └── [favicons, og-image, robots.txt, sitemap.xml, ads.txt]
+```bash
+npm run dev           # should start all tools incl. the new one
+npm run build         # should succeed without errors
 ```
 
-**Why sub-pages are NOT Rollup inputs:** Sub-pages use non-module IIFE scripts
-(`<script src="/shared.js">`) and `public/`-relative CSS. Vite's HTML transform
-can't handle either, producing build warnings. Instead, sub-pages are copied
-verbatim by `build.sh` after the Vite build. The dev server serves them raw via
-the middleware in `tools/vite-tool-config.ts`.
+Then open the built HTML:
 
-**Script load order matters:** `/shared.js` (site-level globals) must load before
-the tool's `shared.js` (which calls `window.rfDonateHtml`, `window.rfNavSep`, etc.).
+```bash
+grep -n "tool-chrome\|site-header\|shared.js" dist/tools/<tool-name>/index.html
+# expect:
+#   <link rel="stylesheet" href="/tool-chrome.css?v=HASH">
+#   <script src="/shared.js?v=HASH">
+#   <script src="/tools/<tool-name>/shared.js?v=HASH">
+```
+
+Visually verify at `http://localhost:8080/tools/<tool-name>/`:
+
+- Header renders with your brand + nav + support strip.
+- Narrow the window — nav collapses into a hamburger at ≤640px.
+- Footer renders with donate block + legal links + copyright.
+- Tool theme colors flow through to the header accent on hover.
+
+If any of those fail, see "Where to look when things break" in `CLAUDE.md`.

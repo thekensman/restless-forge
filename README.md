@@ -36,13 +36,10 @@ restless-forge/
 │   ├── robots.txt
 │   └── ads.txt
 ├── tools/                             # Tool source code
-│   ├── what-is-my-time-worth/
-│   │   └── frontend/                  # TypeScript + Vite (port 3000)
-│   ├── holopath/
-│   │   └── frontend/                  # TypeScript + Vite (port 5173)
-│   └── sandpath/
-│       ├── frontend/                  # TypeScript + Vite (port 5174)
-│       └── backend/                   # Python FastAPI (port 8000)
+│   ├── template/frontend/             # Starter scaffold for new tools
+│   ├── what-is-my-time-worth/frontend/  # TypeScript + Vite (port 3000)
+│   ├── holopath/frontend/             # TypeScript + Vite (port 5173)
+│   └── sandpath/frontend/             # TypeScript + Vite (port 5174)
 ├── nginx/                             # Production nginx configs
 │   ├── restless-forge.conf            # Main site
 │   ├── holopath-redirect.conf         # 301: holopath.art → restless-forge.dev
@@ -59,29 +56,29 @@ restless-forge/
 
 ### Development
 
-Each tool can be developed independently:
+Run everything at once from the repo root:
 
 ```bash
-# What Is My Time Worth
-cd tools/what-is-my-time-worth/frontend
 npm install
-npm run dev    # http://localhost:3000
-
-# HoloPath
-cd tools/holopath/frontend
-npm install
-npm run dev    # http://localhost:5173
-
-# SandPath (requires backend)
-cd tools/sandpath/backend
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --host 127.0.0.1 --port 8000
-
-cd tools/sandpath/frontend
-npm install
-npm run dev    # http://localhost:5174
+npm run dev           # proxies all tools at http://localhost:8080
+npm test              # runs all tool test suites
 ```
+
+Or develop a single tool in isolation:
+
+```bash
+cd tools/<tool>/frontend
+npm install
+npm run dev
+```
+
+| Tool | Dev port | Base path |
+|---|---|---|
+| What Is My Time Worth | 3000 | `/tools/what-is-my-time-worth/` |
+| HoloPath | 5173 | `/tools/holopath/` |
+| SandPath | 5174 | `/tools/sandpath/` |
+
+All conversion is client-side — there are no backends to run.
 
 ### Build
 
@@ -105,9 +102,9 @@ sudo nginx -t && sudo systemctl reload nginx
 ## Tech Stack
 
 - **Frontend:** TypeScript, Vite, vanilla CSS (no frameworks)
-- **SandPath Backend:** Python, FastAPI, Uvicorn
 - **Server:** nginx, Let's Encrypt, Cloudflare
 - **Zero runtime npm dependencies** — all tools use native browser APIs
+- **Zero backends** — every tool runs entirely in the browser
 
 ## Support
 

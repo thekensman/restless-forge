@@ -1,9 +1,0 @@
-fastapi==0.115.*
-uvicorn[standard]==0.34.*
-python-multipart==0.0.*
-pydantic==2.*
-Pillow==11.*
-
-# ── Test dependencies (install with: pip install -r requirements.txt) ──
-pytest>=8.0
-httpx>=0.27
