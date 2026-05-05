@@ -99,14 +99,19 @@ domain-root URLs; `build.sh` cache-busts them across every HTML file in dist.
 
 ### Canonical favicon + manifest block
 
-Every HTML page (site-global + every tool, every sub-page) renders the same
-4-tag block in `<head>`:
+Every HTML page renders the same 4-tag block in `<head>`. The URLs differ
+by scope, but the **shape** is invariant:
+
+| Scope | Block |
+|---|---|
+| Site-global (`site/*.html`) | `/favicon.svg`, `/favicon.ico`, `/apple-touch-icon.png`, `/site.webmanifest` |
+| Tool (`tools/<name>/.../index.html`, main + sub-pages) | `/tools/<name>/favicon.svg`, `/tools/<name>/favicon.ico`, `/tools/<name>/apple-touch-icon.png`, `/tools/<name>/site.webmanifest` |
 
 ```html
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" type="image/svg+xml" href=".../favicon.svg">
+<link rel="icon" href=".../favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href=".../apple-touch-icon.png">
+<link rel="manifest" href=".../site.webmanifest">
 ```
 
 Why these four:
@@ -115,16 +120,17 @@ Why these four:
 - **apple-touch-icon**: 180×180 PNG for iOS home screen (no `sizes` attribute — iOS ignores it and modern SEO checks flag it).
 - **manifest**: the PWA / Android home-screen description, replacing the deprecated inline Android `<link>` tags.
 
-Vite's base-path rewrite means each tool serves these from its own
-`public/` (so each tool keeps its brand color); global pages serve them
-from `site/` at the domain root. The block itself is identical across
-every page — DO NOT edit it per-page.
+Each scope (site root + every tool's `public/`) ships its own four files:
+`favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180), and
+`site.webmanifest`. Source HTML hard-codes the scope-specific URL — no
+build-time path rewriting. This matches the same convention already used
+for `/tools/<name>/pages.css`, `/tools/<name>/shared.js`, og:image, and
+canonical URL.
 
-Each scope (site root + every tool's `public/`) ships these four files:
-`favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180),
-`site.webmanifest`. Missing files should be added to that scope's
-directory; do NOT switch the `<link>` tag URL to point at another
-scope's file.
+The two URLs that stay at the domain root on every page are
+`/shared.js` and `/tool-chrome.css` (site-global utilities; preserved
+through Vite's base-path rewrite by the sentinel plugin pair in
+`tools/vite-tool-config.ts`).
 
 ### og:image policy
 

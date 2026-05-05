@@ -50,24 +50,15 @@ build_vite_tool() {
   # Copy sub-page HTML directly — Vite only bundles src/index.html.
   # Sub-pages are static HTML (IIFE scripts, public/-relative CSS) and are
   # excluded from Rollup to avoid bundling warnings. Copy them verbatim here.
-  #
-  # Vite rewrites tool-scoped absolute URLs (`/favicon.svg`, etc.) to
-  # `/tools/<name>/favicon.svg` for the main page. Sub-pages bypass Vite,
-  # so we mirror that rewrite here for the tool-scoped favicon assets.
-  # `/shared.js` and `/tool-chrome.css` are intentionally left at the
-  # domain root (site-global resources).
+  # Sub-page source HTML uses explicit `/tools/<name>/...` URLs for every
+  # tool-scoped resource (favicons, pages.css, shared.js), so no path
+  # rewriting is needed at copy time.
   find "${frontend}/src" -name "*.html" ! -path "*/src/index.html" \
     | while IFS= read -r f; do
         rel="${f#${frontend}/src/}"
         dest="${DIST_DIR}/tools/${name}/${rel}"
         mkdir -p "$(dirname "$dest")"
         cp "$f" "$dest"
-        sed -i \
-          -e "s|\"/favicon\.svg\"|\"/tools/${name}/favicon.svg\"|g" \
-          -e "s|\"/favicon\.ico\"|\"/tools/${name}/favicon.ico\"|g" \
-          -e "s|\"/apple-touch-icon\.png\"|\"/tools/${name}/apple-touch-icon.png\"|g" \
-          -e "s|\"/site\.webmanifest\"|\"/tools/${name}/site.webmanifest\"|g" \
-          "$dest"
       done
 
   echo "  → ${label} built successfully"
