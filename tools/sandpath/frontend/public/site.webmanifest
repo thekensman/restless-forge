@@ -1,0 +1,14 @@
+{
+  "name": "SandPath",
+  "short_name": "SandPath",
+  "description": "Convert images and SVGs to sand table patterns (.thr / .gcode).",
+  "start_url": "/tools/sandpath/",
+  "scope": "/tools/sandpath/",
+  "display": "standalone",
+  "background_color": "#0e0e12",
+  "theme_color": "#0e0e12",
+  "icons": [
+    { "src": "/tools/sandpath/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/tools/sandpath/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

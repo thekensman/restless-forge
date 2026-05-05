@@ -97,6 +97,46 @@ Tools opt in by:
 The dev middleware in `tools/vite-tool-config.ts` serves both files at their
 domain-root URLs; `build.sh` cache-busts them across every HTML file in dist.
 
+### Canonical favicon + manifest block
+
+Every HTML page (site-global + every tool, every sub-page) renders the same
+4-tag block in `<head>`:
+
+```html
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+```
+
+Why these four:
+- **SVG**: scalable, modern browsers (overrides the .ico when both load).
+- **ICO**: legacy fallback (`sizes="any"` lets browsers pick from the multi-size container).
+- **apple-touch-icon**: 180×180 PNG for iOS home screen (no `sizes` attribute — iOS ignores it and modern SEO checks flag it).
+- **manifest**: the PWA / Android home-screen description, replacing the deprecated inline Android `<link>` tags.
+
+Vite's base-path rewrite means each tool serves these from its own
+`public/` (so each tool keeps its brand color); global pages serve them
+from `site/` at the domain root. The block itself is identical across
+every page — DO NOT edit it per-page.
+
+Each scope (site root + every tool's `public/`) ships these four files:
+`favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180),
+`site.webmanifest`. Missing files should be added to that scope's
+directory; do NOT switch the `<link>` tag URL to point at another
+scope's file.
+
+### og:image policy
+
+Every HTML page must have `<meta property="og:image" content="...">` with
+an absolute URL:
+- Site-global pages → `https://restless-forge.dev/og-image.png`
+- Tool pages → `https://restless-forge.dev/tools/<name>/og-image.png`
+
+Each scope (site/ + every tool/public/) owns one `og-image.png`
+(1200×630 recommended). Sub-pages inherit the same image as the tool's
+main page.
+
 ### How Vite base-path transformation is worked around
 
 Vite rewrites absolute URLs in HTML against `base`, which would turn
@@ -227,6 +267,8 @@ sudo nginx -t && sudo systemctl reload nginx
 
 | Symptom | First place to check |
 |---|---|
+| Favicon doesn't show / wrong logo at root | Each scope owns its own `favicon.svg` / `.ico` / `apple-touch-icon.png` / `site.webmanifest` in `public/` (or `site/` for global). Vite rewrites `/favicon.svg` to the tool's path; do not hand-edit URLs. |
+| OG image missing on link previews | Every HTML page must have `<meta property="og:image">` with an absolute URL (`https://restless-forge.dev/...`). Each scope ships one `og-image.png`. |
 | Header/footer not rendering on a tool | Tool's `public/shared.js` — is it running? Is `<div id="<prefix>-header">` in the HTML? Is `/shared.js` loading (check Network)? |
 | Header renders but styling is wrong | Tool's `:root` — does it define all 7 `--rf-*` tokens? Is `<link href="/tool-chrome.css">` present? |
 | `/shared.js` returns the wrong content in dev | `tools/vite-tool-config.ts` — `configureServer` middleware serves it from `site/shared.js` |
