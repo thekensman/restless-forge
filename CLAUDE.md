@@ -120,12 +120,21 @@ Why these four:
 - **apple-touch-icon**: 180×180 PNG for iOS home screen (no `sizes` attribute — iOS ignores it and modern SEO checks flag it).
 - **manifest**: the PWA / Android home-screen description, replacing the deprecated inline Android `<link>` tags.
 
-Each scope (site root + every tool's `public/`) ships its own four files:
-`favicon.svg`, `favicon.ico`, `apple-touch-icon.png` (180×180), and
-`site.webmanifest`. Source HTML hard-codes the scope-specific URL — no
-build-time path rewriting. This matches the same convention already used
-for `/tools/<name>/pages.css`, `/tools/<name>/shared.js`, og:image, and
+Source HTML hard-codes the scope-specific URL — no build-time path
+rewriting. This matches the same convention already used for
+`/tools/<name>/pages.css`, `/tools/<name>/shared.js`, og:image, and
 canonical URL.
+
+**Fallback to site root.** Tools may **omit** any of these five
+fallback-eligible assets (`favicon.svg`, `favicon.ico`,
+`apple-touch-icon.png`, `site.webmanifest`, `og-image.png`). When a
+request for `/tools/<name>/<asset>` doesn't find a tool-specific file,
+nginx (in prod, via the `try_files $uri /$1 =404;` regex location in
+`nginx/restless-forge.conf`) and the Vite dev middleware (in local
+dev, in `tools/vite-tool-config.ts`) both serve the corresponding
+file from the domain root instead. Tools opt into per-brand artwork
+by adding files to `public/`; the site-wide RF defaults cover any
+gaps automatically.
 
 The two URLs that stay at the domain root on every page are
 `/shared.js` and `/tool-chrome.css` (site-global utilities; preserved

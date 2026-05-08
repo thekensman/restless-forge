@@ -30,10 +30,29 @@ export interface ToolConfigOptions {
 }
 
 export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
-  const srcDir = resolve(dir, "src");
-  // site/shared.js + tool-chrome.css live three levels up from tools/<name>/frontend/
-  const siteSharedJs    = resolve(dir, "../../../site/shared.js");
-  const siteToolChrome  = resolve(dir, "../../../site/tool-chrome.css");
+  const srcDir       = resolve(dir, "src");
+  const publicDir    = resolve(dir, "public");
+  // site/ lives three levels up from tools/<name>/frontend/
+  const siteRoot       = resolve(dir, "../../../site");
+  const siteSharedJs   = resolve(siteRoot, "shared.js");
+  const siteToolChrome = resolve(siteRoot, "tool-chrome.css");
+
+  // Tool-scoped assets that fall back to site/ when the tool doesn't ship
+  // its own copy. Mirrors the nginx regex location in restless-forge.conf.
+  const FALLBACK_ASSETS = [
+    "favicon.svg",
+    "favicon.ico",
+    "apple-touch-icon.png",
+    "site.webmanifest",
+    "og-image.png",
+  ];
+  const contentTypeFor = (name: string): string => {
+    if (name.endsWith(".svg"))         return "image/svg+xml";
+    if (name.endsWith(".ico"))         return "image/x-icon";
+    if (name.endsWith(".png"))         return "image/png";
+    if (name.endsWith(".webmanifest")) return "application/manifest+json";
+    return "application/octet-stream";
+  };
 
   // URLs that are SITE-global, not tool-scoped. Vite's default HTML asset
   // handling rewrites every absolute `/foo` href/src to `${base}/foo` during
@@ -107,6 +126,23 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
           server.middlewares.use("/tool-chrome.css", (_req, res) => {
             res.setHeader("Content-Type", "text/css");
             res.end(readFileSync(siteToolChrome, "utf-8"));
+          });
+
+          // Per-tool asset fallback to site/. Tools may omit any of the
+          // FALLBACK_ASSETS files; this middleware serves the site-wide
+          // version when the tool's own public/ doesn't have it. Mirrors
+          // the nginx regex location in restless-forge.conf so dev and
+          // prod behave identically.
+          server.middlewares.use((req, res, next) => {
+            const url = (req.url ?? "").split("?")[0];
+            const m = url.match(new RegExp(`^${base}/([^/]+)$`));
+            if (!m || !FALLBACK_ASSETS.includes(m[1])) return next();
+            const toolFile = resolve(publicDir, m[1]);
+            if (existsSync(toolFile)) return next();   // let Vite serve it
+            const siteFile = resolve(siteRoot, m[1]);
+            if (!existsSync(siteFile)) return next();  // 404 from Vite
+            res.setHeader("Content-Type", contentTypeFor(m[1]));
+            res.end(readFileSync(siteFile));
           });
 
           // Serve sub-page HTML raw from src/ without Vite's HTML transform.
