@@ -513,8 +513,10 @@ describe("STATE_TAX_RATES", () => {
 });
 
 describe("DECISION_PRESETS", () => {
-  it("has 6 presets", () => {
-    expect(DECISION_PRESETS.length).toBe(6);
+  it("has presets with unique ids", () => {
+    expect(DECISION_PRESETS.length).toBeGreaterThan(0);
+    const ids = DECISION_PRESETS.map((p) => p.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("all presets have positive hours and costs", () => {

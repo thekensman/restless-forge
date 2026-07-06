@@ -27,9 +27,10 @@
 
   // Tool links on the left, RF global links on the right.
   // The '/' entry (Restless Forge) triggers the rfNavSep separator.
+  // Only link pages the tool actually ships — add entries (e.g. FAQ,
+  // Articles) as you add the matching src/<page>/index.html.
   var navLinks = [
     [base + '/', '__TOOL_LABEL__'],
-    [base + '/faq/', 'FAQ'],
     [base + '/about/', 'About'],
     ['/', 'Restless Forge'],
     ['/tools/', 'All Tools'],
@@ -37,7 +38,6 @@
 
   var footerLinks = [
     [base + '/', '__TOOL_LABEL__'],
-    [base + '/faq/', 'FAQ'],
     [base + '/about/', 'About'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],

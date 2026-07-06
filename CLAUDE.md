@@ -272,17 +272,24 @@ Search for `© 2026` across all HTML files.
 Work in the tool's own `frontend/` directory. Its dev server is self-contained.
 
 ### Deploy changes
+
+**Normal path: merge to main.** The `Deploy` GitHub Action
+(`.github/workflows/deploy.yml`) builds and rsyncs `dist/` to the VPS on
+every push to main (requires the `DEPLOY_*` repo secrets documented in the
+workflow file). PRs run the `CI` workflow (build + all tests) first.
+
+Manual fallback (or for nginx config changes, which the Action doesn't touch):
 ```bash
 ./build.sh
 sudo cp -r dist/* /var/www/restless-forge/
-sudo nginx -t && sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx/*.conf changes
 ```
 
 ## Where to look when things break
 
 | Symptom | First place to check |
 |---|---|
-| Favicon doesn't show / wrong logo at root | Each scope owns its own `favicon.svg` / `.ico` / `apple-touch-icon.png` / `site.webmanifest` in `public/` (or `site/` for global). Vite rewrites `/favicon.svg` to the tool's path; do not hand-edit URLs. |
+| Favicon doesn't show / wrong logo on a tool | Source HTML hard-codes `/tools/<name>/favicon.svg` etc. If the tool's `public/` lacks the file, the fallback (nginx regex in prod, Vite middleware in dev) serves the site-root default — add the file to the tool's `public/` to override. |
 | OG image missing on link previews | Every HTML page must have `<meta property="og:image">` with an absolute URL (`https://restless-forge.dev/...`). Each scope ships one `og-image.png`. |
 | Header/footer not rendering on a tool | Tool's `public/shared.js` — is it running? Is `<div id="<prefix>-header">` in the HTML? Is `/shared.js` loading (check Network)? |
 | Header renders but styling is wrong | Tool's `:root` — does it define all 7 `--rf-*` tokens? Is `<link href="/tool-chrome.css">` present? |

@@ -220,6 +220,9 @@ describe("Error toast", () => {
 
 describe("Download helper", () => {
   it("creates and revokes blob URL", () => {
+    // jsdom doesn't implement blob URLs; define them so spyOn has a target.
+    URL.createObjectURL ??= () => "";
+    URL.revokeObjectURL ??= () => {};
     const createSpy = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:fake");
     const revokeSpy = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
 

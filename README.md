@@ -108,9 +108,9 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## Support
 
-- [Ko-fi](https://ko-fi.com/E1E21UH4DX)
-- [Buy Me a Coffee](https://buymeacoffee.com/stygnus)
-- [Substack](https://substack.com/@stygnus)
+- [Ko-fi](https://ko-fi.com/restless-forge)
+- [Buy Me a Coffee](https://buymeacoffee.com/restlessforge)
+- [Substack](https://restlessforge.substack.com)
 - [GitHub](https://github.com/thekensman/)
 
 ## License
