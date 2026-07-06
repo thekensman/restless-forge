@@ -75,6 +75,9 @@ build_vite_tool "HoloPath" "holopath"
 echo "[5/7] Building SandPath..."
 build_vite_tool "SandPath" "sandpath"
 
+echo "[5b/7] Building TattooSafe..."
+build_vite_tool "TattooSafe" "tattoosafe"
+
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
 # 1-year cache would serve stale versions after updates. Inject a content
@@ -104,6 +107,7 @@ bust_cache() {
 bust_cache "${DIST_DIR}/tools/what-is-my-time-worth" "/tools/what-is-my-time-worth"
 bust_cache "${DIST_DIR}/tools/holopath"               "/tools/holopath"
 bust_cache "${DIST_DIR}/tools/sandpath"               "/tools/sandpath"
+bust_cache "${DIST_DIR}/tools/tattoosafe"             "/tools/tattoosafe"
 # Add a bust_cache call here for each new tool.
 
 # Cache-bust the global /shared.js across ALL html files in dist
@@ -143,7 +147,8 @@ echo "  ├── tools/"
 echo "  │   ├── index.html          (tools hub)"
 echo "  │   ├── what-is-my-time-worth/"
 echo "  │   ├── holopath/"
-echo "  │   └── sandpath/"
+echo "  │   ├── sandpath/"
+echo "  │   └── tattoosafe/"
 echo "  ├── essays/"
 echo "  └── articles/"
 echo ""
