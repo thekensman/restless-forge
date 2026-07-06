@@ -57,30 +57,12 @@ echo "  - whatismytimeworth.app"
 echo ""
 
 # ── 4. Test nginx config ──
-echo "[4/7] Testing nginx configuration..."
+echo "[4/5] Testing nginx configuration..."
 nginx -t
 echo "  → nginx config test passed"
 
-# ── 5. SandPath Backend ──
-echo "[5/7] Setting up SandPath backend..."
-echo ""
-echo "  SandPath requires a Python backend API."
-echo "  Set up the backend:"
-echo ""
-echo "    cd /home/user/restless-forge/tools/sandpath/backend"
-echo "    python3 -m venv venv"
-echo "    source venv/bin/activate"
-echo "    pip install -r requirements.txt"
-echo "    uvicorn main:app --host 127.0.0.1 --port 8000"
-echo ""
-echo "  Or use the systemd service:"
-echo "    sudo cp sandpath.service /etc/systemd/system/"
-echo "    sudo systemctl enable sandpath"
-echo "    sudo systemctl start sandpath"
-echo ""
-
-# ── 6. Build and deploy ──
-echo "[6/7] Building site..."
+# ── 5. Build and deploy ──
+echo "[5/5] Building site..."
 echo ""
 echo "  Run the build script to compile all tools:"
 echo "    ./build.sh"
@@ -90,8 +72,8 @@ echo "    cp -r dist/* /var/www/restless-forge/"
 echo "    chown -R www-data:www-data /var/www/restless-forge"
 echo ""
 
-# ── 7. Reload nginx ──
-echo "[7/7] Reloading nginx..."
+# ── Reload nginx ──
+echo "Reloading nginx..."
 systemctl reload nginx
 echo "  → nginx reloaded"
 

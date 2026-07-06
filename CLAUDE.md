@@ -4,8 +4,10 @@ AI assistant guide for the Restless Forge monorepo.
 
 ## What This Is
 
-Restless Forge consolidates three tool-based websites into a single domain (restless-forge.dev):
+Restless Forge is a single-domain hub (restless-forge.dev) for free,
+browser-only tools. Every tool runs 100% client-side — there are no backends.
 
+Currently live:
 1. **What Is My Time Worth?** — Real hourly wage calculator (formerly whatismytimeworth.app)
 2. **HoloPath** — Hologram GIF generator (formerly holopath.art)
 3. **SandPath** — Image/SVG to sand table converter (formerly sandpath.art)
@@ -16,173 +18,249 @@ Global support pages (about, contact, privacy, terms, FAQ, essays, articles) liv
 
 ```
 restless-forge/
-├── site/           → Static HTML/CSS for global pages (landing, about, privacy, etc.)
-│   └── shared.js   → Global nav/footer + rf* shared utilities for all tool pages
-├── tools/          → Tool source code (each has its own frontend/ directory)
+├── site/                → Static HTML/CSS for global pages (landing, about, privacy, ...)
+│   ├── shared.js        → `rf*` utilities (donate links, nav/footer separators)
+│   └── tool-chrome.css  → Shared .site-header / .footer styles for every tool
+├── tools/
+│   ├── template/frontend/    → Turnkey scaffold (copy via scripts/new-tool.sh)
 │   ├── what-is-my-time-worth/frontend/
-│   │   ├── src/            → HTML pages + TypeScript source (Vite root)
-│   │   │   ├── index.html  → Main app entry point
-│   │   │   ├── about/index.html, faq/index.html, ...  → Sub-pages
-│   │   │   └── articles/index.html, articles/[slug]/index.html
-│   │   └── public/         → Static assets only (shared.js, pages.css, favicons)
-│   ├── holopath/frontend/  → Same structure as above
-│   └── sandpath/frontend/ + backend/    → Vite + TS + Python FastAPI
-├── nginx/          → Production nginx configs (main site + 301 redirects)
-├── vite.config.ts  → Root dev server (serves site/ + proxies tool servers)
-├── package.json    → Root scripts: `npm run dev` starts everything
-├── build.sh        → Builds all tools → dist/
-├── setup.sh        → Server setup script
-└── dist/           → Build output (gitignored)
+│   ├── holopath/frontend/
+│   └── sandpath/frontend/
+├── scripts/
+│   └── new-tool.sh      → Scaffolds tools/<name>/frontend/ from tools/template/
+├── nginx/               → Production nginx configs (main site + 301 redirects)
+├── vite.config.ts       → Root dev server (serves site/ + proxies tool servers)
+├── package.json         → Root scripts: `npm run dev`, `npm test`, `npm run build`
+├── build.sh             → Builds all tools → dist/
+└── dist/                → Build output (gitignored)
 ```
 
-### Tool frontend convention (both WIMTW and HoloPath)
+### Tool frontend convention
+
+Every tool under `tools/<name>/frontend/` follows the same layout:
 
 ```
 frontend/
-├── src/                     ← Vite root: all HTML pages live here
-│   ├── index.html           ← Main app (TypeScript SPA entry point)
-│   ├── about/index.html     ← Sub-pages use directory style (clean URLs)
+├── package.json          ← name: "<name>-frontend", version 1.0.0, ES modules
+├── tsconfig.json         ← target ES2022, strict, bundler moduleResolution
+├── vite.config.ts        ← calls defineToolConfig({ base, port, dir })
+├── src/                  ← Vite root: HTML pages + TypeScript live here
+│   ├── index.html        ← Main app (TypeScript SPA entry point)
+│   ├── styles.css        ← Main-app styles (Vite-bundled)
+│   ├── app.ts            ← TS entry
+│   ├── about/index.html  ← Sub-pages use directory style (clean URLs)
 │   ├── faq/index.html
-│   ├── contact/index.html
-│   ├── terms/index.html
-│   ├── privacy/index.html
-│   └── articles/
-│       ├── index.html       ← Articles listing
-│       └── [slug].html      ← Individual articles (flat within articles/)
-└── public/                  ← Static assets only (NOT HTML pages)
-    ├── shared.js            ← Tool-specific nav/footer (depends on /shared.js)
-    ├── pages.css            ← Sub-page styles
+│   └── ...
+└── public/               ← Static assets only (NOT HTML pages)
+    ├── shared.js         ← Tool-specific header/footer renderer
+    ├── pages.css         ← Sub-page styles
     └── [favicons, og-image, robots.txt, sitemap.xml, ads.txt, ...]
 ```
 
-**Why `src/` for HTML, not `public/`**: Vite's MPA mode (`appType: 'mpa'`) only routes
-requests to HTML files found in `root` (`src/`). Files in `public/` are static assets
-served verbatim — Vite does not treat them as navigable pages. Sub-pages in `public/`
-always 404 in the dev server.
+**Why `src/` for HTML, not `public/`**: Vite's MPA mode (`appType: 'mpa'`) only
+routes requests to HTML files found in `root` (`src/`). Files in `public/` are
+static assets served verbatim — Vite does not treat them as navigable pages.
 
 ## Key Architecture Decisions
 
-- **Monorepo**: All tool source + global pages in one repo for unified maintenance
-- **Vite base paths**: Each tool's `vite.config.ts` sets `base: '/tools/[name]/'` so assets load from the correct subdirectory
-- **Global pages**: Static HTML in `site/` — no build step, just copy to dist
-- **Per-tool identity**: Each tool keeps its own CSS, fonts, and visual theme
-- **Shared footer**: All tools link to global about/contact/privacy/terms and include the same donation footer
-- **Shared components via JS**: Nav and footer are generated from `shared.js` files. `site/shared.js` is the global root that also exposes `rf*` utilities. Tool-specific `public/shared.js` files depend on it.
-- **SandPath backend**: Python FastAPI proxied through nginx at `/api/`
+- **Monorepo**: all tool source + global pages in one repo.
+- **Client-only**: no backends. If a tool needs heavy computation, it runs in the browser (Canvas, Workers, Wasm, etc.).
+- **Vite base paths**: each tool's `vite.config.ts` uses `defineToolConfig({ base: '/tools/<name>', ... })` via the shared factory in `tools/vite-tool-config.ts`.
+- **Shared chrome, per-tool theme**: every tool renders the same `.site-header` / `.footer` markup (from `public/shared.js`), styled by the shared `site/tool-chrome.css`, themed through a set of `--rf-*` CSS custom properties each tool defines.
+- **Global pages**: static HTML in `site/` — no build step, just copy to dist.
 
 ## Shared Resource Architecture
 
-`site/shared.js` (served at `/shared.js`) is the single source of truth for:
-- `window.rfDonateLinks` — array of [url, label] donation links
-- `window.rfDonateHtml()` — renders the standard "Support Restless Forge" donate block
-- `window.rfNavSep` — `<span class="nav-sep">|</span>` separator between tool and RF nav links
-- `window.rfFooterSep` — `<span class="footer-sep">|</span>` separator for footer
-- `window.rfNav()` — global site navigation
-- `window.rfFooter()` — global site footer
+### `site/shared.js` — runtime utilities
+Served at `/shared.js` in dev and prod. Single source of truth for:
+- `window.rfDonateLinks` — array of `[url, label]` donation links
+- `window.rfDonateHtml()` — renders the "Support Restless Forge" donate block
+- `window.rfNavSep` — `<span class="nav-sep">|</span>` between tool and RF nav links
+- `window.rfFooterSep` — `<span class="footer-sep">|</span>` for footer separators
 
-Every tool page (both main app and sub-pages) loads `/shared.js` first, then its own `shared.js`. This ensures the `rf*` globals are available when the tool's nav/footer functions run.
+Every tool page loads `/shared.js` first, then the tool's own `public/shared.js`.
 
-Vite dev servers each include a `configureServer` plugin that serves `site/shared.js` at `/shared.js` so local development works without nginx.
+### `site/tool-chrome.css` — shared header/footer CSS
+Served at `/tool-chrome.css`. Owns all `.site-header*`, `.nav-toggle`,
+`.site-header__support*`, `.footer__donate*`, `.footer__link*`, `.nav-sep`,
+`.footer-sep` styles and the `@media (max-width: 640px)` collapsing behavior.
+
+Tools opt in by:
+1. `<link rel="stylesheet" href="/tool-chrome.css">` on every HTML page.
+2. Defining the 7 `--rf-*` tokens in `:root` (in both `src/styles.css` and
+   `public/pages.css`): `--rf-bg`, `--rf-text`, `--rf-muted`, `--rf-dim`,
+   `--rf-accent`, `--rf-border`, `--rf-font-mono`. Alias them to the tool's
+   own theme tokens.
+3. Emitting `.site-header` markup from `public/shared.js` (header with brand,
+   `.nav-toggle` button, `.site-header__nav`, and `.site-header__support`).
+
+The dev middleware in `tools/vite-tool-config.ts` serves both files at their
+domain-root URLs; `build.sh` cache-busts them across every HTML file in dist.
+
+### Canonical favicon + manifest block
+
+Every HTML page renders the same 4-tag block in `<head>`. The URLs differ
+by scope, but the **shape** is invariant:
+
+| Scope | Block |
+|---|---|
+| Site-global (`site/*.html`) | `/favicon.svg`, `/favicon.ico`, `/apple-touch-icon.png`, `/site.webmanifest` |
+| Tool (`tools/<name>/.../index.html`, main + sub-pages) | `/tools/<name>/favicon.svg`, `/tools/<name>/favicon.ico`, `/tools/<name>/apple-touch-icon.png`, `/tools/<name>/site.webmanifest` |
+
+```html
+<link rel="icon" type="image/svg+xml" href=".../favicon.svg">
+<link rel="icon" href=".../favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href=".../apple-touch-icon.png">
+<link rel="manifest" href=".../site.webmanifest">
+```
+
+Why these four:
+- **SVG**: scalable, modern browsers (overrides the .ico when both load).
+- **ICO**: legacy fallback (`sizes="any"` lets browsers pick from the multi-size container).
+- **apple-touch-icon**: 180×180 PNG for iOS home screen (no `sizes` attribute — iOS ignores it and modern SEO checks flag it).
+- **manifest**: the PWA / Android home-screen description, replacing the deprecated inline Android `<link>` tags.
+
+Source HTML hard-codes the scope-specific URL — no build-time path
+rewriting. This matches the same convention already used for
+`/tools/<name>/pages.css`, `/tools/<name>/shared.js`, og:image, and
+canonical URL.
+
+**Fallback to site root.** Tools may **omit** any of these five
+fallback-eligible assets (`favicon.svg`, `favicon.ico`,
+`apple-touch-icon.png`, `site.webmanifest`, `og-image.png`). When a
+request for `/tools/<name>/<asset>` doesn't find a tool-specific file,
+nginx (in prod, via the `try_files $uri /$1 =404;` regex location in
+`nginx/restless-forge.conf`) and the Vite dev middleware (in local
+dev, in `tools/vite-tool-config.ts`) both serve the corresponding
+file from the domain root instead. Tools opt into per-brand artwork
+by adding files to `public/`; the site-wide RF defaults cover any
+gaps automatically.
+
+The two URLs that stay at the domain root on every page are
+`/shared.js` and `/tool-chrome.css` (site-global utilities; preserved
+through Vite's base-path rewrite by the sentinel plugin pair in
+`tools/vite-tool-config.ts`).
+
+### og:image policy
+
+Every HTML page must have `<meta property="og:image" content="...">` with
+an absolute URL:
+- Site-global pages → `https://restless-forge.dev/og-image.png`
+- Tool pages → `https://restless-forge.dev/tools/<name>/og-image.png`
+
+Each scope (site/ + every tool/public/) owns one `og-image.png`
+(1200×630 recommended). Sub-pages inherit the same image as the tool's
+main page.
+
+### How Vite base-path transformation is worked around
+
+Vite rewrites absolute URLs in HTML against `base`, which would turn
+`<script src="/shared.js">` into `<script src="/tools/<name>/shared.js">` and
+break cross-tool resource sharing. A pre/post `transformIndexHtml` plugin pair
+in `vite-tool-config.ts` sentinel-marks `/shared.js` and `/tool-chrome.css`
+before Vite runs and restores them afterwards. Do **not** edit this without
+also updating the build output checks.
 
 ## Development Workflow
 
-### Working on a specific tool
+### Everything at once
 
 ```bash
-cd tools/holopath/frontend
+npm install          # (first time only)
+npm run dev          # starts site proxy :8080 + all tool dev servers
+npm test             # runs every tool's vitest suite
+npm run build        # ./build.sh — compiles all tools into dist/
+```
+
+### Single tool in isolation
+
+```bash
+cd tools/<name>/frontend
 npm install
 npm run dev
 ```
 
-Each tool runs on its own dev port (3000, 5173, 5174). Sub-pages (about, faq, etc.) are served correctly thanks to `appType: 'mpa'` in each tool's `vite.config.ts`. Global links like `/about` won't resolve in dev — that's expected; they work in production behind nginx.
+### Port allocation
 
-### Building everything
+| Service                | Port | Started by                        |
+|------------------------|------|-----------------------------------|
+| Site proxy (serves `site/`, proxies `/tools/*`) | 8080 | `npm run dev` from repo root |
+| What Is My Time Worth  | 3000 | `dev:wimtw` or root `dev`         |
+| HoloPath               | 5173 | `dev:holopath` or root `dev`      |
+| SandPath               | 5174 | `dev:sandpath` or root `dev`      |
+| Next new tool          | 5175 | `dev:<prefix>` or root `dev`      |
 
-```bash
-./build.sh    # Runs npm ci + npm run build for each tool, copies to dist/
-```
+Global links like `/about`, `/tools/` resolve correctly at the root proxy
+(:8080) but NOT when running a single tool's dev server (it doesn't serve
+those paths). Test global navigation via the root proxy only.
 
 ### Adding a new tool
 
-1. Create `tools/new-tool/frontend/` with the standard structure:
-   - `src/index.html` — main Vite app entry (TypeScript SPA)
-   - `src/about/index.html`, `src/faq/index.html`, etc. — sub-pages
-   - `public/shared.js` — tool nav/footer (depends on rf* globals from `/shared.js`)
-   - `public/pages.css` — sub-page styles
-   - `public/[favicons, robots.txt, sitemap.xml, ...]` — static assets
-2. Copy `vite.config.ts` from WIMTW or HoloPath and update `base` and `server.port`
-   - The `htmlInputs()` helper auto-discovers all HTML files in `src/` — no manual updates needed when adding pages
-3. In `src/index.html`, add `<script src="/shared.js"></script>` before `<script src="shared.js"></script>`
-4. In every sub-page HTML under `src/`, add `<script src="/shared.js"></script>` before the tool's shared.js include, and use `<div id="tool-header"></div>` / `<div id="tool-footer"></div>` placeholders — nav auto-injects via DOMContentLoaded in `public/shared.js`
-5. In `public/shared.js`, use `window.rfDonateHtml()`, `window.rfNavSep`, `window.rfFooterSep` from `site/shared.js`; add DOMContentLoaded listener to auto-inject into placeholder divs
-6. Add build step in `build.sh` (copy pattern from WIMTW or HoloPath)
-7. Add `bust_cache "${DIST_DIR}/tools/new-tool" "/tools/new-tool"` in build.sh cache-bust section
-8. Add proxy entry in root `vite.config.ts` and start script in root `package.json`
-9. Add tool card to `site/index.html` and `site/tools/index.html`
-10. Add URL to `site/sitemap.xml`
-11. Update nginx config if the tool needs API proxying
+The scaffolder copies `tools/template/`, substitutes placeholders, and runs
+`npm install`:
+
+```bash
+scripts/new-tool.sh <tool-name> "<tool-label>" <prefix> <port> <emoji>
+# example:
+scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
+```
+
+After running it, do the listed manual steps (build.sh entry, root
+package.json dev script, root vite proxy, sitemap, tool hub cards). The
+scaffolder prints the exact commands you need.
 
 ### Adding an essay
 
-1. Create `site/essays/your-essay-slug.html` using existing essay as template
-2. Add card to `site/essays/index.html`
-3. Add URL to `site/sitemap.xml`
-4. Ensure essay has: title, meta description, OG tags, canonical URL, JSON-LD Article schema
+1. Create `site/essays/your-slug.html` using an existing essay as a template.
+2. Add a card to `site/essays/index.html`.
+3. Add the URL to `site/sitemap.xml`.
+4. Ensure it has: title, meta description, OG tags, canonical URL, JSON-LD Article schema.
 
 ## Build System
 
-- **Tools**: TypeScript → Vite build → `tools/[name]/frontend/dist/`
-- **Global pages**: Static files in `site/` — no compilation
-- **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`
-- **Cache-busting**: `build.sh` injects content-hash `?v=HASH` into HTML references for `shared.js`, `pages.css`, and the global `/shared.js` so stale cached files are never served after updates
+- **Tools**: TypeScript → `tsc` → Vite build → `tools/<name>/frontend/dist/`.
+- **Global pages**: static files in `site/` — no compilation.
+- **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`.
+- **Cache-busting**: `build.sh` computes md5 hashes and injects `?v=<hash>` on
+  `/shared.js`, `/tool-chrome.css`, each tool's `shared.js`, and each tool's
+  `pages.css` across every HTML file. Nginx serves these with a 1-year
+  `immutable` cache, so the query-string bust is what invalidates them after
+  a deploy. `bust_cache` gracefully skips missing files (e.g. a single-page
+  tool that has no `pages.css`).
 
 ## URL Routing
 
 | URL Pattern | Source |
 |---|---|
 | `/` | `site/index.html` |
-| `/shared.js` | `site/shared.js` (global shared utilities) |
-| `/about` | `site/about.html` (nginx: try `$uri.html`) |
-| `/contact` | `site/contact.html` |
-| `/privacy` | `site/privacy.html` |
-| `/terms` | `site/terms.html` |
-| `/faq` | `site/faq.html` |
+| `/shared.js` | `site/shared.js` |
+| `/tool-chrome.css` | `site/tool-chrome.css` |
+| `/about`, `/contact`, `/privacy`, `/terms`, `/faq` | `site/<page>.html` (nginx try_files) |
 | `/tools/` | `site/tools/index.html` |
-| `/tools/holopath/` | `tools/holopath/frontend/dist/` |
-| `/tools/sandpath/` | `tools/sandpath/frontend/dist/` |
-| `/tools/what-is-my-time-worth/` | `tools/what-is-my-time-worth/frontend/dist/` |
+| `/tools/<name>/` | `tools/<name>/frontend/dist/` |
 | `/essays/*` | `site/essays/*.html` |
 | `/articles/` | `site/articles/index.html` |
-| `/api/*` | Proxied to SandPath backend (port 8000) |
 
 ## Code Conventions
 
-- TypeScript strict mode, no runtime npm dependencies
-- Vanilla DOM manipulation (no React/Vue/Angular)
-- CSS custom properties for theming (each tool has its own color scheme)
-- BEM-like class naming (`.block__element--modifier`)
-- Semantic HTML with ARIA attributes
-
-## Testing
-
-```bash
-cd tools/holopath/frontend && npm test
-cd tools/sandpath/frontend && npm test
-cd tools/what-is-my-time-worth/frontend && npm test
-cd tools/sandpath/backend && python run_tests.py
-```
+- TypeScript strict mode, no runtime npm dependencies.
+- Vanilla DOM manipulation (no React/Vue/Angular).
+- CSS custom properties for theming.
+- BEM-like class naming (`.block__element--modifier`).
+- Semantic HTML with ARIA attributes.
+- Placeholder IDs follow `<prefix>-header` / `<prefix>-footer` where `<prefix>`
+  is the tool's JS identifier (wimtw, hp, sp).
 
 ## Common Tasks
 
 ### Update global nav/footer links
-Edit the shared.js file for the relevant context:
-- **Global site pages**: `site/shared.js` — nav and footer for all pages in `site/`
-- **WIMTW sub-pages**: `tools/what-is-my-time-worth/frontend/public/shared.js` — header and footer for about, faq, articles, contact, privacy, terms
-- **HoloPath sub-pages**: `tools/holopath/frontend/public/shared.js` — nav, support banner, and footer for all pages in `public/`
-- **Tool main apps** (Vite index.html): Each tool's `src/index.html` includes both `/shared.js` and its own `shared.js` — nav/footer logic lives in the tool's `public/shared.js`
+- Global site pages: `site/shared.js`.
+- Per-tool headers/footers: `tools/<name>/frontend/public/shared.js` — each
+  defines its own `navLinks` / `footerLinks` arrays.
 
 ### Update donation links
-Edit `window.rfDonateLinks` in `site/shared.js` — this is the single source of truth. All tool footers use `window.rfDonateHtml()` which reads from this array.
+Edit `window.rfDonateLinks` in `site/shared.js` — the single source of truth.
+All tool footers read from it via `window.rfDonateHtml()`.
 
 ### Update AdSense publisher ID
 Search for `ca-pub-5516736042033534` across all HTML files.
@@ -191,22 +269,48 @@ Search for `ca-pub-5516736042033534` across all HTML files.
 Search for `© 2026` across all HTML files.
 
 ### Fix a tool-specific bug
-Work in the tool's own `frontend/` directory. The tool's Vite dev server is self-contained.
+Work in the tool's own `frontend/` directory. Its dev server is self-contained.
 
 ### Deploy changes
+
+**Normal path: merge to main.** The `Deploy` GitHub Action
+(`.github/workflows/deploy.yml`) builds and rsyncs `dist/` to the VPS on
+every push to main (requires the `DEPLOY_*` repo secrets documented in the
+workflow file). PRs run the `CI` workflow (build + all tests) first.
+
+Manual fallback (or for nginx config changes, which the Action doesn't touch):
 ```bash
 ./build.sh
 sudo cp -r dist/* /var/www/restless-forge/
-sudo nginx -t && sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx/*.conf changes
 ```
+
+## Where to look when things break
+
+| Symptom | First place to check |
+|---|---|
+| Favicon doesn't show / wrong logo on a tool | Source HTML hard-codes `/tools/<name>/favicon.svg` etc. If the tool's `public/` lacks the file, the fallback (nginx regex in prod, Vite middleware in dev) serves the site-root default — add the file to the tool's `public/` to override. |
+| OG image missing on link previews | Every HTML page must have `<meta property="og:image">` with an absolute URL (`https://restless-forge.dev/...`). Each scope ships one `og-image.png`. |
+| Header/footer not rendering on a tool | Tool's `public/shared.js` — is it running? Is `<div id="<prefix>-header">` in the HTML? Is `/shared.js` loading (check Network)? |
+| Header renders but styling is wrong | Tool's `:root` — does it define all 7 `--rf-*` tokens? Is `<link href="/tool-chrome.css">` present? |
+| `/shared.js` returns the wrong content in dev | `tools/vite-tool-config.ts` — `configureServer` middleware serves it from `site/shared.js` |
+| Built HTML points at `/tools/<name>/shared.js` where it should be `/shared.js` | Sentinel plugins in `tools/vite-tool-config.ts` — verify the SITE_GLOBAL_URLS list includes the URL |
+| Sub-page 404s in dev | Sub-page HTML must live under `src/`, not `public/`. Vite MPA only routes files in `src/` |
+| Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? |
+| New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |
 
 ## Gotchas
 
-- **Vite base paths matter**: If you reset a tool's `vite.config.ts`, re-add the `base` and `appType: 'mpa'` properties or sub-pages and assets won't work correctly
-- **`appType: 'mpa'` required**: Without this, Vite falls back to SPA mode and serves `src/index.html` for every route
-- **HTML pages belong in `src/`, NOT `public/`**: Vite's MPA routing only works for HTML files in `root` (`src/`). Files in `public/` are static assets — Vite does not route to them as pages, so they always 404 in the dev server
-- **Load order matters**: `/shared.js` must be loaded before a tool's `shared.js` or `window.rfDonateHtml` etc. will be undefined
-- **SandPath needs its backend**: Unlike the other tools, SandPath has API calls to a Python backend on port 8000
-- **nginx rate limiting**: The API has a 15 req/min limit per IP — adjust in `nginx/restless-forge.conf` if needed
-- **Old domain redirects**: Keep SSL certs renewed for holopath.art, sandpath.art, whatismytimeworth.app as long as 301 redirects are active
-- **Essays are placeholders**: The 3 essay files have placeholder content — Ken needs to write the actual essays for AdSense approval
+- **Vite base paths matter**: always configure via `defineToolConfig()`. Don't
+  hand-roll base paths — the sentinel plugins and MPA config depend on the
+  factory.
+- **`appType: 'mpa'` is baked into the factory**: sub-pages only work if the
+  tool uses `defineToolConfig()`.
+- **HTML pages belong in `src/`, NOT `public/`** — Vite MPA only routes files
+  in `src/`. `public/` is static assets.
+- **Load order matters**: `/shared.js` must load before the tool's
+  `public/shared.js` or `window.rfDonateHtml` will be undefined.
+- **Old domain redirects**: keep SSL certs renewed for holopath.art,
+  sandpath.art, whatismytimeworth.app as long as 301 redirects are active.
+- **Essays are placeholders**: the 3 essay files under `site/essays/` contain
+  stub content and need real essays before AdSense approval.

@@ -359,27 +359,55 @@ export function convert(
 
   if (device.shape === "circular") {
     // 4. Polar radius
+    //
+    // For a circular bed there are no rectangular "corners" to crop, so the
+    // useful difference between cover and contain is how aggressively we fill
+    // the disk:
+    //   contain → fits every traced point inside the disk (safe default for
+    //             asymmetric content like a watch + chain — nothing clips)
+    //   cover   → scales up further so the SHORT bbox side reaches the edge,
+    //             accepting that points beyond the inscribed circle clip
+    //
+    // Previously cover used halfShort with the bbox center, which silently
+    // dropped large arcs of off-center content (e.g. the bottom of a watch
+    // when the chain pulled the bbox center upward). Anchoring both modes to
+    // the actual max distance from center keeps the polar center honest.
+    const maxDist = Math.max(
+      ...allLists.flatMap(p => p.map(([x, y]) => Math.hypot(x - ccx, y - ccy)))
+    );
     let polarR: number;
     if (fit === "cover") {
       const halfShort = Math.min(cw, ch) / 2;
-      polarR = halfShort > 0.001 ? halfShort / effectiveRho : 1;
+      // Use halfShort when it actually contains the content (centered, square
+      // artwork). Otherwise fall back to maxDist so off-center content is not
+      // truncated.
+      polarR = (halfShort > 0.001 && halfShort >= maxDist)
+        ? halfShort / effectiveRho
+        : (maxDist > 0.001 ? maxDist / effectiveRho : 1);
     } else {
-      const maxDist = Math.max(...allLists.flatMap(p => p.map(([x, y]) => Math.hypot(x - ccx, y - ccy))));
       polarR = maxDist > 0.001 ? maxDist / effectiveRho : 1;
     }
 
-    // 5. Optimise order
+    // 5. Optimise order (nearest-neighbour minimises travel between subpaths)
     const order = optimizeOrder(allLists);
 
-    // 6. Convert to theta-rho
+    // 6. Convert to theta-rho. Consecutive points are drawn as arcs — there
+    // is no pen-up. Nearest-neighbour ordering keeps subpath transitions
+    // short; trying to retract through rho=0 between every subpath creates
+    // a visible starburst of radial spokes, which is worse than the short
+    // chord that naturally connects nearby endpoints.
+    const toPolar = (x: number, y: number): [number, number] => {
+      const dx = x - ccx, dy = y - ccy;
+      const rho = Math.min(Math.hypot(dx, dy) / polarR, effectiveRho);
+      const theta = Math.atan2(dy, dx) + Math.PI / 2;
+      return [theta, rho];
+    };
+
     let tr: [number, number][] = [];
     for (const idx of order) {
-      for (const [x, y] of allLists[idx]) {
-        const dx = x - ccx, dy = y - ccy;
-        const rho = Math.min(Math.hypot(dx, dy) / polarR, effectiveRho);
-        const theta = Math.atan2(dy, dx) + Math.PI / 2;
-        tr.push([theta, rho]);
-      }
+      const path = allLists[idx];
+      if (!path.length) continue;
+      for (const [x, y] of path) tr.push(toPolar(x, y));
     }
     tr = unwrapTheta(tr);
 

@@ -3,29 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- TODO: update title, description, canonical URL, OG tags -->
-  <title>TOOL_LABEL — Restless Forge</title>
+  <title>__TOOL_LABEL__ — Restless Forge</title>
   <meta name="description" content="TODO: page description">
-  <link rel="canonical" href="https://restless-forge.dev/tools/TOOL_NAME/">
+  <link rel="canonical" href="https://restless-forge.dev/tools/__TOOL_NAME__/">
 
   <!-- Open Graph -->
-  <meta property="og:title" content="TOOL_LABEL">
+  <meta property="og:title" content="__TOOL_LABEL__">
   <meta property="og:description" content="TODO: OG description">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://restless-forge.dev/tools/TOOL_NAME/">
-  <meta property="og:image" content="https://restless-forge.dev/tools/TOOL_NAME/og-image.png">
+  <meta property="og:url" content="https://restless-forge.dev/tools/__TOOL_NAME__/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/__TOOL_NAME__/og-image.png">
 
-  <!-- Favicons (add to public/) -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/__TOOL_NAME__/favicon.svg">
+  <link rel="icon" href="/tools/__TOOL_NAME__/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/__TOOL_NAME__/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/__TOOL_NAME__/site.webmanifest">
 
   <!-- JSON-LD structured data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "TOOL_LABEL",
-    "url": "https://restless-forge.dev/tools/TOOL_NAME",
+    "name": "__TOOL_LABEL__",
+    "url": "https://restless-forge.dev/tools/__TOOL_NAME__",
     "description": "TODO",
     "applicationCategory": "UtilityApplication",
     "operatingSystem": "Any",
@@ -34,28 +35,30 @@
   }
   </script>
 
-  <!-- AdSense — replace pub ID if needed -->
+  <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
 
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
   <!-- Tool styles (in src/ — Vite-processed) -->
   <link rel="stylesheet" href="./styles.css">
 
-  <!-- Shared scripts (absolute URLs — served from public/, not bundled by Vite) -->
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
   <script src="/shared.js"></script>
-  <script src="/tools/TOOL_NAME/shared.js"></script>
+  <script src="/tools/__TOOL_NAME__/shared.js"></script>
 </head>
 <body>
 
   <!-- Header injected by DOMContentLoaded in public/shared.js -->
-  <div id="TOOL_PREFIX-header"></div>
+  <div id="__TOOL_PREFIX__-header"></div>
 
   <main>
-    <!-- TODO: tool UI -->
-    <h1>TOOL_LABEL</h1>
+    <h1>__TOOL_LABEL__</h1>
+    <p>TODO: tool UI</p>
   </main>
 
   <!-- Footer injected by DOMContentLoaded in public/shared.js -->
-  <div id="TOOL_PREFIX-footer"></div>
+  <div id="__TOOL_PREFIX__-footer"></div>
 
   <!-- Main app TypeScript entry — Vite bundles this -->
   <script type="module" src="./app.ts"></script>

@@ -17,6 +17,15 @@
   --text-muted: #8888a0;
   --font-display: 'Orbitron', sans-serif;
   --font-body: 'Share Tech Mono', monospace;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--dark);
+  --rf-text: var(--text);
+  --rf-muted: var(--text-muted);
+  --rf-dim: var(--text-muted);
+  --rf-accent: var(--cyan);
+  --rf-border: #1a1a2e;
+  --rf-font-mono: var(--font-body);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,60 +48,7 @@ body {
 a { color: var(--cyan); text-decoration: underline; text-underline-offset: 2px; }
 a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
 
-/* ─── Navigation ─── */
-.nav {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.65rem 1rem;
-  background: var(--dark-raised);
-  border-bottom: 1px solid rgba(0, 255, 242, 0.12);
-  flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
-}
-.nav__link {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.82rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 4px;
-  transition: color 0.2s, background 0.2s;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-}
-.nav__link:hover {
-  color: var(--cyan);
-  background: rgba(0, 255, 242, 0.06);
-  text-shadow: none;
-}
-.nav__link--active {
-  color: var(--cyan);
-  background: rgba(0, 255, 242, 0.1);
-}
-.nav-sep {
-  color: rgba(0, 255, 242, 0.4);
-  padding: 0 4px;
-  user-select: none;
-  font-size: 0.82rem;
-}
-
-@media (max-width: 480px) {
-  .nav {
-    gap: 0.15rem;
-    padding: 0.5rem 0.5rem;
-  }
-  .nav__link {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.5rem;
-  }
-}
+/* Navigation + support banner now come from site/tool-chrome.css. */
 
 /* ─── Page Content ─── */
 .page-content {
@@ -201,75 +157,9 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   font-size: 0.88rem;
 }
 
-/* ─── Support Banner ─── */
-.support-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: linear-gradient(90deg, rgba(0,255,242,0.04), rgba(255,0,255,0.04));
-  border-bottom: 1px solid rgba(0, 255, 242, 0.1);
-  flex-wrap: wrap;
-  width: 100%;
-}
-.support-banner__text {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-}
-.support-banner__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 3px;
-  text-decoration: none;
-  transition: all 0.2s;
-  background: transparent;
-}
-.support-banner__btn:hover {
-  background: rgba(255, 215, 0, 0.08);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
-  text-shadow: none;
-  color: #ffd700;
-  text-decoration: none;
-}
-.support-banner__btn--alt {
-  color: var(--cyan-dim);
-  border-color: rgba(0, 255, 242, 0.2);
-}
-.support-banner__btn--alt:hover {
-  background: rgba(0, 255, 242, 0.06);
-  box-shadow: 0 0 12px rgba(0, 255, 242, 0.15);
-  color: var(--cyan);
-  text-decoration: none;
-}
-.support-banner__close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0 4px;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-}
-.support-banner__close:hover { opacity: 1; }
-
-/* Footer support link */
-.footer__support {
-  color: var(--cyan-dim);
-  text-decoration: none;
-  font-size: 0.72rem;
-  margin-left: 4px;
-}
-.footer__support:hover { color: var(--cyan); text-shadow: none; }
+/* Support banner is now the shared .site-header__support strip in
+   site/tool-chrome.css — rendered inline inside the header, not a separate
+   dismissable banner. */
 
 /* ─── Ad Slot ─── */
 .ad-slot--bottom {
@@ -280,94 +170,12 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   padding: 0 1.5rem;
 }
 
-/* ─── Footer Donate ─── */
-.footer__donate {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-.footer__donate-label {
-  display: block;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--cyan-dim);
-  margin-bottom: 0.5rem;
-}
-.footer__donate-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-}
-.footer__donate-link {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  border: 1px solid rgba(0, 255, 242, 0.12);
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: color 0.2s, border-color 0.2s;
-}
-.footer__donate-link:hover {
-  color: var(--cyan);
-  border-color: var(--cyan-dim);
-  text-shadow: none;
-}
-
-/* ─── Footer ─── */
+/* ─── Footer (outer container; donate/links/copy live in site/tool-chrome.css) ─── */
 .footer {
   text-align: center;
   padding: 2rem 1rem 1.5rem;
   border-top: 1px solid rgba(0, 255, 242, 0.08);
   margin-top: 2rem;
-}
-.footer__links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.2rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-}
-.footer__coffee {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--cyan);
-  text-decoration: none;
-  font-size: 0.85rem;
-}
-.footer__coffee:hover { color: #fff; }
-.footer__coffee svg { opacity: 0.8; }
-.footer__link {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.85rem;
-}
-.footer__link:hover { color: var(--cyan); text-shadow: none; }
-.footer__legal {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
-}
-.footer__legal a {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.8rem;
-}
-.footer__legal a:hover { color: var(--cyan); text-shadow: none; }
-.footer-sep {
-  color: rgba(0, 255, 242, 0.4);
-  padding: 0 4px;
-  user-select: none;
-  font-size: 0.8rem;
-}
-.footer__copy {
-  color: rgba(136, 136, 160, 0.5);
-  font-size: 0.75rem;
-  margin-top: 0.5rem;
 }
 
 /* ─── Responsive ─── */

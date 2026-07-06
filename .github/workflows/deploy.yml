@@ -1,0 +1,62 @@
+name: Deploy
+
+# Deploys dist/ to the production VPS on every push to main.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST     VPS hostname or IP (e.g. sandpath-01 public IP)
+#   DEPLOY_USER     SSH user with write access to the web root
+#   DEPLOY_SSH_KEY  Private key (PEM) for that user — generate a dedicated
+#                   keypair: `ssh-keygen -t ed25519 -f deploy_key -N ""`,
+#                   append deploy_key.pub to ~/.ssh/authorized_keys on the
+#                   VPS, paste deploy_key here.
+#   DEPLOY_PATH     Web root, e.g. /var/www/restless-forge
+#
+# Static files only — nginx serves the new files immediately, no reload
+# needed. nginx config changes (nginx/*.conf) still require a manual
+# `nginx -t && systemctl reload nginx` on the server.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build site
+        run: ./build.sh
+
+      - name: Run all tool test suites
+        run: npm test
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync dist to web root
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            dist/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+
+      - name: Verify deploy
+        run: |
+          curl -sf -o /dev/null https://restless-forge.dev/ && echo "homepage OK"
+          curl -sf -o /dev/null https://restless-forge.dev/favicon.svg && echo "favicon OK"

@@ -1,0 +1,14 @@
+{
+  "name": "What Is My Time Worth?",
+  "short_name": "Time Worth",
+  "description": "Real hourly wage calculator with DIY-vs-hire decision engine.",
+  "start_url": "/tools/what-is-my-time-worth/",
+  "scope": "/tools/what-is-my-time-worth/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    { "src": "/tools/what-is-my-time-worth/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/tools/what-is-my-time-worth/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

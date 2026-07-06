@@ -1,5 +1,27 @@
 import { describe, it, expect } from "vitest";
 
+// jsdom doesn't implement ImageData; the hologram/GIF code and these tests
+// only need the (width, height) constructor and the data/width/height fields.
+if (typeof globalThis.ImageData === "undefined") {
+  class ImageDataPolyfill {
+    readonly width: number;
+    readonly height: number;
+    readonly data: Uint8ClampedArray;
+    constructor(dataOrWidth: Uint8ClampedArray | number, widthOrHeight: number, height?: number) {
+      if (typeof dataOrWidth === "number") {
+        this.width = dataOrWidth;
+        this.height = widthOrHeight;
+        this.data = new Uint8ClampedArray(this.width * this.height * 4);
+      } else {
+        this.data = dataOrWidth;
+        this.width = widthOrHeight;
+        this.height = height ?? dataOrWidth.length / 4 / widthOrHeight;
+      }
+    }
+  }
+  (globalThis as Record<string, unknown>).ImageData = ImageDataPolyfill;
+}
+
 // ─── Presets ─────────────────────────────────────────────────
 
 import { PRESETS, PRESET_ORDER, type HoloPreset } from "../presets";

@@ -1,92 +1,99 @@
-/* shared.js — TOOL_LABEL shared header & footer
-   Single source of truth for ALL TOOL_LABEL pages (main app + sub-pages).
+/* shared.js — __TOOL_LABEL__ shared header & footer
+   Single source of truth for ALL __TOOL_LABEL__ pages (main app + sub-pages).
    Requires /shared.js (site/shared.js) to be loaded first for rf* utilities.
 
-   Placeholders to replace:
-     TOOL_NAME   — URL directory name,  e.g. "my-tool"
-     TOOL_LABEL  — Display name,        e.g. "My Tool"
-     TOOL_PREFIX — JS/HTML identifier,  e.g. "mt"
-     TOOL_EMOJI  — Header emoji,        e.g. "🔧"
+   Placeholders (replace across the whole template):
+     __TOOL_NAME__   — URL directory name,  e.g. "my-tool"
+     __TOOL_LABEL__  — Display name,        e.g. "My Tool"
+     __TOOL_PREFIX__ — Identifier prefix,   e.g. "mt"  (2–5 lowercase letters)
+     __TOOL_EMOJI__  — Header emoji/glyph,  e.g. "\u{1F527}"
 
-   Nav/footer are auto-injected by the DOMContentLoaded listener below.
-   Every HTML page just needs:
-     <div id="TOOL_PREFIX-header"></div>
-     <div id="TOOL_PREFIX-footer"></div>
+   Every HTML page (main + sub-pages) renders the header/footer by including
+   these two empty divs; this script auto-injects on DOMContentLoaded:
+     <div id="__TOOL_PREFIX__-header"></div>
+     <div id="__TOOL_PREFIX__-footer"></div>
 */
 (function () {
   'use strict';
   var p = window.location.pathname;
-  var base = '/tools/TOOL_NAME';
+  var base = '/tools/__TOOL_NAME__';
 
   function active(href) {
+    if (href.startsWith('#')) return false;
     if (href === base + '/') return p === base + '/' || p === base + '/index.html';
-    return p.startsWith(href);
+    if (href.endsWith('/')) return p.startsWith(href);
+    return p === href || p === href.replace('.html', '');
   }
 
-  // Tool navigation links — tool-specific links first, then RF global links.
-  // The '/' entry (Restless Forge) gets a separator prepended automatically.
+  // Tool links on the left, RF global links on the right.
+  // The '/' entry (Restless Forge) triggers the rfNavSep separator.
+  // Only link pages the tool actually ships — add entries (e.g. FAQ,
+  // Articles) as you add the matching src/<page>/index.html.
   var navLinks = [
-    [base + '/', 'TOOL_LABEL'],
-    [base + '/faq/', 'FAQ'],
-    [base + '/articles/', 'Articles'],
+    [base + '/', '__TOOL_LABEL__'],
     [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
     ['/', 'Restless Forge'],
     ['/tools/', 'All Tools'],
   ];
 
   var footerLinks = [
-    [base + '/', 'TOOL_LABEL'],
-    [base + '/faq/', 'FAQ'],
-    [base + '/articles/', 'Articles'],
+    [base + '/', '__TOOL_LABEL__'],
     [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/', 'Restless Forge'],
     ['/tools/', 'All Tools'],
   ];
 
-  window.TOOL_PREFIXHeader = function () {
+  var substackSvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M22.539 8.242H1.46V6h21.08v2.242zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.236h21.08V0z"/></svg>';
+  var heartSvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+
+  window.__TOOL_PREFIX__Header = function () {
     var sep = (window.rfNavSep !== undefined) ? window.rfNavSep
       : '<span class="nav-sep" aria-hidden="true">|</span>';
     var links = navLinks.map(function (l) {
       var cls = active(l[0]) ? ' class="active"' : '';
       var prefix = (l[0] === '/') ? sep : '';
-      return prefix + '<a href="' + l[0] + '"' + cls + '>' + l[1] + '</a>';
+      var target = l[0].startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+      return prefix + '<a href="' + l[0] + '"' + cls + target + '>' + l[1] + '</a>';
     }).join('');
 
     return '<header class="site-header"><div class="site-header__inner">' +
       '<div class="site-header__top">' +
-      '<a class="site-header__brand" href="' + base + '/">TOOL_EMOJI TOOL_LABEL</a>' +
+      '<a class="site-header__brand" href="' + base + '/">__TOOL_EMOJI__ __TOOL_LABEL__</a>' +
       '<button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"' +
       ' onclick="var n=document.getElementById(\'site-nav\');var open=n.classList.toggle(\'open\');this.setAttribute(\'aria-expanded\',open)">&#9776;</button>' +
       '<nav class="site-header__nav" id="site-nav" aria-label="Site navigation">' + links + '</nav>' +
+      '</div>' +
+      '<div class="site-header__support">' +
+      '<span class="site-header__support-label">Support this free tool</span>' +
+      '<a class="site-header__support-link" href="https://restlessforge.substack.com" target="_blank" rel="noopener">' + substackSvg + ' Substack</a>' +
+      '<a class="site-header__support-link" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">' + heartSvg + ' Ko-fi</a>' +
+      '<a class="site-header__support-link" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">&#x2615; Buy Me a Coffee</a>' +
       '</div></div></header>';
   };
 
-  window.TOOL_PREFIXFooter = function () {
+  window.__TOOL_PREFIX__Footer = function () {
     var sep = (window.rfFooterSep !== undefined) ? window.rfFooterSep
       : '<span class="footer-sep" aria-hidden="true">|</span>';
     var donateHtml = (typeof window.rfDonateHtml === 'function') ? window.rfDonateHtml() : '';
     var links = footerLinks.map(function (l) {
       var prefix = (l[0] === '/') ? sep : '';
-      return prefix + '<a class="footer__link" href="' + l[0] + '">' + l[1] + '</a>';
+      var target = l[0].startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+      return prefix + '<a class="footer__link" href="' + l[0] + '"' + target + '>' + l[1] + '</a>';
     }).join('');
 
     return '<footer class="footer">' +
       donateHtml +
       '<div class="footer__links">' + links + '</div>' +
-      '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; TOOL_LABEL.</p>' +
+      '<p class="footer__copy">&copy; 2026 <a href="/" style="color:inherit;text-decoration:none;">Restless Forge</a> &mdash; __TOOL_LABEL__.</p>' +
       '</footer>';
   };
 
-  // Auto-inject header and footer into placeholder elements.
-  // Every HTML page (main app + sub-pages) only needs the two divs below.
   document.addEventListener('DOMContentLoaded', function () {
-    var headerEl = document.getElementById('TOOL_PREFIX-header');
-    if (headerEl) headerEl.outerHTML = window.TOOL_PREFIXHeader();
-    var footerEl = document.getElementById('TOOL_PREFIX-footer');
-    if (footerEl) footerEl.outerHTML = window.TOOL_PREFIXFooter();
+    var headerEl = document.getElementById('__TOOL_PREFIX__-header');
+    if (headerEl) headerEl.outerHTML = window.__TOOL_PREFIX__Header();
+    var footerEl = document.getElementById('__TOOL_PREFIX__-footer');
+    if (footerEl) footerEl.outerHTML = window.__TOOL_PREFIX__Footer();
   });
 })();

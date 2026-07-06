@@ -1,5 +1,10 @@
 # Migration Guide: Restless Forge Consolidation
 
+> **Historical document.** This one-time migration (holopath.art, sandpath.art,
+> whatismytimeworth.app → restless-forge.dev) is complete. Kept for the
+> 301-redirect mapping and cert notes; details may not reflect the current
+> codebase. For current architecture and deploy steps, see `CLAUDE.md`.
+
 Step-by-step guide for migrating holopath.art, sandpath.art, and whatismytimeworth.app into restless-forge.dev.
 
 ## Pre-Migration Checklist
@@ -58,22 +63,11 @@ sudo cp -r dist/* /var/www/restless-forge/
 sudo chown -R www-data:www-data /var/www/restless-forge
 ```
 
-### 2.3 Set Up SandPath Backend
+### 2.3 SandPath Backend — removed
 
-```bash
-cd tools/sandpath/backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run directly:
-uvicorn main:app --host 127.0.0.1 --port 8000
-
-# Or set up as systemd service:
-sudo cp sandpath.service /etc/systemd/system/  # if available
-sudo systemctl enable sandpath
-sudo systemctl start sandpath
-```
+SandPath was later rewritten to run 100% client-side; the Python backend
+(and its `/api/` nginx proxy) no longer exist. No backend setup is needed
+for any tool.
 
 ## Phase 3: nginx Configuration
 

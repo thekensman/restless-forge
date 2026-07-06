@@ -30,6 +30,8 @@ export interface VectorizeOpts {
   maxDimension?: number;
   /** SVG stroke width */
   lineWidth?: number;
+  /** Drop contours shorter than this many points (post-DP simplification). */
+  minPathLength?: number;
 }
 
 export interface VectorizeResult {
@@ -51,6 +53,7 @@ export async function vectorize(file: File, opts: VectorizeOpts = {}): Promise<V
     detail = 1.5,
     maxDimension = 800,
     lineWidth = 2.0,
+    minPathLength = 4,
   } = opts;
 
   // 1–3. Decode, resize, composite on white, greyscale
@@ -66,10 +69,15 @@ export async function vectorize(file: File, opts: VectorizeOpts = {}): Promise<V
   // 5. Gaussian blur
   if (blur > 0) gray = gaussianBlur(gray, w, h, blur);
 
-  // 6. Edge detection → binary grid
+  // 6. Edge detection → binary grid.
+  //
+  // For outline mode, Sobel alone produces a 2–3 px wide band of "on" pixels
+  // along every real edge. Marching squares then traces both sides of the
+  // band, doubling every contour. NMS thins the band to a single-pixel ridge
+  // so each edge yields one contour. The result is far cleaner on photos.
   let grid: number[][];
   if (mode === "outline") {
-    grid = sobelEdges(gray, w, h, threshold);
+    grid = sobelEdgesThinned(gray, w, h, threshold);
   } else if (mode === "centerline") {
     grid = centerline(gray, w, h, threshold);
   } else {
@@ -79,15 +87,18 @@ export async function vectorize(file: File, opts: VectorizeOpts = {}): Promise<V
   // 7. Marching squares
   const contours = marchingSquares(grid, w, h);
 
-  // 8. Simplify
+  // 8. Simplify + drop short/noise contours.
+  // Short fragments add visible "extra lines" without contributing structure —
+  // they are the dominant noise source in Sobel-based tracing.
   const simplified: [number, number][][] = [];
   let totalPts = 0;
+  const minPts = Math.max(2, minPathLength);
   for (const contour of contours) {
     const simp = douglasPeucker(contour, detail);
-    if (simp.length >= 2) {
-      simplified.push(simp);
-      totalPts += simp.length;
-    }
+    if (simp.length < minPts) continue;
+    if (pathLength(simp) < detail * 4) continue;
+    simplified.push(simp);
+    totalPts += simp.length;
   }
 
   // 9. Build SVG
@@ -178,22 +189,56 @@ function gaussianBlur(pixels: Uint8Array, w: number, h: number, radius: number):
 
 // ─── Edge detection ───────────────────────────────────────────
 
-function sobelEdges(pixels: Uint8Array, w: number, h: number, threshold: number): number[][] {
-  const grid: number[][] = [];
+/**
+ * Sobel + non-maximum suppression: thins the gradient ridge to a single
+ * pixel along each edge. Without NMS, marching squares traces both sides of
+ * the 2–3 px wide Sobel response, producing two parallel contours per edge.
+ */
+function sobelEdgesThinned(
+  pixels: Uint8Array, w: number, h: number, threshold: number
+): number[][] {
+  const mag = new Float32Array(w * h);
+  const dir = new Uint8Array(w * h); // 0:|  1:/  2:—  3:\
   const px = (x: number, y: number): number =>
     pixels[Math.max(0, Math.min(h - 1, y)) * w + Math.max(0, Math.min(w - 1, x))];
 
   for (let y = 0; y < h; y++) {
-    const row: number[] = [];
     for (let x = 0; x < w; x++) {
       const gx = -px(x-1,y-1) + px(x+1,y-1) - 2*px(x-1,y) + 2*px(x+1,y) - px(x-1,y+1) + px(x+1,y+1);
       const gy = -px(x-1,y-1) - 2*px(x,y-1) - px(x+1,y-1) + px(x-1,y+1) + 2*px(x,y+1) + px(x+1,y+1);
-      const mag = Math.min(255, Math.round(Math.sqrt(gx * gx + gy * gy)));
-      row.push(mag > threshold ? 1 : 0);
+      mag[y * w + x] = Math.sqrt(gx * gx + gy * gy);
+      // Quantise angle to 4 bins (0, 45, 90, 135°) for NMS comparisons
+      const ang = Math.atan2(gy, gx) * 180 / Math.PI;
+      const a = ((ang < 0 ? ang + 180 : ang) + 22.5) % 180;
+      dir[y * w + x] = Math.min(3, Math.floor(a / 45));
+    }
+  }
+
+  const grid: number[][] = [];
+  for (let y = 0; y < h; y++) {
+    const row: number[] = [];
+    for (let x = 0; x < w; x++) {
+      const m = mag[y * w + x];
+      if (m <= threshold) { row.push(0); continue; }
+      let m1 = 0, m2 = 0;
+      const d = dir[y * w + x];
+      if (d === 0)      { m1 = mag[y * w + Math.max(0, x-1)];           m2 = mag[y * w + Math.min(w-1, x+1)]; }
+      else if (d === 1) { m1 = mag[Math.max(0, y-1) * w + Math.min(w-1, x+1)]; m2 = mag[Math.min(h-1, y+1) * w + Math.max(0, x-1)]; }
+      else if (d === 2) { m1 = mag[Math.max(0, y-1) * w + x];           m2 = mag[Math.min(h-1, y+1) * w + x]; }
+      else              { m1 = mag[Math.max(0, y-1) * w + Math.max(0, x-1)];   m2 = mag[Math.min(h-1, y+1) * w + Math.min(w-1, x+1)]; }
+      row.push(m >= m1 && m >= m2 ? 1 : 0);
     }
     grid.push(row);
   }
   return grid;
+}
+
+function pathLength(pts: [number, number][]): number {
+  let len = 0;
+  for (let i = 1; i < pts.length; i++) {
+    len += Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]);
+  }
+  return len;
 }
 
 function thresholdGrid(pixels: Uint8Array, w: number, h: number, level: number): number[][] {

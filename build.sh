@@ -50,6 +50,9 @@ build_vite_tool() {
   # Copy sub-page HTML directly — Vite only bundles src/index.html.
   # Sub-pages are static HTML (IIFE scripts, public/-relative CSS) and are
   # excluded from Rollup to avoid bundling warnings. Copy them verbatim here.
+  # Sub-page source HTML uses explicit `/tools/<name>/...` URLs for every
+  # tool-scoped resource (favicons, pages.css, shared.js), so no path
+  # rewriting is needed at copy time.
   find "${frontend}/src" -name "*.html" ! -path "*/src/index.html" \
     | while IFS= read -r f; do
         rel="${f#${frontend}/src/}"
@@ -81,18 +84,26 @@ echo "[6/7] Cache-busting shared static files..."
 bust_cache() {
   local dir="$1"
   local tool_path="$2"   # e.g. /tools/what-is-my-time-worth
-  local js_hash css_hash
-  js_hash=$(md5sum "${dir}/shared.js" | cut -c1-8)
-  css_hash=$(md5sum "${dir}/pages.css" | cut -c1-8)
-  find "${dir}" -name "*.html" -exec sed -i \
-    -e "s|${tool_path}/shared\.js\"|${tool_path}/shared.js?v=${js_hash}\"|g" \
-    -e "s|${tool_path}/pages\.css\"|${tool_path}/pages.css?v=${css_hash}\"|g" \
-    {} \;
-  echo "  → ${tool_path}: shared.js?v=${js_hash}  pages.css?v=${css_hash}"
+  local js_hash=""
+  local css_hash=""
+  if [ -f "${dir}/shared.js" ]; then
+    js_hash=$(md5sum "${dir}/shared.js" | cut -c1-8)
+    find "${dir}" -name "*.html" -exec sed -i \
+      -e "s|${tool_path}/shared\.js\"|${tool_path}/shared.js?v=${js_hash}\"|g" \
+      {} \;
+  fi
+  if [ -f "${dir}/pages.css" ]; then
+    css_hash=$(md5sum "${dir}/pages.css" | cut -c1-8)
+    find "${dir}" -name "*.html" -exec sed -i \
+      -e "s|${tool_path}/pages\.css\"|${tool_path}/pages.css?v=${css_hash}\"|g" \
+      {} \;
+  fi
+  echo "  → ${tool_path}: shared.js?v=${js_hash:-<missing>}  pages.css?v=${css_hash:-<missing>}"
 }
 
 bust_cache "${DIST_DIR}/tools/what-is-my-time-worth" "/tools/what-is-my-time-worth"
 bust_cache "${DIST_DIR}/tools/holopath"               "/tools/holopath"
+bust_cache "${DIST_DIR}/tools/sandpath"               "/tools/sandpath"
 # Add a bust_cache call here for each new tool.
 
 # Cache-bust the global /shared.js across ALL html files in dist
@@ -101,6 +112,15 @@ find "${DIST_DIR}" -name "*.html" -exec sed -i \
   -e "s|\"/shared\.js\"|\"/shared.js?v=${site_shared_hash}\"|g" \
   {} \;
 echo "  → /shared.js?v=${site_shared_hash}"
+
+# Cache-bust the shared /tool-chrome.css across ALL html files in dist
+if [ -f "${DIST_DIR}/tool-chrome.css" ]; then
+  site_chrome_hash=$(md5sum "${DIST_DIR}/tool-chrome.css" | cut -c1-8)
+  find "${DIST_DIR}" -name "*.html" -exec sed -i \
+    -e "s|\"/tool-chrome\.css\"|\"/tool-chrome.css?v=${site_chrome_hash}\"|g" \
+    {} \;
+  echo "  → /tool-chrome.css?v=${site_chrome_hash}"
+fi
 
 # ── Summary ──
 echo ""

@@ -21,13 +21,11 @@
   <meta name="twitter:description" content="Turn any image into an animated hologram GIF with one click.">
   <meta name="twitter:image" content="https://restless-forge.dev/tools/holopath/og-image.png">
 
-  <!-- Favicons -->
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <!-- Favicons (canonical block — tool-scoped, same on every HoloPath page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/holopath/favicon.svg">
+  <link rel="icon" href="/tools/holopath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/holopath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/holopath/site.webmanifest">
 
   <!-- JSON-LD: WebApplication -->
   <script type="application/ld+json">
@@ -77,6 +75,7 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
      crossorigin="anonymous"></script>
 
+  <link rel="stylesheet" href="/tool-chrome.css">
   <link rel="stylesheet" href="./styles.css">
   <script src="/shared.js"></script>
   <script src="/tools/holopath/shared.js"></script>
@@ -89,7 +88,7 @@
     <p class="header__sub">Image · GIF · Video → Hologram GIF</p>
   </header>
 
-  <div id="hp-nav"></div>
+  <div id="hp-header"></div>
 
   <!-- ═══ Left Rail Ad ═══ -->
   <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
