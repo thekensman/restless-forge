@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Should I Repair or Replace? — The Neutral Calculator</title>
+  <meta name="description" content="Every repair-vs-replace calculator online is built by someone selling repairs or appliances. This one has no agenda. Factors in remaining life, energy savings, sunk cost fallacy, and the 50% rule.">
+  <meta name="keywords" content="repair or replace calculator, repair vs replace appliance, should I fix my car, 50 percent rule appliance, sunk cost fallacy, repair cost calculator">
+  <link rel="canonical" href="https://restless-forge.dev/tools/repair-or-replace/">
+  <meta property="og:title" content="Should I Repair or Replace?">
+  <meta property="og:description" content="No agenda. No upsell. Just the math on whether to repair or replace.">
+  <meta property="og:type" content="website">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Should I Repair or Replace?","description":"Neutral repair vs replace calculator with sunk cost detection","url":"https://restless-forge.dev/tools/repair-or-replace/","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root{--bg:#0b0d12;--bg-raised:#151820;--bg-card:#1a1e28;--bg-input:#0e1018;--border:#252a35;--border-focus:#d4a44e;--text:#d8d4cc;--text-dim:#7a7770;--text-muted:#4a4840;--accent:#d4a44e;--accent-dim:#a88540;--green:#6bbd7a;--red:#d45d5d;--orange:#d4a04e;--font-body:"Lora",Georgia,serif;--font-mono:"IBM Plex Mono","Courier New",monospace;--max-w:1100px;--radius:3px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;scroll-behavior:smooth}body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;background-image:radial-gradient(ellipse at 20% 0%,rgba(212,164,78,0.03) 0%,transparent 60%)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.header{border-bottom:1px solid var(--border);padding:36px 24px 28px}.header__inner{max-width:var(--max-w);margin:0 auto}.header__brand{display:flex;align-items:center;gap:14px;margin-bottom:8px}.header__logo{font-size:28px;line-height:1}.header__title{font-family:var(--font-mono);font-size:clamp(20px,3.5vw,28px);font-weight:400;letter-spacing:-0.3px}.header__tagline{font-style:italic;color:var(--text-dim);font-size:16px}
+.tabs{max-width:var(--max-w);margin:0 auto;padding:20px 24px 0;display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto}.tab{font-family:var(--font-mono);font-size:13px;padding:9px 18px 11px;background:transparent;color:var(--text-dim);border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;transition:all .15s;white-space:nowrap}.tab:hover{color:var(--text);background:var(--bg-raised)}.tab--active{color:var(--accent);background:var(--bg-raised);border-color:var(--border);border-bottom:1px solid var(--bg-raised);margin-bottom:-1px}.tab__icon{margin-right:5px}
+.main{max-width:var(--max-w);margin:0 auto;padding:0 24px}.panel{padding:28px 0;display:none}.panel--active{display:block}.panel__grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}@media(max-width:820px){.panel__grid{grid-template-columns:1fr}}
+.card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.card__title{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}.card__title--spaced{margin-top:24px}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:5px}.field__hint{display:block;font-size:11px;color:var(--text-muted);margin-top:3px;font-style:italic}.field-row{display:flex;gap:12px;margin-bottom:16px}.field-row .field{flex:1;margin-bottom:0}
+.input-group{display:flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}.input-group:focus-within{border-color:var(--border-focus)}.input-prefix,.input-suffix{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);padding:0 9px;flex-shrink:0}
+input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:var(--text);background:transparent;border:none;padding:9px 11px;width:100%;outline:none;-moz-appearance:textfield}input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}select{cursor:pointer;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px}select option{background:var(--bg-card);color:var(--text)}
+.results-column{display:flex;flex-direction:column;gap:14px}
+.result-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center}.result-card--hero{border-width:2px;padding:28px 22px}.result-card--hero .result-card__value{font-size:clamp(24px,4vw,38px)}.result-card__label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}.result-card__value{font-family:var(--font-mono);font-weight:500;font-size:22px;color:var(--text);line-height:1.2}.result-card__note{font-size:12px;color:var(--text-muted);margin-top:5px;font-style:italic}
+.insight-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.insight-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}.insight-card__icon{font-size:22px;margin-bottom:6px}.insight-card__value{font-family:var(--font-mono);font-size:18px;font-weight:500}.insight-card__label{font-size:11px;color:var(--text-dim);margin-top:4px}
+.breakdown{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:14px}.breakdown__row{display:flex;justify-content:space-between;padding:5px 0;font-family:var(--font-mono);font-size:12px;border-bottom:1px solid rgba(37,42,53,0.5)}.breakdown__row:last-child{border-bottom:none}.breakdown__row span:first-child{color:var(--text-dim)}.breakdown__row--total{border-top:2px solid var(--accent);margin-top:8px;padding-top:8px;font-weight:600}
+.sunk-warning{background:rgba(212,93,93,0.08);border:1px solid var(--red);border-radius:var(--radius);padding:16px;margin-top:14px;font-size:13px;line-height:1.7}.sunk-warning strong{color:var(--red)}
+
+.about{padding:40px 0;border-top:1px solid var(--border);margin-top:20px}.about__title{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--accent);margin-bottom:14px}.about__text{font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:12px}
+.footer{border-top:1px solid var(--border);padding:24px;text-align:center}.footer__links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}.footer__link{font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}.footer__link:hover{color:var(--accent)}.footer__link--heart{color:var(--red)}.footer__link--heart svg{vertical-align:-2px;margin-right:3px}.footer__copy{font-size:11px;color:var(--text-muted)}.forge-link{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px}.forge-link a{color:var(--accent-dim)}
+  </style>
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/repair-or-replace/favicon.svg">
+  <link rel="icon" href="/tools/repair-or-replace/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/repair-or-replace/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/repair-or-replace/site.webmanifest">
+</head>
+<body>
+  <header class="header"><div class="header__inner"><div class="header__brand"><span class="header__logo">🔧</span><h1 class="header__title">Should I Repair or Replace?</h1></div><p class="header__tagline">No repair shop built this. No retailer sponsors it.</p></div></header>
+
+  <main class="main">
+    <nav class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="decide" role="tab" aria-selected="true"><span class="tab__icon">⚖️</span> Decision Engine</button>
+      <button class="tab" data-tab="sunk" role="tab" aria-selected="false"><span class="tab__icon">🕳️</span> Sunk Cost Detector</button>
+    </nav>
+
+    <!-- TAB 1 -->
+    <section class="panel panel--active" id="panel-decide" role="tabpanel">
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Your Item</h2>
+          <div class="field"><label for="d-type">Category</label>
+            <select id="d-type"><option value="fridge" data-life="15">Refrigerator (15yr avg)</option><option value="washer" data-life="12">Washer (12yr avg)</option><option value="dryer" data-life="13">Dryer (13yr avg)</option><option value="dishwasher" data-life="10">Dishwasher (10yr avg)</option><option value="oven" data-life="15">Oven/Range (15yr avg)</option><option value="hvac" data-life="18">HVAC System (18yr avg)</option><option value="water-heater" data-life="12">Water Heater (12yr avg)</option><option value="car" data-life="15">Car (15yr avg)</option><option value="laptop" data-life="5">Laptop (5yr avg)</option><option value="phone" data-life="4">Phone (4yr avg)</option><option value="other" data-life="10">Other (enter lifespan)</option></select>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="d-age">Item age</label><div class="input-group"><input type="number" id="d-age" value="8" min="0" step="1"><span class="input-suffix">yrs</span></div></div>
+            <div class="field"><label for="d-lifespan">Expected lifespan</label><div class="input-group"><input type="number" id="d-lifespan" value="15" min="1" step="1"><span class="input-suffix">yrs</span></div></div>
+          </div>
+          <div class="field"><label for="d-repair">Repair cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-repair" value="350" min="0" step="25"></div></div>
+          <div class="field"><label for="d-replace">Replacement cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-replace" value="900" min="0" step="50"></div></div>
+          <h2 class="card__title card__title--spaced">Energy Savings (Optional)</h2>
+          <div class="field-row">
+            <div class="field"><label for="d-energy-old">Current monthly energy cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-energy-old" value="15" min="0" step="1"></div></div>
+            <div class="field"><label for="d-energy-new">New item energy cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="d-energy-new" value="8" min="0" step="1"></div></div>
+          </div>
+        </div>
+        <div class="results-column">
+          <div class="result-card result-card--hero" id="decide-hero"><div class="result-card__label">Recommendation</div><div class="result-card__value" id="res-decide">—</div><div class="result-card__note" id="res-decide-note"></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">📊</div><div class="insight-card__value" id="res-ratio">—</div><div class="insight-card__label">Repair-to-replace ratio</div></div>
+            <div class="insight-card"><div class="insight-card__icon">⏳</div><div class="insight-card__value" id="res-remaining">—</div><div class="insight-card__label">Remaining useful life</div></div>
+            <div class="insight-card"><div class="insight-card__icon">⚡</div><div class="insight-card__value" id="res-energy-save">—</div><div class="insight-card__label">Energy savings over remaining life</div></div>
+          </div>
+          <div class="breakdown">
+            <div class="breakdown__row"><span>Repair cost</span><span id="bd-repair">—</span></div>
+            <div class="breakdown__row"><span>Repair cost per remaining year</span><span id="bd-repair-yr">—</span></div>
+            <div class="breakdown__row"><span>Replacement cost</span><span id="bd-replace">—</span></div>
+            <div class="breakdown__row"><span>Replace cost per year (new lifespan)</span><span id="bd-replace-yr">—</span></div>
+            <div class="breakdown__row"><span>Energy savings (remaining life)</span><span id="bd-energy">—</span></div>
+            <div class="breakdown__row"><span>Effective replacement cost</span><span id="bd-eff-replace">—</span></div>
+            <div class="breakdown__row breakdown__row--total"><span>50% rule</span><span id="bd-50pct">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Sunk Cost Detector -->
+    <section class="panel" id="panel-sunk" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Repair History</h2>
+          <div class="field"><label for="s-value">Current replacement value</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-value" value="800" min="0" step="50"></div><span class="field__hint">What it would cost to buy a replacement today.</span></div>
+          <div class="field"><label for="s-repair1">Past repair #1</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-repair1" value="200" min="0" step="25"></div></div>
+          <div class="field"><label for="s-repair2">Past repair #2</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-repair2" value="350" min="0" step="25"></div></div>
+          <div class="field"><label for="s-repair3">Past repair #3</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-repair3" value="175" min="0" step="25"></div></div>
+          <div class="field"><label for="s-repair4">Past repair #4 (optional)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-repair4" value="0" min="0" step="25"></div></div>
+          <div class="field"><label for="s-next">Proposed next repair</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-next" value="400" min="0" step="25"></div></div>
+        </div>
+        <div class="results-column">
+          <div class="result-card result-card--hero" id="sunk-hero"><div class="result-card__label">Sunk Cost Status</div><div class="result-card__value" id="res-sunk">—</div><div class="result-card__note" id="res-sunk-note"></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">💸</div><div class="insight-card__value" id="res-total-repairs">—</div><div class="insight-card__label">Total already spent on repairs</div></div>
+            <div class="insight-card"><div class="insight-card__icon">🔄</div><div class="insight-card__value" id="res-vs-replace">—</div><div class="insight-card__label">% of replacement cost spent</div></div>
+          </div>
+          <div class="sunk-warning" id="sunk-warning" style="display:none">
+            <strong>Sunk cost fallacy detected.</strong> You've already spent more on repairs than the item is worth. Past repairs can't be recovered — they shouldn't influence whether the <em>next</em> repair makes sense. The question isn't "I've already invested so much" — it's "does this next repair, on its own merits, make sense compared to buying new?"
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="about__title">Why This Calculator Exists</h2>
+      <p class="about__text">Most repair-vs-replace tools online are built by companies that profit from one answer. Repair shops want you to repair. Retailers want you to replace. Consumer Reports has a version, but it's behind a paywall. This calculator has no agenda, no affiliate links to appliance stores, and no "schedule a repair" button. Just the math.</p>
+      <p class="about__text">The Sunk Cost Detector on Tab 2 addresses the most common mistake: "I've already put $800 into this thing, I can't give up now." Past spending is gone. It shouldn't influence the next decision. This tool helps you see that clearly.</p>
+      <p class="about__text about__text--dim">Appliance lifespan data from Consumer Reports and NAHB. Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Runs entirely in your browser.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__links">
+      <a class="footer__link footer__link--heart" href="https://ko-fi.com/stygnus" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Ko-fi</a>
+      <a class="footer__link" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" href="https://stygnus.substack.com" target="_blank" rel="noopener">Substack</a>
+    </div>
+    <p class="footer__copy">&copy; 2026 Should I Repair or Replace? — No agenda. Just math.</p>
+    <p class="forge-link">Part of <a href="https://restless-forge.dev">Restless Forge</a> &middot; <a href="https://whatismytimeworth.app">What Is My Time Worth?</a></p>
+  </footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>{t.classList.remove('tab--active');t.setAttribute('aria-selected','false')});document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('panel--active');p.hidden=true});tab.classList.add('tab--active');tab.setAttribute('aria-selected','true');const panel=document.getElementById('panel-'+tab.dataset.tab);panel.classList.add('panel--active');panel.hidden=false})});
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+
+document.getElementById('d-type').addEventListener('change',function(){
+  const life=this.selectedOptions[0].dataset.life;
+  document.getElementById('d-lifespan').value=life;
+  calcDecide();
+});
+
+function calcDecide(){
+  const age=+(document.getElementById('d-age').value)||0;
+  const lifespan=+(document.getElementById('d-lifespan').value)||1;
+  const repair=+(document.getElementById('d-repair').value)||0;
+  const replace=+(document.getElementById('d-replace').value)||0;
+  const energyOld=+(document.getElementById('d-energy-old').value)||0;
+  const energyNew=+(document.getElementById('d-energy-new').value)||0;
+
+  const remaining=Math.max(lifespan-age,0);
+  const ratio=replace>0?(repair/replace*100):0;
+  const repairPerYear=remaining>0?repair/remaining:Infinity;
+  const replacePerYear=lifespan>0?replace/lifespan:Infinity;
+  const energySaveTotal=(energyOld-energyNew)*12*remaining;
+  const effectiveReplace=replace-energySaveTotal;
+
+  let verdict='', note='', color='';
+  const hero=document.getElementById('decide-hero');
+
+  if(remaining<=1){
+    verdict='Replace';note='Item is at or past expected end of life.';color='var(--red)';
+  } else if(ratio>50){
+    verdict='Replace';note=`Repair is ${ratio.toFixed(0)}% of replacement — exceeds the 50% rule.`;color='var(--red)';
+  } else if(repairPerYear>replacePerYear && energySaveTotal>0){
+    verdict='Replace';note='Per-year cost favors replacement, and energy savings sweeten the deal.';color='var(--red)';
+  } else if(ratio<30 && remaining>3){
+    verdict='Repair';note=`Repair is only ${ratio.toFixed(0)}% of replacement with ${remaining} years left.`;color='var(--green)';
+  } else {
+    verdict='Repair (probably)';note=`Borderline case at ${ratio.toFixed(0)}%. Repair is cheaper per year if it lasts.`;color='var(--orange)';
+  }
+
+  hero.style.borderColor=color;
+  document.getElementById('res-decide').textContent=verdict;
+  document.getElementById('res-decide').style.color=color;
+  document.getElementById('res-decide-note').textContent=note;
+
+  document.getElementById('res-ratio').textContent=ratio.toFixed(0)+'%';
+  document.getElementById('res-remaining').textContent=remaining+' years';
+  document.getElementById('res-energy-save').textContent=fmt(energySaveTotal);
+
+  document.getElementById('bd-repair').textContent=fmt(repair);
+  document.getElementById('bd-repair-yr').textContent=remaining>0?fmt(repairPerYear)+'/yr':'N/A';
+  document.getElementById('bd-replace').textContent=fmt(replace);
+  document.getElementById('bd-replace-yr').textContent=fmt(replacePerYear)+'/yr';
+  document.getElementById('bd-energy').textContent=fmt(energySaveTotal);
+  document.getElementById('bd-eff-replace').textContent=fmt(effectiveReplace);
+  document.getElementById('bd-50pct').textContent=ratio<=50?'✓ Under 50% — repair is reasonable':'✗ Over 50% — replace is smarter';
+  document.getElementById('bd-50pct').style.color=ratio<=50?'var(--green)':'var(--red)';
+}
+
+function calcSunk(){
+  const value=+(document.getElementById('s-value').value)||0;
+  const r1=+(document.getElementById('s-repair1').value)||0;
+  const r2=+(document.getElementById('s-repair2').value)||0;
+  const r3=+(document.getElementById('s-repair3').value)||0;
+  const r4=+(document.getElementById('s-repair4').value)||0;
+  const next=+(document.getElementById('s-next').value)||0;
+
+  const totalPast=r1+r2+r3+r4;
+  const totalWithNext=totalPast+next;
+  const pctOfReplace=value>0?(totalPast/value*100):0;
+  const pctWithNext=value>0?(totalWithNext/value*100):0;
+
+  const hero=document.getElementById('sunk-hero');
+  document.getElementById('res-total-repairs').textContent=fmt(totalPast);
+  document.getElementById('res-vs-replace').textContent=pctOfReplace.toFixed(0)+'%';
+
+  const warning=document.getElementById('sunk-warning');
+
+  if(totalPast>=value){
+    document.getElementById('res-sunk').textContent='Already exceeded';
+    document.getElementById('res-sunk').style.color='var(--red)';
+    hero.style.borderColor='var(--red)';
+    document.getElementById('res-sunk-note').textContent=`You've spent ${fmt(totalPast)} repairing an item worth ${fmt(value)}.`;
+    warning.style.display='block';
+  } else if(totalWithNext>=value){
+    document.getElementById('res-sunk').textContent='Will exceed with next repair';
+    document.getElementById('res-sunk').style.color='var(--orange)';
+    hero.style.borderColor='var(--orange)';
+    document.getElementById('res-sunk-note').textContent=`The next repair brings total to ${fmt(totalWithNext)} — ${pctWithNext.toFixed(0)}% of replacement value.`;
+    warning.style.display='block';
+  } else {
+    document.getElementById('res-sunk').textContent='Under threshold';
+    document.getElementById('res-sunk').style.color='var(--green)';
+    hero.style.borderColor='var(--green)';
+    document.getElementById('res-sunk-note').textContent=`Total repairs including the next one would be ${pctWithNext.toFixed(0)}% of replacement cost. Repair may still make sense.`;
+    warning.style.display='none';
+  }
+}
+
+['d-type','d-age','d-lifespan','d-repair','d-replace','d-energy-old','d-energy-new'].forEach(id=>document.getElementById(id).addEventListener('input',calcDecide));
+['s-value','s-repair1','s-repair2','s-repair3','s-repair4','s-next'].forEach(id=>document.getElementById(id).addEventListener('input',calcSunk));
+calcDecide(); calcSunk();
+</script>
+</body>
+</html>

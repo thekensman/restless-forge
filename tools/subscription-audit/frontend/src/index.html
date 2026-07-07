@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <title>What Are My Subscriptions Costing Me? — Subscription Audit Calculator</title>
+  <meta name="description" content="You think you spend $50/month on subscriptions. It's $217. And that Netflix you haven't opened since February costs 11 hours of life energy per year. Audit every subscription, see the true cost in time and money.">
+  <meta name="keywords" content="subscription calculator, subscription audit, how much do I spend on subscriptions, cancel subscriptions, streaming cost calculator, subscription tracker free">
+  <link rel="canonical" href="https://restless-forge.dev/tools/subscription-audit/">
+  <meta property="og:title" content="What Are My Subscriptions Costing Me?">
+  <meta property="og:description" content="You think it's $50/month. It's $217. Audit your subscriptions for free.">
+  <meta property="og:type" content="website">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Subscription Audit Calculator","description":"Free subscription cost audit showing true monthly, annual, and life-energy cost of all your subscriptions","url":"https://restless-forge.dev/tools/subscription-audit/","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root{--bg:#0b0d12;--bg-raised:#151820;--bg-card:#1a1e28;--bg-input:#0e1018;--border:#252a35;--border-focus:#d4a44e;--text:#d8d4cc;--text-dim:#7a7770;--text-muted:#4a4840;--accent:#d4a44e;--accent-dim:#a88540;--green:#6bbd7a;--red:#d45d5d;--orange:#d4a04e;--font-body:"Lora",Georgia,serif;--font-mono:"IBM Plex Mono","Courier New",monospace;--max-w:1100px;--radius:3px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;scroll-behavior:smooth}body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;background-image:radial-gradient(ellipse at 20% 0%,rgba(212,164,78,0.03) 0%,transparent 60%)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.header{border-bottom:1px solid var(--border);padding:36px 24px 28px}.header__inner{max-width:var(--max-w);margin:0 auto}.header__brand{display:flex;align-items:center;gap:14px;margin-bottom:8px}.header__logo{font-size:28px;line-height:1}.header__title{font-family:var(--font-mono);font-size:clamp(20px,3.5vw,28px);font-weight:400;letter-spacing:-0.3px}.header__tagline{font-style:italic;color:var(--text-dim);font-size:16px}
+.main{max-width:var(--max-w);margin:0 auto;padding:24px}
+.top-bar{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin-bottom:24px}
+.top-bar .field{margin:0}.top-bar .field label{margin-bottom:4px}
+.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.result-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center}.result-card--hero{border-color:var(--accent);border-width:2px;padding:22px}.result-card--hero .result-card__value{font-size:clamp(24px,4vw,36px);color:var(--accent)}.result-card__label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}.result-card__value{font-family:var(--font-mono);font-weight:500;font-size:22px;color:var(--text);line-height:1.2}.result-card__note{font-size:11px;color:var(--text-muted);margin-top:4px;font-style:italic}
+.card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.card__title{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:4px}.field__hint{display:block;font-size:11px;color:var(--text-muted);margin-top:2px;font-style:italic}
+.input-group{display:flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}.input-group:focus-within{border-color:var(--border-focus)}.input-prefix,.input-suffix{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);padding:0 9px;flex-shrink:0}
+input[type="number"],input[type="text"],select{font-family:var(--font-mono);font-size:14px;color:var(--text);background:transparent;border:none;padding:8px 10px;width:100%;outline:none;-moz-appearance:textfield}input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}select{cursor:pointer;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px}select option{background:var(--bg-card);color:var(--text)}
+.sub-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px}
+.sub-table th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text-dim);font-weight:500;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.sub-table td{padding:6px;border-bottom:1px solid rgba(37,42,53,0.5);vertical-align:middle}
+.sub-table tr.graveyard{opacity:0.7;background:rgba(212,93,93,0.05)}
+.sub-table .cost{color:var(--accent)}.sub-table .time{color:var(--text-dim)}.sub-table .waste{color:var(--red)}
+.btn{font-family:var(--font-mono);font-size:12px;padding:8px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-card);color:var(--text-dim);cursor:pointer;transition:all .15s}.btn:hover{border-color:var(--accent);color:var(--accent)}.btn--accent{border-color:var(--accent);color:var(--accent)}.btn--small{padding:4px 10px;font-size:11px}
+.btn--danger{border-color:var(--red);color:var(--red)}.btn--danger:hover{background:rgba(212,93,93,0.1)}
+.add-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;padding:14px;background:var(--bg-card);border:1px dashed var(--border);border-radius:var(--radius);margin-top:14px}
+.add-row .field{margin:0;flex:1;min-width:120px}
+.graveyard-section{margin-top:24px}.graveyard-section h3{font-family:var(--font-mono);font-size:12px;color:var(--red);margin-bottom:10px;letter-spacing:1px}
+
+.about{padding:40px 0;border-top:1px solid var(--border);margin-top:20px}.about__title{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--accent);margin-bottom:14px}.about__text{font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:12px}
+.footer{border-top:1px solid var(--border);padding:24px;text-align:center}.footer__links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}.footer__link{font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}.footer__link:hover{color:var(--accent)}.footer__link--heart{color:var(--red)}.footer__link--heart svg{vertical-align:-2px;margin-right:3px}.footer__copy{font-size:11px;color:var(--text-muted)}.forge-link{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px}.forge-link a{color:var(--accent-dim)}
+  </style>
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/subscription-audit/favicon.svg">
+  <link rel="icon" href="/tools/subscription-audit/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/subscription-audit/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/subscription-audit/site.webmanifest">
+</head>
+<body>
+  <header class="header"><div class="header__inner"><div class="header__brand"><span class="header__logo">📋</span><h1 class="header__title">What Are My Subscriptions Costing Me?</h1></div><p class="header__tagline">89% of Americans underestimate this number.</p></div></header>
+
+  <main class="main">
+    <div class="top-bar">
+      <div class="field"><label for="s-wage">Your real hourly wage (optional)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="s-wage" value="22" min="0" step="0.5"></div></div>
+      <span class="field__hint" style="flex-basis:100%">Enter your wage to see subscription costs in hours of life energy. <a href="https://whatismytimeworth.app" target="_blank">Calculate it &rarr;</a></span>
+    </div>
+
+    <div class="summary-row" id="summary-row">
+      <div class="result-card result-card--hero"><div class="result-card__label">Monthly Total</div><div class="result-card__value" id="res-monthly">$0</div></div>
+      <div class="result-card"><div class="result-card__label">Annual Total</div><div class="result-card__value" id="res-annual">$0</div></div>
+      <div class="result-card"><div class="result-card__label">5-Year Total</div><div class="result-card__value" id="res-5yr">$0</div></div>
+      <div class="result-card"><div class="result-card__label">Hours of Life / Year</div><div class="result-card__value" id="res-hours">0</div><div class="result-card__note" id="res-hours-note"></div></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Your Subscriptions</h2>
+      <table class="sub-table">
+        <thead><tr><th>Service</th><th>Cost</th><th>Cycle</th><th>Uses/mo</th><th>$/use</th><th>Hrs/yr</th><th></th></tr></thead>
+        <tbody id="sub-body"></tbody>
+      </table>
+      <div class="add-row">
+        <div class="field"><label>Service</label><input type="text" id="add-name" placeholder="e.g. Hulu" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-family:var(--font-mono);font-size:14px;color:var(--text)"></div>
+        <div class="field"><label>Cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="add-cost" value="" min="0" step="0.01" placeholder="14.99"></div></div>
+        <div class="field"><label>Cycle</label><select id="add-cycle"><option value="monthly">Monthly</option><option value="annual">Annual</option><option value="weekly">Weekly</option></select></div>
+        <div class="field"><label>Uses/mo</label><input type="number" id="add-uses" value="" min="0" step="1" placeholder="8" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-family:var(--font-mono);font-size:14px;color:var(--text);width:80px"></div>
+        <button class="btn btn--accent" onclick="addSub()">+ Add</button>
+      </div>
+    </div>
+
+    <div class="graveyard-section" id="graveyard-section" style="display:none">
+      <h3>💀 Subscription Graveyard — Used &lt; 2x/month</h3>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px">These subscriptions cost more per use than they're worth. Consider canceling.</p>
+      <div id="graveyard-list"></div>
+    </div>
+
+    <section class="about">
+      <h2 class="about__title">Why This Calculator Exists</h2>
+      <p class="about__text">The average American has 4.5 streaming subscriptions alone, plus gym memberships, cloud storage, productivity apps, and meal kits. Studies show 89% of us underestimate what we actually spend — guessing around $62/month when the real number is over $91. And that's just the average. Many people spend $200+ without realizing it.</p>
+      <p class="about__text">The "hours of life energy" column is the real gut-punch. When you see that a streaming service you use once a month costs 8 hours of your working life per year, the cancel button starts looking very attractive.</p>
+      <p class="about__text about__text--dim">Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. No data leaves your browser. No signup. No irony.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__links">
+      <a class="footer__link footer__link--heart" href="https://ko-fi.com/stygnus" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Ko-fi</a>
+      <a class="footer__link" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" href="https://stygnus.substack.com" target="_blank" rel="noopener">Substack</a>
+    </div>
+    <p class="footer__copy">&copy; 2026 Subscription Audit Calculator — Your numbers, your browser, your wake-up call.</p>
+    <p class="forge-link">Part of <a href="https://restless-forge.dev">Restless Forge</a> &middot; <a href="https://whatismytimeworth.app">What Is My Time Worth?</a></p>
+  </footer>
+
+<script>
+const fmt=n=>'$'+n.toFixed(2);
+const fmt0=n=>'$'+Math.round(n).toLocaleString();
+const DEFAULTS = [
+  {name:'Netflix',cost:15.49,cycle:'monthly',uses:12},
+  {name:'Spotify',cost:11.99,cycle:'monthly',uses:25},
+  {name:'Amazon Prime',cost:139,cycle:'annual',uses:20},
+  {name:'ChatGPT Plus',cost:20,cycle:'monthly',uses:30},
+  {name:'Gym',cost:45,cycle:'monthly',uses:8},
+  {name:'iCloud+',cost:2.99,cycle:'monthly',uses:30},
+  {name:'YouTube Premium',cost:13.99,cycle:'monthly',uses:20},
+];
+let subs = [...DEFAULTS];
+function toMonthly(cost,cycle){ return cycle==='annual'?cost/12:cycle==='weekly'?cost*4.33:cost; }
+
+function render(){
+  const wage=+(document.getElementById('s-wage').value)||0;
+  const body=document.getElementById('sub-body');
+  let totalMonthly=0;
+  let html='';
+  let graveyardHtml='';
+  let graveyardCount=0;
+
+  subs.forEach((s,i)=>{
+    const monthly=toMonthly(s.cost,s.cycle);
+    const annual=monthly*12;
+    const costPerUse=s.uses>0?monthly/s.uses:Infinity;
+    const hoursPerYear=wage>0?annual/wage:0;
+    const isGraveyard=s.uses<2;
+    totalMonthly+=monthly;
+
+    const row=`<tr class="${isGraveyard?'graveyard':''}">
+      <td>${s.name}</td>
+      <td class="cost">${fmt(monthly)}/mo</td>
+      <td style="color:var(--text-muted)">${s.cycle}</td>
+      <td>${s.uses}</td>
+      <td class="${costPerUse>5?'waste':''}">${costPerUse===Infinity?'∞':fmt(costPerUse)}</td>
+      <td class="time">${hoursPerYear>0?hoursPerYear.toFixed(1)+'h':'—'}</td>
+      <td><button class="btn btn--small btn--danger" onclick="removeSub(${i})">✕</button></td>
+    </tr>`;
+    html+=row;
+
+    if(isGraveyard){
+      graveyardCount++;
+      graveyardHtml+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px"><span>${s.name}</span><span style="color:var(--red)">${fmt(monthly)}/mo — used ${s.uses}x/mo — ${fmt(costPerUse)}/use</span></div>`;
+    }
+  });
+
+  body.innerHTML=html;
+  const annual=totalMonthly*12;
+  document.getElementById('res-monthly').textContent=fmt0(totalMonthly);
+  document.getElementById('res-annual').textContent=fmt0(annual);
+  document.getElementById('res-5yr').textContent=fmt0(annual*5);
+
+  if(wage>0){
+    const hrs=annual/wage;
+    document.getElementById('res-hours').textContent=hrs.toFixed(0)+'hrs';
+    document.getElementById('res-hours-note').textContent=`At ${fmt(wage)}/hr real wage`;
+  } else {
+    document.getElementById('res-hours').textContent='—';
+    document.getElementById('res-hours-note').textContent='Enter your wage to see this';
+  }
+
+  const gs=document.getElementById('graveyard-section');
+  if(graveyardCount>0){gs.style.display='block';document.getElementById('graveyard-list').innerHTML=graveyardHtml;}
+  else{gs.style.display='none';}
+}
+
+function addSub(){
+  const name=document.getElementById('add-name').value.trim();
+  const cost=+(document.getElementById('add-cost').value)||0;
+  const cycle=document.getElementById('add-cycle').value;
+  const uses=+(document.getElementById('add-uses').value)||0;
+  if(!name||!cost) return;
+  subs.push({name,cost,cycle,uses});
+  document.getElementById('add-name').value='';
+  document.getElementById('add-cost').value='';
+  document.getElementById('add-uses').value='';
+  render();
+}
+
+function removeSub(i){ subs.splice(i,1); render(); }
+
+document.getElementById('s-wage').addEventListener('input',render);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "last_updated": "2026-01",
+  "presets": [
+    {
+      "name": "Netflix",
+      "cost": 15.49,
+      "cycle": "monthly",
+      "uses": 12
+    },
+    {
+      "name": "Spotify",
+      "cost": 11.99,
+      "cycle": "monthly",
+      "uses": 25
+    },
+    {
+      "name": "Amazon Prime",
+      "cost": 139,
+      "cycle": "annual",
+      "uses": 20
+    },
+    {
+      "name": "ChatGPT Plus",
+      "cost": 20,
+      "cycle": "monthly",
+      "uses": 30
+    },
+    {
+      "name": "Gym",
+      "cost": 45,
+      "cycle": "monthly",
+      "uses": 8
+    },
+    {
+      "name": "iCloud+",
+      "cost": 2.99,
+      "cycle": "monthly",
+      "uses": 30
+    },
+    {
+      "name": "YouTube Premium",
+      "cost": 13.99,
+      "cycle": "monthly",
+      "uses": 20
+    }
+  ]
+}

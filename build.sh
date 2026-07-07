@@ -111,6 +111,24 @@ build_vite_tool "PixelGrid" "pixelgrid"
 echo "[5c/7] Building WaveCarve..."
 build_vite_tool "WaveCarve" "wavecarve"
 
+echo "[5d/7] Building Am I Actually Saving?..."
+build_vite_tool "Am I Actually Saving?" "am-i-actually-saving"
+
+echo "[5d/7] Building Is My Raise Real?..."
+build_vite_tool "Is My Raise Real?" "is-my-raise-real"
+
+echo "[5d/7] Building Pet Cost..."
+build_vite_tool "Pet Cost" "pet-cost"
+
+echo "[5d/7] Building Repair or Replace?..."
+build_vite_tool "Repair or Replace?" "repair-or-replace"
+
+echo "[5d/7] Building Side Hustle Reality..."
+build_vite_tool "Side Hustle Reality" "side-hustle-reality"
+
+echo "[5d/7] Building Subscription Audit..."
+build_vite_tool "Subscription Audit" "subscription-audit"
+
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
 # 1-year cache would serve stale versions after updates. Inject a content
@@ -152,6 +170,12 @@ bust_cache "${DIST_DIR}/tools/petdose"             "/tools/petdose"
 bust_cache "${DIST_DIR}/tools/cookscale"             "/tools/cookscale"
 bust_cache "${DIST_DIR}/tools/pixelgrid"             "/tools/pixelgrid"
 bust_cache "${DIST_DIR}/tools/wavecarve"             "/tools/wavecarve"
+bust_cache "${DIST_DIR}/tools/am-i-actually-saving"             "/tools/am-i-actually-saving"
+bust_cache "${DIST_DIR}/tools/is-my-raise-real"             "/tools/is-my-raise-real"
+bust_cache "${DIST_DIR}/tools/pet-cost"             "/tools/pet-cost"
+bust_cache "${DIST_DIR}/tools/repair-or-replace"             "/tools/repair-or-replace"
+bust_cache "${DIST_DIR}/tools/side-hustle-reality"             "/tools/side-hustle-reality"
+bust_cache "${DIST_DIR}/tools/subscription-audit"             "/tools/subscription-audit"
 # Add a bust_cache call here for each new tool.
 
 # Cache-bust the global /shared.js across ALL html files in dist

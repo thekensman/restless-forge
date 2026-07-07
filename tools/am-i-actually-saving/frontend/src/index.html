@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Am I Actually Saving Money? — False Economy Detector</title>
+  <meta name="description" content="You drove 20 minutes to save $3 on gas. You just paid yourself $9/hour. Your real wage is $22/hr. You lost money. This calculator detects false economies by factoring in the value of your time.">
+  <meta name="keywords" content="false economy calculator, is it worth driving to save money, Costco membership worth it, time value saving money, bulk buying calculator, coupon worth it">
+  <link rel="canonical" href="https://restless-forge.dev/tools/am-i-actually-saving/">
+  <meta property="og:title" content="Am I Actually Saving Money?">
+  <meta property="og:description" content="You drove 20 min to save $3 on gas. That's $9/hr. Your wage is $22/hr. You lost money.">
+  <meta property="og:type" content="website">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Am I Actually Saving Money?","description":"False economy detector — calculates whether your 'savings' actually cost you money when time is factored in","url":"https://restless-forge.dev/tools/am-i-actually-saving/","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is it worth driving to a cheaper gas station?","acceptedAnswer":{"@type":"Answer","text":"Usually not. If gas is $0.10/gallon cheaper and you have a 15-gallon tank, you save $1.50. If the detour takes 10 extra minutes and your real hourly wage is $22, that 10 minutes costs $3.67 in time value — you lost $2.17. Use our calculator to check your specific numbers."}},{"@type":"Question","name":"Is a Costco membership worth it?","acceptedAnswer":{"@type":"Answer","text":"It depends on your shopping habits, distance, time spent, and whether you impulse-buy. Research shows warehouse shoppers overspend by 20-40% on unplanned items. Our Bulk Buy Auditor factors in membership fees, gas, time cost, and impulse spending to show whether your membership actually saves money."}},{"@type":"Question","name":"What is a false economy?","acceptedAnswer":{"@type":"Answer","text":"A false economy is when you spend time or money trying to save, but the total cost of the 'saving' effort exceeds what you actually saved. Common examples include driving far for cheaper gas, extreme couponing, buying in bulk that spoils, or DIYing something that takes far longer than expected."}}]}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #0b0d12; --bg-raised: #151820; --bg-card: #1a1e28; --bg-input: #0e1018;
+  --border: #252a35; --border-focus: #d4a44e;
+  --text: #d8d4cc; --text-dim: #7a7770; --text-muted: #4a4840;
+  --accent: #d4a44e; --accent-dim: #a88540;
+  --green: #6bbd7a; --red: #d45d5d; --orange: #d4a04e;
+  --font-body: "Lora", Georgia, serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --max-w: 1100px; --radius: 3px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;background-image:radial-gradient(ellipse at 20% 0%,rgba(212,164,78,0.03) 0%,transparent 60%)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+
+.header{border-bottom:1px solid var(--border);padding:36px 24px 28px}
+.header__inner{max-width:var(--max-w);margin:0 auto}
+.header__brand{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.header__logo{font-size:28px;line-height:1}
+.header__title{font-family:var(--font-mono);font-size:clamp(20px,3.5vw,30px);font-weight:400;color:var(--text);letter-spacing:-0.3px}
+.header__tagline{font-style:italic;color:var(--text-dim);font-size:16px}
+
+.tabs{max-width:var(--max-w);margin:0 auto;padding:20px 24px 0;display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{font-family:var(--font-mono);font-size:13px;padding:9px 18px 11px;background:transparent;color:var(--text-dim);border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.tab:hover{color:var(--text);background:var(--bg-raised)}
+.tab--active{color:var(--accent);background:var(--bg-raised);border-color:var(--border);border-bottom:1px solid var(--bg-raised);margin-bottom:-1px}
+.tab__icon{margin-right:5px}
+
+.main{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+.panel{padding:28px 0;display:none}.panel--active{display:block}
+.panel__grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+@media(max-width:820px){.panel__grid{grid-template-columns:1fr}}
+
+.card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.card__title{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+.card__title--spaced{margin-top:24px}
+
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:5px}
+.field__hint{display:block;font-size:11px;color:var(--text-muted);margin-top:3px;font-style:italic}
+.field-row{display:flex;gap:12px;margin-bottom:16px}.field-row .field{flex:1;margin-bottom:0}
+.input-group{display:flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}
+.input-group:focus-within{border-color:var(--border-focus)}
+.input-prefix,.input-suffix{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);padding:0 9px;flex-shrink:0}
+input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:var(--text);background:transparent;border:none;padding:9px 11px;width:100%;outline:none;-moz-appearance:textfield}
+input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+select{cursor:pointer;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px}
+select:focus{border-color:var(--border-focus);outline:none}
+select option{background:var(--bg-card);color:var(--text)}
+
+.results-column{display:flex;flex-direction:column;gap:14px}
+.result-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center}
+.result-card--hero{border-color:var(--accent);border-width:2px;padding:28px 22px}
+.result-card--hero .result-card__value{font-size:clamp(28px,5vw,44px)}
+.result-card__label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
+.result-card__value{font-family:var(--font-mono);font-weight:500;font-size:28px;color:var(--text);line-height:1.2}
+.result-card__note{font-size:12px;color:var(--text-muted);margin-top:5px;font-style:italic}
+.verdict-save .result-card__value{color:var(--green)}
+.verdict-lose .result-card__value{color:var(--red)}
+.verdict-flat .result-card__value{color:var(--orange)}
+
+.insight-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.insight-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.insight-card__icon{font-size:22px;margin-bottom:6px}
+.insight-card__value{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--text)}
+.insight-card__label{font-size:11px;color:var(--text-dim);margin-top:4px}
+
+.preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}
+.preset{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;text-align:center;cursor:pointer;transition:all .15s}
+.preset:hover{border-color:var(--accent);background:var(--bg-raised)}
+.preset__icon{font-size:20px;margin-bottom:4px}
+.preset__label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim)}
+
+.breakdown{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:14px}
+.breakdown__row{display:flex;justify-content:space-between;padding:5px 0;font-family:var(--font-mono);font-size:12px;border-bottom:1px solid rgba(37,42,53,0.5)}
+.breakdown__row:last-child{border-bottom:none}
+.breakdown__row span:first-child{color:var(--text-dim)}
+.breakdown__row--total{border-top:2px solid var(--accent);margin-top:8px;padding-top:8px;font-weight:600}
+
+.about{padding:40px 0;border-top:1px solid var(--border);margin-top:20px}
+.about__title{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--accent);margin-bottom:14px}
+.about__text{font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:12px}
+.footer{border-top:1px solid var(--border);padding:24px;text-align:center}
+.footer__links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}
+.footer__link{font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.footer__link:hover{color:var(--accent)}
+.footer__link--heart{color:var(--red)}
+.footer__link--heart svg{vertical-align:-2px;margin-right:3px}
+.footer__copy{font-size:11px;color:var(--text-muted)}
+.forge-link{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px}
+.forge-link a{color:var(--accent-dim)}
+  </style>
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/am-i-actually-saving/favicon.svg">
+  <link rel="icon" href="/tools/am-i-actually-saving/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/am-i-actually-saving/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/am-i-actually-saving/site.webmanifest">
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__brand">
+        <span class="header__logo">🧾</span>
+        <h1 class="header__title">Am I Actually Saving Money?</h1>
+      </div>
+      <p class="header__tagline">The math your "savings" don't want you to do.</p>
+    </div>
+  </header>
+
+  <main class="main">
+    <nav class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="economy" role="tab" aria-selected="true"><span class="tab__icon">🔍</span> False Economy Detector</button>
+      <button class="tab" data-tab="bulk" role="tab" aria-selected="false"><span class="tab__icon">🛒</span> Bulk Buy Auditor</button>
+    </nav>
+
+    <!-- TAB 1: FALSE ECONOMY DETECTOR -->
+    <section class="panel panel--active" id="panel-economy" role="tabpanel">
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">The "Savings"</h2>
+          <div class="field">
+            <label for="f-wage">Your real hourly wage</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="f-wage" value="22" min="0" step="0.5"></div>
+            <span class="field__hint">Don't know? <a href="https://whatismytimeworth.app" target="_blank">Calculate it here</a>.</span>
+          </div>
+          <div class="field">
+            <label for="f-saved">Amount you "saved"</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="f-saved" value="3" min="0" step="0.5"></div>
+          </div>
+          <div class="field">
+            <label for="f-time">Extra time spent (round-trip)</label>
+            <div class="input-group"><input type="number" id="f-time" value="20" min="0" step="5"><span class="input-suffix">min</span></div>
+            <span class="field__hint">Driving, waiting in line, clipping coupons, comparing prices, etc.</span>
+          </div>
+          <div class="field">
+            <label for="f-extra-cost">Extra costs incurred</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="f-extra-cost" value="1.50" min="0" step="0.25"></div>
+            <span class="field__hint">Gas, parking, impulse buys at the "cheap" store, etc.</span>
+          </div>
+          <div class="field">
+            <label for="f-frequency">How often do you do this?</label>
+            <select id="f-frequency">
+              <option value="1">Once</option>
+              <option value="4" selected>Weekly</option>
+              <option value="8">Twice a week</option>
+              <option value="17">Every other day</option>
+              <option value="30">Daily</option>
+            </select>
+          </div>
+
+          <h2 class="card__title card__title--spaced">Quick Checks</h2>
+          <div class="preset-grid" id="preset-grid"></div>
+        </div>
+
+        <div class="results-column" id="economy-results">
+          <div class="result-card result-card--hero" id="econ-hero">
+            <div class="result-card__label">Verdict</div>
+            <div class="result-card__value" id="res-econ-verdict">—</div>
+            <div class="result-card__note" id="res-econ-note"></div>
+          </div>
+
+          <div class="insight-row">
+            <div class="insight-card">
+              <div class="insight-card__icon">⏱️</div>
+              <div class="insight-card__value" id="res-econ-rate">—</div>
+              <div class="insight-card__label">You're paying yourself per hour</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">💸</div>
+              <div class="insight-card__value" id="res-econ-true-savings">—</div>
+              <div class="insight-card__label">Actual savings (time-adjusted)</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">📅</div>
+              <div class="insight-card__value" id="res-econ-annual">—</div>
+              <div class="insight-card__label">Annual impact</div>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <div class="breakdown__row"><span>Nominal savings</span><span id="bd-saved">—</span></div>
+            <div class="breakdown__row"><span>Extra costs</span><span id="bd-extra">—</span></div>
+            <div class="breakdown__row"><span>Net cash savings</span><span id="bd-net-cash">—</span></div>
+            <div class="breakdown__row"><span>Time spent</span><span id="bd-time">—</span></div>
+            <div class="breakdown__row"><span>Time cost (@ your wage)</span><span id="bd-time-cost">—</span></div>
+            <div class="breakdown__row breakdown__row--total"><span>True savings (or loss)</span><span id="bd-true">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: BULK BUY AUDITOR -->
+    <section class="panel" id="panel-bulk" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Membership Details</h2>
+          <div class="field">
+            <label for="b-wage">Your real hourly wage</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="b-wage" value="22" min="0" step="0.5"></div>
+          </div>
+          <div class="field">
+            <label for="b-fee">Annual membership fee</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="b-fee" value="65" min="0" step="5"></div>
+          </div>
+          <div class="field">
+            <label for="b-trips">Trips per month</label>
+            <div class="input-group"><input type="number" id="b-trips" value="3" min="0" step="1"></div>
+          </div>
+          <div class="field">
+            <label for="b-time">Round-trip time per visit</label>
+            <div class="input-group"><input type="number" id="b-time" value="75" min="0" step="5"><span class="input-suffix">min</span></div>
+            <span class="field__hint">Include driving, shopping, loading, and putting away.</span>
+          </div>
+          <div class="field">
+            <label for="b-gas">Gas cost per trip</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="b-gas" value="6" min="0" step="0.5"></div>
+          </div>
+          <div class="field">
+            <label for="b-savings">Estimated savings per trip</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="b-savings" value="25" min="0" step="5"></div>
+            <span class="field__hint">Vs. buying the same items at your regular store.</span>
+          </div>
+          <div class="field">
+            <label for="b-impulse">Impulse spend per trip</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="b-impulse" value="15" min="0" step="5"></div>
+            <span class="field__hint">Be honest. The giant muffins, the socks, the thing you didn't plan to buy. Research says 20–40% of warehouse spending is unplanned.</span>
+          </div>
+        </div>
+
+        <div class="results-column">
+          <div class="result-card result-card--hero" id="bulk-hero">
+            <div class="result-card__label">Your Membership</div>
+            <div class="result-card__value" id="res-bulk-verdict">—</div>
+            <div class="result-card__note" id="res-bulk-note"></div>
+          </div>
+
+          <div class="insight-row">
+            <div class="insight-card">
+              <div class="insight-card__icon">💰</div>
+              <div class="insight-card__value" id="res-bulk-gross">—</div>
+              <div class="insight-card__label">Gross annual savings</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">🛒</div>
+              <div class="insight-card__value" id="res-bulk-impulse">—</div>
+              <div class="insight-card__label">Annual impulse overspend</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">⏱️</div>
+              <div class="insight-card__value" id="res-bulk-time">—</div>
+              <div class="insight-card__label">Annual time cost</div>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <div class="breakdown__row"><span>Gross product savings (${trips}×12 trips)</span><span id="bb-gross">—</span></div>
+            <div class="breakdown__row"><span>Membership fee</span><span id="bb-fee">—</span></div>
+            <div class="breakdown__row"><span>Annual gas cost</span><span id="bb-gas">—</span></div>
+            <div class="breakdown__row"><span>Annual impulse spending</span><span id="bb-impulse">—</span></div>
+            <div class="breakdown__row"><span>Annual time (hrs @ your wage)</span><span id="bb-time">—</span></div>
+            <div class="breakdown__row breakdown__row--total"><span>True annual savings / loss</span><span id="bb-total">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="about__title">Why This Calculator Exists</h2>
+      <p class="about__text">We all do it. We drive across town to save a few dollars on gas, clip coupons for an hour to save $8, or buy bulk toilet paper we have nowhere to store. It feels like saving. But when you factor in the value of your time — the time you could spend earning, resting, or just not being in a parking lot — many "savings" turn out to cost more than they save.</p>
+      <p class="about__text">This isn't about never being frugal. It's about being frugal where it actually works. Some bulk buys are genuinely great deals. Some coupons are worth clipping. This tool helps you tell the difference.</p>
+      <p class="about__text about__text--dim">Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser. Nothing is sent anywhere.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__links">
+      <a class="footer__link footer__link--heart" href="https://ko-fi.com/stygnus" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Ko-fi</a>
+      <a class="footer__link" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" href="https://stygnus.substack.com" target="_blank" rel="noopener">Substack</a>
+      <a class="footer__link" href="https://github.com/thekensman" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="footer__copy">&copy; 2026 Am I Actually Saving Money? — Your numbers, your browser, no agenda.</p>
+    <p class="forge-link">Part of <a href="https://restless-forge.dev">Restless Forge</a> — free tools, no signup, no tracking. <a href="https://whatismytimeworth.app">Know your real hourly wage &rarr;</a></p>
+  </footer>
+
+<script>
+// ═══ Tab switching ═══
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => { t.classList.remove('tab--active'); t.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.panel').forEach(p => { p.classList.remove('panel--active'); p.hidden = true; });
+    tab.classList.add('tab--active'); tab.setAttribute('aria-selected','true');
+    const panel = document.getElementById('panel-' + tab.dataset.tab);
+    panel.classList.add('panel--active'); panel.hidden = false;
+  });
+});
+
+const fmt = n => n.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0});
+const fmt2 = n => n.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+
+// ═══ Presets ═══
+const PRESETS = [
+  { icon:'⛽', label:'Cheaper gas', saved:1.50, time:15, extra:1.00, freq:4 },
+  { icon:'✂️', label:'Coupon trip', saved:8, time:45, extra:2.00, freq:4 },
+  { icon:'🧹', label:'DIY car wash', saved:12, time:40, extra:2.00, freq:2 },
+  { icon:'🍳', label:'Cook vs. takeout', saved:15, time:60, extra:5.00, freq:8 },
+  { icon:'🛍️', label:'Cheaper store', saved:5, time:20, extra:2.00, freq:4 },
+  { icon:'🔧', label:'DIY oil change', saved:30, time:60, extra:15.00, freq:0.25 },
+  { icon:'👕', label:'Thrift shopping', saved:20, time:90, extra:3.00, freq:2 },
+  { icon:'📦', label:'Waiting for sale', saved:10, time:30, extra:0, freq:2 },
+];
+
+const presetGrid = document.getElementById('preset-grid');
+PRESETS.forEach(p => {
+  const div = document.createElement('div');
+  div.className = 'preset';
+  div.innerHTML = `<div class="preset__icon">${p.icon}</div><div class="preset__label">${p.label}</div>`;
+  div.addEventListener('click', () => {
+    document.getElementById('f-saved').value = p.saved;
+    document.getElementById('f-time').value = p.time;
+    document.getElementById('f-extra-cost').value = p.extra;
+    // Match closest frequency
+    const sel = document.getElementById('f-frequency');
+    let closest = sel.options[0];
+    for (const opt of sel.options) { if (Math.abs(parseFloat(opt.value) - p.freq) < Math.abs(parseFloat(closest.value) - p.freq)) closest = opt; }
+    sel.value = closest.value;
+    calcEconomy();
+  });
+  presetGrid.appendChild(div);
+});
+
+// ═══ TAB 1: False Economy ═══
+function calcEconomy() {
+  const wage = parseFloat(document.getElementById('f-wage').value) || 0;
+  const saved = parseFloat(document.getElementById('f-saved').value) || 0;
+  const timeMin = parseFloat(document.getElementById('f-time').value) || 0;
+  const extraCost = parseFloat(document.getElementById('f-extra-cost').value) || 0;
+  const freqMonth = parseFloat(document.getElementById('f-frequency').value) || 1;
+
+  const timeHrs = timeMin / 60;
+  const timeCost = timeHrs * wage;
+  const netCash = saved - extraCost;
+  const trueSavings = netCash - timeCost;
+  const hourlyRate = timeHrs > 0 ? netCash / timeHrs : Infinity;
+  const annualImpact = trueSavings * freqMonth * 12;
+
+  const hero = document.getElementById('econ-hero');
+  hero.className = 'result-card result-card--hero';
+
+  if (trueSavings > 0.50) {
+    hero.classList.add('verdict-save');
+    document.getElementById('res-econ-verdict').textContent = 'Genuine Savings';
+    document.getElementById('res-econ-note').textContent = `You're saving ${fmt2(trueSavings)} even after time. Worth it.`;
+  } else if (trueSavings < -0.50) {
+    hero.classList.add('verdict-lose');
+    document.getElementById('res-econ-verdict').textContent = 'False Economy';
+    document.getElementById('res-econ-note').textContent = `You're losing ${fmt2(Math.abs(trueSavings))} each time. You're paying to "save."`;
+  } else {
+    hero.classList.add('verdict-flat');
+    document.getElementById('res-econ-verdict').textContent = 'Break Even';
+    document.getElementById('res-econ-note').textContent = `After time, this is roughly a wash. Not saving, not losing.`;
+  }
+
+  document.getElementById('res-econ-rate').textContent = hourlyRate === Infinity ? '∞' : fmt2(hourlyRate) + '/hr';
+  document.getElementById('res-econ-true-savings').textContent = fmt2(trueSavings);
+  document.getElementById('res-econ-annual').textContent = fmt(annualImpact);
+
+  document.getElementById('bd-saved').textContent = fmt2(saved);
+  document.getElementById('bd-extra').textContent = '-' + fmt2(extraCost);
+  document.getElementById('bd-net-cash').textContent = fmt2(netCash);
+  document.getElementById('bd-time').textContent = timeMin + ' min (' + timeHrs.toFixed(2) + ' hrs)';
+  document.getElementById('bd-time-cost').textContent = '-' + fmt2(timeCost);
+  document.getElementById('bd-true').textContent = fmt2(trueSavings);
+  document.getElementById('bd-true').style.color = trueSavings >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ═══ TAB 2: Bulk Buy Auditor ═══
+function calcBulk() {
+  const wage = parseFloat(document.getElementById('b-wage').value) || 0;
+  const fee = parseFloat(document.getElementById('b-fee').value) || 0;
+  const trips = parseFloat(document.getElementById('b-trips').value) || 0;
+  const timeMin = parseFloat(document.getElementById('b-time').value) || 0;
+  const gas = parseFloat(document.getElementById('b-gas').value) || 0;
+  const savings = parseFloat(document.getElementById('b-savings').value) || 0;
+  const impulse = parseFloat(document.getElementById('b-impulse').value) || 0;
+
+  const annualTrips = trips * 12;
+  const grossSavings = savings * annualTrips;
+  const annualGas = gas * annualTrips;
+  const annualImpulse = impulse * annualTrips;
+  const annualTimeHrs = (timeMin / 60) * annualTrips;
+  const annualTimeCost = annualTimeHrs * wage;
+  const trueSavings = grossSavings - fee - annualGas - annualImpulse - annualTimeCost;
+
+  const hero = document.getElementById('bulk-hero');
+  hero.className = 'result-card result-card--hero';
+
+  if (trueSavings > 10) {
+    hero.classList.add('verdict-save');
+    document.getElementById('res-bulk-verdict').textContent = 'Worth It: ' + fmt(trueSavings) + '/yr';
+    document.getElementById('res-bulk-note').textContent = 'Your membership saves real money after all costs and time.';
+  } else if (trueSavings < -10) {
+    hero.classList.add('verdict-lose');
+    document.getElementById('res-bulk-verdict').textContent = 'Costs You: ' + fmt(Math.abs(trueSavings)) + '/yr';
+    document.getElementById('res-bulk-note').textContent = 'Your membership is more expensive than shopping normally.';
+  } else {
+    hero.classList.add('verdict-flat');
+    document.getElementById('res-bulk-verdict').textContent = 'Break Even';
+    document.getElementById('res-bulk-note').textContent = 'You\'re roughly breaking even. Keep it if you enjoy the experience.';
+  }
+
+  document.getElementById('res-bulk-gross').textContent = fmt(grossSavings);
+  document.getElementById('res-bulk-impulse').textContent = fmt(annualImpulse);
+  document.getElementById('res-bulk-time').textContent = fmt(annualTimeCost);
+
+  document.getElementById('bb-gross').textContent = '+' + fmt(grossSavings);
+  document.getElementById('bb-fee').textContent = '-' + fmt(fee);
+  document.getElementById('bb-gas').textContent = '-' + fmt(annualGas);
+  document.getElementById('bb-impulse').textContent = '-' + fmt(annualImpulse);
+  document.getElementById('bb-time').textContent = '-' + fmt(annualTimeCost) + ' (' + annualTimeHrs.toFixed(0) + 'hrs)';
+  document.getElementById('bb-total').textContent = fmt(trueSavings);
+  document.getElementById('bb-total').style.color = trueSavings >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ═══ Event listeners ═══
+['f-wage','f-saved','f-time','f-extra-cost','f-frequency'].forEach(id => document.getElementById(id).addEventListener('input', calcEconomy));
+['b-wage','b-fee','b-trips','b-time','b-gas','b-savings','b-impulse'].forEach(id => document.getElementById(id).addEventListener('input', calcBulk));
+
+calcEconomy();
+calcBulk();
+</script>
+</body>
+</html>
