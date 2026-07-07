@@ -30,6 +30,11 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
       },
+      "/tools/tattoosafe": {
+        target: "http://localhost:5175",
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 });

@@ -1,0 +1,22 @@
+{
+  "name": "tattoosafe-frontend",
+  "version": "1.0.0",
+  "description": "AR tattoo preview & pricing calculator — see your design in real time.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.0",
+    "jsdom": "^25.0.0"
+  },
+  "author": "Kenneth Cross",
+  "license": "MIT"
+}

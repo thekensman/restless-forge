@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d14">
+  <title>About — TattooSafe</title>
+  <meta name="description" content="About TattooSafe — free AR tattoo preview and pricing calculator.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/tattoosafe/about/">
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/tattoosafe/favicon.svg">
+  <link rel="icon" href="/tools/tattoosafe/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/tattoosafe/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/tattoosafe/site.webmanifest">
+  <meta property="og:title" content="About — TattooSafe">
+  <meta property="og:url" content="https://restless-forge.dev/tools/tattoosafe/about/">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/tattoosafe/pages.css">
+  <script src="/shared.js"></script>
+  <script src="/tools/tattoosafe/shared.js"></script>
+</head>
+<body>
+  <div id="ts-header"></div>
+  <main>
+    <h1>About TattooSafe</h1>
+    <p class="page-sub">Free AR tattoo preview &amp; pricing calculator — everything runs in your browser.</p>
+
+    <h2>What It Does</h2>
+    <p>TattooSafe lets you see how a tattoo design will look on your body using your phone or laptop camera.
+    Upload any image, activate the camera, and drag your design into position. The pricing calculator
+    estimates cost based on size, style, placement, and artist experience level using 2024–2025 US market data.</p>
+
+    <h2>How It Works</h2>
+    <p>The AR preview uses the browser Camera API (getUserMedia) and HTML5 Canvas for real-time compositing at 60fps.
+    The silhouette preview generates inline SVGs with anatomically proportioned body outlines scaled to your height.
+    The pricing engine calculates session time from tattoo area × complexity, adjusted for placement difficulty and session overhead.</p>
+
+    <h2>About Your Data</h2>
+    <div class="info-box">
+      <p><strong>Privacy:</strong> Nothing you enter is sent to a server. Camera feed stays on your device. Images are never uploaded. All processing happens in your browser.</p>
+    </div>
+    <p>See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Use</a>.</p>
+
+    <h2>Open Source</h2>
+    <p>Source code is on <a href="https://github.com/thekensman/restless-forge" target="_blank" rel="noopener">GitHub</a>. Contributions, bug reports, and feature requests welcome.</p>
+  </main>
+  <div id="ts-footer"></div>
+</body>
+</html>
