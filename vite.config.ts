@@ -35,6 +35,61 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
       },
+      "/tools/stitchtrace": {
+        target: "http://localhost:5176",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/plotpath": {
+        target: "http://localhost:5177",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/cncfeed": {
+        target: "http://localhost:5178",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/printplate": {
+        target: "http://localhost:5179",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/gerberpeek": {
+        target: "http://localhost:5180",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/knotguide": {
+        target: "http://localhost:5181",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/lensmatch": {
+        target: "http://localhost:5182",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/petdose": {
+        target: "http://localhost:5183",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/cookscale": {
+        target: "http://localhost:5184",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/pixelgrid": {
+        target: "http://localhost:5185",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/wavecarve": {
+        target: "http://localhost:5186",
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 });
