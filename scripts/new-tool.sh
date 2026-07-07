@@ -79,24 +79,15 @@ cat <<EOF
 
 ✓ tools/${TOOL_NAME}/frontend/ created and installed.
 
-Manual steps remaining (no safe way to automate without breaking something):
+Manual steps remaining:
 
-  1. Add the build step to build.sh (near the other build_vite_tool calls):
-       build_vite_tool "${TOOL_LABEL}" "${TOOL_NAME}"
-     and a bust_cache call below:
-       bust_cache "\${DIST_DIR}/tools/${TOOL_NAME}" "/tools/${TOOL_NAME}"
+  build.sh, root package.json dev/test, and the root vite proxy discover
+  tools automatically — no edits needed there.
 
-  2. Add to the root package.json "dev" concurrently list and create a dev:${TOOL_PREFIX} alias:
-       "dev:${TOOL_PREFIX}": "npm run dev --prefix tools/${TOOL_NAME}/frontend"
+  1. Add a tool card to site/index.html and site/tools/index.html
+     (inside the "Tools on deck" comment block if the tool isn't ready).
 
-  3. Add a proxy entry to the root vite.config.ts:
-       "/tools/${TOOL_NAME}": { target: "http://localhost:${TOOL_PORT}", changeOrigin: true, ws: true }
-
-  4. Add a tool card to site/index.html and site/tools/index.html.
-
-  5. Add URLs to site/sitemap.xml.
-
-  6. (If the tool has an API / backend) Update nginx/restless-forge.conf.
+  2. Add URLs to site/sitemap.xml when the tool goes public.
 
 Start developing:
   cd tools/${TOOL_NAME}/frontend

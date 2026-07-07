@@ -35,26 +35,66 @@
     <h2>PetDose: Pet medication dosage calculator</h2>
     <p>Free pet medication dosage calculator with safety warnings. Everything runs in your browser — no uploads, no accounts, no data stored.</p>
   </div>
+  <!-- ═══ Safety disclaimer modal (dismissable, reshown each session) ═══ -->
+  <div class="safety-modal" id="safety-modal" role="alertdialog" aria-modal="true"
+       aria-labelledby="safety-title" aria-describedby="safety-text">
+    <div class="safety-modal__card">
+      <h2 class="safety-modal__title" id="safety-title">⚠ Before you use PetDose</h2>
+      <p class="safety-modal__text" id="safety-text">
+        PetDose shows <strong>general reference ranges</strong> compiled from published
+        veterinary sources. It is <strong>not veterinary advice</strong>. Safe dosing
+        depends on your pet's breed, age, weight, health conditions, pregnancy status,
+        and other medications — never give a medication, change a dose, or use a
+        prescription drug without your veterinarian's direction.
+      </p>
+      <p class="safety-modal__text">
+        If your pet swallowed something toxic or is in distress, contact your vet or the
+        ASPCA Animal Poison Control Center at <strong>(888)&nbsp;426-4435</strong> now.
+      </p>
+      <button class="safety-modal__btn" id="safety-dismiss">I understand — show reference ranges</button>
+    </div>
+  </div>
+
   <div class="tool-content">
-    <section class="upload" aria-label="File upload">
-      <h2 class="sr-only">Upload your file</h2>
-      <div class="upload__circle" id="drop-zone" role="button" tabindex="0" aria-label="Drop a file here or click to browse">
-        <div class="upload__inner">
-          <svg class="upload__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M24 32V16m0 0l-7 7m7-7l7 7" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="6" y="6" width="36" height="36" rx="8" stroke-linecap="round"/>
-          </svg>
-          <p class="upload__label">Drop your file here</p>
-          <p class="upload__hint">or click to browse</p>
-          <input type="file" id="file-input" hidden>
-        </div>
+    <!-- ─── Dose calculator ─── -->
+    <section class="settings" aria-label="Dose calculator">
+      <h2 class="settings__title">Dose Calculator</h2>
+
+      <div class="field">
+        <label class="field__label" for="species-select">Pet</label>
+        <select class="field__select" id="species-select">
+          <option value="dog" selected>Dog</option>
+          <option value="cat">Cat</option>
+        </select>
       </div>
-      <p class="upload__file-name" id="file-name" aria-live="polite"></p>
+
+      <div class="field">
+        <label class="field__label" for="weight-input">Weight</label>
+        <div class="field__row">
+          <input class="field__input" type="number" id="weight-input" value="10" min="0.5" max="200" step="0.1">
+          <select class="field__select field__select--unit" id="weight-unit">
+            <option value="lbs" selected>lbs</option>
+            <option value="kg">kg</option>
+          </select>
+        </div>
+        <p class="field__hint" id="weight-note" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="med-select">Medication</label>
+        <select class="field__select" id="med-select"></select>
+      </div>
     </section>
-    <section class="settings" aria-label="Settings">
-      <h2 class="settings__title">Settings</h2>
-      <div class="output-area" id="output-area">PetDose ready — upload a file or adjust settings to begin.</div>
+
+    <!-- ─── Results ─── -->
+    <section class="settings" aria-label="Dose result">
+      <h2 class="settings__title">Reference Range</h2>
+      <div class="output-area" id="output-area" aria-live="polite">Select a medication to see its reference range.</div>
+      <p class="dose-disclaimer" id="dose-disclaimer">
+        Reference only — confirm every dose with your veterinarian before giving it.
+      </p>
     </section>
+
     <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
   </div>
   <div id="pd-footer"></div>

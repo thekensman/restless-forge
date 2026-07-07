@@ -141,35 +141,12 @@ Every sub-page HTML file must contain:
 The absolute URLs are preserved through Vite's build via the sentinel
 `transformIndexHtml` plugins in `tools/vite-tool-config.ts`.
 
-### 5. Wire the tool into the monorepo
+### 5. Monorepo wiring — automatic
 
-**`build.sh`** — add two lines:
-
-```bash
-echo "[N/7] Building <Tool Label>..."
-build_vite_tool "<Tool Label>" "<tool-name>"
-
-# ...and in the cache-bust section:
-bust_cache "${DIST_DIR}/tools/<tool-name>" "/tools/<tool-name>"
-```
-
-**Root `package.json`** — add to `dev` and `test`:
-
-```json
-"dev": "concurrently ... \"npm run dev --prefix tools/<tool-name>/frontend\"",
-"test": "... && npm test --prefix tools/<tool-name>/frontend",
-"dev:<prefix>": "npm run dev --prefix tools/<tool-name>/frontend"
-```
-
-**Root `vite.config.ts`** — add a proxy entry:
-
-```ts
-"/tools/<tool-name>": {
-  target: "http://localhost:<port>",
-  changeOrigin: true,
-  ws: true,
-},
-```
+`build.sh`, root `npm run dev` / `npm test`, and the root vite proxy all
+discover tools from `tools/*/frontend/` via `scripts/tools.mjs` (each
+tool's port + base path are read from its own `vite.config.ts`). There is
+nothing to edit at the repo root when adding or removing a tool.
 
 ### 6. Add to the site
 

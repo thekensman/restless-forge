@@ -1,54 +1,113 @@
 /**
  * PetDose — Main Application
- * Reactive UI controller. All processing in browser.
+ * Dose calculator UI wired to engine.ts. All processing in browser.
+ * A dismissable safety disclaimer gates first use each session.
  */
-import * as engine from "./engine";
+import {
+  MEDICATIONS, calculateDose, getMedicationsForSpecies, lbsToKg, kgToLbs,
+} from "./engine";
 
 const $ = (sel: string) => document.querySelector<HTMLElement>(sel);
 
-function setupFileUpload(): void {
-  const dz = $("#drop-zone");
-  const fi = $("input#file-input") as HTMLInputElement | null;
-  if (!dz || !fi) return;
-  dz.addEventListener("click", () => fi.click());
-  dz.addEventListener("keydown", (e) => {
-    if ((e as KeyboardEvent).key === "Enter" || (e as KeyboardEvent).key === " ") { e.preventDefault(); fi.click(); }
+// ─── Safety disclaimer modal ─────────────────────────────────
+
+const SAFETY_KEY = "petdose-safety-acknowledged";
+
+function setupSafetyModal(): void {
+  const modal = $("#safety-modal");
+  const dismiss = $("#safety-dismiss");
+  if (!modal || !dismiss) return;
+  let acknowledged = false;
+  try {
+    // sessionStorage on purpose: the disclaimer reappears every new visit.
+    acknowledged = sessionStorage.getItem(SAFETY_KEY) === "1";
+  } catch { /* storage blocked — keep showing the modal */ }
+  if (acknowledged) {
+    modal.style.display = "none";
+    return;
+  }
+  document.body.classList.add("safety-locked");
+  dismiss.addEventListener("click", () => {
+    modal.style.display = "none";
+    document.body.classList.remove("safety-locked");
+    try { sessionStorage.setItem(SAFETY_KEY, "1"); } catch { /* non-fatal */ }
   });
-  dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("upload__circle--active"); });
-  dz.addEventListener("dragleave", () => dz.classList.remove("upload__circle--active"));
-  dz.addEventListener("drop", (e) => {
-    e.preventDefault(); dz.classList.remove("upload__circle--active");
-    const dt = (e as DragEvent).dataTransfer;
-    if (dt?.files.length) handleFile(dt.files[0]);
-  });
-  fi.addEventListener("change", () => { if (fi.files?.length) handleFile(fi.files[0]); });
+  dismiss.focus();
 }
 
-function handleFile(file: File): void {
-  const fn = $("#file-name");
-  if (fn) fn.textContent = file.name;
+// ─── Calculator ──────────────────────────────────────────────
+
+function currentWeightKg(): number {
+  const val = parseFloat(($("#weight-input") as HTMLInputElement)?.value) || 0;
+  const unit = ($("#weight-unit") as HTMLSelectElement)?.value;
+  return unit === "kg" ? val : lbsToKg(val);
+}
+
+function populateMedications(): void {
+  const species = ($("#species-select") as HTMLSelectElement)?.value ?? "dog";
+  const sel = $("#med-select") as HTMLSelectElement | null;
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = "";
+  for (const med of getMedicationsForSpecies(species)) {
+    const opt = document.createElement("option");
+    opt.value = med.id;
+    opt.textContent = med.name;
+    sel.appendChild(opt);
+  }
+  if ([...sel.options].some((o) => o.value === current)) sel.value = current;
+}
+
+function render(): void {
+  const species = ($("#species-select") as HTMLSelectElement)?.value ?? "dog";
+  const medId = ($("#med-select") as HTMLSelectElement)?.value;
+  const weightKg = currentWeightKg();
   const out = $("#output-area");
-  if (out) out.textContent = `Loaded ${file.name} (${(file.size / 1024).toFixed(1)} KB) — processing in browser...`;
-}
+  const note = $("#weight-note");
+  if (!out) return;
 
-function setupReactiveInputs(): void {
-  document.querySelectorAll<HTMLElement>("select, input[type=number], input[type=range]").forEach((el) => {
-    el.addEventListener("input", handleChange);
-    el.addEventListener("change", handleChange);
-  });
-}
+  const unit = ($("#weight-unit") as HTMLSelectElement)?.value;
+  if (note) {
+    note.textContent = unit === "kg"
+      ? `${kgToLbs(weightKg)} lbs`
+      : `${weightKg} kg`;
+  }
 
-function handleChange(): void {
-  const out = $("#output-area");
-  if (out) out.textContent = "PetDose ready — all processing runs in your browser.";
+  if (!medId || weightKg <= 0) {
+    out.textContent = "Enter your pet's weight and pick a medication.";
+    return;
+  }
+
+  const med = MEDICATIONS.find((m) => m.id === medId);
+  const result = calculateDose(medId, species, weightKg);
+  if (!med || !result) {
+    out.textContent = "This medication has no reference range for the selected species.";
+    return;
+  }
+
+  const doseLine = result.unit
+    ? `${result.dose} ${result.unit} per dose`
+    : `${result.dose}`;
+
+  out.innerHTML = [
+    `<p class="dose-result__dose"><strong>${med.name}</strong></p>`,
+    `<p class="dose-result__line">${doseLine} · ${result.frequency}</p>`,
+    result.maxDailyNote ? `<p class="dose-result__cap">⚠ ${result.maxDailyNote}</p>` : "",
+    result.tablets ? `<p class="dose-result__line">${result.tablets}</p>` : "",
+    result.warnings?.length
+      ? `<ul class="dose-result__warnings">${result.warnings.map((w: string) => `<li>${w}</li>`).join("")}</ul>`
+      : "",
+    `<p class="dose-result__disclaimer">${result.vetDisclaimer}</p>`,
+  ].join("");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  setupFileUpload();
-  setupReactiveInputs();
-  handleChange();
-  console.log("PetDose: loaded — browser-only, no backend");
+  setupSafetyModal();
+  populateMedications();
+  $("#species-select")?.addEventListener("change", () => { populateMedications(); render(); });
+  ["#weight-input", "#weight-unit", "#med-select"].forEach((sel) => {
+    $(sel)?.addEventListener("input", render);
+    $(sel)?.addEventListener("change", render);
+  });
+  render();
 });
-
-// Expose engine for console debugging
-(window as unknown as Record<string, unknown>)["petdoseEngine"] = engine;

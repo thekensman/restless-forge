@@ -188,7 +188,7 @@ npm run dev
 | What Is My Time Worth  | 3000 | `dev:wimtw` or root `dev`         |
 | HoloPath               | 5173 | `dev:holopath` or root `dev`      |
 | SandPath               | 5174 | `dev:sandpath` or root `dev`      |
-| Next new tool          | 5175 | `dev:<prefix>` or root `dev`      |
+| New tools              | next free ≥5193 | declared in the tool's own vite.config.ts — discovery handles the rest |
 
 Global links like `/about`, `/tools/` resolve correctly at the root proxy
 (:8080) but NOT when running a single tool's dev server (it doesn't serve
@@ -205,9 +205,12 @@ scripts/new-tool.sh <tool-name> "<tool-label>" <prefix> <port> <emoji>
 scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 ```
 
-After running it, do the listed manual steps (build.sh entry, root
-package.json dev script, root vite proxy, sitemap, tool hub cards). The
-scaffolder prints the exact commands you need.
+build.sh, the root dev/test scripts, and the root vite proxy all
+DISCOVER tools automatically from `tools/*/frontend/` (ports and base
+paths are read from each tool's `vite.config.ts` by
+`scripts/tools.mjs`). The only manual steps left are the tool hub cards
+(commented out while the tool is unfinished) and sitemap entries when
+it goes public.
 
 ### Adding an essay
 
