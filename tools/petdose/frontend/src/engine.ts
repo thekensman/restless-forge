@@ -63,18 +63,38 @@ export function calculateDose(medId, species, weightKg) {
   }
 
   const totalDose = Math.round(spec.dosePerKg * weightKg * 10) / 10;
-  // Calculate tablet count
+  // Tablet guidance. Quarter tablets are the smallest practical split; if the
+  // target dose is below a quarter of the SMALLEST available strength, a
+  // tablet cannot deliver it safely — send the owner to liquid/compounded
+  // forms instead of printing "0 tablets".
   let tabletInfo = null;
   if (med.forms[0]?.type === 'tablet') {
-    const closest = med.forms[0].strengths.reduce((best, s) =>
-      Math.abs(s - totalDose) < Math.abs(best - totalDose) ? s : best
-    , med.forms[0].strengths[0]);
-    const count = Math.round((totalDose / closest) * 4) / 4;
-    tabletInfo = `${count} × ${closest}${spec.unit} tablet${count !== 1 ? 's' : ''}`;
+    const strengths = med.forms[0].strengths;
+    const smallest = Math.min(...strengths);
+    if (totalDose < smallest / 4) {
+      tabletInfo = `Dose is below ¼ of the smallest ${smallest}${spec.unit} tablet — ask your vet about a liquid or compounded form.`;
+    } else {
+      // Choose the strength whose quarter-rounded count lands closest to the target.
+      let best = null;
+      for (const s of strengths) {
+        const count = Math.max(0.25, Math.round((totalDose / s) * 4) / 4);
+        const delivered = count * s;
+        const err = Math.abs(delivered - totalDose);
+        if (!best || err < best.err) best = { s, count, delivered, err };
+      }
+      tabletInfo = `${best.count} × ${best.s}${spec.unit} tablet${best.count !== 1 ? 's' : ''} (${best.delivered}${spec.unit})`;
+      if (best.err / totalDose > 0.15) {
+        tabletInfo += ' — more than 15% off the target dose; confirm with your vet.';
+      }
+    }
   }
 
   return {
     dose: totalDose, unit: spec.unit, frequency: spec.frequency,
+    maxDaily: spec.maxDaily ?? null,
+    maxDailyNote: spec.maxDaily
+      ? `Do not exceed ${spec.maxDaily} dose${spec.maxDaily !== 1 ? 's' : ''} in 24 hours (${Math.round(totalDose * spec.maxDaily * 10) / 10}${spec.unit} total).`
+      : null,
     tablets: tabletInfo, warnings: med.warnings,
     vetDisclaimer: 'Always confirm dosages with your veterinarian. This is a reference tool, not medical advice.',
   };

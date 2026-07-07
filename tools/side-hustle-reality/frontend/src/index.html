@@ -9,6 +9,7 @@
   <meta name="keywords" content="gig economy calculator, Uber earnings real, DoorDash worth it, side hustle calculator, true hourly rate gig, self employment tax calculator, rideshare earnings">
   <link rel="canonical" href="https://restless-forge.dev/tools/side-hustle-reality/">
   <meta property="og:title" content="Is This Side Hustle Worth It?">
+  <meta property="og:image" content="https://restless-forge.dev/tools/side-hustle-reality/og-image.png">
   <meta property="og:description" content="Your Uber 'earnings' say $25/hr. After all costs, it's $9.40. Calculate your real gig rate.">
   <meta property="og:type" content="website">
   <script type="application/ld+json">
@@ -42,6 +43,7 @@ input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:va
   <link rel="icon" href="/tools/side-hustle-reality/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/tools/side-hustle-reality/apple-touch-icon.png">
   <link rel="manifest" href="/tools/side-hustle-reality/site.webmanifest">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
 </head>
 <body>
   <header class="header"><div class="header__inner"><div class="header__brand"><span class="header__logo">🚗</span><h1 class="header__title">Is This Side Hustle Worth It?</h1></div><p class="header__tagline">The earnings screen shows one number. Reality is another.</p></div></header>
@@ -80,7 +82,7 @@ input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:va
           <div class="breakdown">
             <div class="breakdown__row"><span>Gross weekly earnings</span><span id="bd-g-gross">—</span></div>
             <div class="breakdown__row breakdown__row--sub"><span>Gas</span><span id="bd-g-gas">—</span></div>
-            <div class="breakdown__row breakdown__row--sub"><span>Vehicle depreciation (IRS $0.70/mi)</span><span id="bd-g-deprec">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>Vehicle depreciation (IRS $0.725/mi)</span><span id="bd-g-deprec">—</span></div>
             <div class="breakdown__row breakdown__row--sub"><span>Self-employment tax (15.3%)</span><span id="bd-g-se">—</span></div>
             <div class="breakdown__row breakdown__row--sub"><span>Phone/data</span><span id="bd-g-phone">—</span></div>
             <div class="breakdown__row breakdown__row--sub"><span>Other costs</span><span id="bd-g-other">—</span></div>
@@ -148,7 +150,7 @@ input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:va
     <section class="about">
       <h2 class="about__title">Why This Calculator Exists</h2>
       <p class="about__text">Gig platforms show you gross earnings because the number looks good. They don't subtract gas, vehicle depreciation, self-employment tax (15.3% — you pay both halves of FICA), phone costs, or the dead time between rides. When you do the math, many gig workers earn less than minimum wage. That doesn't mean all gigs are bad — some are genuinely profitable, especially with the right vehicle and market. This tool helps you see the real number.</p>
-      <p class="about__text about__text--dim">Vehicle depreciation uses the 2024 IRS standard mileage rate of $0.70/mile as a proxy for total vehicle costs. Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser.</p>
+      <p class="about__text about__text--dim">Vehicle depreciation uses the 2026 IRS standard mileage rate of $0.725/mile as a proxy for total vehicle costs. Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser.</p>
     </section>
   </main>
 
@@ -168,7 +170,7 @@ document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=
 const fmt=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0});
 
-const IRS_MILE = 0.70; // 2024 standard mileage rate
+const IRS_MILE = 0.725; // 2026 standard mileage rate (IRS Notice 2026-10)
 const SE_TAX = 0.153;  // Self-employment tax rate
 
 function calcGig(){
@@ -183,8 +185,11 @@ function calcGig(){
   const gasCost = (miles / mpg) * gasPrice;
   const deprecCost = miles * IRS_MILE - gasCost; // IRS rate includes gas, so depreciation = IRS total minus gas
   const depreciationOnly = Math.max(deprecCost, 0);
-  const seTax = gross * SE_TAX * 0.9235; // SE tax on 92.35% of net
   const phoneWeekly = phone / 4.33;
+  // SE tax applies to 92.35% of NET earnings (gross minus deductible expenses),
+  // not gross — taxing gross overstated the bite for every driver.
+  const seNetBase = Math.max(gross - gasCost - depreciationOnly - phoneWeekly - other, 0);
+  const seTax = seNetBase * 0.9235 * SE_TAX;
   const totalCosts = gasCost + depreciationOnly + seTax + phoneWeekly + other;
   const netPay = gross - totalCosts;
   const trueRate = hours > 0 ? netPay / hours : 0;

@@ -12,12 +12,12 @@ echo "═══ Restless Forge Build ═══"
 echo ""
 
 # ── Clean previous build ──
-echo "[1/7] Cleaning previous build..."
+echo "[1/5] Cleaning previous build..."
 rm -rf "${DIST_DIR}"
 mkdir -p "${DIST_DIR}"
 
 # ── Copy global site pages ──
-echo "[2/7] Copying global site pages..."
+echo "[2/5] Copying global site pages..."
 cp -r "${SCRIPT_DIR}/site/"* "${DIST_DIR}/"
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -65,75 +65,21 @@ build_vite_tool() {
 }
 
 # ── Build Vite tools ──
-echo "[3/7] Building What Is My Time Worth..."
-build_vite_tool "What Is My Time Worth" "what-is-my-time-worth"
-
-echo "[4/7] Building HoloPath..."
-build_vite_tool "HoloPath" "holopath"
-
-# ── Build SandPath ──
-echo "[5/7] Building SandPath..."
-build_vite_tool "SandPath" "sandpath"
-
-echo "[5b/7] Building TattooSafe..."
-build_vite_tool "TattooSafe" "tattoosafe"
-
-echo "[5c/7] Building StitchTrace..."
-build_vite_tool "StitchTrace" "stitchtrace"
-
-echo "[5c/7] Building PlotPath..."
-build_vite_tool "PlotPath" "plotpath"
-
-echo "[5c/7] Building CNCFeed..."
-build_vite_tool "CNCFeed" "cncfeed"
-
-echo "[5c/7] Building PrintPlate..."
-build_vite_tool "PrintPlate" "printplate"
-
-echo "[5c/7] Building GerberPeek..."
-build_vite_tool "GerberPeek" "gerberpeek"
-
-echo "[5c/7] Building KnotGuide..."
-build_vite_tool "KnotGuide" "knotguide"
-
-echo "[5c/7] Building LensMatch..."
-build_vite_tool "LensMatch" "lensmatch"
-
-echo "[5c/7] Building PetDose..."
-build_vite_tool "PetDose" "petdose"
-
-echo "[5c/7] Building CookScale..."
-build_vite_tool "CookScale" "cookscale"
-
-echo "[5c/7] Building PixelGrid..."
-build_vite_tool "PixelGrid" "pixelgrid"
-
-echo "[5c/7] Building WaveCarve..."
-build_vite_tool "WaveCarve" "wavecarve"
-
-echo "[5d/7] Building Am I Actually Saving?..."
-build_vite_tool "Am I Actually Saving?" "am-i-actually-saving"
-
-echo "[5d/7] Building Is My Raise Real?..."
-build_vite_tool "Is My Raise Real?" "is-my-raise-real"
-
-echo "[5d/7] Building Pet Cost..."
-build_vite_tool "Pet Cost" "pet-cost"
-
-echo "[5d/7] Building Repair or Replace?..."
-build_vite_tool "Repair or Replace?" "repair-or-replace"
-
-echo "[5d/7] Building Side Hustle Reality..."
-build_vite_tool "Side Hustle Reality" "side-hustle-reality"
-
-echo "[5d/7] Building Subscription Audit..."
-build_vite_tool "Subscription Audit" "subscription-audit"
+# Convention-driven: every tools/<name>/frontend/ directory is built.
+# Adding a new tool requires NO edit here — drop it in tools/ and it ships.
+echo "[3/5] Building all tool frontends..."
+for frontend in "${SCRIPT_DIR}"/tools/*/frontend; do
+  name="$(basename "$(dirname "${frontend}")")"
+  [ "${name}" = "template" ] && continue
+  echo "  ── ${name} ──"
+  build_vite_tool "${name}" "${name}"
+done
 
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
 # 1-year cache would serve stale versions after updates. Inject a content
 # hash into the HTML references so browsers re-fetch only when files change.
-echo "[6/7] Cache-busting shared static files..."
+echo "[4/5] Cache-busting shared static files..."
 
 bust_cache() {
   local dir="$1"
@@ -155,28 +101,12 @@ bust_cache() {
   echo "  → ${tool_path}: shared.js?v=${js_hash:-<missing>}  pages.css?v=${css_hash:-<missing>}"
 }
 
-bust_cache "${DIST_DIR}/tools/what-is-my-time-worth" "/tools/what-is-my-time-worth"
-bust_cache "${DIST_DIR}/tools/holopath"               "/tools/holopath"
-bust_cache "${DIST_DIR}/tools/sandpath"               "/tools/sandpath"
-bust_cache "${DIST_DIR}/tools/tattoosafe"             "/tools/tattoosafe"
-bust_cache "${DIST_DIR}/tools/stitchtrace"             "/tools/stitchtrace"
-bust_cache "${DIST_DIR}/tools/plotpath"             "/tools/plotpath"
-bust_cache "${DIST_DIR}/tools/cncfeed"             "/tools/cncfeed"
-bust_cache "${DIST_DIR}/tools/printplate"             "/tools/printplate"
-bust_cache "${DIST_DIR}/tools/gerberpeek"             "/tools/gerberpeek"
-bust_cache "${DIST_DIR}/tools/knotguide"             "/tools/knotguide"
-bust_cache "${DIST_DIR}/tools/lensmatch"             "/tools/lensmatch"
-bust_cache "${DIST_DIR}/tools/petdose"             "/tools/petdose"
-bust_cache "${DIST_DIR}/tools/cookscale"             "/tools/cookscale"
-bust_cache "${DIST_DIR}/tools/pixelgrid"             "/tools/pixelgrid"
-bust_cache "${DIST_DIR}/tools/wavecarve"             "/tools/wavecarve"
-bust_cache "${DIST_DIR}/tools/am-i-actually-saving"             "/tools/am-i-actually-saving"
-bust_cache "${DIST_DIR}/tools/is-my-raise-real"             "/tools/is-my-raise-real"
-bust_cache "${DIST_DIR}/tools/pet-cost"             "/tools/pet-cost"
-bust_cache "${DIST_DIR}/tools/repair-or-replace"             "/tools/repair-or-replace"
-bust_cache "${DIST_DIR}/tools/side-hustle-reality"             "/tools/side-hustle-reality"
-bust_cache "${DIST_DIR}/tools/subscription-audit"             "/tools/subscription-audit"
-# Add a bust_cache call here for each new tool.
+# Convention-driven: cache-bust every built tool.
+for tool_dir in "${DIST_DIR}"/tools/*/; do
+  name="$(basename "${tool_dir}")"
+  [ -f "${tool_dir}index.html" ] || continue   # skip the hub index.html dir itself
+  bust_cache "${DIST_DIR}/tools/${name}" "/tools/${name}"
+done
 
 # Cache-bust the global /shared.js across ALL html files in dist
 site_shared_hash=$(md5sum "${DIST_DIR}/shared.js" | cut -c1-8)
@@ -196,7 +126,7 @@ fi
 
 # ── Summary ──
 echo ""
-echo "[7/7] Build complete!"
+echo "[5/5] Build complete!"
 echo ""
 echo "Deployable site at: ${DIST_DIR}/"
 echo ""
@@ -213,10 +143,7 @@ echo "  ├── robots.txt"
 echo "  ├── ads.txt"
 echo "  ├── tools/"
 echo "  │   ├── index.html          (tools hub)"
-echo "  │   ├── what-is-my-time-worth/"
-echo "  │   ├── holopath/"
-echo "  │   ├── sandpath/"
-echo "  │   └── tattoosafe/"
+echo "  │   └── <one dir per tool>/"
 echo "  ├── essays/"
 echo "  └── articles/"
 echo ""
