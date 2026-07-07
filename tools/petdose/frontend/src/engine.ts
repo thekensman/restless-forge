@@ -1,0 +1,91 @@
+// @ts-nocheck
+/* PetDose — engine.js: Pet medication dosage calculator (browser-only) */
+
+export const SPECIES = {
+  dog: { label: 'Dog', weightRange: [0.5, 90] },
+  cat: { label: 'Cat', weightRange: [0.5, 12] },
+};
+
+export const MEDICATIONS = [
+  { id:'benadryl', name:'Benadryl (Diphenhydramine)', species:['dog','cat'],
+    dog: { dosePerKg: 2, unit:'mg', frequency:'Every 8-12 hours', maxDaily: 3 },
+    cat: { dosePerKg: 1, unit:'mg', frequency:'Every 8-12 hours', maxDaily: 2 },
+    warnings:['May cause drowsiness','Do not use "D" formulations (pseudoephedrine)','Consult vet for puppies under 12 weeks'],
+    forms: [{type:'tablet', strengths:[25]}, {type:'liquid', strengths:[12.5], perMl:true}] },
+  { id:'pepcid', name:'Pepcid (Famotidine)', species:['dog','cat'],
+    dog: { dosePerKg: 0.5, unit:'mg', frequency:'Every 12-24 hours', maxDaily: 2 },
+    cat: { dosePerKg: 0.5, unit:'mg', frequency:'Every 12-24 hours', maxDaily: 2 },
+    warnings:['Give on empty stomach for best effect','Safe for short-term use'],
+    forms: [{type:'tablet', strengths:[10,20]}] },
+  { id:'cerenia', name:'Cerenia (Maropitant)', species:['dog'],
+    dog: { dosePerKg: 2, unit:'mg', frequency:'Every 24 hours', maxDaily: 1 },
+    warnings:['Prescription medication — confirm with vet','Not for puppies under 16 weeks','Do not use for more than 5 consecutive days'],
+    forms: [{type:'tablet', strengths:[16,24,60]}] },
+  { id:'frontline', name:'Frontline Plus (Fipronil)', species:['dog','cat'],
+    dog: { doseByWeight: [{min:0,max:10,dose:'0.67ml'},{min:10,max:20,dose:'1.34ml'},{min:20,max:40,dose:'2.68ml'},{min:40,max:90,dose:'4.02ml'}] },
+    cat: { doseByWeight: [{min:0,max:12,dose:'0.5ml'}] },
+    warnings:['Apply to skin between shoulder blades','Do not use dog product on cats — toxic','Wait 24hrs before bathing'],
+    forms: [{type:'topical', strengths:[]}], isTopical: true },
+  { id:'dewormer', name:'Panacur (Fenbendazole)', species:['dog','cat'],
+    dog: { dosePerKg: 50, unit:'mg', frequency:'Once daily for 3 days', maxDaily: 1 },
+    cat: { dosePerKg: 50, unit:'mg', frequency:'Once daily for 3 days', maxDaily: 1 },
+    warnings:['Give with food','Safe for pregnant animals','May need to repeat in 2-3 weeks'],
+    forms: [{type:'granules', strengths:[222], perGram:true}] },
+  { id:'metronidazole', name:'Metronidazole (Flagyl)', species:['dog','cat'],
+    dog: { dosePerKg: 12.5, unit:'mg', frequency:'Every 12 hours', maxDaily: 2 },
+    cat: { dosePerKg: 10, unit:'mg', frequency:'Every 12 hours', maxDaily: 2 },
+    warnings:['Prescription only','Do not use in pregnant animals','May cause neurological side effects at high doses','Give with food'],
+    forms: [{type:'tablet', strengths:[250,500]}] },
+];
+
+/**
+ * Calculate dosage for a medication.
+ * @param {string} medId
+ * @param {string} species - 'dog' or 'cat'
+ * @param {number} weightKg
+ * @returns {{ dose, unit, frequency, tablets, warnings, vetDisclaimer }}
+ */
+export function calculateDose(medId, species, weightKg) {
+  const med = MEDICATIONS.find(m => m.id === medId);
+  if (!med || !med.species.includes(species)) return null;
+  const spec = med[species];
+  if (!spec) return null;
+
+  // Weight-based topical
+  if (med.isTopical && spec.doseByWeight) {
+    const range = spec.doseByWeight.find(r => weightKg >= r.min && weightKg < r.max);
+    return {
+      dose: range ? range.dose : 'Consult vet — outside weight range',
+      unit: '', frequency: 'Monthly', tablets: null,
+      warnings: med.warnings,
+      vetDisclaimer: 'Always confirm dosages with your veterinarian.',
+    };
+  }
+
+  const totalDose = Math.round(spec.dosePerKg * weightKg * 10) / 10;
+  // Calculate tablet count
+  let tabletInfo = null;
+  if (med.forms[0]?.type === 'tablet') {
+    const closest = med.forms[0].strengths.reduce((best, s) =>
+      Math.abs(s - totalDose) < Math.abs(best - totalDose) ? s : best
+    , med.forms[0].strengths[0]);
+    const count = Math.round((totalDose / closest) * 4) / 4;
+    tabletInfo = `${count} × ${closest}${spec.unit} tablet${count !== 1 ? 's' : ''}`;
+  }
+
+  return {
+    dose: totalDose, unit: spec.unit, frequency: spec.frequency,
+    tablets: tabletInfo, warnings: med.warnings,
+    vetDisclaimer: 'Always confirm dosages with your veterinarian. This is a reference tool, not medical advice.',
+  };
+}
+
+/** Get medications for a species */
+export function getMedicationsForSpecies(species) {
+  return MEDICATIONS.filter(m => m.species.includes(species));
+}
+
+/** Convert weight: lbs → kg */
+export function lbsToKg(lbs) { return Math.round(lbs * 0.4536 * 100) / 100; }
+/** Convert weight: kg → lbs */
+export function kgToLbs(kg) { return Math.round(kg * 2.2046 * 100) / 100; }

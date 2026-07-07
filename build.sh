@@ -78,6 +78,39 @@ build_vite_tool "SandPath" "sandpath"
 echo "[5b/7] Building TattooSafe..."
 build_vite_tool "TattooSafe" "tattoosafe"
 
+echo "[5c/7] Building StitchTrace..."
+build_vite_tool "StitchTrace" "stitchtrace"
+
+echo "[5c/7] Building PlotPath..."
+build_vite_tool "PlotPath" "plotpath"
+
+echo "[5c/7] Building CNCFeed..."
+build_vite_tool "CNCFeed" "cncfeed"
+
+echo "[5c/7] Building PrintPlate..."
+build_vite_tool "PrintPlate" "printplate"
+
+echo "[5c/7] Building GerberPeek..."
+build_vite_tool "GerberPeek" "gerberpeek"
+
+echo "[5c/7] Building KnotGuide..."
+build_vite_tool "KnotGuide" "knotguide"
+
+echo "[5c/7] Building LensMatch..."
+build_vite_tool "LensMatch" "lensmatch"
+
+echo "[5c/7] Building PetDose..."
+build_vite_tool "PetDose" "petdose"
+
+echo "[5c/7] Building CookScale..."
+build_vite_tool "CookScale" "cookscale"
+
+echo "[5c/7] Building PixelGrid..."
+build_vite_tool "PixelGrid" "pixelgrid"
+
+echo "[5c/7] Building WaveCarve..."
+build_vite_tool "WaveCarve" "wavecarve"
+
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
 # 1-year cache would serve stale versions after updates. Inject a content
@@ -108,6 +141,17 @@ bust_cache "${DIST_DIR}/tools/what-is-my-time-worth" "/tools/what-is-my-time-wor
 bust_cache "${DIST_DIR}/tools/holopath"               "/tools/holopath"
 bust_cache "${DIST_DIR}/tools/sandpath"               "/tools/sandpath"
 bust_cache "${DIST_DIR}/tools/tattoosafe"             "/tools/tattoosafe"
+bust_cache "${DIST_DIR}/tools/stitchtrace"             "/tools/stitchtrace"
+bust_cache "${DIST_DIR}/tools/plotpath"             "/tools/plotpath"
+bust_cache "${DIST_DIR}/tools/cncfeed"             "/tools/cncfeed"
+bust_cache "${DIST_DIR}/tools/printplate"             "/tools/printplate"
+bust_cache "${DIST_DIR}/tools/gerberpeek"             "/tools/gerberpeek"
+bust_cache "${DIST_DIR}/tools/knotguide"             "/tools/knotguide"
+bust_cache "${DIST_DIR}/tools/lensmatch"             "/tools/lensmatch"
+bust_cache "${DIST_DIR}/tools/petdose"             "/tools/petdose"
+bust_cache "${DIST_DIR}/tools/cookscale"             "/tools/cookscale"
+bust_cache "${DIST_DIR}/tools/pixelgrid"             "/tools/pixelgrid"
+bust_cache "${DIST_DIR}/tools/wavecarve"             "/tools/wavecarve"
 # Add a bust_cache call here for each new tool.
 
 # Cache-bust the global /shared.js across ALL html files in dist
