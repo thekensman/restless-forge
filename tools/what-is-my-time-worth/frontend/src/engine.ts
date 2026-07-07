@@ -122,30 +122,33 @@ export interface JobComparisonResult {
 
 // ─── Tax Constants ───────────────────────────────────────────
 
-const SS_WAGE_BASE = 176_100;
+// Tax year 2026 (IRS Rev. Proc. 2025-32; SSA 2026 wage-base announcement).
+// Updated annually by the "WIMTW annual tax data update" routine — see
+// docs/automation.md.
+const SS_WAGE_BASE = 184_500;
 
 const FEDERAL_BRACKETS_SINGLE: { limit: number; rate: number }[] = [
-  { limit: 11_600, rate: 0.10 },
-  { limit: 47_150, rate: 0.12 },
-  { limit: 100_525, rate: 0.22 },
-  { limit: 191_950, rate: 0.24 },
-  { limit: 243_725, rate: 0.32 },
-  { limit: 609_350, rate: 0.35 },
+  { limit: 12_400, rate: 0.10 },
+  { limit: 50_400, rate: 0.12 },
+  { limit: 105_700, rate: 0.22 },
+  { limit: 201_775, rate: 0.24 },
+  { limit: 256_225, rate: 0.32 },
+  { limit: 640_600, rate: 0.35 },
   { limit: Infinity, rate: 0.37 },
 ];
 
 const FEDERAL_BRACKETS_MFJ: { limit: number; rate: number }[] = [
-  { limit: 23_200, rate: 0.10 },
-  { limit: 94_300, rate: 0.12 },
-  { limit: 201_050, rate: 0.22 },
-  { limit: 383_900, rate: 0.24 },
-  { limit: 487_450, rate: 0.32 },
-  { limit: 731_200, rate: 0.35 },
+  { limit: 24_800, rate: 0.10 },
+  { limit: 100_800, rate: 0.12 },
+  { limit: 211_400, rate: 0.22 },
+  { limit: 403_550, rate: 0.24 },
+  { limit: 512_450, rate: 0.32 },
+  { limit: 768_700, rate: 0.35 },
   { limit: Infinity, rate: 0.37 },
 ];
 
-const STANDARD_DEDUCTION_SINGLE = 14_600;
-const STANDARD_DEDUCTION_MFJ = 29_200;
+const STANDARD_DEDUCTION_SINGLE = 16_100;
+const STANDARD_DEDUCTION_MFJ = 32_200;
 
 // ─── Tax Calculations ────────────────────────────────────────
 

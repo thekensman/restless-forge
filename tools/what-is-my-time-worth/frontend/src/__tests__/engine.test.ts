@@ -89,8 +89,10 @@ describe("calcFederalIncomeTax", () => {
   });
 
   it("calculates 10% bracket correctly (single)", () => {
+    // Tax year 2026: 25,000 − 16,100 standard deduction = 8,900 taxable,
+    // entirely within the 10% bracket (≤ 12,400) → 890.
     const tax = calcFederalIncomeTax(25_000, "single");
-    expect(tax).toBe(1040);
+    expect(tax).toBe(890);
   });
 
   it("handles six-figure income", () => {
