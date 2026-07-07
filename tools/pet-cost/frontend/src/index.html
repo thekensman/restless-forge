@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <title>What Does This Pet Actually Cost? — Lifetime Pet Cost Calculator</title>
+  <meta name="description" content="That 'free' shelter puppy will cost you $34,550 over its lifetime. This calculator shows the true cost of pet ownership — food, vet, grooming, insurance, emergencies, and the expenses nobody mentions.">
+  <meta name="keywords" content="pet cost calculator, cost of owning a dog, cost of owning a cat, lifetime pet cost, can I afford a pet, pet budget calculator">
+  <link rel="canonical" href="https://restless-forge.dev/tools/pet-cost/">
+  <meta property="og:title" content="What Does This Pet Actually Cost?">
+  <meta property="og:description" content="That 'free' shelter puppy costs $34,550 over its lifetime. Calculate yours.">
+  <meta property="og:type" content="website">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Pet Lifetime Cost Calculator","description":"Calculate the true lifetime cost of pet ownership including food, vet, grooming, insurance, and hidden expenses","url":"https://restless-forge.dev/tools/pet-cost/","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root{--bg:#0b0d12;--bg-raised:#151820;--bg-card:#1a1e28;--bg-input:#0e1018;--border:#252a35;--border-focus:#d4a44e;--text:#d8d4cc;--text-dim:#7a7770;--text-muted:#4a4840;--accent:#d4a44e;--accent-dim:#a88540;--green:#6bbd7a;--red:#d45d5d;--orange:#d4a04e;--font-body:"Lora",Georgia,serif;--font-mono:"IBM Plex Mono","Courier New",monospace;--max-w:1100px;--radius:3px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;scroll-behavior:smooth}body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;background-image:radial-gradient(ellipse at 20% 0%,rgba(212,164,78,0.03) 0%,transparent 60%)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.header{border-bottom:1px solid var(--border);padding:36px 24px 28px}.header__inner{max-width:var(--max-w);margin:0 auto}.header__brand{display:flex;align-items:center;gap:14px;margin-bottom:8px}.header__logo{font-size:28px;line-height:1}.header__title{font-family:var(--font-mono);font-size:clamp(20px,3.5vw,28px);font-weight:400;letter-spacing:-0.3px}.header__tagline{font-style:italic;color:var(--text-dim);font-size:16px}
+.tabs{max-width:var(--max-w);margin:0 auto;padding:20px 24px 0;display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto}.tab{font-family:var(--font-mono);font-size:13px;padding:9px 18px 11px;background:transparent;color:var(--text-dim);border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;transition:all .15s;white-space:nowrap}.tab:hover{color:var(--text);background:var(--bg-raised)}.tab--active{color:var(--accent);background:var(--bg-raised);border-color:var(--border);border-bottom:1px solid var(--bg-raised);margin-bottom:-1px}.tab__icon{margin-right:5px}
+.main{max-width:var(--max-w);margin:0 auto;padding:0 24px}.panel{padding:28px 0;display:none}.panel--active{display:block}.panel__grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}@media(max-width:820px){.panel__grid{grid-template-columns:1fr}}
+.card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.card__title{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}.card__title--spaced{margin-top:24px}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:5px}.field__hint{display:block;font-size:11px;color:var(--text-muted);margin-top:3px;font-style:italic}.field-row{display:flex;gap:12px;margin-bottom:16px}.field-row .field{flex:1;margin-bottom:0}
+.input-group{display:flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}.input-group:focus-within{border-color:var(--border-focus)}.input-prefix,.input-suffix{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);padding:0 9px;flex-shrink:0}
+input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:var(--text);background:transparent;border:none;padding:9px 11px;width:100%;outline:none;-moz-appearance:textfield}input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}select{cursor:pointer;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px}select option{background:var(--bg-card);color:var(--text)}
+.results-column{display:flex;flex-direction:column;gap:14px}
+.result-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center}.result-card--hero{border-color:var(--accent);border-width:2px;padding:28px 22px}.result-card--hero .result-card__value{font-size:clamp(24px,4vw,38px);color:var(--accent)}.result-card__label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}.result-card__value{font-family:var(--font-mono);font-weight:500;font-size:22px;color:var(--text);line-height:1.2}.result-card__note{font-size:12px;color:var(--text-muted);margin-top:5px;font-style:italic}
+.insight-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.insight-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}.insight-card__icon{font-size:22px;margin-bottom:6px}.insight-card__value{font-family:var(--font-mono);font-size:18px;font-weight:500}.insight-card__label{font-size:11px;color:var(--text-dim);margin-top:4px}
+.breakdown{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:14px}.breakdown__row{display:flex;justify-content:space-between;padding:5px 0;font-family:var(--font-mono);font-size:12px;border-bottom:1px solid rgba(37,42,53,0.5)}.breakdown__row:last-child{border-bottom:none}.breakdown__row span:first-child{color:var(--text-dim)}.breakdown__row--total{border-top:2px solid var(--accent);margin-top:8px;padding-top:8px;font-weight:600}.breakdown__row--sub span:first-child{padding-left:12px;font-size:11px}
+.readiness{background:var(--bg-raised);border-radius:var(--radius);padding:18px;margin-top:14px;text-align:center;border:2px solid var(--border)}.readiness__label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}.readiness__value{font-family:var(--font-mono);font-size:24px;font-weight:500;margin-bottom:6px}.readiness__note{font-size:12px;color:var(--text-dim);font-style:italic}
+
+.about{padding:40px 0;border-top:1px solid var(--border);margin-top:20px}.about__title{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--accent);margin-bottom:14px}.about__text{font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:12px}
+.footer{border-top:1px solid var(--border);padding:24px;text-align:center}.footer__links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}.footer__link{font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}.footer__link:hover{color:var(--accent)}.footer__link--heart{color:var(--red)}.footer__link--heart svg{vertical-align:-2px;margin-right:3px}.footer__copy{font-size:11px;color:var(--text-muted)}.forge-link{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px}.forge-link a{color:var(--accent-dim)}
+  </style>
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/pet-cost/favicon.svg">
+  <link rel="icon" href="/tools/pet-cost/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/pet-cost/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/pet-cost/site.webmanifest">
+</head>
+<body>
+  <header class="header"><div class="header__inner"><div class="header__brand"><span class="header__logo">🐾</span><h1 class="header__title">What Does This Pet Actually Cost?</h1></div><p class="header__tagline">"Free to a good home" has never been free.</p></div></header>
+
+  <main class="main">
+    <nav class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="cost" role="tab" aria-selected="true"><span class="tab__icon">💰</span> True Cost</button>
+      <button class="tab" data-tab="afford" role="tab" aria-selected="false"><span class="tab__icon">📊</span> Can I Afford This?</button>
+    </nav>
+
+    <!-- TAB 1 -->
+    <section class="panel panel--active" id="panel-cost" role="tabpanel">
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Your Pet</h2>
+          <div class="field"><label for="p-type">Pet type</label>
+            <select id="p-type">
+              <option value="dog-s" data-life="14" data-food="40" data-vet="250" data-groom="30" data-ins="35">Dog — Small (&lt;25 lbs)</option>
+              <option value="dog-m" data-life="12" data-food="55" data-vet="300" data-groom="50" data-ins="45" selected>Dog — Medium (25–60 lbs)</option>
+              <option value="dog-l" data-life="10" data-food="80" data-vet="350" data-groom="65" data-ins="55">Dog — Large (60+ lbs)</option>
+              <option value="cat" data-life="16" data-food="35" data-vet="200" data-groom="10" data-ins="25">Cat — Indoor</option>
+              <option value="cat-out" data-life="12" data-food="35" data-vet="275" data-groom="10" data-ins="30">Cat — Indoor/Outdoor</option>
+            </select>
+          </div>
+          <div class="field"><label for="p-adopt">Adoption / purchase cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-adopt" value="250" min="0" step="50"></div></div>
+          <div class="field"><label for="p-lifespan">Expected lifespan</label><div class="input-group"><input type="number" id="p-lifespan" value="12" min="1" step="1"><span class="input-suffix">yrs</span></div></div>
+
+          <h2 class="card__title card__title--spaced">Monthly Costs</h2>
+          <div class="field"><label for="p-food">Food</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-food" value="55" min="0" step="5"></div></div>
+          <div class="field"><label for="p-treats">Treats & supplements</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-treats" value="15" min="0" step="5"></div></div>
+          <div class="field"><label for="p-groom">Grooming</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-groom" value="50" min="0" step="10"></div></div>
+          <div class="field"><label for="p-insurance">Pet insurance</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-insurance" value="45" min="0" step="5"></div></div>
+          <div class="field"><label for="p-misc">Toys, litter, misc.</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-misc" value="25" min="0" step="5"></div></div>
+
+          <h2 class="card__title card__title--spaced">Annual Costs</h2>
+          <div class="field"><label for="p-vet">Routine vet (annual)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-vet" value="300" min="0" step="25"></div></div>
+          <div class="field"><label for="p-dental">Dental cleaning (annual)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-dental" value="200" min="0" step="25"></div><span class="field__hint">Not needed every year, but averages out. Many owners skip this.</span></div>
+          <div class="field"><label for="p-boarding">Boarding / pet sitting (annual)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-boarding" value="300" min="0" step="50"></div></div>
+          <div class="field"><label for="p-emergency">Emergency fund (annual set-aside)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="p-emergency" value="200" min="0" step="50"></div><span class="field__hint">Average emergency vet visit is $800–1,500. Set aside yearly.</span></div>
+        </div>
+        <div class="results-column">
+          <div class="result-card result-card--hero"><div class="result-card__label">Lifetime Cost</div><div class="result-card__value" id="res-lifetime">—</div><div class="result-card__note" id="res-lifetime-note"></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">📅</div><div class="insight-card__value" id="res-annual">—</div><div class="insight-card__label">Annual cost</div></div>
+            <div class="insight-card"><div class="insight-card__icon">📆</div><div class="insight-card__value" id="res-monthly">—</div><div class="insight-card__label">Monthly cost</div></div>
+            <div class="insight-card"><div class="insight-card__icon">🎂</div><div class="insight-card__value" id="res-first-year">—</div><div class="insight-card__label">First year (higher)</div></div>
+          </div>
+          <div class="breakdown">
+            <div class="breakdown__row"><span>Adoption / purchase</span><span id="bd-adopt">—</span></div>
+            <div class="breakdown__row"><span>First-year supplies (bed, crate, bowls, etc.)</span><span id="bd-supplies">—</span></div>
+            <div class="breakdown__row"><span>Food (lifetime)</span><span id="bd-food">—</span></div>
+            <div class="breakdown__row"><span>Treats & supplements (lifetime)</span><span id="bd-treats">—</span></div>
+            <div class="breakdown__row"><span>Grooming (lifetime)</span><span id="bd-groom">—</span></div>
+            <div class="breakdown__row"><span>Insurance (lifetime)</span><span id="bd-insurance">—</span></div>
+            <div class="breakdown__row"><span>Toys, litter, misc. (lifetime)</span><span id="bd-misc">—</span></div>
+            <div class="breakdown__row"><span>Routine vet (lifetime)</span><span id="bd-vet">—</span></div>
+            <div class="breakdown__row"><span>Dental (lifetime)</span><span id="bd-dental">—</span></div>
+            <div class="breakdown__row"><span>Boarding (lifetime)</span><span id="bd-boarding">—</span></div>
+            <div class="breakdown__row"><span>Emergency fund (lifetime)</span><span id="bd-emergency">—</span></div>
+            <div class="breakdown__row"><span>End-of-life care (est.)</span><span id="bd-eol">—</span></div>
+            <div class="breakdown__row breakdown__row--total"><span>Total lifetime cost</span><span id="bd-total">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Affordability -->
+    <section class="panel" id="panel-afford" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Your Finances</h2>
+          <div class="field"><label for="a-income">Monthly take-home income</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-income" value="4500" min="0" step="100"></div></div>
+          <div class="field"><label for="a-rent">Monthly rent / mortgage</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-rent" value="1500" min="0" step="50"></div></div>
+          <div class="field"><label for="a-bills">Monthly bills & utilities</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-bills" value="400" min="0" step="25"></div></div>
+          <div class="field"><label for="a-food">Monthly groceries (you)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-food" value="400" min="0" step="25"></div></div>
+          <div class="field"><label for="a-debt">Monthly debt payments</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-debt" value="300" min="0" step="25"></div></div>
+          <div class="field"><label for="a-other">Other fixed monthly expenses</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-other" value="200" min="0" step="25"></div></div>
+          <div class="field"><label for="a-savings">Current emergency savings</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-savings" value="3000" min="0" step="500"></div></div>
+        </div>
+        <div class="results-column">
+          <div class="readiness" id="readiness-card"><div class="readiness__label">Financial Readiness</div><div class="readiness__value" id="res-ready">—</div><div class="readiness__note" id="res-ready-note"></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">💰</div><div class="insight-card__value" id="res-discretionary">—</div><div class="insight-card__label">Monthly discretionary income</div></div>
+            <div class="insight-card"><div class="insight-card__icon">🐾</div><div class="insight-card__value" id="res-pet-pct">—</div><div class="insight-card__label">Pet as % of discretionary</div></div>
+            <div class="insight-card"><div class="insight-card__icon">🏥</div><div class="insight-card__value" id="res-emergency-ok">—</div><div class="insight-card__label">Emergency vet fund status</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="about__title">Why This Calculator Exists</h2>
+      <p class="about__text">Roughly 20% of adopted pets are returned to shelters within six months. Financial stress is one of the most common reasons. That's heartbreaking for the animal and the family. This calculator exists to prevent that — not by discouraging pet ownership, but by making sure you go in with realistic numbers.</p>
+      <p class="about__text">The costs people forget: dental cleanings ($200–700 per session), end-of-life care (euthanasia, cremation, or burial: $200–1,500), pet deposits on apartments ($200–500), and the big one — emergency vet visits that average $800–1,500 and can exceed $5,000 for surgery.</p>
+      <p class="about__text about__text--dim">Cost data from ASPCA, Rover (2025 True Cost of Pet Parenthood), and veterinary industry surveys. Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Runs entirely in your browser.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__links">
+      <a class="footer__link footer__link--heart" href="https://ko-fi.com/stygnus" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Ko-fi</a>
+      <a class="footer__link" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" href="https://stygnus.substack.com" target="_blank" rel="noopener">Substack</a>
+    </div>
+    <p class="footer__copy">&copy; 2026 Pet Lifetime Cost Calculator — Because love should come with a budget.</p>
+    <p class="forge-link">Part of <a href="https://restless-forge.dev">Restless Forge</a> &middot; <a href="https://whatismytimeworth.app">What Is My Time Worth?</a></p>
+  </footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>{t.classList.remove('tab--active');t.setAttribute('aria-selected','false')});document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('panel--active');p.hidden=true});tab.classList.add('tab--active');tab.setAttribute('aria-selected','true');document.getElementById('panel-'+tab.dataset.tab).classList.add('panel--active');document.getElementById('panel-'+tab.dataset.tab).hidden=false})});
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+
+const FIRST_YEAR_SUPPLIES = { 'dog-s':350, 'dog-m':450, 'dog-l':550, 'cat':300, 'cat-out':300 };
+const EOL_COST = 500; // Average end-of-life expenses
+
+// Auto-fill defaults when pet type changes
+document.getElementById('p-type').addEventListener('change',function(){
+  const o=this.selectedOptions[0];
+  document.getElementById('p-lifespan').value=o.dataset.life;
+  document.getElementById('p-food').value=o.dataset.food;
+  document.getElementById('p-vet').value=o.dataset.vet;
+  document.getElementById('p-groom').value=o.dataset.groom;
+  document.getElementById('p-insurance').value=o.dataset.ins;
+  calcCost();
+});
+
+function calcCost(){
+  const type=document.getElementById('p-type').value;
+  const adopt=+(document.getElementById('p-adopt').value)||0;
+  const life=+(document.getElementById('p-lifespan').value)||1;
+  const food=+(document.getElementById('p-food').value)||0;
+  const treats=+(document.getElementById('p-treats').value)||0;
+  const groom=+(document.getElementById('p-groom').value)||0;
+  const insurance=+(document.getElementById('p-insurance').value)||0;
+  const misc=+(document.getElementById('p-misc').value)||0;
+  const vet=+(document.getElementById('p-vet').value)||0;
+  const dental=+(document.getElementById('p-dental').value)||0;
+  const boarding=+(document.getElementById('p-boarding').value)||0;
+  const emergency=+(document.getElementById('p-emergency').value)||0;
+
+  const supplies=FIRST_YEAR_SUPPLIES[type]||400;
+  const monthlyTotal=(food+treats+groom+insurance+misc);
+  const annualTotal=monthlyTotal*12+vet+dental+boarding+emergency;
+  const lifetimeMonthly=monthlyTotal*12*life;
+  const lifetimeAnnual=(vet+dental+boarding+emergency)*life;
+  const lifetime=adopt+supplies+lifetimeMonthly+lifetimeAnnual+EOL_COST;
+  const firstYear=adopt+supplies+annualTotal;
+
+  document.getElementById('res-lifetime').textContent=fmt(lifetime);
+  document.getElementById('res-lifetime-note').textContent=`Over ${life} years — that's ${fmt(lifetime/life)}/year`;
+  document.getElementById('res-annual').textContent=fmt(annualTotal);
+  document.getElementById('res-monthly').textContent=fmt(monthlyTotal);
+  document.getElementById('res-first-year').textContent=fmt(firstYear);
+
+  document.getElementById('bd-adopt').textContent=fmt(adopt);
+  document.getElementById('bd-supplies').textContent=fmt(supplies);
+  document.getElementById('bd-food').textContent=fmt(food*12*life);
+  document.getElementById('bd-treats').textContent=fmt(treats*12*life);
+  document.getElementById('bd-groom').textContent=fmt(groom*12*life);
+  document.getElementById('bd-insurance').textContent=fmt(insurance*12*life);
+  document.getElementById('bd-misc').textContent=fmt(misc*12*life);
+  document.getElementById('bd-vet').textContent=fmt(vet*life);
+  document.getElementById('bd-dental').textContent=fmt(dental*life);
+  document.getElementById('bd-boarding').textContent=fmt(boarding*life);
+  document.getElementById('bd-emergency').textContent=fmt(emergency*life);
+  document.getElementById('bd-eol').textContent=fmt(EOL_COST);
+  document.getElementById('bd-total').textContent=fmt(lifetime);
+
+  // Update affordability tab too
+  calcAfford();
+}
+
+function calcAfford(){
+  const income=+(document.getElementById('a-income').value)||0;
+  const rent=+(document.getElementById('a-rent').value)||0;
+  const bills=+(document.getElementById('a-bills').value)||0;
+  const foodH=+(document.getElementById('a-food').value)||0;
+  const debt=+(document.getElementById('a-debt').value)||0;
+  const other=+(document.getElementById('a-other').value)||0;
+  const savings=+(document.getElementById('a-savings').value)||0;
+
+  const obligations=rent+bills+foodH+debt+other;
+  const discretionary=income-obligations;
+
+  // Get pet monthly cost from tab 1
+  const petFood=+(document.getElementById('p-food').value)||0;
+  const petTreats=+(document.getElementById('p-treats').value)||0;
+  const petGroom=+(document.getElementById('p-groom').value)||0;
+  const petIns=+(document.getElementById('p-insurance').value)||0;
+  const petMisc=+(document.getElementById('p-misc').value)||0;
+  const petVet=+(document.getElementById('p-vet').value)||0;
+  const petDental=+(document.getElementById('p-dental').value)||0;
+  const petBoarding=+(document.getElementById('p-boarding').value)||0;
+  const petEmergency=+(document.getElementById('p-emergency').value)||0;
+  const petMonthly=(petFood+petTreats+petGroom+petIns+petMisc)+(petVet+petDental+petBoarding+petEmergency)/12;
+
+  const petPct=discretionary>0?(petMonthly/discretionary*100):100;
+  const emergencyOk=savings>=1500;
+
+  document.getElementById('res-discretionary').textContent=fmt(discretionary);
+  document.getElementById('res-pet-pct').textContent=petPct.toFixed(0)+'%';
+
+  const card=document.getElementById('readiness-card');
+  let status='', note='', color='';
+
+  if(discretionary<petMonthly){
+    status='Not Yet';color='var(--red)';
+    note='Your current budget can\'t absorb these costs. Build more income or reduce expenses first.';
+  } else if(petPct>40){
+    status='Stretched';color='var(--orange)';
+    note='This pet would consume '+petPct.toFixed(0)+'% of your discretionary income. Very tight.';
+  } else if(petPct>25||!emergencyOk){
+    status='Tight but Possible';color='var(--orange)';
+    note=!emergencyOk?'Consider building your emergency fund to at least $1,500 first.':'Affordable, but leaves less room for surprises.';
+  } else {
+    status='Ready';color='var(--green)';
+    note='You have the financial room for this pet. Budget '+fmt(petMonthly)+'/month.';
+  }
+
+  document.getElementById('res-ready').textContent=status;
+  document.getElementById('res-ready').style.color=color;
+  card.style.borderColor=color;
+  document.getElementById('res-ready-note').textContent=note;
+  document.getElementById('res-emergency-ok').textContent=emergencyOk?'✓ Adequate':'✗ Build to $1,500+';
+  document.getElementById('res-emergency-ok').style.color=emergencyOk?'var(--green)':'var(--red)';
+}
+
+const costFields=['p-type','p-adopt','p-lifespan','p-food','p-treats','p-groom','p-insurance','p-misc','p-vet','p-dental','p-boarding','p-emergency'];
+const affordFields=['a-income','a-rent','a-bills','a-food','a-debt','a-other','a-savings'];
+costFields.forEach(id=>document.getElementById(id).addEventListener('input',calcCost));
+affordFields.forEach(id=>document.getElementById(id).addEventListener('input',calcAfford));
+calcCost();
+</script>
+</body>
+</html>

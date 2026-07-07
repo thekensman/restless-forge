@@ -2,13 +2,13 @@
   "name": "restless-forge",
   "private": true,
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail --names \"rf,wimtw,hp,sp,ts,stitchtrace,plotpath,cncfeed,printplate,gerberpeek,knotguide,lensmatch,petdose,cookscale,pixelgrid,wavecarve\" --prefix-colors \"cyan,yellow,magenta,green,blue\" \"vite\" \"npm run dev --prefix tools/what-is-my-time-worth/frontend\" \"npm run dev --prefix tools/holopath/frontend\" \"npm run dev --prefix tools/sandpath/frontend\" \"npm run dev --prefix tools/tattoosafe/frontend\" \"npm run dev --prefix tools/stitchtrace/frontend\" \"npm run dev --prefix tools/plotpath/frontend\" \"npm run dev --prefix tools/cncfeed/frontend\" \"npm run dev --prefix tools/printplate/frontend\" \"npm run dev --prefix tools/gerberpeek/frontend\" \"npm run dev --prefix tools/knotguide/frontend\" \"npm run dev --prefix tools/lensmatch/frontend\" \"npm run dev --prefix tools/petdose/frontend\" \"npm run dev --prefix tools/cookscale/frontend\" \"npm run dev --prefix tools/pixelgrid/frontend\" \"npm run dev --prefix tools/wavecarve/frontend\"",
+    "dev": "concurrently --kill-others-on-fail --names \"rf,wimtw,hp,sp,ts,stitchtrace,plotpath,cncfeed,printplate,gerberpeek,knotguide,lensmatch,petdose,cookscale,pixelgrid,wavecarve,am-i-actually-saving,is-my-raise-real,pet-cost,repair-or-replace,side-hustle-reality,subscription-audit\" --prefix-colors \"cyan,yellow,magenta,green,blue\" \"vite\" \"npm run dev --prefix tools/what-is-my-time-worth/frontend\" \"npm run dev --prefix tools/holopath/frontend\" \"npm run dev --prefix tools/sandpath/frontend\" \"npm run dev --prefix tools/tattoosafe/frontend\" \"npm run dev --prefix tools/stitchtrace/frontend\" \"npm run dev --prefix tools/plotpath/frontend\" \"npm run dev --prefix tools/cncfeed/frontend\" \"npm run dev --prefix tools/printplate/frontend\" \"npm run dev --prefix tools/gerberpeek/frontend\" \"npm run dev --prefix tools/knotguide/frontend\" \"npm run dev --prefix tools/lensmatch/frontend\" \"npm run dev --prefix tools/petdose/frontend\" \"npm run dev --prefix tools/cookscale/frontend\" \"npm run dev --prefix tools/pixelgrid/frontend\" \"npm run dev --prefix tools/wavecarve/frontend\" \"npm run dev --prefix tools/am-i-actually-saving/frontend\" \"npm run dev --prefix tools/is-my-raise-real/frontend\" \"npm run dev --prefix tools/pet-cost/frontend\" \"npm run dev --prefix tools/repair-or-replace/frontend\" \"npm run dev --prefix tools/side-hustle-reality/frontend\" \"npm run dev --prefix tools/subscription-audit/frontend\"",
     "dev:site": "vite",
     "dev:wimtw": "npm run dev --prefix tools/what-is-my-time-worth/frontend",
     "dev:holopath": "npm run dev --prefix tools/holopath/frontend",
     "dev:sandpath": "npm run dev --prefix tools/sandpath/frontend",
     "build": "./build.sh",
-    "test": "npm test --prefix tools/what-is-my-time-worth/frontend && npm test --prefix tools/holopath/frontend && npm test --prefix tools/sandpath/frontend && npm test --prefix tools/tattoosafe/frontend && npm test --prefix tools/stitchtrace/frontend && npm test --prefix tools/plotpath/frontend && npm test --prefix tools/cncfeed/frontend && npm test --prefix tools/printplate/frontend && npm test --prefix tools/gerberpeek/frontend && npm test --prefix tools/knotguide/frontend && npm test --prefix tools/lensmatch/frontend && npm test --prefix tools/petdose/frontend && npm test --prefix tools/cookscale/frontend && npm test --prefix tools/pixelgrid/frontend && npm test --prefix tools/wavecarve/frontend",
+    "test": "npm test --prefix tools/what-is-my-time-worth/frontend && npm test --prefix tools/holopath/frontend && npm test --prefix tools/sandpath/frontend && npm test --prefix tools/tattoosafe/frontend && npm test --prefix tools/stitchtrace/frontend && npm test --prefix tools/plotpath/frontend && npm test --prefix tools/cncfeed/frontend && npm test --prefix tools/printplate/frontend && npm test --prefix tools/gerberpeek/frontend && npm test --prefix tools/knotguide/frontend && npm test --prefix tools/lensmatch/frontend && npm test --prefix tools/petdose/frontend && npm test --prefix tools/cookscale/frontend && npm test --prefix tools/pixelgrid/frontend && npm test --prefix tools/wavecarve/frontend && npm test --prefix tools/am-i-actually-saving/frontend && npm test --prefix tools/is-my-raise-real/frontend && npm test --prefix tools/pet-cost/frontend && npm test --prefix tools/repair-or-replace/frontend && npm test --prefix tools/side-hustle-reality/frontend && npm test --prefix tools/subscription-audit/frontend",
     "dev:tattoosafe": "npm run dev --prefix tools/tattoosafe/frontend",
     "dev:stitchtrace": "npm run dev --prefix tools/stitchtrace/frontend",
     "dev:plotpath": "npm run dev --prefix tools/plotpath/frontend",
@@ -20,7 +20,13 @@
     "dev:petdose": "npm run dev --prefix tools/petdose/frontend",
     "dev:cookscale": "npm run dev --prefix tools/cookscale/frontend",
     "dev:pixelgrid": "npm run dev --prefix tools/pixelgrid/frontend",
-    "dev:wavecarve": "npm run dev --prefix tools/wavecarve/frontend"
+    "dev:wavecarve": "npm run dev --prefix tools/wavecarve/frontend",
+    "dev:am-i-actually-saving": "npm run dev --prefix tools/am-i-actually-saving/frontend",
+    "dev:is-my-raise-real": "npm run dev --prefix tools/is-my-raise-real/frontend",
+    "dev:pet-cost": "npm run dev --prefix tools/pet-cost/frontend",
+    "dev:repair-or-replace": "npm run dev --prefix tools/repair-or-replace/frontend",
+    "dev:side-hustle-reality": "npm run dev --prefix tools/side-hustle-reality/frontend",
+    "dev:subscription-audit": "npm run dev --prefix tools/subscription-audit/frontend"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

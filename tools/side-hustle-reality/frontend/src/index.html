@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Is This Side Hustle Worth It? — Gig Economy Reality Calculator</title>
+  <meta name="description" content="Your Uber 'earnings' say $25/hour. After gas, depreciation, self-employment tax, and dead miles, it's $9.40. Calculate the true hourly rate of any gig, side hustle, or freelance work.">
+  <meta name="keywords" content="gig economy calculator, Uber earnings real, DoorDash worth it, side hustle calculator, true hourly rate gig, self employment tax calculator, rideshare earnings">
+  <link rel="canonical" href="https://restless-forge.dev/tools/side-hustle-reality/">
+  <meta property="og:title" content="Is This Side Hustle Worth It?">
+  <meta property="og:description" content="Your Uber 'earnings' say $25/hr. After all costs, it's $9.40. Calculate your real gig rate.">
+  <meta property="og:type" content="website">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Is This Side Hustle Worth It?","description":"Gig economy reality calculator showing true hourly rate after all costs","url":"https://restless-forge.dev/tools/side-hustle-reality/","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root{--bg:#0b0d12;--bg-raised:#151820;--bg-card:#1a1e28;--bg-input:#0e1018;--border:#252a35;--border-focus:#d4a44e;--text:#d8d4cc;--text-dim:#7a7770;--text-muted:#4a4840;--accent:#d4a44e;--accent-dim:#a88540;--green:#6bbd7a;--red:#d45d5d;--orange:#d4a04e;--font-body:"Lora",Georgia,serif;--font-mono:"IBM Plex Mono","Courier New",monospace;--max-w:1100px;--radius:3px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;background-image:radial-gradient(ellipse at 20% 0%,rgba(212,164,78,0.03) 0%,transparent 60%)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.header{border-bottom:1px solid var(--border);padding:36px 24px 28px}.header__inner{max-width:var(--max-w);margin:0 auto}.header__brand{display:flex;align-items:center;gap:14px;margin-bottom:8px}.header__logo{font-size:28px;line-height:1}.header__title{font-family:var(--font-mono);font-size:clamp(20px,3.5vw,30px);font-weight:400;letter-spacing:-0.3px}.header__tagline{font-style:italic;color:var(--text-dim);font-size:16px}
+.tabs{max-width:var(--max-w);margin:0 auto;padding:20px 24px 0;display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto}.tab{font-family:var(--font-mono);font-size:13px;padding:9px 18px 11px;background:transparent;color:var(--text-dim);border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;transition:all .15s;white-space:nowrap}.tab:hover{color:var(--text);background:var(--bg-raised)}.tab--active{color:var(--accent);background:var(--bg-raised);border-color:var(--border);border-bottom:1px solid var(--bg-raised);margin-bottom:-1px}.tab__icon{margin-right:5px}
+.main{max-width:var(--max-w);margin:0 auto;padding:0 24px}.panel{padding:28px 0;display:none}.panel--active{display:block}.panel__grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}@media(max-width:820px){.panel__grid{grid-template-columns:1fr}}
+.card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.card__title{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}.card__title--spaced{margin-top:24px}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:5px}.field__hint{display:block;font-size:11px;color:var(--text-muted);margin-top:3px;font-style:italic}.field-row{display:flex;gap:12px;margin-bottom:16px}.field-row .field{flex:1;margin-bottom:0}
+.input-group{display:flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}.input-group:focus-within{border-color:var(--border-focus)}.input-prefix,.input-suffix{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);padding:0 9px;flex-shrink:0}
+input[type="number"],select{font-family:var(--font-mono);font-size:14px;color:var(--text);background:transparent;border:none;padding:9px 11px;width:100%;outline:none;-moz-appearance:textfield}input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}select{cursor:pointer;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px}select:focus{border-color:var(--border-focus);outline:none}select option{background:var(--bg-card);color:var(--text)}
+.results-column{display:flex;flex-direction:column;gap:14px}
+.result-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center}.result-card--hero{border-color:var(--accent);border-width:2px;padding:28px 22px}.result-card--hero .result-card__value{font-size:clamp(28px,5vw,44px)}.result-card__label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}.result-card__value{font-family:var(--font-mono);font-weight:500;font-size:28px;color:var(--text);line-height:1.2}.result-card__note{font-size:12px;color:var(--text-muted);margin-top:5px;font-style:italic}
+.insight-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.insight-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}.insight-card__icon{font-size:22px;margin-bottom:6px}.insight-card__value{font-family:var(--font-mono);font-size:20px;font-weight:500}.insight-card__label{font-size:11px;color:var(--text-dim);margin-top:4px}
+.gap-visual{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px}.gap-visual__bar{height:28px;background:rgba(37,42,53,0.8);border-radius:3px;overflow:hidden;position:relative;display:flex}.gap-visual__segment{height:100%;transition:width .3s}.gap-visual__labels{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);margin-top:6px}
+.breakdown{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:14px}.breakdown__row{display:flex;justify-content:space-between;padding:5px 0;font-family:var(--font-mono);font-size:12px;border-bottom:1px solid rgba(37,42,53,0.5)}.breakdown__row:last-child{border-bottom:none}.breakdown__row span:first-child{color:var(--text-dim)}.breakdown__row--total{border-top:2px solid var(--accent);margin-top:8px;padding-top:8px;font-weight:600}.breakdown__row--sub span:first-child{padding-left:12px;font-size:11px}
+.about{padding:40px 0;border-top:1px solid var(--border);margin-top:20px}.about__title{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--accent);margin-bottom:14px}.about__text{font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:12px}
+.footer{border-top:1px solid var(--border);padding:24px;text-align:center}.footer__links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}.footer__link{font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}.footer__link:hover{color:var(--accent)}.footer__link--heart{color:var(--red)}.footer__link--heart svg{vertical-align:-2px;margin-right:3px}.footer__copy{font-size:11px;color:var(--text-muted)}.forge-link{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px}.forge-link a{color:var(--accent-dim)}
+  </style>
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/side-hustle-reality/favicon.svg">
+  <link rel="icon" href="/tools/side-hustle-reality/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/side-hustle-reality/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/side-hustle-reality/site.webmanifest">
+</head>
+<body>
+  <header class="header"><div class="header__inner"><div class="header__brand"><span class="header__logo">🚗</span><h1 class="header__title">Is This Side Hustle Worth It?</h1></div><p class="header__tagline">The earnings screen shows one number. Reality is another.</p></div></header>
+
+  <main class="main">
+    <nav class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="gig" role="tab" aria-selected="true"><span class="tab__icon">📊</span> Gig Reality Check</button>
+      <button class="tab" data-tab="compare" role="tab" aria-selected="false"><span class="tab__icon">⚖️</span> Gig vs. Job</button>
+      <button class="tab" data-tab="equip" role="tab" aria-selected="false"><span class="tab__icon">🔧</span> Equipment Break-Even</button>
+    </nav>
+
+    <!-- TAB 1 -->
+    <section class="panel panel--active" id="panel-gig" role="tabpanel">
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Your Gig Numbers</h2>
+          <div class="field"><label for="g-type">Gig type</label>
+            <select id="g-type"><option value="rideshare">Rideshare (Uber/Lyft)</option><option value="delivery">Delivery (DoorDash/Instacart)</option><option value="freelance">Freelance / Remote</option><option value="reselling">Reselling (eBay/Poshmark)</option><option value="other">Other</option></select>
+          </div>
+          <div class="field"><label for="g-gross">Gross weekly earnings (from app)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="g-gross" value="500" min="0" step="25"></div></div>
+          <div class="field"><label for="g-hours">Hours worked per week</label><div class="input-group"><input type="number" id="g-hours" value="20" min="0" step="1"><span class="input-suffix">hrs</span></div><span class="field__hint">Include waiting, driving to pickup zone, dead time between gigs.</span></div>
+          <div class="field"><label for="g-miles">Miles driven per week</label><div class="input-group"><input type="number" id="g-miles" value="300" min="0" step="25"><span class="input-suffix">mi</span></div></div>
+          <div class="field"><label for="g-gas-price">Gas price per gallon</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="g-gas-price" value="3.50" min="0" step="0.1"></div></div>
+          <div class="field"><label for="g-mpg">Your vehicle MPG</label><div class="input-group"><input type="number" id="g-mpg" value="28" min="5" step="1"><span class="input-suffix">mpg</span></div></div>
+          <div class="field"><label for="g-phone">Monthly phone/data cost (gig share)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="g-phone" value="30" min="0" step="5"></div><span class="field__hint">Portion of your phone bill attributable to gig work.</span></div>
+          <div class="field"><label for="g-other">Other weekly costs</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="g-other" value="10" min="0" step="5"></div><span class="field__hint">Insulated bags, car cleaning, extra insurance, tolls, parking, etc.</span></div>
+        </div>
+        <div class="results-column">
+          <div class="result-card result-card--hero" id="gig-hero"><div class="result-card__label">Your True Hourly Rate</div><div class="result-card__value" id="res-gig-rate">—</div><div class="result-card__note" id="res-gig-note"></div></div>
+          <div class="gap-visual"><div class="gap-visual__bar"><div class="gap-visual__segment" id="gig-bar-keep" style="background:var(--green)"></div><div class="gap-visual__segment" id="gig-bar-costs" style="background:var(--red)"></div></div><div class="gap-visual__labels"><span id="gig-label-keep">You keep: —</span><span id="gig-label-costs">Costs: —</span></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">💸</div><div class="insight-card__value" id="res-gig-app-rate">—</div><div class="insight-card__label">App says you earn</div></div>
+            <div class="insight-card"><div class="insight-card__icon">⛽</div><div class="insight-card__value" id="res-gig-gas">—</div><div class="insight-card__label">Weekly gas cost</div></div>
+            <div class="insight-card"><div class="insight-card__icon">📉</div><div class="insight-card__value" id="res-gig-deprec">—</div><div class="insight-card__label">Weekly depreciation</div></div>
+          </div>
+          <div class="breakdown">
+            <div class="breakdown__row"><span>Gross weekly earnings</span><span id="bd-g-gross">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>Gas</span><span id="bd-g-gas">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>Vehicle depreciation (IRS $0.70/mi)</span><span id="bd-g-deprec">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>Self-employment tax (15.3%)</span><span id="bd-g-se">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>Phone/data</span><span id="bd-g-phone">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>Other costs</span><span id="bd-g-other">—</span></div>
+            <div class="breakdown__row breakdown__row--total"><span>Actual weekly take-home</span><span id="bd-g-net">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Gig vs Job -->
+    <section class="panel" id="panel-compare" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">The Gig</h2>
+          <div class="field"><label for="c-gig-rate">Your TRUE gig hourly rate</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="c-gig-rate" value="12" min="0" step="0.5"></div><span class="field__hint">Use Tab 1 to calculate this.</span></div>
+          <div class="field"><label for="c-gig-hours">Gig hours per week</label><div class="input-group"><input type="number" id="c-gig-hours" value="20" min="0" step="1"><span class="input-suffix">hrs</span></div></div>
+          <h2 class="card__title card__title--spaced">The Job Offer</h2>
+          <div class="field"><label for="c-job-rate">Job hourly wage (before tax)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="c-job-rate" value="18" min="0" step="0.5"></div></div>
+          <div class="field"><label for="c-job-hours">Job hours per week</label><div class="input-group"><input type="number" id="c-job-hours" value="30" min="0" step="1"><span class="input-suffix">hrs</span></div></div>
+          <div class="field"><label for="c-job-health">Health insurance value (monthly)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="c-job-health" value="400" min="0" step="25"></div><span class="field__hint">What you'd pay on the open market for equivalent coverage.</span></div>
+          <div class="field"><label for="c-job-pto">Paid days off per year</label><div class="input-group"><input type="number" id="c-job-pto" value="10" min="0" step="1"></div></div>
+          <div class="field"><label for="c-job-match">Employer 401k match (annual)</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="c-job-match" value="1500" min="0" step="100"></div></div>
+        </div>
+        <div class="results-column">
+          <div class="result-card result-card--hero" id="compare-hero"><div class="result-card__label">True Hourly Comparison</div><div class="result-card__value" id="res-cmp-verdict">—</div><div class="result-card__note" id="res-cmp-note"></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">🚗</div><div class="insight-card__value" id="res-cmp-gig">—</div><div class="insight-card__label">Gig: true hourly</div></div>
+            <div class="insight-card"><div class="insight-card__icon">🏢</div><div class="insight-card__value" id="res-cmp-job">—</div><div class="insight-card__label">Job: total comp hourly</div></div>
+            <div class="insight-card"><div class="insight-card__icon">📊</div><div class="insight-card__value" id="res-cmp-gap">—</div><div class="insight-card__label">Real gap per hour</div></div>
+          </div>
+          <div class="breakdown">
+            <div class="breakdown__row"><span>Job base wage</span><span id="bd-c-base">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>+ Health insurance value (/hr)</span><span id="bd-c-health">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>+ Employer FICA match (/hr)</span><span id="bd-c-fica">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>+ 401k match (/hr)</span><span id="bd-c-match">—</span></div>
+            <div class="breakdown__row breakdown__row--sub"><span>+ PTO value (/hr)</span><span id="bd-c-pto">—</span></div>
+            <div class="breakdown__row breakdown__row--total"><span>Job total comp per hour</span><span id="bd-c-total">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Equipment Break-Even -->
+    <section class="panel" id="panel-equip" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">The Investment</h2>
+          <div class="field"><label for="e-cost">Equipment / startup cost</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="e-cost" value="500" min="0" step="50"></div><span class="field__hint">Camera, pressure washer, craft supplies, tools, etc.</span></div>
+          <div class="field"><label for="e-revenue">Revenue per gig/sale</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="e-revenue" value="75" min="0" step="5"></div></div>
+          <div class="field"><label for="e-supply">Supply/material cost per gig</label><div class="input-group"><span class="input-prefix">$</span><input type="number" id="e-supply" value="15" min="0" step="1"></div></div>
+          <div class="field"><label for="e-time">Hours per gig</label><div class="input-group"><input type="number" id="e-time" value="3" min="0" step="0.5"><span class="input-suffix">hrs</span></div><span class="field__hint">Include travel, setup, cleanup, and admin/marketing time.</span></div>
+          <div class="field"><label for="e-gigs">Gigs per month</label><div class="input-group"><input type="number" id="e-gigs" value="4" min="0" step="1"></div></div>
+        </div>
+        <div class="results-column">
+          <div class="result-card result-card--hero"><div class="result-card__label">Break-Even Point</div><div class="result-card__value" id="res-equip-break">—</div><div class="result-card__note" id="res-equip-note"></div></div>
+          <div class="insight-row">
+            <div class="insight-card"><div class="insight-card__icon">💰</div><div class="insight-card__value" id="res-equip-profit">—</div><div class="insight-card__label">Profit per gig</div></div>
+            <div class="insight-card"><div class="insight-card__icon">⏱️</div><div class="insight-card__value" id="res-equip-rate">—</div><div class="insight-card__label">Hourly rate (after break-even)</div></div>
+            <div class="insight-card"><div class="insight-card__icon">📅</div><div class="insight-card__value" id="res-equip-annual">—</div><div class="insight-card__label">Annual profit (post break-even)</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="about__title">Why This Calculator Exists</h2>
+      <p class="about__text">Gig platforms show you gross earnings because the number looks good. They don't subtract gas, vehicle depreciation, self-employment tax (15.3% — you pay both halves of FICA), phone costs, or the dead time between rides. When you do the math, many gig workers earn less than minimum wage. That doesn't mean all gigs are bad — some are genuinely profitable, especially with the right vehicle and market. This tool helps you see the real number.</p>
+      <p class="about__text about__text--dim">Vehicle depreciation uses the 2024 IRS standard mileage rate of $0.70/mile as a proxy for total vehicle costs. Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__links">
+      <a class="footer__link footer__link--heart" href="https://ko-fi.com/stygnus" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Ko-fi</a>
+      <a class="footer__link" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" href="https://stygnus.substack.com" target="_blank" rel="noopener">Substack</a>
+      <a class="footer__link" href="https://github.com/thekensman" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="footer__copy">&copy; 2026 Is This Side Hustle Worth It? — Your numbers, your browser, the truth.</p>
+    <p class="forge-link">Part of <a href="https://restless-forge.dev">Restless Forge</a> &middot; <a href="https://whatismytimeworth.app">What Is My Time Worth?</a> &middot; <a href="https://restless-forge.dev/tools/is-my-raise-real/">Is My Raise Real?</a></p>
+  </footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>{t.classList.remove('tab--active');t.setAttribute('aria-selected','false')});document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('panel--active');p.hidden=true});tab.classList.add('tab--active');tab.setAttribute('aria-selected','true');const panel=document.getElementById('panel-'+tab.dataset.tab);panel.classList.add('panel--active');panel.hidden=false})});
+const fmt=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt0=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0});
+
+const IRS_MILE = 0.70; // 2024 standard mileage rate
+const SE_TAX = 0.153;  // Self-employment tax rate
+
+function calcGig(){
+  const gross=+(document.getElementById('g-gross').value)||0;
+  const hours=+(document.getElementById('g-hours').value)||0;
+  const miles=+(document.getElementById('g-miles').value)||0;
+  const gasPrice=+(document.getElementById('g-gas-price').value)||0;
+  const mpg=+(document.getElementById('g-mpg').value)||1;
+  const phone=+(document.getElementById('g-phone').value)||0;
+  const other=+(document.getElementById('g-other').value)||0;
+
+  const gasCost = (miles / mpg) * gasPrice;
+  const deprecCost = miles * IRS_MILE - gasCost; // IRS rate includes gas, so depreciation = IRS total minus gas
+  const depreciationOnly = Math.max(deprecCost, 0);
+  const seTax = gross * SE_TAX * 0.9235; // SE tax on 92.35% of net
+  const phoneWeekly = phone / 4.33;
+  const totalCosts = gasCost + depreciationOnly + seTax + phoneWeekly + other;
+  const netPay = gross - totalCosts;
+  const trueRate = hours > 0 ? netPay / hours : 0;
+  const appRate = hours > 0 ? gross / hours : 0;
+
+  document.getElementById('res-gig-rate').textContent = fmt(trueRate) + '/hr';
+  const hero = document.getElementById('gig-hero');
+  hero.className = 'result-card result-card--hero';
+  if(trueRate < 10) { hero.style.borderColor='var(--red)'; document.getElementById('res-gig-rate').style.color='var(--red)'; }
+  else if(trueRate < 15) { hero.style.borderColor='var(--orange)'; document.getElementById('res-gig-rate').style.color='var(--orange)'; }
+  else { hero.style.borderColor='var(--green)'; document.getElementById('res-gig-rate').style.color='var(--green)'; }
+
+  const pctLoss = gross > 0 ? ((gross - netPay) / gross * 100) : 0;
+  document.getElementById('res-gig-note').textContent = `The app shows ${fmt(appRate)}/hr. You lose ${pctLoss.toFixed(0)}% to costs.`;
+  document.getElementById('res-gig-app-rate').textContent = fmt(appRate)+'/hr';
+  document.getElementById('res-gig-gas').textContent = fmt(gasCost);
+  document.getElementById('res-gig-deprec').textContent = fmt(depreciationOnly);
+
+  // Bar
+  const keepPct = gross > 0 ? (netPay / gross * 100) : 50;
+  document.getElementById('gig-bar-keep').style.width = Math.max(keepPct, 0) + '%';
+  document.getElementById('gig-bar-costs').style.width = Math.max(100 - keepPct, 0) + '%';
+  document.getElementById('gig-label-keep').textContent = 'You keep: ' + fmt0(netPay);
+  document.getElementById('gig-label-costs').textContent = 'Costs: ' + fmt0(totalCosts);
+
+  document.getElementById('bd-g-gross').textContent = fmt(gross);
+  document.getElementById('bd-g-gas').textContent = '-'+fmt(gasCost);
+  document.getElementById('bd-g-deprec').textContent = '-'+fmt(depreciationOnly);
+  document.getElementById('bd-g-se').textContent = '-'+fmt(seTax);
+  document.getElementById('bd-g-phone').textContent = '-'+fmt(phoneWeekly);
+  document.getElementById('bd-g-other').textContent = '-'+fmt(other);
+  document.getElementById('bd-g-net').textContent = fmt(netPay);
+  document.getElementById('bd-g-net').style.color = netPay >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+function calcCompare(){
+  const gigRate=+(document.getElementById('c-gig-rate').value)||0;
+  const gigHrs=+(document.getElementById('c-gig-hours').value)||0;
+  const jobRate=+(document.getElementById('c-job-rate').value)||0;
+  const jobHrs=+(document.getElementById('c-job-hours').value)||0;
+  const health=+(document.getElementById('c-job-health').value)||0;
+  const pto=+(document.getElementById('c-job-pto').value)||0;
+  const match401k=+(document.getElementById('c-job-match').value)||0;
+
+  const annualJobHrs = jobHrs * 52;
+  const healthHourly = annualJobHrs > 0 ? (health * 12) / annualJobHrs : 0;
+  const ficaHourly = jobRate * 0.0765; // Employer FICA match
+  const matchHourly = annualJobHrs > 0 ? match401k / annualJobHrs : 0;
+  const ptoHourly = annualJobHrs > 0 ? (pto * 8 * jobRate) / annualJobHrs : 0;
+  const totalJobHourly = jobRate + healthHourly + ficaHourly + matchHourly + ptoHourly;
+  const gap = totalJobHourly - gigRate;
+
+  document.getElementById('res-cmp-gig').textContent = fmt(gigRate)+'/hr';
+  document.getElementById('res-cmp-job').textContent = fmt(totalJobHourly)+'/hr';
+  document.getElementById('res-cmp-gap').textContent = (gap >= 0 ? '+' : '') + fmt(gap);
+  document.getElementById('res-cmp-gap').style.color = gap > 0 ? 'var(--green)' : 'var(--red)';
+
+  const hero = document.getElementById('compare-hero');
+  hero.className = 'result-card result-card--hero';
+  if(gap > 1) {
+    document.getElementById('res-cmp-verdict').textContent = 'Job wins by ' + fmt(gap)+'/hr';
+    document.getElementById('res-cmp-verdict').style.color = 'var(--green)';
+    document.getElementById('res-cmp-note').textContent = 'The job\'s total compensation exceeds your gig\'s true rate.';
+  } else if(gap < -1) {
+    document.getElementById('res-cmp-verdict').textContent = 'Gig wins by ' + fmt(Math.abs(gap))+'/hr';
+    document.getElementById('res-cmp-verdict').style.color = 'var(--accent)';
+    document.getElementById('res-cmp-note').textContent = 'Your gig pays more even after factoring in job benefits.';
+  } else {
+    document.getElementById('res-cmp-verdict').textContent = 'Roughly equal';
+    document.getElementById('res-cmp-verdict').style.color = 'var(--orange)';
+    document.getElementById('res-cmp-note').textContent = 'Factor in flexibility, stability, and what matters to you.';
+  }
+
+  document.getElementById('bd-c-base').textContent = fmt(jobRate)+'/hr';
+  document.getElementById('bd-c-health').textContent = '+'+fmt(healthHourly);
+  document.getElementById('bd-c-fica').textContent = '+'+fmt(ficaHourly);
+  document.getElementById('bd-c-match').textContent = '+'+fmt(matchHourly);
+  document.getElementById('bd-c-pto').textContent = '+'+fmt(ptoHourly);
+  document.getElementById('bd-c-total').textContent = fmt(totalJobHourly)+'/hr';
+}
+
+function calcEquip(){
+  const cost=+(document.getElementById('e-cost').value)||0;
+  const revenue=+(document.getElementById('e-revenue').value)||0;
+  const supply=+(document.getElementById('e-supply').value)||0;
+  const timeHrs=+(document.getElementById('e-time').value)||0;
+  const gigs=+(document.getElementById('e-gigs').value)||0;
+
+  const profitPerGig = revenue - supply;
+  const breakEvenGigs = profitPerGig > 0 ? Math.ceil(cost / profitPerGig) : Infinity;
+  const breakEvenMonths = gigs > 0 ? (breakEvenGigs / gigs) : Infinity;
+  const hourlyAfterBE = timeHrs > 0 ? profitPerGig / timeHrs : 0;
+  const annualProfit = (profitPerGig * gigs * 12) - cost;
+
+  if(breakEvenGigs === Infinity) {
+    document.getElementById('res-equip-break').textContent = 'Never';
+    document.getElementById('res-equip-note').textContent = 'Costs exceed revenue per gig. This doesn\'t work.';
+  } else {
+    document.getElementById('res-equip-break').textContent = breakEvenGigs + ' gigs';
+    document.getElementById('res-equip-note').textContent = breakEvenMonths <= 12
+      ? `That's about ${breakEvenMonths.toFixed(1)} months at ${gigs} gigs/month.`
+      : `That's ${breakEvenMonths.toFixed(1)} months. Consider if you'll stick with it that long.`;
+  }
+  document.getElementById('res-equip-profit').textContent = fmt(profitPerGig);
+  document.getElementById('res-equip-rate').textContent = fmt(hourlyAfterBE)+'/hr';
+  document.getElementById('res-equip-annual').textContent = fmt0(Math.max(annualProfit, 0));
+}
+
+['g-type','g-gross','g-hours','g-miles','g-gas-price','g-mpg','g-phone','g-other'].forEach(id=>document.getElementById(id).addEventListener('input',calcGig));
+['c-gig-rate','c-gig-hours','c-job-rate','c-job-hours','c-job-health','c-job-pto','c-job-match'].forEach(id=>document.getElementById(id).addEventListener('input',calcCompare));
+['e-cost','e-revenue','e-supply','e-time','e-gigs'].forEach(id=>document.getElementById(id).addEventListener('input',calcEquip));
+
+calcGig(); calcCompare(); calcEquip();
+</script>
+</body>
+</html>

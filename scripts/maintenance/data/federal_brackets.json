@@ -1,0 +1,87 @@
+{
+  "tax_year": 2025,
+  "source": "IRS Rev. Proc. 2024-40",
+  "source_url": "https://www.irs.gov/newsroom/irs-provides-tax-inflation-adjustments-for-tax-year-2025",
+  "brackets_single": [
+    {
+      "min": 0,
+      "max": 11925,
+      "rate": 0.1
+    },
+    {
+      "min": 11925,
+      "max": 48475,
+      "rate": 0.12
+    },
+    {
+      "min": 48475,
+      "max": 103350,
+      "rate": 0.22
+    },
+    {
+      "min": 103350,
+      "max": 197300,
+      "rate": 0.24
+    },
+    {
+      "min": 197300,
+      "max": 250525,
+      "rate": 0.32
+    },
+    {
+      "min": 250525,
+      "max": 626350,
+      "rate": 0.35
+    },
+    {
+      "min": 626350,
+      "max": null,
+      "rate": 0.37
+    }
+  ],
+  "brackets_mfj": [
+    {
+      "min": 0,
+      "max": 23850,
+      "rate": 0.1
+    },
+    {
+      "min": 23850,
+      "max": 96950,
+      "rate": 0.12
+    },
+    {
+      "min": 96950,
+      "max": 206700,
+      "rate": 0.22
+    },
+    {
+      "min": 206700,
+      "max": 394600,
+      "rate": 0.24
+    },
+    {
+      "min": 394600,
+      "max": 501050,
+      "rate": 0.32
+    },
+    {
+      "min": 501050,
+      "max": 751600,
+      "rate": 0.35
+    },
+    {
+      "min": 751600,
+      "max": null,
+      "rate": 0.37
+    }
+  ],
+  "standard_deduction_single": 15000,
+  "standard_deduction_mfj": 30000,
+  "fica_rate": 0.0765,
+  "fica_ss_wage_base": 176100,
+  "fica_ss_rate": 0.062,
+  "fica_medicare_rate": 0.0145,
+  "se_tax_rate": 0.153,
+  "se_tax_deductible_fraction": 0.9235
+}

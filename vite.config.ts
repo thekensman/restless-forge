@@ -90,6 +90,36 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
       },
+      "/tools/am-i-actually-saving": {
+        target: "http://localhost:5187",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/is-my-raise-real": {
+        target: "http://localhost:5188",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/pet-cost": {
+        target: "http://localhost:5189",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/repair-or-replace": {
+        target: "http://localhost:5190",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/side-hustle-reality": {
+        target: "http://localhost:5191",
+        changeOrigin: true,
+        ws: true,
+      },
+      "/tools/subscription-audit": {
+        target: "http://localhost:5192",
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 });
