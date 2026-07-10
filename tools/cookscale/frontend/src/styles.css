@@ -39,3 +39,20 @@ a { color: var(--accent); } a:hover { color: var(--accent-light); }
 .error-toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--error); color: #fff; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.88rem; z-index: 1000; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 480px) { .upload__circle { width: 170px; height: 170px; } .settings { padding: 1.25rem; } }
+
+/* ─── Calculator form (shared shape with PetDose) ─── */
+.field { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.field__label { font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.field__optional { text-transform: none; letter-spacing: 0; opacity: 0.7; }
+.field__row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.field__select, .field__input {
+  font-family: inherit; font-size: 0.95rem; padding: 0.55rem 0.8rem;
+  background: var(--bg-raised, #141420); color: var(--text-bright, #e8e4f0);
+  border: 1px solid var(--border, #252535); border-radius: 8px; outline: none;
+}
+.field__select:focus, .field__input:focus { border-color: var(--accent); }
+.field__input { width: 6.5rem; }
+.field__arrow { color: var(--accent); font-size: 1.1rem; }
+.field__unit-label { color: var(--text-muted); font-size: 0.9rem; }
+.scale-result__factor { font-size: 1.05rem; margin-bottom: 0.3rem; }
+.scale-result__line { color: var(--text-muted); margin-bottom: 0.25rem; }

@@ -13,16 +13,13 @@ scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 ```
 
 This copies `tools/template/frontend/` to `tools/<tool-name>/frontend/`,
-replaces every placeholder, and runs `npm install`. It prints the remaining
-manual wiring at the end:
+replaces every placeholder, and runs `npm install`. build.sh, the root
+dev/test scripts, and the root vite proxy discover the new tool
+automatically — the only manual steps are:
 
-1. **build.sh** — add the tool to the build + cache-bust section.
-2. **Root `package.json`** — add the tool to the `concurrently` list in the
-   `dev` script and to the root `test` script; optionally add a `dev:<prefix>`
-   alias.
-3. **Root `vite.config.ts`** — add the proxy entry.
-4. **site/index.html + site/tools/index.html** — add a tool card.
-5. **site/sitemap.xml** — add the tool URLs.
+1. **site/index.html + site/tools/index.html** — add a tool card
+   (inside the "Tools on deck" comment block while the tool is unfinished).
+2. **site/sitemap.xml** — add the tool URLs when it goes public.
 
 After the edits, `npm run dev` from repo root will start your new tool on
 the port you chose, proxied at `http://localhost:8080/tools/<tool-name>/`.
