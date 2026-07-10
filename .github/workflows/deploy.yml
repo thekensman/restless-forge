@@ -18,6 +18,8 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Manual runs from the Actions tab (e.g. re-deploy without a new commit).
+  workflow_dispatch:
 
 concurrency:
   group: production-deploy
