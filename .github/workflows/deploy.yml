@@ -30,6 +30,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Fail fast with a readable message instead of dying cryptically at
+      # ssh-keyscan when the secrets aren't visible to this workflow.
+      # Secrets must be REPOSITORY secrets, or environment secrets on an
+      # environment named exactly `production` (this job pins that name).
+      - name: Check deploy secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.DEPLOY_HOST }}" ]    && missing="$missing DEPLOY_HOST"
+          [ -z "${{ secrets.DEPLOY_USER }}" ]    && missing="$missing DEPLOY_USER"
+          [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ] && missing="$missing DEPLOY_SSH_KEY"
+          [ -z "${{ secrets.DEPLOY_PATH }}" ]    && missing="$missing DEPLOY_PATH"
+          if [ -n "$missing" ]; then
+            echo "::error::Deploy secrets not visible to this workflow:$missing"
+            echo "::error::Add them under Settings → Secrets and variables → Actions as Repository secrets, or as Environment secrets on an environment named 'production'."
+            exit 1
+          fi
+          echo "All deploy secrets present."
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
