@@ -70,6 +70,36 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
+      # Verbose pre-flight so auth failures explain themselves instead of
+      # ending in a bare "Permission denied" from rsync. Prints the public
+      # fingerprint of the key the runner is offering (compare it against
+      # `ssh-keygen -lf ~/.ssh/authorized_keys` output on the server) and a
+      # -vv connection trace showing which auth methods the server allows.
+      # Reminder: for the root user, sshd reads /root/.ssh/authorized_keys —
+      # NOT /home/root/.ssh/authorized_keys.
+      - name: SSH diagnostics
+        run: |
+          echo "── DEPLOY_SSH_KEY sanity ──"
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /tmp/pubkey.out 2> /tmp/keyerr.out; then
+            echo "::error::DEPLOY_SSH_KEY does not parse as a private key (wrong file pasted, truncated, or passphrase-protected)."
+            cat /tmp/keyerr.out
+            exit 1
+          fi
+          echo "Private key parses OK. Fingerprint the server must have in authorized_keys:"
+          ssh-keygen -lf /tmp/pubkey.out
+          echo ""
+          echo "── connection attempt (verbose; debug2 noise filtered) ──"
+          set +e
+          ssh -vv -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'echo "CONNECTED as $(whoami)"; ls -ld "${{ secrets.DEPLOY_PATH }}"' 2>&1 | grep -vE "^debug2:"
+          rc=$?
+          set -e
+          if [ $rc -ne 0 ]; then
+            echo "::error::SSH authentication failed (see trace above: 'Offering public key' shows what we sent; 'Authentications that can continue' shows what the server will accept)."
+            exit $rc
+          fi
+
       - name: Rsync dist to web root
         run: |
           rsync -az --delete \
