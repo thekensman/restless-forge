@@ -99,6 +99,8 @@ interface CameraRefs {
 export interface CameraController {
   /** Give the preview the (new) design image. Enables the start button. */
   setDesign(img: HTMLImageElement): void;
+  /** Reflect the size panel: real-world dimensions drive the overlay's base size. */
+  setTattooSize(wCm: number, hCm: number, placementLabel: string): void;
   /** True while the camera is streaming. */
   isActive(): boolean;
 }
@@ -123,6 +125,15 @@ export function setupCameraPreview(
   if (!ctx) return null;
 
   let design: HTMLImageElement | null = null;
+  // Real-world tattoo size from the settings panel. The camera can't know
+  // true scale without a reference object, so we assume the visible frame is
+  // ~VIEW_WIDTH_CM across at typical arm's-length framing; pinch refines it.
+  const VIEW_WIDTH_CM = 50;
+  let tattooWCm = 0;
+  let tattooHCm = 0;
+  let placement = "";
+  const wrapToggle = document.querySelector<HTMLInputElement>("#ar-wrap");
+  const wrapLabel = document.querySelector<HTMLElement>("#ar-wrap-label");
   let video: HTMLVideoElement | null = null;
   let stream: MediaStream | null = null;
   let raf = 0;
@@ -157,14 +168,39 @@ export function setupCameraPreview(
     ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, canvas.width, canvas.height);
 
     if (design) {
-      const { w, h } = drawSize(design.naturalWidth, design.naturalHeight, canvas.width, state.scale);
+      let w: number, h: number;
+      if (tattooWCm > 0) {
+        // cm-driven: overlay width maps the declared size onto the assumed frame width
+        w = canvas.width * (tattooWCm / VIEW_WIDTH_CM) * state.scale;
+        h = tattooHCm > 0 ? (w * tattooHCm) / tattooWCm
+                          : (w * design.naturalHeight) / design.naturalWidth;
+      } else {
+        ({ w, h } = drawSize(design.naturalWidth, design.naturalHeight, canvas.width, state.scale));
+      }
       ctx.save();
       ctx.translate(state.x, state.y);
       ctx.rotate((getRotation() * Math.PI) / 180);
-      ctx.globalAlpha = getOpacity();
+      const alpha = getOpacity();
       // Multiply blend settles the design into skin tones like real ink.
       ctx.globalCompositeOperation = "multiply";
-      ctx.drawImage(design, -w / 2, -h / 2, w, h);
+      if (wrapToggle?.checked) {
+        // Cylindrical illusion without tracking: vertical strips compress
+        // toward the edges (sin mapping) and fade slightly, as if the design
+        // wraps around a limb. Cheap, dependency-free, runs per frame.
+        const STRIPS = 32;
+        const srcW = design.naturalWidth / STRIPS;
+        for (let i = 0; i < STRIPS; i++) {
+          const t0 = i / STRIPS, t1 = (i + 1) / STRIPS, tm = (t0 + t1) / 2;
+          const x0 = (Math.sin((t0 - 0.5) * Math.PI) / 2 + 0.5) * w;
+          const x1 = (Math.sin((t1 - 0.5) * Math.PI) / 2 + 0.5) * w;
+          ctx.globalAlpha = alpha * (0.45 + 0.55 * Math.cos((tm - 0.5) * Math.PI));
+          ctx.drawImage(design, i * srcW, 0, srcW, design.naturalHeight,
+                        -w / 2 + x0, -h / 2, Math.max(x1 - x0, 0.5), h);
+        }
+      } else {
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(design, -w / 2, -h / 2, w, h);
+      }
       ctx.restore();
     }
     raf = requestAnimationFrame(render);
@@ -193,7 +229,8 @@ export function setupCameraPreview(
     refs.startBtn.hidden = true;
     refs.stopBtn.hidden = false;
     refs.shotBtn.hidden = false;
-    refs.hint.textContent = "Drag to position · pinch or scroll to resize · use the sliders for angle & opacity";
+    if (wrapLabel) wrapLabel.hidden = false;
+    updateHint();
     raf = requestAnimationFrame(render);
   }
 
@@ -206,6 +243,7 @@ export function setupCameraPreview(
     refs.startBtn.hidden = false;
     refs.stopBtn.hidden = true;
     refs.shotBtn.hidden = true;
+    if (wrapLabel) wrapLabel.hidden = true;
     refs.hint.textContent = "";
     ctx?.clearRect(0, 0, refs.canvas.width, refs.canvas.height);
   }
@@ -266,11 +304,23 @@ export function setupCameraPreview(
     if (document.hidden && stream) stop();
   });
 
+  function updateHint(): void {
+    if (!stream) return;
+    const size = tattooWCm > 0 ? `${tattooWCm} × ${tattooHCm} cm${placement ? " on " + placement : ""} · ` : "";
+    refs.hint.textContent = `${size}drag to position · pinch to calibrate scale · sliders set angle & opacity`;
+  }
+
   return {
     setDesign(img: HTMLImageElement): void {
       design = img;
       refs.startBtn.disabled = false;
       if (!stream) refs.hint.textContent = "Design loaded — start the camera to preview it on your body.";
+    },
+    setTattooSize(wCm: number, hCm: number, placementLabel: string): void {
+      tattooWCm = wCm;
+      tattooHCm = hCm;
+      placement = placementLabel;
+      updateHint();
     },
     isActive: () => stream !== null,
   };

@@ -160,6 +160,24 @@
         <input class="field__range" type="range" id="opacity-range" min="20" max="100" value="85" step="5">
         <div class="field__range-labels"><span>Faded</span><span>Solid</span></div>
       </div>
+
+      <div class="settings__divider"></div>
+
+      <div class="field">
+        <label class="field__label" for="complexity-select">Style / Complexity</label>
+        <select class="field__select" id="complexity-select"></select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="artist-select">Artist Tier</label>
+        <select class="field__select" id="artist-select"></select>
+      </div>
+
+      <div class="price-estimate" id="price-estimate" aria-live="polite">
+        <p class="price-estimate__range" id="price-range">—</p>
+        <p class="price-estimate__detail" id="price-detail"></p>
+        <p class="price-estimate__link"><a href="/tools/tattoosafe/pricing/">How this estimate works →</a></p>
+      </div>
     </section>
 
     <!-- ─── Silhouette Preview ─── -->
@@ -179,6 +197,9 @@
         <button class="btn btn--primary" id="ar-start" disabled>Start Camera</button>
         <button class="btn" id="ar-stop" hidden>Stop Camera</button>
         <button class="btn" id="ar-screenshot" hidden>Save Screenshot</button>
+        <label class="ar__wrap-toggle" id="ar-wrap-label" hidden>
+          <input type="checkbox" id="ar-wrap"> Wrap around limb
+        </label>
       </div>
       <p class="ar__note">Upload a design above to enable the camera preview.</p>
     </section>

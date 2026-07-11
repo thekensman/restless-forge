@@ -59,21 +59,21 @@ export function sqCmToSqIn(sqCm: number): number { return sqCm / 6.4516; }
 // ─── Body Part Catalogue ─────────────────────────────────────
 
 export const BODY_PARTS: BodyPart[] = [
-  { id: "inner_forearm", label: "Inner Forearm", group: "arm", widthRatio: 0.045, heightRatio: 0.15, difficulty: 1.0, description: "Flat surface, low pain, excellent visibility. Most popular first-tattoo placement.", zone: { x: 0.30, y: 0.38, w: 0.12, h: 0.18 } },
-  { id: "outer_forearm", label: "Outer Forearm", group: "arm", widthRatio: 0.05, heightRatio: 0.15, difficulty: 1.0, description: "Slightly curved surface. Good for wrapping designs.", zone: { x: 0.58, y: 0.38, w: 0.12, h: 0.18 } },
-  { id: "upper_arm", label: "Upper Arm / Bicep", group: "arm", widthRatio: 0.07, heightRatio: 0.12, difficulty: 1.0, description: "Large flat area. Easy to conceal. Popular for medium-to-large pieces.", zone: { x: 0.15, y: 0.26, w: 0.14, h: 0.12 } },
-  { id: "shoulder", label: "Shoulder / Deltoid", group: "arm", widthRatio: 0.08, heightRatio: 0.08, difficulty: 1.1, description: "Curved surface follows muscle contour. Good for rounded designs.", zone: { x: 0.12, y: 0.20, w: 0.12, h: 0.08 } },
-  { id: "wrist", label: "Wrist", group: "arm", widthRatio: 0.035, heightRatio: 0.04, difficulty: 1.2, description: "Small area, thin skin, higher pain. Popular for minimalist designs.", zone: { x: 0.30, y: 0.56, w: 0.08, h: 0.04 } },
-  { id: "chest", label: "Chest", group: "torso", widthRatio: 0.18, heightRatio: 0.12, difficulty: 1.1, description: "Large canvas. Sternum area is more painful than pectoral muscle.", zone: { x: 0.32, y: 0.20, w: 0.36, h: 0.12 } },
-  { id: "upper_back", label: "Upper Back", group: "torso", widthRatio: 0.20, heightRatio: 0.15, difficulty: 1.0, description: "Largest flat surface on the body. Ideal for large detailed pieces.", zone: { x: 0.30, y: 0.20, w: 0.40, h: 0.15 } },
-  { id: "ribs", label: "Ribs / Side Torso", group: "torso", widthRatio: 0.08, heightRatio: 0.15, difficulty: 1.4, description: "Thin skin over bone — one of the most painful placements. Stunning results.", zone: { x: 0.16, y: 0.28, w: 0.10, h: 0.16 } },
-  { id: "sternum", label: "Sternum / Underboob", group: "torso", widthRatio: 0.10, heightRatio: 0.08, difficulty: 1.4, description: "Centre of chest between ribs. High pain, high impact.", zone: { x: 0.40, y: 0.30, w: 0.20, h: 0.08 } },
-  { id: "lower_back", label: "Lower Back", group: "torso", widthRatio: 0.16, heightRatio: 0.10, difficulty: 1.1, description: "Wide horizontal area above the waistline.", zone: { x: 0.32, y: 0.42, w: 0.36, h: 0.10 } },
-  { id: "thigh", label: "Thigh", group: "leg", widthRatio: 0.09, heightRatio: 0.18, difficulty: 1.0, description: "Large surface, moderate pain. Easy to conceal. Great for big pieces.", zone: { x: 0.35, y: 0.52, w: 0.14, h: 0.18 } },
-  { id: "calf", label: "Calf", group: "leg", widthRatio: 0.06, heightRatio: 0.16, difficulty: 1.1, description: "Curved muscle surface. Visible when wearing shorts.", zone: { x: 0.60, y: 0.70, w: 0.10, h: 0.16 } },
-  { id: "ankle", label: "Ankle", group: "leg", widthRatio: 0.04, heightRatio: 0.04, difficulty: 1.3, description: "Small bony area, higher pain. Popular for minimalist and wrap designs.", zone: { x: 0.60, y: 0.88, w: 0.08, h: 0.04 } },
+  { id: "inner_forearm", label: "Inner Forearm", group: "arm", widthRatio: 0.045, heightRatio: 0.15, difficulty: 1.0, description: "Flat surface, low pain, excellent visibility. Most popular first-tattoo placement.", zone: { x: 0.27, y: 0.38, w: 0.10, h: 0.18 } },
+  { id: "outer_forearm", label: "Outer Forearm", group: "arm", widthRatio: 0.05, heightRatio: 0.15, difficulty: 1.0, description: "Slightly curved surface. Good for wrapping designs.", zone: { x: 0.645, y: 0.38, w: 0.10, h: 0.18 } },
+  { id: "upper_arm", label: "Upper Arm / Bicep", group: "arm", widthRatio: 0.07, heightRatio: 0.12, difficulty: 1.0, description: "Large flat area. Easy to conceal. Popular for medium-to-large pieces.", zone: { x: 0.26, y: 0.26, w: 0.10, h: 0.12 } },
+  { id: "shoulder", label: "Shoulder / Deltoid", group: "arm", widthRatio: 0.08, heightRatio: 0.08, difficulty: 1.1, description: "Curved surface follows muscle contour. Good for rounded designs.", zone: { x: 0.25, y: 0.185, w: 0.11, h: 0.07 } },
+  { id: "wrist", label: "Wrist", group: "arm", widthRatio: 0.035, heightRatio: 0.04, difficulty: 1.2, description: "Small area, thin skin, higher pain. Popular for minimalist designs.", zone: { x: 0.27, y: 0.56, w: 0.09, h: 0.04 } },
+  { id: "chest", label: "Chest", group: "torso", widthRatio: 0.18, heightRatio: 0.12, difficulty: 1.1, description: "Large canvas. Sternum area is more painful than pectoral muscle.", zone: { x: 0.37, y: 0.20, w: 0.26, h: 0.12 } },
+  { id: "upper_back", label: "Upper Back", group: "torso", widthRatio: 0.20, heightRatio: 0.15, difficulty: 1.0, description: "Largest flat surface on the body. Ideal for large detailed pieces.", zone: { x: 0.37, y: 0.20, w: 0.26, h: 0.15 } },
+  { id: "ribs", label: "Ribs / Side Torso", group: "torso", widthRatio: 0.08, heightRatio: 0.15, difficulty: 1.4, description: "Thin skin over bone — one of the most painful placements. Stunning results.", zone: { x: 0.365, y: 0.28, w: 0.06, h: 0.16 } },
+  { id: "sternum", label: "Sternum / Underboob", group: "torso", widthRatio: 0.10, heightRatio: 0.08, difficulty: 1.4, description: "Centre of chest between ribs. High pain, high impact.", zone: { x: 0.42, y: 0.30, w: 0.16, h: 0.08 } },
+  { id: "lower_back", label: "Lower Back", group: "torso", widthRatio: 0.16, heightRatio: 0.10, difficulty: 1.1, description: "Wide horizontal area above the waistline.", zone: { x: 0.37, y: 0.42, w: 0.26, h: 0.07 } },
+  { id: "thigh", label: "Thigh", group: "leg", widthRatio: 0.09, heightRatio: 0.18, difficulty: 1.0, description: "Large surface, moderate pain. Easy to conceal. Great for big pieces.", zone: { x: 0.39, y: 0.52, w: 0.10, h: 0.18 } },
+  { id: "calf", label: "Calf", group: "leg", widthRatio: 0.06, heightRatio: 0.16, difficulty: 1.1, description: "Curved muscle surface. Visible when wearing shorts.", zone: { x: 0.52, y: 0.70, w: 0.09, h: 0.16 } },
+  { id: "ankle", label: "Ankle", group: "leg", widthRatio: 0.04, heightRatio: 0.04, difficulty: 1.3, description: "Small bony area, higher pain. Popular for minimalist and wrap designs.", zone: { x: 0.52, y: 0.88, w: 0.08, h: 0.04 } },
   { id: "back_of_neck", label: "Back of Neck", group: "other", widthRatio: 0.06, heightRatio: 0.05, difficulty: 1.3, description: "Small area, moderate pain. Easily hidden by hair or collar.", zone: { x: 0.44, y: 0.12, w: 0.12, h: 0.05 } },
-  { id: "behind_ear", label: "Behind Ear", group: "other", widthRatio: 0.025, heightRatio: 0.03, difficulty: 1.4, description: "Tiny, delicate area. Higher pain due to thin skin and proximity to bone.", zone: { x: 0.38, y: 0.07, w: 0.06, h: 0.04 } },
+  { id: "behind_ear", label: "Behind Ear", group: "other", widthRatio: 0.025, heightRatio: 0.03, difficulty: 1.4, description: "Tiny, delicate area. Higher pain due to thin skin and proximity to bone.", zone: { x: 0.40, y: 0.07, w: 0.06, h: 0.04 } },
   { id: "hand", label: "Back of Hand", group: "other", widthRatio: 0.045, heightRatio: 0.05, difficulty: 1.5, description: "High visibility, high pain, faster fading due to frequent washing and sun exposure.", zone: { x: 0.25, y: 0.58, w: 0.08, h: 0.05 } },
 ];
 
@@ -102,6 +102,25 @@ export function checkFit(bodyPartId: string, heightCm: number, tattooWCm: number
   return { fits: widthPct <= 100 && heightPct <= 100, widthPct, heightPct };
 }
 
+
+/**
+ * Silhouette figure regions on the 200×400 viewBox, exported so the zone
+ * regression test can assert each body part's zone lands on the right limb.
+ * The figure spans the full canvas height (head y≈6 → feet y≈388) to match
+ * the normalized zone coordinate system.
+ */
+export const FIGURE_REGIONS: Record<string, { x: number; y: number; w: number; h: number }> = {
+  head:      { x: 84, y: 6,   w: 32, h: 44 },
+  neck:      { x: 92, y: 48,  w: 16, h: 16 },
+  torso:     { x: 72, y: 64,  w: 56, h: 132 },
+  left_arm:  { x: 52, y: 72,  w: 20, h: 168 },
+  right_arm: { x: 128, y: 72, w: 20, h: 168 },
+  left_hand: { x: 53, y: 238, w: 18, h: 20 },
+  right_hand:{ x: 129, y: 238, w: 18, h: 20 },
+  left_leg:  { x: 78, y: 194, w: 20, h: 180 },
+  right_leg: { x: 102, y: 194, w: 20, h: 180 },
+};
+
 export function generateSilhouetteSvg(
   bodyPartId: string, heightCm: number, tattooWCm: number, tattooHCm: number,
   options: { rotation?: number; opacity?: number } = {},
@@ -119,13 +138,17 @@ export function generateSilhouetteSvg(
   const cx = tx + tw / 2, cy = ty + th / 2;
   return `<svg viewBox="0 0 ${vw} ${vh}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tattoo placement preview on ${bp.label}">
   <rect width="${vw}" height="${vh}" fill="#1a1a2a" rx="8"/>
-  <ellipse cx="100" cy="45" rx="18" ry="22" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
-  <rect x="78" y="66" width="44" height="70" rx="10" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
-  <rect x="55" y="70" width="20" height="80" rx="6" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
-  <rect x="125" y="70" width="20" height="80" rx="6" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
-  <rect x="82" y="138" width="16" height="90" rx="5" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
-  <rect x="102" y="138" width="16" height="90" rx="5" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
-  <rect x="${zx}" y="${zy}" width="${zw}" height="${zh}" fill="none" stroke="#a882ff" stroke-width="0.8" stroke-dasharray="3,2" rx="2" opacity="0.6"/>
+  <ellipse cx="100" cy="28" rx="16" ry="22" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect x="92" y="48" width="16" height="16" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect x="72" y="64" width="56" height="132" rx="12" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect x="52" y="72" width="20" height="168" rx="8" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect x="128" y="72" width="20" height="168" rx="8" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <ellipse cx="62" cy="248" rx="9" ry="10" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <ellipse cx="138" cy="248" rx="9" ry="10" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect x="78" y="194" width="20" height="180" rx="8" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect x="102" y="194" width="20" height="180" rx="8" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <ellipse cx="86" cy="382" rx="11" ry="7" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <ellipse cx="114" cy="382" rx="11" ry="7" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
   <g transform="rotate(${rotation}, ${cx}, ${cy})">
     <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="#a882ff" opacity="${opacity * 0.35}" rx="1"/>
     <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="none" stroke="#c9b0ff" stroke-width="0.6" rx="1"/>

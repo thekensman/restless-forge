@@ -108,6 +108,15 @@ for tool_dir in "${DIST_DIR}"/tools/*/; do
   bust_cache "${DIST_DIR}/tools/${name}" "/tools/${name}"
 done
 
+# Cache-bust the global /tools-data.js across ALL html files in dist
+if [ -f "${DIST_DIR}/tools-data.js" ]; then
+  tools_data_hash=$(md5sum "${DIST_DIR}/tools-data.js" | cut -c1-8)
+  find "${DIST_DIR}" -name "*.html" -exec sed -i \
+    -e "s|\"/tools-data\.js\"|\"/tools-data.js?v=${tools_data_hash}\"|g" \
+    {} \;
+  echo "  → /tools-data.js?v=${tools_data_hash}"
+fi
+
 # Cache-bust the global /shared.js across ALL html files in dist
 site_shared_hash=$(md5sum "${DIST_DIR}/shared.js" | cut -c1-8)
 find "${DIST_DIR}" -name "*.html" -exec sed -i \

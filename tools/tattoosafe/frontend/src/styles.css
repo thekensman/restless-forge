@@ -83,3 +83,21 @@ a { color: var(--accent); } a:hover { color: var(--accent-light); }
 .btn--primary { background: var(--accent-dim); border-color: var(--accent-dim); color: #fff; }
 .btn--primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Live price estimate ─── */
+.price-estimate {
+  margin-top: 0.5rem; padding: 1rem 1.2rem; border-radius: var(--radius);
+  background: var(--bg-card, #1a1a2a); border: 1px solid var(--accent-dim);
+}
+.price-estimate__range { font-size: 1.5rem; font-weight: 600; color: var(--accent-light); }
+.price-estimate__detail { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem; }
+.price-estimate__link { font-size: 0.78rem; margin-top: 0.5rem; }
+.price-estimate__link a { color: var(--accent); text-decoration: none; }
+.price-estimate__link a:hover { text-decoration: underline; }
+
+/* ─── AR wrap toggle ─── */
+.ar__wrap-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;
+}
+.ar__wrap-toggle input { accent-color: var(--accent); }
