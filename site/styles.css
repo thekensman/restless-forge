@@ -397,3 +397,19 @@ img { max-width: 100%; height: auto; }
   .tools-grid { grid-template-columns: 1fr; }
   .support-links { flex-direction: column; align-items: center; }
 }
+
+/* ─── Tool directory (data-driven) ─── */
+.tool-search {
+  width: 100%; max-width: 420px; display: block; margin: 0 0 1.5rem;
+  font-family: inherit; font-size: 0.95rem; padding: 0.6rem 0.9rem;
+  background: var(--bg-raised, #151820); color: inherit;
+  border: 1px solid var(--border, #252a35); border-radius: 6px; outline: none;
+}
+.tool-search:focus { border-color: var(--accent, #d4a44e); }
+.tool-directory__category {
+  margin: 2rem 0 0.75rem; font-size: 0.85rem; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--accent, #d4a44e);
+}
+.tool-directory__teaser {
+  margin-top: 2rem; font-style: italic; color: var(--text-dim, #7a7770);
+}

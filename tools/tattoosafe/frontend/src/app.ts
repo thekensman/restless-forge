@@ -5,6 +5,8 @@
 import {
   BODY_PARTS, getBodyPart, maxTattooDimensions, checkFit,
   ftInToCm, generateSilhouetteSvg,
+  COMPLEXITY, HOURLY_RATES, calculatePrice, fmtPriceRange, fmtTime,
+  type ComplexityKey, type ArtistKey,
 } from "./engine";
 import { setupCameraPreview, type CameraController } from "./camera";
 
@@ -37,6 +39,29 @@ function populateBodyParts(): void {
     sel.appendChild(og);
   }
   sel.dispatchEvent(new Event("change"));
+}
+
+function populatePricingSelects(): void {
+  const cx = $("select#complexity-select") as HTMLSelectElement | null;
+  const ar = $("select#artist-select") as HTMLSelectElement | null;
+  if (cx) {
+    for (const [key, c] of Object.entries(COMPLEXITY)) {
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = (c as { label: string; desc: string }).label + " — " + (c as { desc: string }).desc;
+      cx.appendChild(opt);
+    }
+    cx.value = "moderate_detail";
+  }
+  if (ar) {
+    for (const [key, r] of Object.entries(HOURLY_RATES)) {
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = (r as { label: string }).label;
+      ar.appendChild(opt);
+    }
+    ar.value = "experienced";
+  }
 }
 
 function updateHeight(): void {
@@ -73,6 +98,21 @@ function updateSizeInfo(): void {
   const opacity = (parseFloat(($("#opacity-range") as HTMLInputElement)?.value) || 85) / 100;
   const container = $("#silhouette-preview");
   if (container) container.innerHTML = generateSilhouetteSvg(bpId, heightCm, w, h, { rotation, opacity });
+
+  // Live price estimate — the size panel drives it directly.
+  const complexity = (($("#complexity-select") as HTMLSelectElement)?.value || "moderate_detail") as ComplexityKey;
+  const artist = (($("#artist-select") as HTMLSelectElement)?.value || "experienced") as ArtistKey;
+  const price = calculatePrice(w, h, complexity, bpId, artist);
+  const rangeEl = $("#price-range"), detailEl = $("#price-detail");
+  if (rangeEl && detailEl && price.high > 0) {
+    rangeEl.textContent = fmtPriceRange(price.low, price.high);
+    detailEl.textContent =
+      `${price.areaSqIn} sq in · ~${fmtTime(price.totalMinutes)} across ` +
+      `${price.sessions} session${price.sessions !== 1 ? "s" : ""} · pain: ${price.painLevel}`;
+  }
+
+  // Reflect the size settings in the camera preview.
+  camera?.setTattooSize(w, h, bp?.label ?? "");
 }
 
 function setupFileUpload(): void {
@@ -108,7 +148,8 @@ function handleFile(file: File): void {
 
 document.addEventListener("DOMContentLoaded", () => {
   populateBodyParts();
-  const inputs = "#body-part-select,#tattoo-width,#tattoo-height,#rotation-range,#opacity-range,#height-input,#height-ft,#height-in,#height-unit";
+  populatePricingSelects();
+  const inputs = "#body-part-select,#tattoo-width,#tattoo-height,#rotation-range,#opacity-range,#height-input,#height-ft,#height-in,#height-unit,#complexity-select,#artist-select";
   inputs.split(",").forEach(s => {
     $(s)?.addEventListener("input", updateSizeInfo);
     $(s)?.addEventListener("change", updateSizeInfo);

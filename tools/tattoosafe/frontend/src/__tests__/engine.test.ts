@@ -337,3 +337,37 @@ describe("realistic pricing scenarios", () => {
     expect(p.sessions).toBeGreaterThanOrEqual(3);
   });
 });
+
+// ─── Silhouette zone alignment (regression for inner-forearm-on-leg bug) ───
+
+import { FIGURE_REGIONS } from "../engine";
+
+describe("silhouette zone alignment", () => {
+  const GROUP_REGIONS: Record<string, string[]> = {
+    arm: ["left_arm", "right_arm", "torso"],
+    torso: ["torso"],
+    leg: ["left_leg", "right_leg"],
+    other: ["head", "neck", "left_hand", "right_hand", "torso"],
+  };
+  const inside = (px: number, py: number, r: { x: number; y: number; w: number; h: number }) =>
+    px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+
+  it("every body part's zone center lands on a limb of its own group", () => {
+    for (const bp of BODY_PARTS) {
+      const cx = (bp.zone.x + bp.zone.w / 2) * 200;
+      const cy = (bp.zone.y + bp.zone.h / 2) * 400;
+      const allowed = GROUP_REGIONS[bp.group].map((k) => FIGURE_REGIONS[k]);
+      const hit = allowed.some((r) => inside(cx, cy, r));
+      expect(hit, `${bp.id} zone center (${cx},${cy}) must be on a ${bp.group} region`).toBe(true);
+    }
+  });
+
+  it("inner forearm zone is NOT on the legs (the original bug)", () => {
+    const bp = BODY_PARTS.find((b) => b.id === "inner_forearm")!;
+    const cy = (bp.zone.y + bp.zone.h / 2) * 400;
+    for (const leg of [FIGURE_REGIONS.left_leg, FIGURE_REGIONS.right_leg]) {
+      const cx = (bp.zone.x + bp.zone.w / 2) * 200;
+      expect(inside(cx, cy, leg)).toBe(false);
+    }
+  });
+});

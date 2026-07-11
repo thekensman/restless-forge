@@ -84,8 +84,9 @@ Manual steps remaining:
   build.sh, root package.json dev/test, and the root vite proxy discover
   tools automatically — no edits needed there.
 
-  1. Add a tool card to site/index.html and site/tools/index.html
-     (inside the "Tools on deck" comment block if the tool isn't ready).
+  1. Add the tool to site/tools-data.js (status: "soon" until ready,
+     then flip to "live" to publish — category, label, and description
+     live ONLY there).
 
   2. Add URLs to site/sitemap.xml when the tool goes public.
 

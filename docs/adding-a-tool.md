@@ -17,8 +17,9 @@ replaces every placeholder, and runs `npm install`. build.sh, the root
 dev/test scripts, and the root vite proxy discover the new tool
 automatically — the only manual steps are:
 
-1. **site/index.html + site/tools/index.html** — add a tool card
-   (inside the "Tools on deck" comment block while the tool is unfinished).
+1. **site/tools-data.js** — add the tool entry with `status: "soon"`;
+   flip to `"live"` to publish (label, category, and description live
+   ONLY there — both hub pages render from it).
 2. **site/sitemap.xml** — add the tool URLs when it goes public.
 
 After the edits, `npm run dev` from repo root will start your new tool on
@@ -147,8 +148,9 @@ nothing to edit at the repo root when adding or removing a tool.
 
 ### 6. Add to the site
 
-- Tool cards in `site/index.html` and `site/tools/index.html`.
-- URLs in `site/sitemap.xml`.
+- Add the tool entry to `site/tools-data.js` (the single source of truth
+  for label/category/description/status — hub pages render from it).
+- URLs in `site/sitemap.xml` when it goes public.
 
 ---
 
