@@ -152,13 +152,36 @@ jobs:
       - name: Verify deploy
         run: |
           curl -sf -o /dev/null https://restless-forge.dev/ && echo "homepage OK"
-          curl -sf -o /dev/null https://restless-forge.dev/favicon.svg && echo "favicon OK"
-          # Brand assets must carry the short cache from the nginx config
-          # (24h), not the 1-year immutable header — this is what lets a
-          # favicon swap actually propagate.
-          cc=$(curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r' | grep -i '^cache-control:' || true)
+
+          # ── Content freshness: served bytes must equal what we shipped ──
+          # Catches every stale-cache layer at once (CDN, proxy, stale web
+          # root) because it compares hashes, not just status codes.
+          for f in favicon.ico favicon.svg og-image.png; do
+            local_hash=$(md5sum "dist/$f" | cut -d' ' -f1)
+            served_hash=$(curl -sf "https://restless-forge.dev/$f" | md5sum | cut -d' ' -f1)
+            if [ "$local_hash" = "$served_hash" ]; then
+              echo "$f content matches build ($local_hash)"
+            else
+              echo "::warning::$f served from the public URL differs from the build (built $local_hash, served $served_hash) — a CDN/proxy between users and nginx is answering with a cached copy. If the domain is behind Cloudflare (orange cloud), purge the cache or set a cache rule to respect origin headers."
+            fi
+          done
+
+          # ── Brand-asset cache header (24h, not 1y immutable) ──
+          # Retry briefly: `systemctl reload nginx` is graceful, so the first
+          # request after the reload can still land on an old worker.
+          ok=""
+          for i in 1 2 3; do
+            cc=$(curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r' | grep -i '^cache-control:' || true)
+            case "$cc" in
+              *max-age=86400*) ok=1; break ;;
+            esac
+            sleep 4
+          done
           echo "favicon.ico $cc"
-          case "$cc" in
-            *max-age=86400*) echo "brand-asset cache header OK" ;;
-            *) echo "::warning::favicon.ico is not serving the 24h cache header — nginx config may not be applied" ;;
-          esac
+          if [ -n "$ok" ]; then
+            echo "brand-asset cache header OK"
+          else
+            echo "── full response headers for diagnosis ──"
+            curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r'
+            echo "::warning::favicon.ico is not serving the 24h cache header. If the headers above include 'server: cloudflare' or 'cf-cache-status', a CDN is caching the old response — purge it. Otherwise check on the VPS that /etc/nginx/sites-enabled/restless-forge is a symlink to sites-available (ls -l), not a stale copy."
+          fi
