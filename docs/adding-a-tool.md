@@ -20,7 +20,11 @@ automatically — the only manual steps are:
 1. **site/tools-data.js** — add the tool entry with `status: "soon"`;
    flip to `"live"` to publish (label, category, and description live
    ONLY there — both hub pages render from it).
-2. **site/sitemap.xml** — add the tool URLs when it goes public.
+2. **Remove `noindex`** — the template ships every HTML page with
+   `<meta name="robots" content="noindex">` so unfinished tools that are
+   deployed but unlisted don't get crawled as thin content. Delete that
+   line from every page under `src/` when the tool launches.
+3. **site/sitemap.xml** — add the tool URLs when it goes public.
 
 After the edits, `npm run dev` from repo root will start your new tool on
 the port you chose, proxied at `http://localhost:8080/tools/<tool-name>/`.

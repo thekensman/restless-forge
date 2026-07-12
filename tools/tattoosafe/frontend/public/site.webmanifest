@@ -1,0 +1,14 @@
+{
+  "name": "TattooSafe",
+  "short_name": "TattooSafe",
+  "description": "Preview a tattoo on your body with your camera, check size against 16 placements, and estimate pricing.",
+  "start_url": "/tools/tattoosafe/",
+  "scope": "/tools/tattoosafe/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    { "src": "/tools/tattoosafe/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/tools/tattoosafe/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

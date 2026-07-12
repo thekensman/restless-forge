@@ -1,0 +1,22 @@
+{
+  "name": "Subscription Audit",
+  "short_name": "Subscription A",
+  "description": "What your subscriptions really cost per year, per use, and in hours of your life.",
+  "start_url": "/tools/subscription-audit/",
+  "scope": "/tools/subscription-audit/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/subscription-audit/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/subscription-audit/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

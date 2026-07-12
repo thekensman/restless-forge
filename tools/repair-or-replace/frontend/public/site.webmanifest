@@ -1,0 +1,22 @@
+{
+  "name": "Repair or Replace?",
+  "short_name": "Repair or Repl",
+  "description": "The neutral decision calculator: 50% rule, remaining lifespan, and the sunk-cost detector.",
+  "start_url": "/tools/repair-or-replace/",
+  "scope": "/tools/repair-or-replace/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/repair-or-replace/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/repair-or-replace/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

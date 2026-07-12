@@ -8,8 +8,12 @@
      "live" — rendered with a launch link on the landing page and directory
      "soon" — counted in the "in the forge" teaser; never linked
 
-   To launch a tool: flip its status to "live" and add its URLs to
-   site/sitemap.xml. Nothing else. */
+   To launch a tool:
+     1. flip its status to "live"
+     2. remove the `<meta name="robots" content="noindex">` line from every
+        HTML page under tools/<id>/frontend/src/
+     3. add its URLs to site/sitemap.xml
+   Nothing else. */
 (function () {
   'use strict';
 
@@ -63,6 +67,8 @@
       desc: 'Images to embroidery machine files.' },
     { id: 'petdose', label: 'PetDose', category: 'Lifestyle', status: 'soon',
       desc: 'Pet medication reference ranges with safety warnings. (Pending veterinary review.)' },
+    { id: 'promptdrop', label: 'PromptDrop', category: 'Conservation', status: 'soon',
+      desc: 'The water footprint of your AI usage, honestly: cooling vs electricity-generation water, per prompt, image, and video, with sources for every number.' },
   ];
 
   /**

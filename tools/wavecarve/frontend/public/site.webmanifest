@@ -1,0 +1,22 @@
+{
+  "name": "WaveCarve",
+  "short_name": "WaveCarve",
+  "description": "Turn audio waveforms into carvable SVG, DXF, and STL art.",
+  "start_url": "/tools/wavecarve/",
+  "scope": "/tools/wavecarve/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/wavecarve/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/wavecarve/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

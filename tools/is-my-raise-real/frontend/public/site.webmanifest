@@ -1,0 +1,22 @@
+{
+  "name": "Is My Raise Real?",
+  "short_name": "Is My Raise Re",
+  "description": "Your raise vs inflation: real purchasing power, what to ask for, and salary erosion over time.",
+  "start_url": "/tools/is-my-raise-real/",
+  "scope": "/tools/is-my-raise-real/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/is-my-raise-real/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/is-my-raise-real/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
