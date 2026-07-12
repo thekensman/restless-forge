@@ -11,9 +11,15 @@ name: Deploy
 #                   VPS, paste deploy_key here.
 #   DEPLOY_PATH     Web root, e.g. /var/www/restless-forge
 #
-# Static files only — nginx serves the new files immediately, no reload
-# needed. nginx config changes (nginx/*.conf) still require a manual
-# `nginx -t && systemctl reload nginx` on the server.
+# Deploys static files AND the main nginx vhost. Static files are served
+# immediately with no reload; the nginx config is copied to
+# /etc/nginx/sites-available/restless-forge (the live vhost name — no
+# .conf suffix), validated with `nginx -t`, and only then reloaded. If
+# validation fails the previous config is restored and the workflow fails.
+# Requires DEPLOY_USER to be root (or able to write /etc/nginx and reload
+# nginx without a password prompt). The redirect vhosts
+# (nginx/*-redirect.conf) are not deployed automatically — they change
+# rarely and their live filenames vary; install those by hand.
 
 on:
   push:
@@ -106,7 +112,53 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key" \
             dist/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/"
 
+      # Ship the main vhost config with the same safety net an operator
+      # would use by hand: skip if unchanged, back up, `nginx -t`, reload
+      # only on a clean test, restore the backup on failure.
+      - name: Deploy nginx config
+        run: |
+          scp -i ~/.ssh/deploy_key nginx/restless-forge.conf \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/rf-nginx-incoming.conf"
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" bash -s <<'REMOTE'
+          set -euo pipefail
+          TARGET=/etc/nginx/sites-available/restless-forge
+          INCOMING=/tmp/rf-nginx-incoming.conf
+          if [ -f "$TARGET" ] && cmp -s "$INCOMING" "$TARGET"; then
+            echo "nginx config unchanged — skipping reload"
+            rm -f "$INCOMING"
+            exit 0
+          fi
+          BACKUP=""
+          if [ -f "$TARGET" ]; then
+            BACKUP=/tmp/rf-nginx-backup.$(date +%s).conf
+            cp -a "$TARGET" "$BACKUP"
+            echo "backed up current config to $BACKUP"
+          fi
+          mv "$INCOMING" "$TARGET"
+          if nginx -t; then
+            systemctl reload nginx
+            echo "nginx config deployed and reloaded"
+          else
+            echo "nginx -t FAILED — restoring previous config"
+            if [ -n "$BACKUP" ]; then
+              mv "$BACKUP" "$TARGET"
+              nginx -t && systemctl reload nginx || true
+            fi
+            exit 1
+          fi
+          REMOTE
+
       - name: Verify deploy
         run: |
           curl -sf -o /dev/null https://restless-forge.dev/ && echo "homepage OK"
           curl -sf -o /dev/null https://restless-forge.dev/favicon.svg && echo "favicon OK"
+          # Brand assets must carry the short cache from the nginx config
+          # (24h), not the 1-year immutable header — this is what lets a
+          # favicon swap actually propagate.
+          cc=$(curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r' | grep -i '^cache-control:' || true)
+          echo "favicon.ico $cc"
+          case "$cc" in
+            *max-age=86400*) echo "brand-asset cache header OK" ;;
+            *) echo "::warning::favicon.ico is not serving the 24h cache header — nginx config may not be applied" ;;
+          esac

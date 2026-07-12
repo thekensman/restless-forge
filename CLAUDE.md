@@ -278,14 +278,20 @@ Work in the tool's own `frontend/` directory. Its dev server is self-contained.
 
 **Normal path: merge to main.** The `Deploy` GitHub Action
 (`.github/workflows/deploy.yml`) builds and rsyncs `dist/` to the VPS on
-every push to main (requires the `DEPLOY_*` repo secrets documented in the
-workflow file). PRs run the `CI` workflow (build + all tests) first.
+every push to main, then deploys `nginx/restless-forge.conf` to
+`/etc/nginx/sites-available/restless-forge` (the live vhost has no `.conf`
+suffix) with an `nginx -t` check, graceful reload, and automatic rollback
+if validation fails. Requires the `DEPLOY_*` repo secrets documented in
+the workflow file. PRs run the `CI` workflow (build + all tests) first.
+The old-domain redirect vhosts (`nginx/*-redirect.conf`) are NOT deployed
+automatically — install those by hand.
 
-Manual fallback (or for nginx config changes, which the Action doesn't touch):
+Manual fallback:
 ```bash
 ./build.sh
 sudo cp -r dist/* /var/www/restless-forge/
-sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx/*.conf changes
+sudo cp nginx/restless-forge.conf /etc/nginx/sites-available/restless-forge
+sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config changes
 ```
 
 ## Where to look when things break
