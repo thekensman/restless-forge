@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>Methodology &amp; Sources — PromptDrop</title>
+  <meta name="description" content="How PromptDrop estimates the water footprint of AI usage: the on-site/off-site accounting split, the published figures behind every constant, and what's deliberately out of scope.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/promptdrop/about/">
+  <link rel="icon" type="image/svg+xml" href="/tools/promptdrop/favicon.svg">
+  <link rel="icon" href="/tools/promptdrop/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/promptdrop/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/promptdrop/site.webmanifest">
+  <meta property="og:title" content="About — PromptDrop">
+  <meta property="og:url" content="https://restless-forge.dev/tools/promptdrop/about/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://restless-forge.dev/tools/promptdrop/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/promptdrop/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/promptdrop/shared.js"></script>
+</head>
+<body>
+  <!-- Header auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="pdr-header"></div>
+
+  <main>
+    <h1>Methodology &amp; Sources</h1>
+    <p class="page-sub">Why "five drops" and "a bottle per email" are both real numbers — and what PromptDrop actually counts.</p>
+
+    <h2>The model</h2>
+    <p>
+      Every estimate is <code>energy × (WUE + EWIF)</code>:
+    </p>
+    <ul>
+      <li><strong>Energy</strong> — watt-hours per task, as a low/typical/high
+        band per task type (chat, long/reasoning, image, video). Published
+        measurements disagree by roughly 10×, so a single number would be
+        false precision.</li>
+      <li><strong>WUE</strong> (Water Usage Effectiveness) — <em>on-site</em>
+        datacenter cooling water, in liters per kWh. This is the number
+        behind "five drops per prompt."</li>
+      <li><strong>EWIF</strong> (Energy Water Intensity Factor) — the
+        <em>off-site</em> water consumed generating the electricity
+        (thermoelectric plant cooling, hydro evaporation). This is the
+        number that turns drops into bottles. Most headlines silently
+        include or exclude it — PromptDrop always shows both parts
+        separately.</li>
+    </ul>
+    <p>
+      The low bound pairs efficient-datacenter WUE with a clean grid; the
+      high bound pairs evaporative cooling in a hot climate with a
+      water-intensive grid. That makes the range an honest <em>envelope</em>,
+      not a statistical confidence interval. The typical column is the number
+      to quote.
+    </p>
+
+    <h2>The constants</h2>
+    <ul>
+      <li><strong>Chat prompt energy</strong>: 0.2–3 Wh (typical 0.34).
+        Google's August 2025 disclosure put a median Gemini text prompt at
+        0.24 Wh / 0.26 mL; OpenAI's stated average is ≈0.34 Wh / 0.32 mL;
+        older and reasoning-heavy estimates run to a few Wh.</li>
+      <li><strong>Long / reasoning tasks</strong>: 1–15 Wh — long-context and
+        chain-of-thought workloads measured well above chat medians.</li>
+      <li><strong>Image generation</strong>: 0.5–8 Wh (typical 3), from the
+        Hugging Face / Luccioni et al. measurements of diffusion models.</li>
+      <li><strong>Video (~5 s clip)</strong>: 20–950 Wh. The widest and least
+        settled band — research-scale measurements reach 3.4 MJ per clip.</li>
+      <li><strong>WUE</strong>: 0.12–1.8 L/kWh (typical 0.4). AWS reported a
+        fleet WUE of 0.12 in 2025, Microsoft 0.30, industry average ≈0.84;
+        evaporative cooling in hot, dry climates runs far higher.</li>
+      <li><strong>EWIF</strong>: 0.5–4 L/kWh (typical 1.8), from NREL /
+        Macknick et al. water-consumption intensities across US generation
+        mixes, as applied by Li et al. (UC Riverside), "Making AI Less
+        Thirsty."</li>
+      <li><strong>Comparisons</strong>: direct-use figures (shower, flush,
+        bottle) are utility-grade averages; coffee and beef are lifecycle
+        "virtual water" figures from the Water Footprint Network — the fair
+        comparison class for our combined estimate.</li>
+    </ul>
+
+    <h2>Deliberately out of scope</h2>
+    <p>
+      PromptDrop counts <strong>operational water only</strong>. It excludes
+      water embodied in chip fabrication, datacenter construction, and model
+      training, and it does not attempt jurisdiction-, provider-, or
+      model-version-specific precision. Those details change the answer less
+      than the on-site/off-site accounting choice does — and chasing them
+      produces a false sense of exactness that the underlying disclosures
+      can't support. When providers publish better numbers, the bands
+      tighten; the constants are reviewed on the site's annual data refresh.</p>
+
+    <h2>About Your Data</h2>
+    <div class="info-box">
+      <p><strong>Privacy:</strong> Nothing you enter is sent to a server. All processing happens in your browser.</p>
+    </div>
+    <p>See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Use</a>.</p>
+  </main>
+
+  <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="pdr-footer"></div>
+</body>
+</html>

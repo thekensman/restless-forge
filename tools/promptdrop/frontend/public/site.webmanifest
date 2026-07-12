@@ -1,0 +1,22 @@
+{
+  "name": "PromptDrop",
+  "short_name": "PromptDrop",
+  "description": "The water footprint of your AI usage, honestly: cooling vs electricity-generation water, with sources.",
+  "start_url": "/tools/promptdrop/",
+  "scope": "/tools/promptdrop/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/promptdrop/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/promptdrop/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

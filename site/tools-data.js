@@ -67,6 +67,8 @@
       desc: 'Images to embroidery machine files.' },
     { id: 'petdose', label: 'PetDose', category: 'Lifestyle', status: 'soon',
       desc: 'Pet medication reference ranges with safety warnings. (Pending veterinary review.)' },
+    { id: 'promptdrop', label: 'PromptDrop', category: 'Conservation', status: 'soon',
+      desc: 'The water footprint of your AI usage, honestly: cooling vs electricity-generation water, per prompt, image, and video, with sources for every number.' },
   ];
 
   /**

@@ -1,0 +1,88 @@
+/* ═══════════════════════════════════════════════════════
+   PromptDrop — Main app styles (Vite-processed)
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* Tool theme tokens — override the defaults here. */
+  --bg: #0b0d12;
+  --text: #d8d4cc;
+  --text-muted: #7a7770;
+  --text-dim: #4a4840;
+  --accent: #48c0e8;
+  --border: #252a35;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text);
+  --rf-muted: var(--text-muted);
+  --rf-dim: var(--text-dim);
+  --rf-accent: var(--accent);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-mono);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+/* Footer outer container; everything inside comes from tool-chrome.css. */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 24px;
+  text-align: center;
+}
+
+/* ── PromptDrop calculator ── */
+.tool-intro { margin-bottom: 32px; }
+.tool-intro h1 { font-size: 1.6rem; margin-bottom: 12px; color: var(--text); }
+.tool-intro p { color: var(--text-muted); max-width: 62ch; }
+.tool-intro strong, .tool-intro em { color: var(--text); }
+
+.calc { display: grid; grid-template-columns: minmax(260px, 1fr) 1.6fr; gap: 32px; }
+@media (max-width: 780px) { .calc { grid-template-columns: 1fr; } }
+
+.calc__inputs h2, .calc__results h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--accent); }
+
+.field { display: grid; grid-template-columns: 1fr; gap: 4px; margin-bottom: 18px; }
+.field__label { font-size: 0.92rem; }
+.field input {
+  background: #10141c; color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px; font-size: 1rem; width: 100%;
+  font-family: var(--font-mono);
+}
+.field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.field__unit { font-size: 0.78rem; color: var(--text-dim); }
+
+.result-hero { border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 24px; text-align: center; }
+.result-hero__value { font-size: 2.4rem; font-family: var(--font-mono); color: var(--accent); }
+.result-hero__label { color: var(--text-muted); font-size: 0.85rem; }
+.result-hero__range { color: var(--text-dim); font-size: 0.85rem; margin-top: 6px; font-family: var(--font-mono); }
+
+.split { margin-bottom: 24px; }
+.split h3, .perspective h3 { font-size: 0.95rem; margin-bottom: 10px; }
+.split__hint { color: var(--text-dim); font-weight: 400; font-size: 0.8rem; }
+.split__bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: #10141c; border: 1px solid var(--border); }
+.split__seg--onsite { background: var(--accent); }
+.split__seg--offsite { background: #2a6a86; }
+.split__legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+.dot--onsite { background: var(--accent); }
+.dot--offsite { background: #2a6a86; }
+.split__energy { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
+
+.perspective__shower { color: var(--text); font-size: 1.05rem; margin-bottom: 10px; }
+.perspective__list { list-style: none; padding: 0; color: var(--text-muted); font-size: 0.92rem; }
+.perspective__list li { padding: 3px 0; }
+.perspective__note { font-size: 0.78rem; color: var(--text-dim); margin-top: 10px; max-width: 55ch; }
+
+.scope-note { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--text-dim); max-width: 60ch; }
+.scope-note a { color: var(--accent); }

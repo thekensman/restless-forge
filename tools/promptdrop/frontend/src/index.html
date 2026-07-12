@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>PromptDrop — AI Water Footprint Calculator | Restless Forge</title>
+  <meta name="description" content="Estimate the water footprint of your AI usage with honest ranges: datacenter cooling vs electricity-generation water, per prompt, image, and video — with sources for every number.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/promptdrop/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="PromptDrop">
+  <meta property="og:description" content="Estimate the water footprint of your AI usage with honest ranges: datacenter cooling vs electricity-generation water, per prompt, image, and video — with sources for every number.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/promptdrop/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/promptdrop/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/promptdrop/favicon.svg">
+  <link rel="icon" href="/tools/promptdrop/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/promptdrop/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/promptdrop/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PromptDrop",
+    "url": "https://restless-forge.dev/tools/promptdrop",
+    "description": "Estimate the water footprint of your AI usage with honest ranges: datacenter cooling vs electricity-generation water, per prompt, image, and video — with sources for every number.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/promptdrop/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="pdr-header"></div>
+
+  <main>
+    <section class="tool-intro">
+      <h1>PromptDrop: How much water does your AI use?</h1>
+      <p>
+        Headlines say an AI prompt costs anywhere from "five drops" to "a
+        bottle of water" — and both are quoting real numbers. The difference
+        is what gets counted: datacenter <strong>cooling</strong> water, or
+        cooling <em>plus</em> the water consumed <strong>generating the
+        electricity</strong>. PromptDrop shows both, as honest ranges with
+        sources, for your actual usage. Everything runs in your browser.
+      </p>
+    </section>
+
+    <div class="calc">
+      <section class="calc__inputs" aria-labelledby="usage-heading">
+        <h2 id="usage-heading">Your daily AI usage</h2>
+        <div id="usage-fields"></div>
+      </section>
+
+      <section class="calc__results" aria-labelledby="results-heading" aria-live="polite">
+        <h2 id="results-heading">Your water footprint</h2>
+
+        <div class="result-hero">
+          <div class="result-hero__value" id="annual-typical">—</div>
+          <div class="result-hero__label">per year, typical estimate</div>
+          <div class="result-hero__range" id="annual-range">—</div>
+        </div>
+
+        <div class="split">
+          <h3>Where it goes <span class="split__hint">(typical, per day)</span></h3>
+          <div class="split__bar" id="split-bar" role="img" aria-label="On-site vs off-site water split">
+            <div class="split__seg split__seg--onsite" id="seg-onsite"></div>
+            <div class="split__seg split__seg--offsite" id="seg-offsite"></div>
+          </div>
+          <div class="split__legend">
+            <span><i class="dot dot--onsite"></i> Datacenter cooling: <b id="onsite-day">—</b></span>
+            <span><i class="dot dot--offsite"></i> Electricity generation: <b id="offsite-day">—</b></span>
+          </div>
+          <p class="split__energy">Energy driving it: <b id="energy-day">—</b> per day (typical).</p>
+        </div>
+
+        <div class="perspective">
+          <h3>In perspective</h3>
+          <p class="perspective__shower" id="shower-line">—</p>
+          <ul class="perspective__list" id="comparisons"></ul>
+          <p class="perspective__note">
+            Items marked ◦ are lifecycle ("virtual water") figures — the
+            fair comparison for our combined estimate, which is also a
+            lifecycle-style number.
+          </p>
+        </div>
+
+        <p class="scope-note">
+          Operational water only — chip manufacturing, datacenter
+          construction, and model training are excluded, and every constant
+          is a published range, not a precise measurement.
+          <a href="/tools/promptdrop/about/">Methodology &amp; sources</a>.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="pdr-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

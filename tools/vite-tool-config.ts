@@ -99,14 +99,25 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
       {
         // After Vite is done, replace the sentinel with the original absolute
         // URL so the browser fetches the shared file from the domain root.
+        //
+        // The sentinel comes back in two forms:
+        //   build: `__RF_SITE__/shared.js` (untouched — not root-relative)
+        //   dev:   `${base}/__RF_SITE__/shared.js` (dev's HTML transform
+        //          resolves it as a RELATIVE url and prefixes the base)
+        // Dev also base-prefixes the already-absolute tool-scoped URLs
+        // (`/tools/<name>/x` → `${base}/tools/<name>/x`), which build never
+        // does — collapse that double prefix here or dev pages lose their
+        // header/footer/favicons while prod looks fine.
         name: "site-global-urls-post",
         transformIndexHtml: {
           order: "post",
           handler(html) {
             let out = html;
             for (const url of SITE_GLOBAL_URLS) {
-              out = out.split(`"${sentinel(url)}"`).join(`"${url}"`);
+              out = out.split(`"${base}/${sentinel(url)}"`).join(`"${url}"`); // dev form
+              out = out.split(`"${sentinel(url)}"`).join(`"${url}"`);         // build form
             }
+            out = out.split(`"${base}${base}/`).join(`"${base}/`);            // dev double-prefix
             return out;
           },
         },
