@@ -1,0 +1,104 @@
+name: Health check
+
+# Uptime + TLS monitoring for restless-forge.dev. Nothing else watches the
+# droplet, so this is the "know when it's down" layer: every 30 minutes it
+# checks the homepage, a tool page, the nginx vhost fingerprint, and cert
+# expiry, and opens (or updates) a `site-health` issue on failure — GitHub's
+# notification email is the alert channel.
+#
+# Legacy domains (holopath.art, sandpath.art, whatismytimeworth.app) are
+# deliberately NOT monitored — they expire naturally with their Namecheap
+# registrations.
+
+on:
+  schedule:
+    - cron: "13,43 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: health-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run checks
+        id: checks
+        run: |
+          fails=""
+          note() { fails="$fails- $1"$'\n'; }
+
+          # Homepage up and recognizably ours
+          body=$(curl -sf --max-time 15 https://restless-forge.dev/ || true)
+          if [ -z "$body" ]; then
+            note "Homepage did not return 200 within 15s"
+          elif ! echo "$body" | grep -q "Restless Forge"; then
+            note "Homepage returned 200 but is missing the 'Restless Forge' marker (wrong content served?)"
+          fi
+
+          # A tool page (proves /tools/ dirs deployed and routed)
+          curl -sf --max-time 15 -o /dev/null https://restless-forge.dev/tools/what-is-my-time-worth/ \
+            || note "Tool page /tools/what-is-my-time-worth/ not reachable"
+
+          # Vhost fingerprint: brand assets must carry the 24h cache header
+          cc=$(curl -sfI --max-time 15 https://restless-forge.dev/favicon.ico | tr -d '\r' | grep -i '^cache-control:' || true)
+          case "$cc" in
+            *max-age=86400*) : ;;
+            *) note "favicon.ico Cache-Control is '$cc' (expected max-age=86400) — deployed nginx vhost may not be live" ;;
+          esac
+
+          # TLS cert ≥ 14 days remaining
+          end=$(echo | openssl s_client -servername restless-forge.dev \
+                  -connect restless-forge.dev:443 2>/dev/null \
+                | openssl x509 -noout -enddate | cut -d= -f2 || true)
+          if [ -z "$end" ]; then
+            note "Could not read the TLS certificate at all"
+          else
+            end_s=$(date -d "$end" +%s); now_s=$(date +%s)
+            days=$(( (end_s - now_s) / 86400 ))
+            if [ "$days" -lt 14 ]; then
+              note "TLS cert expires in ${days} days ($end) — certbot renewal may be broken; see docs/infrastructure.md § Certificate renewal"
+            fi
+            echo "cert days remaining: $days"
+          fi
+
+          if [ -n "$fails" ]; then
+            {
+              echo "## Site health check failed — $(date -u '+%Y-%m-%d %H:%M UTC')"
+              echo ""
+              echo "$fails"
+              echo "Runbook: docs/infrastructure.md"
+            } > report.md
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            cat report.md
+          else
+            echo "failed=false" >> "$GITHUB_OUTPUT"
+            echo "All checks passed."
+          fi
+
+      - name: Open or update site-health issue
+        if: steps.checks.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --repo "${{ github.repository }}" \
+            --label site-health --state open --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ] && [ "$existing" != "null" ]; then
+            gh issue comment "$existing" --repo "${{ github.repository }}" --body-file report.md
+            echo "updated existing issue #$existing"
+          else
+            gh label create site-health --repo "${{ github.repository }}" \
+              --description "Automated uptime/TLS alerts" --color D93F0B 2>/dev/null || true
+            # Assigning the issue guarantees a GitHub notification email to
+            # the owner even if repo-watch settings are web-only.
+            gh issue create --repo "${{ github.repository }}" \
+              --title "Site health check failing" \
+              --label site-health \
+              --assignee "${{ github.repository_owner }}" \
+              --body-file report.md
+          fi

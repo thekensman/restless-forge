@@ -307,6 +307,7 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 | Sub-page 404s in dev | Sub-page HTML must live under `src/`, not `public/`. Vite MPA only routes files in `src/` |
 | Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? |
 | New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |
+| Site down / cert expiring / stale assets in prod | `site-health` issues from `.github/workflows/health-check.yml`; server runbook in `docs/infrastructure.md` (Cloudflare edge, DNS-01 cert renewal, disaster recovery) |
 
 ## Gotchas
 

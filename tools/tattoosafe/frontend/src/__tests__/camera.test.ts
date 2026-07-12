@@ -6,7 +6,7 @@
 import { describe, it, expect } from "vitest";
 import {
   clampCenter, pinchScale, wheelScale, drawSize, hitTest, coverCrop,
-  MIN_SCALE, MAX_SCALE,
+  computeWrapStrips, MIN_SCALE, MAX_SCALE,
 } from "../camera";
 
 describe("clampCenter", () => {
@@ -94,5 +94,48 @@ describe("coverCrop", () => {
     expect(c.sw).toBe(1080);
     expect(c.sh).toBe(810);
     expect(c.sy).toBe(555);
+  });
+});
+
+describe("computeWrapStrips", () => {
+
+  it("projected width is 2/π of the flat display width", () => {
+    const { projW } = computeWrapStrips(400, 300, 32);
+    expect(projW).toBeCloseTo((300 * 2) / Math.PI, 6);
+  });
+
+  it("destination strips are contiguous (seam-free) and span the projection", () => {
+    const { projW, strips } = computeWrapStrips(400, 300, 32);
+    for (let i = 1; i < strips.length; i++) {
+      expect(strips[i].x0).toBeCloseTo(strips[i - 1].x1, 9);
+    }
+    expect(strips[0].x0).toBeCloseTo(-projW / 2, 9);
+    expect(strips[strips.length - 1].x1).toBeCloseTo(projW / 2, 9);
+  });
+
+  it("source ranges are contiguous and cover the whole design", () => {
+    const { strips } = computeWrapStrips(400, 300, 32);
+    for (let i = 1; i < strips.length; i++) {
+      expect(strips[i].u0).toBeCloseTo(strips[i - 1].u1, 6);
+    }
+    expect(strips[0].u0).toBeCloseTo(0, 6);
+    expect(strips[strips.length - 1].u1).toBeCloseTo(400, 6);
+  });
+
+  it("edges compress: edge strips consume more source per dest pixel than center", () => {
+    const { strips } = computeWrapStrips(400, 300, 32);
+    const density = (s: { u0: number; u1: number; x0: number; x1: number }) =>
+      (s.u1 - s.u0) / (s.x1 - s.x0);
+    const edge = density(strips[0]);
+    const center = density(strips[16]);
+    expect(edge).toBeGreaterThan(center * 2);
+    // Center of a half-cylinder viewed straight on is very nearly 1:1
+    // (srcW 400 over dispW 300 gives a base texel ratio of 400/300).
+    expect(center).toBeCloseTo(400 / 300, 1);
+  });
+
+  it("source mapping is monotonic", () => {
+    const { strips } = computeWrapStrips(400, 300, 48);
+    for (const s of strips) expect(s.u1).toBeGreaterThan(s.u0);
   });
 });

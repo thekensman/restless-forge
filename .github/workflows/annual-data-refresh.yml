@@ -1,0 +1,66 @@
+name: Annual data refresh
+
+# Runs the consolidated annual data refresh (tax brackets, SS wage base,
+# IRS mileage, CPI, subscription prices) as a Claude Code agent job and
+# opens ONE pull request with the updates. The canonical procedure lives
+# in docs/automation.md — this workflow just executes it, so there is a
+# single source of truth for what gets refreshed.
+#
+# Scheduled for Jan 16: after the IRS mileage notice (late Dec) and the
+# BLS annual CPI release (~Jan 13), and four days before the freshness
+# safety net (annual-data-check.yml, Jan 20) verifies the result.
+#
+# Required repository secret:
+#   ANTHROPIC_API_KEY — an Anthropic API key (console.anthropic.com).
+#     Without it the job fails fast with a readable error.
+
+on:
+  schedule:
+    - cron: "23 13 16 1 *"   # Jan 16, 13:23 UTC, yearly
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: annual-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check API key secret
+        run: |
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set. Add it under Settings → Secrets and variables → Actions to enable the automated annual refresh."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run the refresh agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Read docs/automation.md and execute the canonical "Annual data
+            refresh" routine exactly as written there (the prompt inside the
+            <details> block) for the current year. Follow its rules:
+            cross-check two sources per number, never guess on conflicts
+            (open the blocking issue instead), run the affected test suites,
+            and open ONE pull request against main titled
+            "Annual data refresh <YEAR>" from a branch named
+            claude/annual-data-refresh-<YEAR>. Do not merge it yourself.
+          claude_args: "--max-turns 200"

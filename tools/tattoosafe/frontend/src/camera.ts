@@ -52,6 +52,46 @@ export function drawSize(imgW: number, imgH: number, canvasW: number, scale: num
   return { w, h: imgH > 0 && imgW > 0 ? (w * imgH) / imgW : w };
 }
 
+export interface WrapStrip {
+  /** Source x range, in design pixels. */
+  u0: number;
+  u1: number;
+  /** Destination x range, centered on 0, in display pixels. */
+  x0: number;
+  x1: number;
+}
+
+/**
+ * Cylindrical wrap geometry. The flat design (srcW px wide, displayed at
+ * dispW px when flat) wraps the front half of a cylinder whose
+ * half-circumference equals the flat display width, viewed straight on:
+ *   dest x = R·sin(θ),  source u = (θ + π/2)/π · srcW,  R = dispW/π
+ * So the projected on-screen width shrinks to dispW·2/π, the center stays
+ * 1:1, and the edges compress toward zero — the actual foreshortening a
+ * wrapped design has. Destination strips are contiguous (seam-free) and
+ * the source ranges cover the design exactly.
+ */
+export function computeWrapStrips(
+  srcW: number, dispW: number, strips: number
+): { projW: number; strips: WrapStrip[] } {
+  const R = dispW / Math.PI;
+  const projW = 2 * R;
+  const out: WrapStrip[] = [];
+  for (let i = 0; i < strips; i++) {
+    const x0 = -R + (projW * i) / strips;
+    const x1 = -R + (projW * (i + 1)) / strips;
+    const th0 = Math.asin(Math.max(-1, Math.min(1, x0 / R)));
+    const th1 = Math.asin(Math.max(-1, Math.min(1, x1 / R)));
+    out.push({
+      u0: ((th0 + Math.PI / 2) / Math.PI) * srcW,
+      u1: ((th1 + Math.PI / 2) / Math.PI) * srcW,
+      x0,
+      x1,
+    });
+  }
+  return { projW, strips: out };
+}
+
 /**
  * Is a canvas point inside the (rotated) overlay? Used to decide whether a
  * pointer-down starts a drag. Rotation in degrees, matching the UI slider.
@@ -134,6 +174,7 @@ export function setupCameraPreview(
   let placement = "";
   const wrapToggle = document.querySelector<HTMLInputElement>("#ar-wrap");
   const wrapLabel = document.querySelector<HTMLElement>("#ar-wrap-label");
+  let wrapCanvas: HTMLCanvasElement | null = null;
   let video: HTMLVideoElement | null = null;
   let stream: MediaStream | null = null;
   let raf = 0;
@@ -184,18 +225,39 @@ export function setupCameraPreview(
       // Multiply blend settles the design into skin tones like real ink.
       ctx.globalCompositeOperation = "multiply";
       if (wrapToggle?.checked) {
-        // Cylindrical illusion without tracking: vertical strips compress
-        // toward the edges (sin mapping) and fade slightly, as if the design
-        // wraps around a limb. Cheap, dependency-free, runs per frame.
-        const STRIPS = 32;
-        const srcW = design.naturalWidth / STRIPS;
-        for (let i = 0; i < STRIPS; i++) {
-          const t0 = i / STRIPS, t1 = (i + 1) / STRIPS, tm = (t0 + t1) / 2;
-          const x0 = (Math.sin((t0 - 0.5) * Math.PI) / 2 + 0.5) * w;
-          const x1 = (Math.sin((t1 - 0.5) * Math.PI) / 2 + 0.5) * w;
-          ctx.globalAlpha = alpha * (0.45 + 0.55 * Math.cos((tm - 0.5) * Math.PI));
-          ctx.drawImage(design, i * srcW, 0, srcW, design.naturalHeight,
-                        -w / 2 + x0, -h / 2, Math.max(x1 - x0, 0.5), h);
+        // Cylindrical illusion without tracking (see computeWrapStrips):
+        // strips render seam-free onto a cached offscreen canvas at full
+        // alpha, a smooth cos(θ) gradient shades the sides via
+        // destination-in, and the result composites onto the frame ONCE —
+        // per-strip alpha on the main canvas left antialiased seams
+        // (visible vertical striping) in the previous implementation.
+        const { projW, strips } = computeWrapStrips(design.naturalWidth, w, 64);
+        const off = (wrapCanvas ??= document.createElement("canvas"));
+        const offW = Math.max(2, Math.ceil(projW));
+        const offH = Math.max(2, Math.ceil(h));
+        if (off.width !== offW || off.height !== offH) {
+          off.width = offW;
+          off.height = offH;
+        }
+        const octx = off.getContext("2d");
+        if (octx) {
+          octx.clearRect(0, 0, offW, offH);
+          for (const s of strips) {
+            octx.drawImage(design, s.u0, 0, s.u1 - s.u0, design.naturalHeight,
+                           s.x0 + projW / 2, 0, s.x1 - s.x0, offH);
+          }
+          const g = octx.createLinearGradient(0, 0, offW, 0);
+          for (let i = 0; i <= 8; i++) {
+            const t = i / 8;
+            const shade = 0.35 + 0.65 * Math.cos((t - 0.5) * Math.PI);
+            g.addColorStop(t, `rgba(0,0,0,${shade.toFixed(3)})`);
+          }
+          octx.globalCompositeOperation = "destination-in";
+          octx.fillStyle = g;
+          octx.fillRect(0, 0, offW, offH);
+          octx.globalCompositeOperation = "source-over";
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(off, -projW / 2, -h / 2, projW, h);
         }
       } else {
         ctx.globalAlpha = alpha;
