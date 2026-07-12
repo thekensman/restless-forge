@@ -94,8 +94,11 @@ jobs:
           else
             gh label create site-health --repo "${{ github.repository }}" \
               --description "Automated uptime/TLS alerts" --color D93F0B 2>/dev/null || true
+            # Assigning the issue guarantees a GitHub notification email to
+            # the owner even if repo-watch settings are web-only.
             gh issue create --repo "${{ github.repository }}" \
               --title "Site health check failing" \
               --label site-health \
+              --assignee "${{ github.repository_owner }}" \
               --body-file report.md
           fi

@@ -20,22 +20,34 @@ Instead of one scheduled job per tool, there is **one consolidated
 "Annual data refresh" routine** covering the whole matrix, plus a
 **GitHub Actions freshness check** that catches silent failures.
 
-### 1. Annual data refresh (Claude scheduled routine)
+### 1. Annual data refresh (`.github/workflows/annual-data-refresh.yml`)
 
-Runs mid-January yearly in a fresh Claude Code cloud session. It
-researches every value above from authoritative sources (cross-checked,
-"open an issue instead of guessing" on conflicts), updates every target
-file and maintenance JSON, runs the affected test suites (fixing tests
-that assert prior-year constants), and opens **one PR**:
+Runs **from GitHub Actions** (cron: Jan 16 yearly, plus manual
+`workflow_dispatch`) so every recurring job lives in one place — the
+Actions tab. The workflow runs a Claude Code agent
+(`anthropics/claude-code-action`) that reads this file and executes the
+canonical prompt below: it researches every value above from
+authoritative sources (cross-checked, "open an issue instead of
+guessing" on conflicts), updates every target file and maintenance
+JSON, runs the affected test suites (fixing tests that assert
+prior-year constants), and opens **one PR**:
 `claude/annual-data-refresh-<YEAR>`. You review and merge; the deploy
 workflow ships it.
 
-> **Status note (July 2026):** the original routine covered only the
-> WIMTW tax constants, and its 2026 catch-up firing failed silently —
-> the 2026 data was applied manually instead. When recreating or
-> editing the routine, use the consolidated prompt below (ask Claude:
-> "replace the WIMTW tax trigger with the consolidated annual data
-> refresh from docs/automation.md").
+**Requires** the `ANTHROPIC_API_KEY` repository secret (an Anthropic
+API key from console.anthropic.com); the workflow fails fast with a
+readable error if it's missing.
+
+Timing: Jan 16 is after the IRS mileage notice (late Dec) and the BLS
+annual CPI release (~Jan 13), and four days before the freshness
+safety net verifies the result.
+
+> **History:** this started as a claude.ai scheduled trigger covering
+> only the WIMTW tax constants; its 2026 firing failed silently and
+> the data was applied manually. The GitHub Actions workflow replaced
+> it (July 2026) — if a claude.ai trigger named anything like "WIMTW
+> tax update" still exists in your account, delete it so the job
+> doesn't run twice.
 
 <details>
 <summary>Full routine prompt (canonical copy)</summary>
