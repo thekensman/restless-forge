@@ -1,0 +1,22 @@
+{
+  "name": "PixelGrid",
+  "short_name": "PixelGrid",
+  "description": "Photos to cross-stitch and perler bead patterns with DMC color matching.",
+  "start_url": "/tools/pixelgrid/",
+  "scope": "/tools/pixelgrid/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/pixelgrid/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/pixelgrid/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

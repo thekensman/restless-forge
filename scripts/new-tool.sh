@@ -88,7 +88,11 @@ Manual steps remaining:
      then flip to "live" to publish — category, label, and description
      live ONLY there).
 
-  2. Add URLs to site/sitemap.xml when the tool goes public.
+  2. At launch: remove the '<meta name="robots" content="noindex">' line
+     from every HTML page under src/ (the template ships with it so
+     unlaunched tools aren't crawled as thin content).
+
+  3. Add URLs to site/sitemap.xml when the tool goes public.
 
 Start developing:
   cd tools/${TOOL_NAME}/frontend

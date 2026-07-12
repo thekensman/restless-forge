@@ -1,0 +1,22 @@
+{
+  "name": "Side Hustle Reality",
+  "short_name": "Side Hustle Re",
+  "description": "Your true hourly rate after gas, depreciation, self-employment tax, and dead time.",
+  "start_url": "/tools/side-hustle-reality/",
+  "scope": "/tools/side-hustle-reality/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/side-hustle-reality/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/side-hustle-reality/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

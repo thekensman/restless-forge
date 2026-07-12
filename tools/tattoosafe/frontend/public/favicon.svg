@@ -1,6 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="5.3" fill="#0d0d14"/>
-  <text x="16" y="22.5" text-anchor="middle"
-        font-family="Georgia, 'DejaVu Serif', serif"
-        font-size="17" font-weight="700" fill="#a882ff">TS</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="10.6" fill="#0d0d14"/>
+  <g stroke="#a882ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <circle cx="32" cy="13.5" r="4.5"/>
+    <path d="M32 18 V50"/>
+    <path d="M21 26 H43"/>
+    <path d="M12 36 C14 47 22 52 32 52 C42 52 50 47 52 36"/>
+    <path d="M12 36 l 6.5 -1.5 M12 36 l 1.5 6.5"/>
+    <path d="M52 36 l -6.5 -1.5 M52 36 l -1.5 6.5"/>
+  </g>
 </svg>

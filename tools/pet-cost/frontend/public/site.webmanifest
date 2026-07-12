@@ -1,0 +1,22 @@
+{
+  "name": "Pet Cost",
+  "short_name": "Pet Cost",
+  "description": "Lifetime cost of a dog or cat \u2014 food, vet, insurance, and the categories nobody budgets for.",
+  "start_url": "/tools/pet-cost/",
+  "scope": "/tools/pet-cost/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/pet-cost/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/pet-cost/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

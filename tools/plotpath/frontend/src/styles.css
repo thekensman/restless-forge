@@ -24,7 +24,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 a { color: var(--accent); } a:hover { color: var(--accent-light); }
 .tool-content { max-width: 640px; margin: 0 auto; padding: 1rem 1.5rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
 .tool-intro { max-width: 640px; margin: 0 auto; padding: 1.5rem; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; text-align: center; }
-.tool-intro h2 { font-family: var(--font-display); font-size: 1.5rem; color: var(--text-bright); font-weight: 400; margin-bottom: 0.75rem; }
+.tool-intro h1 { font-family: var(--font-display); font-size: 1.5rem; color: var(--text-bright); font-weight: 400; margin-bottom: 0.75rem; }
 .upload { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%; }
 .upload__circle { width: 200px; height: 200px; border-radius: 50%; border: 2px dashed #4ac7a04d; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.3s, background 0.3s; }
 .upload__circle:hover, .upload__circle--active { border-color: var(--accent); background: #4ac7a00d; }
