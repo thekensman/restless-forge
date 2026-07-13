@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>ForgeImage — Restless Forge</title>
+  <meta name="description" content="Resize, crop, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeimage/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ForgeImage">
+  <meta property="og:description" content="Resize, crop, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeimage/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeimage/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeimage/favicon.svg">
+  <link rel="icon" href="/tools/forgeimage/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeimage/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeimage/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ForgeImage",
+    "url": "https://restless-forge.dev/tools/forgeimage",
+    "description": "Resize, crop, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeimage/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="fimg-header"></div>
+
+  <main>
+    <section class="tool-intro">
+      <h1>ForgeImage: Resize, crop, convert &amp; compress — in your browser</h1>
+      <p>
+        The five image operations you actually open an editor for, with no
+        uploads, no account, and no watermark. Files are processed on your
+        device with the Canvas API and never leave it.
+      </p>
+    </section>
+
+    <label class="field field--file"><span class="field__label">Image</span>
+      <input type="file" id="img-file" accept="image/*">
+      <span class="op-meta" id="img-meta"></span>
+    </label>
+
+    <nav class="op-tabs" role="tablist" aria-label="Image operations">
+      <button class="op-tab is-active" data-op="resize" role="tab" aria-selected="true">Resize</button>
+      <button class="op-tab" data-op="crop" role="tab" aria-selected="false">Crop</button>
+      <button class="op-tab" data-op="convert" role="tab" aria-selected="false">Convert</button>
+      <button class="op-tab" data-op="compress" role="tab" aria-selected="false">Compress</button>
+      <button class="op-tab" data-op="social" role="tab" aria-selected="false">Social sizes</button>
+    </nav>
+
+    <section class="op-panel" id="panel-resize" role="tabpanel">
+      <div class="field-row">
+        <label class="field"><span class="field__label">Width (px)</span>
+          <input type="number" id="rs-width" min="1" placeholder="auto"></label>
+        <label class="field"><span class="field__label">Height (px)</span>
+          <input type="number" id="rs-height" min="1" placeholder="auto"></label>
+        <label class="field"><span class="field__label">or Percent</span>
+          <input type="number" id="rs-percent" min="1" max="1000" placeholder="e.g. 50"></label>
+      </div>
+      <label class="op-check"><input type="checkbox" id="rs-lock" checked> Lock aspect ratio</label>
+      <button class="op-run" id="rs-run">Resize</button>
+    </section>
+
+    <section class="op-panel" id="panel-crop" role="tabpanel" hidden>
+      <label class="field"><span class="field__label">Aspect</span>
+        <select id="cr-aspect"></select>
+      </label>
+      <p class="op-help">v1 crops the largest centered region at the chosen aspect. Freeform drag crop lands in v2.</p>
+      <button class="op-run" id="cr-run">Crop</button>
+    </section>
+
+    <section class="op-panel" id="panel-convert" role="tabpanel" hidden>
+      <label class="field"><span class="field__label">Format</span>
+        <select id="cv-format"></select>
+      </label>
+      <label class="field"><span class="field__label">Quality</span>
+        <input type="range" id="cv-quality" min="10" max="100" value="85">
+      </label>
+      <button class="op-run" id="cv-run">Convert</button>
+    </section>
+
+    <section class="op-panel" id="panel-compress" role="tabpanel" hidden>
+      <label class="field"><span class="field__label">Target size (KB)</span>
+        <input type="number" id="cp-target" min="10" value="500">
+      </label>
+      <p class="op-help">Finds the highest JPEG quality that fits under the target.</p>
+      <button class="op-run" id="cp-run">Compress</button>
+    </section>
+
+    <section class="op-panel" id="panel-social" role="tabpanel" hidden>
+      <p class="op-help">Generates every size below from one image (center-cropped, never distorted).</p>
+      <ul class="file-list" id="social-list"></ul>
+      <button class="op-run" id="social-run">Generate all sizes</button>
+    </section>
+
+    <p class="op-status" id="op-status" role="status" aria-live="polite"></p>
+    <div class="op-downloads" id="op-downloads"></div>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="fimg-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

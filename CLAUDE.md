@@ -246,7 +246,11 @@ it goes public.
 
 ## Code Conventions
 
-- TypeScript strict mode, no runtime npm dependencies.
+- TypeScript strict mode. No runtime npm dependencies unless a tool
+  genuinely can't work without one — each exception is documented here.
+  Current exceptions: `pdf-lib` (pure-JS, MIT) in forgedoc, forgeinvoice,
+  and forgeresume, because parsing/producing real PDFs is not
+  hand-rollable. Vite bundles it per tool; nothing is fetched at runtime.
 - Vanilla DOM manipulation (no React/Vue/Angular).
 - CSS custom properties for theming.
 - BEM-like class naming (`.block__element--modifier`).

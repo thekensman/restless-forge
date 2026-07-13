@@ -1,0 +1,14 @@
+/**
+ * ForgeDoc — smoke test.
+ * Replace with real tests as the tool grows; this keeps `npm test`
+ * meaningful from the moment the tool is scaffolded.
+ */
+
+import { describe, it, expect } from "vitest";
+
+describe("ForgeDoc scaffold", () => {
+  it("runs in a DOM environment", () => {
+    document.body.innerHTML = '<div id="fd-header"></div>';
+    expect(document.getElementById("fd-header")).not.toBeNull();
+  });
+});

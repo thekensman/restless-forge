@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>ForgeResume — Restless Forge</title>
+  <meta name="description" content="Free resume builder with a built-in ATS keyword check and clean PDF export. Your employment history stays in your browser — no account, no dark patterns.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeresume/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ForgeResume">
+  <meta property="og:description" content="Free resume builder with a built-in ATS keyword check and clean PDF export. Your employment history stays in your browser — no account, no dark patterns.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeresume/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeresume/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeresume/favicon.svg">
+  <link rel="icon" href="/tools/forgeresume/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeresume/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeresume/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ForgeResume",
+    "url": "https://restless-forge.dev/tools/forgeresume",
+    "description": "Free resume builder with a built-in ATS keyword check and clean PDF export. Your employment history stays in your browser — no account, no dark patterns.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeresume/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="fr-header"></div>
+
+  <main>
+    <section class="tool-intro">
+      <h1>ForgeResume: Resume builder with a free ATS check</h1>
+      <p>
+        Build an ATS-friendly resume, score it against a job description,
+        and download a clean PDF. Your employment history stays in
+        <em>your browser</em> — no account, no server, no dark patterns.
+      </p>
+    </section>
+
+    <div class="two-col">
+      <section class="col-form" aria-label="Resume form">
+        <div class="field-row">
+          <label class="field"><span class="field__label">Profile</span>
+            <select id="profile-select"></select></label>
+          <label class="field"><span class="field__label">Save as</span>
+            <span class="joined"><input id="profile-name" type="text" placeholder="e.g. Backend roles">
+            <button class="op-mini" id="profile-save" type="button">Save</button></span></label>
+        </div>
+
+        <h2>Contact</h2>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Name</span><input id="r-name" type="text"></label>
+          <label class="field"><span class="field__label">Title</span><input id="r-title" type="text"></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Email</span><input id="r-email" type="email"></label>
+          <label class="field"><span class="field__label">Phone</span><input id="r-phone" type="text"></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Location</span><input id="r-location" type="text"></label>
+          <label class="field"><span class="field__label">Website</span><input id="r-website" type="text"></label>
+        </div>
+
+        <h2>Summary</h2>
+        <label class="field"><textarea id="r-summary" rows="3"></textarea></label>
+
+        <h2>Experience</h2>
+        <div id="exp-list"></div>
+        <button class="op-mini" id="exp-add" type="button">+ Add role</button>
+
+        <h2>Education</h2>
+        <div id="edu-list"></div>
+        <button class="op-mini" id="edu-add" type="button">+ Add education</button>
+
+        <h2>Skills <span class="field__unit">(comma or newline separated)</span></h2>
+        <label class="field"><textarea id="r-skills" rows="2"></textarea></label>
+
+        <div class="actions">
+          <button class="op-run" id="r-download" type="button">Download PDF</button>
+          <button class="op-mini" id="r-plain" type="button">Copy as plain text</button>
+          <button class="op-mini" id="data-export" type="button">Export</button>
+          <label class="op-mini op-file">Import<input id="data-import" type="file" accept="application/json" hidden></label>
+        </div>
+        <p class="op-status" id="op-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="col-preview" aria-label="ATS check">
+        <h2>ATS keyword check</h2>
+        <label class="field"><span class="field__label">Paste the job description</span>
+          <textarea id="ats-jd" rows="8"></textarea></label>
+        <button class="op-mini" id="ats-run" type="button">Score my resume</button>
+        <div class="ats-result" id="ats-result" hidden>
+          <div class="ats-score"><span id="ats-score">—</span><span class="ats-score__label">keyword match</span></div>
+          <p><strong>Missing keywords</strong> — work these in where they're true:</p>
+          <p class="ats-missing" id="ats-missing"></p>
+          <p class="pv-muted">Matched: <span id="ats-matched"></span></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="fr-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

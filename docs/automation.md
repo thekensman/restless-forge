@@ -34,9 +34,15 @@ prior-year constants), and opens **one PR**:
 `claude/annual-data-refresh-<YEAR>`. You review and merge; the deploy
 workflow ships it.
 
-**Requires** the `ANTHROPIC_API_KEY` repository secret (an Anthropic
-API key from console.anthropic.com); the workflow fails fast with a
-readable error if it's missing.
+**Credentials (either one):** the `ANTHROPIC_API_KEY` repository secret
+(an Anthropic API key from console.anthropic.com), or
+`CLAUDE_CODE_OAUTH_TOKEN` for subscription auth (run `claude setup-token`
+locally, paste the token — runs then draw down your claude.ai plan
+instead of API credit, like the old claude.ai routine did). With
+**neither** secret set the workflow skips cleanly (green run with a
+notice), and the Jan 20 freshness check remains the backstop: it opens
+an issue if the data is stale, and the canonical prompt below can be
+pasted into any Claude Code session to do the refresh by hand.
 
 Timing: Jan 16 is after the IRS mileage notice (late Dec) and the BLS
 annual CPI release (~Jan 13), and four days before the freshness

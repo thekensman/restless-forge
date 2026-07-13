@@ -83,6 +83,17 @@ If the dry run passes and the timer is active, renewal is autonomous. The
 health-check workflow is the safety net: it alerts at 14 days remaining,
 which is 2 renewal attempts' worth of margin (certbot renews at 30 days).
 
+**Where the schedule lives:** apt-installed certbot runs from the systemd
+timer `certbot.timer` (twice daily at 00:00/12:00 plus a randomized delay
+of up to 12 h; each run renews only certs within 30 days of expiry, so
+most runs are no-ops).
+
+```bash
+systemctl list-timers certbot.timer   # NEXT and LAST run times
+systemctl cat certbot.timer           # the schedule definition itself
+journalctl -u certbot.service -n 50   # log of recent renewal attempts
+```
+
 ## Cloudflare edge
 
 - The droplet firewalls 80/443 to **Cloudflare IPs only** (ipset `cf4`/`cf6`

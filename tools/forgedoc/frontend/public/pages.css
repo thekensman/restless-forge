@@ -1,0 +1,54 @@
+/* ═══════════════════════════════════════════════════════
+   ForgeDoc — Shared Sub-page Styles
+   Self-contained CSS for static HTML pages (about, faq, etc.).
+   These pages aren't processed by Vite, so they need their own styles.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* Tool theme tokens — override the defaults here. */
+  --bg: #0b0d12;
+  --text: #d8d4cc;
+  --text-muted: #7a7770;
+  --text-dim: #4a4840;
+  --accent: #e0685c;
+  --border: #252a35;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text);
+  --rf-muted: var(--text-muted);
+  --rf-dim: var(--text-dim);
+  --rf-accent: var(--accent);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-mono);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Site header + footer donate/links/copy styles live in site/tool-chrome.css. */
+
+main { max-width: 820px; margin: 0 auto; padding: 52px 24px 40px; flex: 1; }
+h1 { font-family: var(--font-mono); font-size: clamp(24px, 4vw, 38px); color: var(--accent); margin-bottom: 14px; }
+h2 { font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin: 36px 0 12px; }
+p  { font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-bottom: 14px; }
+
+/* Footer outer container; everything inside comes from tool-chrome.css. */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 24px;
+  text-align: center;
+}

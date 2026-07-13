@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>ForgeInvoice — Restless Forge</title>
+  <meta name="description" content="Free invoice generator with live preview, PDF download, saved clients, and invoice history — all stored in your browser, never on a server. No account, no subscription.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeinvoice/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ForgeInvoice">
+  <meta property="og:description" content="Free invoice generator with live preview, PDF download, saved clients, and invoice history — all stored in your browser, never on a server. No account, no subscription.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeinvoice/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeinvoice/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeinvoice/favicon.svg">
+  <link rel="icon" href="/tools/forgeinvoice/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeinvoice/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeinvoice/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ForgeInvoice",
+    "url": "https://restless-forge.dev/tools/forgeinvoice",
+    "description": "Free invoice generator with live preview, PDF download, saved clients, and invoice history — all stored in your browser, never on a server. No account, no subscription.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeinvoice/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="fi-header"></div>
+
+  <main>
+    <section class="tool-intro">
+      <h1>ForgeInvoice: Free invoice generator, no account required</h1>
+      <p>
+        Fill in the form, watch the live preview, download a professional
+        PDF. Your business details, client list, and invoice history are
+        saved in <em>your browser</em> — nothing is uploaded, ever.
+      </p>
+    </section>
+
+    <div class="two-col">
+      <section class="col-form" aria-label="Invoice form">
+        <h2>Your business</h2>
+        <label class="field"><span class="field__label">Name</span><input id="biz-name" type="text"></label>
+        <label class="field"><span class="field__label">Address</span><input id="biz-address" type="text"></label>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Email</span><input id="biz-email" type="email"></label>
+          <label class="field"><span class="field__label">Phone</span><input id="biz-phone" type="text"></label>
+        </div>
+
+        <h2>Client</h2>
+        <label class="field"><span class="field__label">Saved clients</span>
+          <select id="client-select"><option value="">— new client —</option></select></label>
+        <label class="field"><span class="field__label">Name</span><input id="cl-name" type="text"></label>
+        <label class="field"><span class="field__label">Address</span><input id="cl-address" type="text"></label>
+        <label class="field"><span class="field__label">Email</span><input id="cl-email" type="email"></label>
+        <button class="op-mini" id="client-save" type="button">Save client</button>
+
+        <h2>Invoice</h2>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Number</span><input id="inv-number" type="text"></label>
+          <label class="field"><span class="field__label">Date</span><input id="inv-date" type="date"></label>
+          <label class="field"><span class="field__label">Terms</span><select id="inv-terms"></select></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Currency</span><select id="inv-currency"></select></label>
+          <label class="field"><span class="field__label">Discount</span>
+            <span class="joined"><input id="inv-discount" type="number" min="0" value="0">
+            <select id="inv-discount-type"><option value="percent">%</option><option value="fixed">amt</option></select></span></label>
+          <label class="field"><span class="field__label">Tax %</span><input id="inv-tax" type="number" min="0" step="0.01" value="0"></label>
+        </div>
+
+        <h2>Line items</h2>
+        <div id="items"></div>
+        <button class="op-mini" id="item-add" type="button">+ Add item</button>
+
+        <label class="field"><span class="field__label">Notes / payment instructions</span>
+          <textarea id="inv-notes" rows="3"></textarea></label>
+
+        <div class="actions">
+          <button class="op-run" id="inv-download" type="button">Download PDF</button>
+          <button class="op-mini" id="data-export" type="button">Export data</button>
+          <label class="op-mini op-file">Import data<input id="data-import" type="file" accept="application/json" hidden></label>
+        </div>
+        <p class="op-status" id="op-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="col-preview" aria-label="Live preview">
+        <h2>Preview</h2>
+        <div class="invoice-preview" id="preview"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="fi-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>
