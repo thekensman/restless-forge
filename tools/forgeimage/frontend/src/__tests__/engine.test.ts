@@ -120,3 +120,71 @@ describe("fmtBytes", () => {
     expect(fmtBytes(3 * 1024 * 1024)).toBe("3.00 MB");
   });
 });
+
+import { fitWithin, dragCropRect, hitCropHandle } from "../engine";
+
+describe("fitWithin", () => {
+  it("scales down to fit, preserving aspect", () => {
+    const f = fitWithin({ w: 2000, h: 1000 }, 500, 500);
+    expect(f).toEqual({ w: 500, h: 250, scale: 0.25 });
+  });
+  it("never upscales", () => {
+    expect(fitWithin({ w: 100, h: 80 }, 500, 500).scale).toBe(1);
+  });
+});
+
+describe("dragCropRect", () => {
+  const img = { w: 1000, h: 800 };
+  const rect = { x: 200, y: 200, w: 400, h: 300 };
+
+  it("move translates and clamps", () => {
+    expect(dragCropRect(rect, "move", 50, -20, img)).toEqual({ x: 250, y: 180, w: 400, h: 300 });
+    const clamped = dragCropRect(rect, "move", 9999, 9999, img);
+    expect(clamped.x + clamped.w).toBe(img.w);
+    expect(clamped.y + clamped.h).toBe(img.h);
+  });
+
+  it("se drag grows from the nw anchor", () => {
+    const r = dragCropRect(rect, "se", 100, 50, img);
+    expect(r).toEqual({ x: 200, y: 200, w: 500, h: 350 });
+  });
+
+  it("nw drag keeps the se corner fixed", () => {
+    const r = dragCropRect(rect, "nw", -50, -50, img);
+    expect(r.x + r.w).toBe(600);
+    expect(r.y + r.h).toBe(500);
+    expect(r.w).toBe(450);
+  });
+
+  it("enforces a minimum size when collapsed", () => {
+    const r = dragCropRect(rect, "se", -1000, -1000, img);
+    expect(r.w).toBeGreaterThanOrEqual(16);
+    expect(r.h).toBeGreaterThanOrEqual(16);
+  });
+
+  it("respects an aspect constraint", () => {
+    const r = dragCropRect(rect, "se", 200, 0, img, { w: 1, h: 1 });
+    expect(Math.abs(r.w - r.h)).toBeLessThanOrEqual(1);
+  });
+
+  it("never escapes the image, even with aspect", () => {
+    const r = dragCropRect(rect, "se", 5000, 5000, img, { w: 16, h: 9 });
+    expect(r.x + r.w).toBeLessThanOrEqual(img.w);
+    expect(r.y + r.h).toBeLessThanOrEqual(img.h);
+    expect(Math.abs(r.w / r.h - 16 / 9)).toBeLessThan(0.05);
+  });
+});
+
+describe("hitCropHandle", () => {
+  const rect = { x: 100, y: 100, w: 200, h: 150 };
+  it("detects corners within tolerance", () => {
+    expect(hitCropHandle(102, 98, rect, 8)).toBe("nw");
+    expect(hitCropHandle(298, 252, rect, 8)).toBe("se");
+    expect(hitCropHandle(300, 100, rect, 8)).toBe("ne");
+    expect(hitCropHandle(100, 250, rect, 8)).toBe("sw");
+  });
+  it("inside → move, outside → null", () => {
+    expect(hitCropHandle(200, 175, rect, 8)).toBe("move");
+    expect(hitCropHandle(50, 50, rect, 8)).toBeNull();
+  });
+});

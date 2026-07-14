@@ -104,3 +104,19 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
 .ats-score { font-size: 2rem; color: var(--accent); font-family: var(--font-mono); }
 .ats-score__label { font-size: 0.8rem; color: var(--text-dim); margin-left: 8px; }
 .ats-missing { color: var(--text); }
+
+
+/* ── preview stage + sliders ── */
+.stage-wrap { border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  margin: 14px 0; max-width: 640px; text-align: center; background: #0e1118; }
+.stage { max-width: 100%; touch-action: none; display: none; margin: 0 auto; }
+.stage.is-visible { display: block; }
+.stage.is-cropping { cursor: crosshair; }
+.stage__empty { color: var(--text-dim); font-size: 0.9rem; padding: 26px 0; }
+.stage__caption { color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; min-height: 1em; }
+.slider-field { margin: 12px 0; }
+.slider-field b { color: var(--accent); font-family: var(--font-mono); font-weight: 600; }
+.slider-pair { display: grid; grid-template-columns: 1fr 92px; gap: 10px; align-items: center; }
+.slider-pair input[type="range"] { width: 100%; accent-color: var(--accent); }
+.slider-pair input[type="number"] { background: #10141c; color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
