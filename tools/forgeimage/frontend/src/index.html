@@ -68,6 +68,12 @@
       <span class="op-meta" id="img-meta"></span>
     </label>
 
+    <div class="stage-wrap">
+      <canvas id="stage" class="stage" width="10" height="10"></canvas>
+      <p class="stage__empty" id="stage-empty">Pick an image to see a live preview here.</p>
+      <p class="stage__caption" id="stage-caption"></p>
+    </div>
+
     <nav class="op-tabs" role="tablist" aria-label="Image operations">
       <button class="op-tab is-active" data-op="resize" role="tab" aria-selected="true">Resize</button>
       <button class="op-tab" data-op="crop" role="tab" aria-selected="false">Crop</button>
@@ -77,24 +83,31 @@
     </nav>
 
     <section class="op-panel" id="panel-resize" role="tabpanel">
-      <div class="field-row">
-        <label class="field"><span class="field__label">Width (px)</span>
-          <input type="number" id="rs-width" min="1" placeholder="auto"></label>
-        <label class="field"><span class="field__label">Height (px)</span>
-          <input type="number" id="rs-height" min="1" placeholder="auto"></label>
-        <label class="field"><span class="field__label">or Percent</span>
-          <input type="number" id="rs-percent" min="1" max="1000" placeholder="e.g. 50"></label>
+      <div class="slider-field">
+        <span class="field__label">Width <b id="rs-width-out">—</b> px</span>
+        <div class="slider-pair">
+          <input type="range" id="rs-width-slider" min="1" max="100" value="100">
+          <input type="number" id="rs-width" min="1">
+        </div>
+      </div>
+      <div class="slider-field">
+        <span class="field__label">Height <b id="rs-height-out">—</b> px</span>
+        <div class="slider-pair">
+          <input type="range" id="rs-height-slider" min="1" max="100" value="100">
+          <input type="number" id="rs-height" min="1">
+        </div>
       </div>
       <label class="op-check"><input type="checkbox" id="rs-lock" checked> Lock aspect ratio</label>
-      <button class="op-run" id="rs-run">Resize</button>
+      <button class="op-run" id="rs-run">Download resized</button>
     </section>
 
     <section class="op-panel" id="panel-crop" role="tabpanel" hidden>
-      <label class="field"><span class="field__label">Aspect</span>
+      <p class="op-help">Drag the box on the preview above — corners resize, the middle moves it.</p>
+      <label class="field"><span class="field__label">Constrain aspect</span>
         <select id="cr-aspect"></select>
       </label>
-      <p class="op-help">v1 crops the largest centered region at the chosen aspect. Freeform drag crop lands in v2.</p>
-      <button class="op-run" id="cr-run">Crop</button>
+      <p class="op-meta" id="cr-meta"></p>
+      <button class="op-run" id="cr-run">Download crop</button>
     </section>
 
     <section class="op-panel" id="panel-convert" role="tabpanel" hidden>

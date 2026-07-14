@@ -135,3 +135,99 @@ export function fmtBytes(n: number): string {
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
+
+/* ── interactive crop + preview geometry ── */
+
+/** Scale dims to fit inside a box, never upscaling. */
+export function fitWithin(src: Dims, maxW: number, maxH: number): Dims & { scale: number } {
+  const scale = Math.min(maxW / src.w, maxH / src.h, 1);
+  return { w: Math.max(1, Math.round(src.w * scale)), h: Math.max(1, Math.round(src.h * scale)), scale };
+}
+
+export type CropHandle = "nw" | "ne" | "sw" | "se" | "move";
+
+/**
+ * Apply a pointer drag (in IMAGE pixels) to a crop rect. Corner handles
+ * resize (respecting an optional aspect w/h constraint, min 16px); "move"
+ * translates. Result is clamped inside the image.
+ */
+export function dragCropRect(
+  rect: CropRect,
+  handle: CropHandle,
+  dx: number,
+  dy: number,
+  img: Dims,
+  aspect: { w: number; h: number } | null = null,
+): CropRect {
+  const MIN = 16;
+  if (handle === "move") {
+    return clampCrop({ ...rect, x: rect.x + dx, y: rect.y + dy }, img);
+  }
+  // Anchor is the corner opposite the handle; the dragged corner follows the pointer.
+  const left = rect.x;
+  const top = rect.y;
+  const rightEdge = rect.x + rect.w;
+  const bottom = rect.y + rect.h;
+  const anchor = {
+    nw: { x: rightEdge, y: bottom },
+    ne: { x: left, y: bottom },
+    sw: { x: rightEdge, y: top },
+    se: { x: left, y: top },
+  }[handle];
+  const corner = {
+    nw: { x: left + dx, y: top + dy },
+    ne: { x: rightEdge + dx, y: top + dy },
+    sw: { x: left + dx, y: bottom + dy },
+    se: { x: rightEdge + dx, y: bottom + dy },
+  }[handle];
+
+  let w = Math.max(MIN, Math.abs(corner.x - anchor.x));
+  let h = Math.max(MIN, Math.abs(corner.y - anchor.y));
+  if (aspect) {
+    const target = aspect.w / aspect.h;
+    // Follow the dominant axis of the drag, derive the other.
+    if (w / h > target) h = w / target;
+    else w = h * target;
+  }
+  // Rebuild the rect from the anchor toward the dragged corner's direction.
+  const dirX = corner.x >= anchor.x ? 1 : -1;
+  const dirY = corner.y >= anchor.y ? 1 : -1;
+  let x = dirX === 1 ? anchor.x : anchor.x - w;
+  let y = dirY === 1 ? anchor.y : anchor.y - h;
+  // Clamp size so the anchored corner stays fixed inside the image.
+  const maxW2 = dirX === 1 ? img.w - anchor.x : anchor.x;
+  const maxH2 = dirY === 1 ? img.h - anchor.y : anchor.y;
+  let scaleBack = Math.min(1, maxW2 / w, maxH2 / h);
+  if (!aspect) {
+    w = Math.min(w, maxW2);
+    h = Math.min(h, maxH2);
+  } else {
+    w *= scaleBack;
+    h *= scaleBack;
+  }
+  w = Math.max(MIN, w);
+  h = Math.max(MIN, h);
+  x = dirX === 1 ? anchor.x : anchor.x - w;
+  y = dirY === 1 ? anchor.y : anchor.y - h;
+  return clampCrop({ x, y, w, h }, img);
+}
+
+/** Which handle (if any) a display-space point hits; tolerance in px. */
+export function hitCropHandle(
+  px: number,
+  py: number,
+  rect: CropRect,
+  tol: number,
+): CropHandle | null {
+  const corners: Array<[CropHandle, number, number]> = [
+    ["nw", rect.x, rect.y],
+    ["ne", rect.x + rect.w, rect.y],
+    ["sw", rect.x, rect.y + rect.h],
+    ["se", rect.x + rect.w, rect.y + rect.h],
+  ];
+  for (const [h, cx, cy] of corners) {
+    if (Math.abs(px - cx) <= tol && Math.abs(py - cy) <= tol) return h;
+  }
+  if (px >= rect.x && px <= rect.x + rect.w && py >= rect.y && py <= rect.y + rect.h) return "move";
+  return null;
+}
