@@ -10,9 +10,14 @@ name: Annual data refresh
 # BLS annual CPI release (~Jan 13), and four days before the freshness
 # safety net (annual-data-check.yml, Jan 20) verifies the result.
 #
-# Required repository secret:
-#   ANTHROPIC_API_KEY — an Anthropic API key (console.anthropic.com).
-#     Without it the job fails fast with a readable error.
+# Credentials (either one; checked in this order):
+#   ANTHROPIC_API_KEY        — an Anthropic API key (console.anthropic.com)
+#   CLAUDE_CODE_OAUTH_TOKEN  — subscription auth: run `claude setup-token`
+#                              locally and paste the token (no API credit
+#                              needed — runs draw down your claude.ai plan)
+# With NEITHER set, the workflow SKIPS cleanly (green, with a notice) —
+# the Jan 20 freshness check still catches a missed refresh, and the
+# canonical prompt in docs/automation.md can always be run by hand.
 
 on:
   schedule:
@@ -34,25 +39,36 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Check API key secret
+      - name: Check credentials
+        id: creds
         run: |
-          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
-            echo "::error::ANTHROPIC_API_KEY secret is not set. Add it under Settings → Secrets and variables → Actions to enable the automated annual refresh."
-            exit 1
+          if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "mode=api_key" >> "$GITHUB_OUTPUT"
+            echo "Using ANTHROPIC_API_KEY."
+          elif [ -n "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ]; then
+            echo "mode=oauth" >> "$GITHUB_OUTPUT"
+            echo "Using CLAUDE_CODE_OAUTH_TOKEN (subscription auth)."
+          else
+            echo "mode=skip" >> "$GITHUB_OUTPUT"
+            echo "::notice::No ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN secret set — skipping the automated refresh. The Jan 20 freshness check (annual-data-check.yml) will open an issue if the data goes stale; run the canonical prompt from docs/automation.md manually to refresh."
           fi
 
       - uses: actions/checkout@v4
+        if: steps.creds.outputs.mode != 'skip'
         with:
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
+        if: steps.creds.outputs.mode != 'skip'
         with:
           node-version: 20
 
       - name: Run the refresh agent
+        if: steps.creds.outputs.mode != 'skip'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             Read docs/automation.md and execute the canonical "Annual data

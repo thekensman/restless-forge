@@ -1,0 +1,22 @@
+{
+  "name": "ForgeDoc",
+  "short_name": "ForgeDoc",
+  "description": "The free browser-only PDF toolkit: merge, split, rotate, watermark. Your files never leave your device.",
+  "start_url": "/tools/forgedoc/",
+  "scope": "/tools/forgedoc/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/forgedoc/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/forgedoc/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

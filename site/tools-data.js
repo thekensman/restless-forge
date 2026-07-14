@@ -69,6 +69,14 @@
       desc: 'Pet medication reference ranges with safety warnings. (Pending veterinary review.)' },
     { id: 'promptdrop', label: 'PromptDrop', category: 'Conservation', status: 'soon',
       desc: 'The water footprint of your AI usage, honestly: cooling vs electricity-generation water, per prompt, image, and video, with sources for every number.' },
+    { id: 'forgedoc', label: 'ForgeDoc', category: 'Utility', status: 'soon',
+      desc: 'Merge, split, rotate, and watermark PDFs — free, unlimited, and entirely in your browser. Your files never leave your device.' },
+    { id: 'forgeinvoice', label: 'ForgeInvoice', category: 'Financial', status: 'soon',
+      desc: 'Professional invoices with live preview and PDF download. Clients and history saved in your browser, never on a server.' },
+    { id: 'forgeresume', label: 'ForgeResume', category: 'Utility', status: 'soon',
+      desc: 'ATS-friendly resume builder with a free keyword check against any job description. No account, no dark patterns.' },
+    { id: 'forgeimage', label: 'ForgeImage', category: 'Creative', status: 'soon',
+      desc: 'Resize, crop, convert, compress, and generate social-media sizes — the five image jobs you actually need, with no uploads.' },
   ];
 
   /**
