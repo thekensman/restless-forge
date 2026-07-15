@@ -15,6 +15,8 @@ export interface BodyPart {
   widthRatio: number;
   heightRatio: number;
   difficulty: number;
+  /** Typical adult circumference at this placement, cm (drives the AR wrap curvature). */
+  circumferenceCm: number;
   description: string;
   zone: { x: number; y: number; w: number; h: number };
 }
@@ -59,22 +61,22 @@ export function sqCmToSqIn(sqCm: number): number { return sqCm / 6.4516; }
 // ─── Body Part Catalogue ─────────────────────────────────────
 
 export const BODY_PARTS: BodyPart[] = [
-  { id: "inner_forearm", label: "Inner Forearm", group: "arm", widthRatio: 0.045, heightRatio: 0.15, difficulty: 1.0, description: "Flat surface, low pain, excellent visibility. Most popular first-tattoo placement.", zone: { x: 0.27, y: 0.38, w: 0.10, h: 0.18 } },
-  { id: "outer_forearm", label: "Outer Forearm", group: "arm", widthRatio: 0.05, heightRatio: 0.15, difficulty: 1.0, description: "Slightly curved surface. Good for wrapping designs.", zone: { x: 0.645, y: 0.38, w: 0.10, h: 0.18 } },
-  { id: "upper_arm", label: "Upper Arm / Bicep", group: "arm", widthRatio: 0.07, heightRatio: 0.12, difficulty: 1.0, description: "Large flat area. Easy to conceal. Popular for medium-to-large pieces.", zone: { x: 0.26, y: 0.26, w: 0.10, h: 0.12 } },
-  { id: "shoulder", label: "Shoulder / Deltoid", group: "arm", widthRatio: 0.08, heightRatio: 0.08, difficulty: 1.1, description: "Curved surface follows muscle contour. Good for rounded designs.", zone: { x: 0.25, y: 0.185, w: 0.11, h: 0.07 } },
-  { id: "wrist", label: "Wrist", group: "arm", widthRatio: 0.035, heightRatio: 0.04, difficulty: 1.2, description: "Small area, thin skin, higher pain. Popular for minimalist designs.", zone: { x: 0.27, y: 0.56, w: 0.09, h: 0.04 } },
-  { id: "chest", label: "Chest", group: "torso", widthRatio: 0.18, heightRatio: 0.12, difficulty: 1.1, description: "Large canvas. Sternum area is more painful than pectoral muscle.", zone: { x: 0.37, y: 0.20, w: 0.26, h: 0.12 } },
-  { id: "upper_back", label: "Upper Back", group: "torso", widthRatio: 0.20, heightRatio: 0.15, difficulty: 1.0, description: "Largest flat surface on the body. Ideal for large detailed pieces.", zone: { x: 0.37, y: 0.20, w: 0.26, h: 0.15 } },
-  { id: "ribs", label: "Ribs / Side Torso", group: "torso", widthRatio: 0.08, heightRatio: 0.15, difficulty: 1.4, description: "Thin skin over bone — one of the most painful placements. Stunning results.", zone: { x: 0.365, y: 0.28, w: 0.06, h: 0.16 } },
-  { id: "sternum", label: "Sternum / Underboob", group: "torso", widthRatio: 0.10, heightRatio: 0.08, difficulty: 1.4, description: "Centre of chest between ribs. High pain, high impact.", zone: { x: 0.42, y: 0.30, w: 0.16, h: 0.08 } },
-  { id: "lower_back", label: "Lower Back", group: "torso", widthRatio: 0.16, heightRatio: 0.10, difficulty: 1.1, description: "Wide horizontal area above the waistline.", zone: { x: 0.37, y: 0.42, w: 0.26, h: 0.07 } },
-  { id: "thigh", label: "Thigh", group: "leg", widthRatio: 0.09, heightRatio: 0.18, difficulty: 1.0, description: "Large surface, moderate pain. Easy to conceal. Great for big pieces.", zone: { x: 0.39, y: 0.52, w: 0.10, h: 0.18 } },
-  { id: "calf", label: "Calf", group: "leg", widthRatio: 0.06, heightRatio: 0.16, difficulty: 1.1, description: "Curved muscle surface. Visible when wearing shorts.", zone: { x: 0.52, y: 0.70, w: 0.09, h: 0.16 } },
-  { id: "ankle", label: "Ankle", group: "leg", widthRatio: 0.04, heightRatio: 0.04, difficulty: 1.3, description: "Small bony area, higher pain. Popular for minimalist and wrap designs.", zone: { x: 0.52, y: 0.88, w: 0.08, h: 0.04 } },
-  { id: "back_of_neck", label: "Back of Neck", group: "other", widthRatio: 0.06, heightRatio: 0.05, difficulty: 1.3, description: "Small area, moderate pain. Easily hidden by hair or collar.", zone: { x: 0.44, y: 0.12, w: 0.12, h: 0.05 } },
-  { id: "behind_ear", label: "Behind Ear", group: "other", widthRatio: 0.025, heightRatio: 0.03, difficulty: 1.4, description: "Tiny, delicate area. Higher pain due to thin skin and proximity to bone.", zone: { x: 0.40, y: 0.07, w: 0.06, h: 0.04 } },
-  { id: "hand", label: "Back of Hand", group: "other", widthRatio: 0.045, heightRatio: 0.05, difficulty: 1.5, description: "High visibility, high pain, faster fading due to frequent washing and sun exposure.", zone: { x: 0.25, y: 0.58, w: 0.08, h: 0.05 } },
+  { id: "inner_forearm", label: "Inner Forearm", group: "arm", widthRatio: 0.045, heightRatio: 0.15, difficulty: 1.0, circumferenceCm: 26, description: "Flat surface, low pain, excellent visibility. Most popular first-tattoo placement.", zone: { x: 0.27, y: 0.38, w: 0.10, h: 0.18 } },
+  { id: "outer_forearm", label: "Outer Forearm", group: "arm", widthRatio: 0.05, heightRatio: 0.15, difficulty: 1.0, circumferenceCm: 26, description: "Slightly curved surface. Good for wrapping designs.", zone: { x: 0.645, y: 0.38, w: 0.10, h: 0.18 } },
+  { id: "upper_arm", label: "Upper Arm / Bicep", group: "arm", widthRatio: 0.07, heightRatio: 0.12, difficulty: 1.0, circumferenceCm: 32, description: "Large flat area. Easy to conceal. Popular for medium-to-large pieces.", zone: { x: 0.26, y: 0.26, w: 0.10, h: 0.12 } },
+  { id: "shoulder", label: "Shoulder / Deltoid", group: "arm", widthRatio: 0.08, heightRatio: 0.08, difficulty: 1.1, circumferenceCm: 42, description: "Curved surface follows muscle contour. Good for rounded designs.", zone: { x: 0.25, y: 0.185, w: 0.11, h: 0.07 } },
+  { id: "wrist", label: "Wrist", group: "arm", widthRatio: 0.035, heightRatio: 0.04, difficulty: 1.2, circumferenceCm: 17, description: "Small area, thin skin, higher pain. Popular for minimalist designs.", zone: { x: 0.27, y: 0.56, w: 0.09, h: 0.04 } },
+  { id: "chest", label: "Chest", group: "torso", widthRatio: 0.18, heightRatio: 0.12, difficulty: 1.1, circumferenceCm: 100, description: "Large canvas. Sternum area is more painful than pectoral muscle.", zone: { x: 0.37, y: 0.20, w: 0.26, h: 0.12 } },
+  { id: "upper_back", label: "Upper Back", group: "torso", widthRatio: 0.20, heightRatio: 0.15, difficulty: 1.0, circumferenceCm: 100, description: "Largest flat surface on the body. Ideal for large detailed pieces.", zone: { x: 0.37, y: 0.20, w: 0.26, h: 0.15 } },
+  { id: "ribs", label: "Ribs / Side Torso", group: "torso", widthRatio: 0.08, heightRatio: 0.15, difficulty: 1.4, circumferenceCm: 90, description: "Thin skin over bone — one of the most painful placements. Stunning results.", zone: { x: 0.365, y: 0.28, w: 0.06, h: 0.16 } },
+  { id: "sternum", label: "Sternum / Underboob", group: "torso", widthRatio: 0.10, heightRatio: 0.08, difficulty: 1.4, circumferenceCm: 90, description: "Centre of chest between ribs. High pain, high impact.", zone: { x: 0.42, y: 0.30, w: 0.16, h: 0.08 } },
+  { id: "lower_back", label: "Lower Back", group: "torso", widthRatio: 0.16, heightRatio: 0.10, difficulty: 1.1, circumferenceCm: 95, description: "Wide horizontal area above the waistline.", zone: { x: 0.37, y: 0.42, w: 0.26, h: 0.07 } },
+  { id: "thigh", label: "Thigh", group: "leg", widthRatio: 0.09, heightRatio: 0.18, difficulty: 1.0, circumferenceCm: 55, description: "Large surface, moderate pain. Easy to conceal. Great for big pieces.", zone: { x: 0.39, y: 0.52, w: 0.10, h: 0.18 } },
+  { id: "calf", label: "Calf", group: "leg", widthRatio: 0.06, heightRatio: 0.16, difficulty: 1.1, circumferenceCm: 37, description: "Curved muscle surface. Visible when wearing shorts.", zone: { x: 0.52, y: 0.70, w: 0.09, h: 0.16 } },
+  { id: "ankle", label: "Ankle", group: "leg", widthRatio: 0.04, heightRatio: 0.04, difficulty: 1.3, circumferenceCm: 22, description: "Small bony area, higher pain. Popular for minimalist and wrap designs.", zone: { x: 0.52, y: 0.88, w: 0.08, h: 0.04 } },
+  { id: "back_of_neck", label: "Back of Neck", group: "other", widthRatio: 0.06, heightRatio: 0.05, difficulty: 1.3, circumferenceCm: 38, description: "Small area, moderate pain. Easily hidden by hair or collar.", zone: { x: 0.44, y: 0.12, w: 0.12, h: 0.05 } },
+  { id: "behind_ear", label: "Behind Ear", group: "other", widthRatio: 0.025, heightRatio: 0.03, difficulty: 1.4, circumferenceCm: 56, description: "Tiny, delicate area. Higher pain due to thin skin and proximity to bone.", zone: { x: 0.40, y: 0.07, w: 0.06, h: 0.04 } },
+  { id: "hand", label: "Back of Hand", group: "other", widthRatio: 0.045, heightRatio: 0.05, difficulty: 1.5, circumferenceCm: 21, description: "High visibility, high pain, faster fading due to frequent washing and sun exposure.", zone: { x: 0.25, y: 0.58, w: 0.08, h: 0.05 } },
 ];
 
 export function getBodyPart(id: string): BodyPart | null {
@@ -261,4 +263,57 @@ export function fmtTime(totalMinutes: number): string {
   if (totalMinutes < 60) return `${totalMinutes} min`;
   const hrs = Math.round((totalMinutes / 60) * 10) / 10;
   return `${hrs} hr${hrs !== 1 ? "s" : ""}`;
+}
+
+/* ── AR wrap + design processing helpers ── */
+
+/**
+ * How far around the limb the design wraps, in radians. Arc length =
+ * tattoo width; span = 2π · width / circumference, capped at a half
+ * cylinder (π — the far side isn't visible anyway). Missing inputs fall
+ * back to π, the pre-calibration look.
+ */
+export function wrapSpanRadians(tattooWCm: number, circumferenceCm: number): number {
+  if (!(tattooWCm > 0) || !(circumferenceCm > 0)) return Math.PI;
+  return Math.min(Math.PI, (2 * Math.PI * tattooWCm) / circumferenceCm);
+}
+
+export interface PixelBuffer {
+  data: Uint8ClampedArray | number[];
+  width: number;
+  height: number;
+}
+
+/**
+ * Key out a uniform background in-place: samples the four corners; when
+ * they agree on a colour, pixels near that colour go transparent (soft
+ * threshold). Returns false (buffer untouched) when the corners disagree —
+ * i.e. the image has no uniform background to remove. Fixes dark-boxed
+ * logo uploads under multiply blending.
+ */
+export function keyOutBackground(px: PixelBuffer, tolerance = 70): boolean {
+  const { data, width, height } = px;
+  if (width < 2 || height < 2) return false;
+  const at = (x: number, y: number): [number, number, number] => {
+    const i = (y * width + x) * 4;
+    return [Number(data[i]), Number(data[i + 1]), Number(data[i + 2])];
+  };
+  const corners = [at(0, 0), at(width - 1, 0), at(0, height - 1), at(width - 1, height - 1)];
+  const dist = (a: number[], b: number[]): number =>
+    Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
+  for (let i = 0; i < corners.length; i++) {
+    for (let j = i + 1; j < corners.length; j++) {
+      if (dist(corners[i], corners[j]) > 110) return false;
+    }
+  }
+  const bg = [0, 1, 2].map((c) => corners.reduce((s2, k) => s2 + k[c], 0) / 4);
+  const soft = tolerance * 0.6;
+  for (let i = 0; i < width * height * 4; i += 4) {
+    const d = dist([Number(data[i]), Number(data[i + 1]), Number(data[i + 2])], bg);
+    if (d < soft) data[i + 3] = 0;
+    else if (d < tolerance) {
+      data[i + 3] = Math.round(Number(data[i + 3]) * ((d - soft) / (tolerance - soft)));
+    }
+  }
+  return true;
 }

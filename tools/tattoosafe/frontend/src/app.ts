@@ -112,7 +112,7 @@ function updateSizeInfo(): void {
   }
 
   // Reflect the size settings in the camera preview.
-  camera?.setTattooSize(w, h, bp?.label ?? "");
+  camera?.setTattooSize(w, h, bp?.label ?? "", bp?.circumferenceCm);
 }
 
 function setupFileUpload(): void {

@@ -139,3 +139,47 @@ describe("computeWrapStrips", () => {
     for (const s of strips) expect(s.u1).toBeGreaterThan(s.u0);
   });
 });
+
+import { wrapShadeAt } from "../camera";
+
+describe("computeWrapStrips with angular span", () => {
+  it("default span π matches the half-cylinder projection", () => {
+    const { projW } = computeWrapStrips(400, 300, 32);
+    expect(projW).toBeCloseTo((300 * 2) / Math.PI, 6);
+  });
+  it("small span ≈ flat: projection approaches the flat width", () => {
+    const { projW } = computeWrapStrips(400, 300, 32, 0.2);
+    expect(projW).toBeGreaterThan(297); // sin(0.1)/0.1 ≈ 0.9983
+    expect(projW).toBeLessThanOrEqual(300);
+  });
+  it("span shrinks projection monotonically", () => {
+    const p1 = computeWrapStrips(400, 300, 32, 1.0).projW;
+    const p2 = computeWrapStrips(400, 300, 32, 2.0).projW;
+    const p3 = computeWrapStrips(400, 300, 32, Math.PI).projW;
+    expect(p1).toBeGreaterThan(p2);
+    expect(p2).toBeGreaterThan(p3);
+  });
+  it("strips stay contiguous and cover the source at any span", () => {
+    for (const span of [0.3, 1.2, Math.PI]) {
+      const { projW, strips } = computeWrapStrips(500, 280, 24, span);
+      for (let i = 1; i < strips.length; i++) {
+        expect(strips[i].x0).toBeCloseTo(strips[i - 1].x1, 9);
+        expect(strips[i].u0).toBeCloseTo(strips[i - 1].u1, 6);
+      }
+      expect(strips[0].x0).toBeCloseTo(-projW / 2, 9);
+      expect(strips[0].u0).toBeCloseTo(0, 6);
+      expect(strips[strips.length - 1].u1).toBeCloseTo(500, 6);
+    }
+  });
+});
+
+describe("wrapShadeAt", () => {
+  it("flat span barely shades", () => {
+    expect(wrapShadeAt(0, 0.1)).toBeGreaterThan(0.99);
+    expect(wrapShadeAt(1, 0.1)).toBeGreaterThan(0.99);
+  });
+  it("half wrap shades edges down to the floor, center stays bright", () => {
+    expect(wrapShadeAt(0.5, Math.PI)).toBeCloseTo(1, 5);
+    expect(wrapShadeAt(0, Math.PI)).toBeCloseTo(0.25, 2);
+  });
+});
