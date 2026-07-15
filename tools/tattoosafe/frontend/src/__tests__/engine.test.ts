@@ -371,3 +371,54 @@ describe("silhouette zone alignment", () => {
     }
   });
 });
+
+import { wrapSpanRadians, keyOutBackground, BODY_PARTS as BP2 } from "../engine";
+
+describe("wrapSpanRadians + circumference data", () => {
+  it("every body part carries a plausible circumference", () => {
+    for (const bp of BP2) {
+      expect(bp.circumferenceCm).toBeGreaterThan(10);
+      expect(bp.circumferenceCm).toBeLessThan(130);
+    }
+  });
+  it("span is proportional to width over circumference", () => {
+    // 6.5cm-wide piece on a 26cm forearm covers 1/4 of the circumference → π/2
+    expect(wrapSpanRadians(6.5, 26)).toBeCloseTo(Math.PI / 2, 6);
+  });
+  it("caps at a half cylinder", () => {
+    expect(wrapSpanRadians(100, 20)).toBe(Math.PI);
+  });
+  it("falls back to π when inputs are missing", () => {
+    expect(wrapSpanRadians(0, 26)).toBe(Math.PI);
+    expect(wrapSpanRadians(10, 0)).toBe(Math.PI);
+  });
+  it("small tattoo on a large limb is nearly flat", () => {
+    expect(wrapSpanRadians(3, 55)).toBeLessThan(0.35);
+  });
+});
+
+describe("keyOutBackground", () => {
+  const buf = (pixels: number[][]): { data: number[]; width: number; height: number } => ({
+    data: pixels.flat(),
+    width: 4,
+    height: 4,
+  });
+  const px = (r: number, g: number, b: number): number[] => [r, g, b, 255];
+
+  it("keys a uniform dark background, keeps a distinct subject", () => {
+    const dark = px(20, 20, 25);
+    const gold = px(212, 164, 78);
+    const grid = Array.from({ length: 16 }, (_, i) => ([5, 6, 9, 10].includes(i) ? [...gold] : [...dark]));
+    const b = buf(grid);
+    expect(keyOutBackground(b)).toBe(true);
+    expect(b.data[3]).toBe(0);              // corner is transparent
+    expect(b.data[(5 * 4) + 3]).toBe(255);  // subject untouched
+  });
+
+  it("refuses when corners disagree (photo, not a logo)", () => {
+    const grid = Array.from({ length: 16 }, (_, i) => px(i * 15, 120, 200 - i * 10));
+    const b = buf(grid);
+    expect(keyOutBackground(b)).toBe(false);
+    expect(b.data[3]).toBe(255);
+  });
+});

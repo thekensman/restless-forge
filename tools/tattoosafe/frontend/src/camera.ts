@@ -10,6 +10,8 @@
  * in setupCameraPreview().
  */
 
+import { wrapSpanRadians, keyOutBackground } from "./engine";
+
 // ─── Overlay state & pure helpers ────────────────────────────
 
 export interface OverlayState {
@@ -72,24 +74,36 @@ export interface WrapStrip {
  * the source ranges cover the design exactly.
  */
 export function computeWrapStrips(
-  srcW: number, dispW: number, strips: number
+  srcW: number, dispW: number, strips: number, span: number = Math.PI
 ): { projW: number; strips: WrapStrip[] } {
-  const R = dispW / Math.PI;
-  const projW = 2 * R;
+  // The design (arc length dispW) wraps `span` radians of a cylinder:
+  //   R = dispW / span,  dest x = R·sin(θ),  θ ∈ [−span/2, span/2]
+  // span→0 degenerates to flat (projW → dispW); span=π is a half wrap.
+  const sp = Math.min(Math.max(span, 0.02), Math.PI);
+  const R = dispW / sp;
+  const X = R * Math.sin(sp / 2);
+  const projW = 2 * X;
   const out: WrapStrip[] = [];
   for (let i = 0; i < strips; i++) {
-    const x0 = -R + (projW * i) / strips;
-    const x1 = -R + (projW * (i + 1)) / strips;
+    const x0 = -X + (projW * i) / strips;
+    const x1 = -X + (projW * (i + 1)) / strips;
     const th0 = Math.asin(Math.max(-1, Math.min(1, x0 / R)));
     const th1 = Math.asin(Math.max(-1, Math.min(1, x1 / R)));
     out.push({
-      u0: ((th0 + Math.PI / 2) / Math.PI) * srcW,
-      u1: ((th1 + Math.PI / 2) / Math.PI) * srcW,
+      u0: ((th0 + sp / 2) / sp) * srcW,
+      u1: ((th1 + sp / 2) / sp) * srcW,
       x0,
       x1,
     });
   }
   return { projW, strips: out };
+}
+
+/** Lambertian-ish shade at normalized stage position t∈[0,1] for a wrap of `span` radians. */
+export function wrapShadeAt(t: number, span: number): number {
+  const sp = Math.min(Math.max(span, 0.02), Math.PI);
+  const theta = Math.asin((2 * t - 1) * Math.sin(sp / 2));
+  return Math.max(Math.cos(theta), 0.25);
 }
 
 /**
@@ -139,8 +153,9 @@ interface CameraRefs {
 export interface CameraController {
   /** Give the preview the (new) design image. Enables the start button. */
   setDesign(img: HTMLImageElement): void;
-  /** Reflect the size panel: real-world dimensions drive the overlay's base size. */
-  setTattooSize(wCm: number, hCm: number, placementLabel: string): void;
+  /** Reflect the size panel: real-world dimensions drive the overlay's base
+   *  size, and the placement's circumference drives the wrap curvature. */
+  setTattooSize(wCm: number, hCm: number, placementLabel: string, circumferenceCm?: number): void;
   /** True while the camera is streaming. */
   isActive(): boolean;
 }
@@ -172,9 +187,37 @@ export function setupCameraPreview(
   let tattooWCm = 0;
   let tattooHCm = 0;
   let placement = "";
+  let circumferenceCm = 0;
   const wrapToggle = document.querySelector<HTMLInputElement>("#ar-wrap");
   const wrapLabel = document.querySelector<HTMLElement>("#ar-wrap-label");
+  const removeBgToggle = document.querySelector<HTMLInputElement>("#ar-removebg");
+  const removeBgLabel = document.querySelector<HTMLElement>("#ar-removebg-label");
   let wrapCanvas: HTMLCanvasElement | null = null;
+  let lumCanvas: HTMLCanvasElement | null = null;
+  let designProc: HTMLCanvasElement | null = null;
+
+  // "Remove design background": corner-keyed transparency so logo uploads
+  // with a solid backdrop don't render as a dark box under multiply blend.
+  function rebuildProcessedDesign(): void {
+    designProc = null;
+    if (!design || !removeBgToggle?.checked) return;
+    try {
+      const c = document.createElement("canvas");
+      c.width = design.naturalWidth;
+      c.height = design.naturalHeight;
+      const cctx = c.getContext("2d", { willReadFrequently: true });
+      if (!cctx) return;
+      cctx.drawImage(design, 0, 0);
+      const px = cctx.getImageData(0, 0, c.width, c.height);
+      if (keyOutBackground(px)) {
+        cctx.putImageData(px, 0, 0);
+        designProc = c;
+      }
+    } catch {
+      designProc = null; // tainted canvas or OOM: fall back to the raw design
+    }
+  }
+  removeBgToggle?.addEventListener("change", rebuildProcessedDesign);
   let video: HTMLVideoElement | null = null;
   let stream: MediaStream | null = null;
   let raf = 0;
@@ -193,6 +236,38 @@ export function setupCameraPreview(
       y: ((e.clientY - r.top) / r.height) * refs.canvas.height,
     };
   };
+
+  /**
+   * Per-column relative luminance of the frame region under the overlay,
+   * normalized around its own mean (so overall exposure doesn't dim the
+   * design — only the light GRADIENT across the limb shows up). Uses an
+   * 8×1 downscale of the region, cheap enough for every frame.
+   */
+  function sampleLuminance(cx: number, cy: number, w: number, h: number): number[] | null {
+    try {
+      const c = (lumCanvas ??= document.createElement("canvas"));
+      c.width = 8;
+      c.height = 1;
+      const lctx = c.getContext("2d", { willReadFrequently: true });
+      if (!lctx) return null;
+      const sx = Math.max(0, cx - w / 2);
+      const sy = Math.max(0, cy - h / 2);
+      const sw = Math.min(w, refs.canvas.width - sx);
+      const sh = Math.min(h, refs.canvas.height - sy);
+      if (sw < 4 || sh < 4) return null;
+      lctx.drawImage(refs.canvas, sx, sy, sw, sh, 0, 0, 8, 1);
+      const d = lctx.getImageData(0, 0, 8, 1).data;
+      const lum: number[] = [];
+      for (let i = 0; i < 8; i++) {
+        lum.push(0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]);
+      }
+      const mean = lum.reduce((a, b) => a + b, 0) / lum.length;
+      if (mean < 8) return null;
+      return lum.map((v) => Math.min(1.35, Math.max(0.65, v / mean)));
+    } catch {
+      return null;
+    }
+  }
 
   function render(): void {
     if (!video || !ctx) return;
@@ -218,20 +293,27 @@ export function setupCameraPreview(
       } else {
         ({ w, h } = drawSize(design.naturalWidth, design.naturalHeight, canvas.width, state.scale));
       }
+      // Sample the actual camera pixels under the overlay (before it is
+      // drawn) so the wrap shading follows the limb's real lighting.
+      const lum = wrapToggle?.checked ? sampleLuminance(state.x, state.y, w, h) : null;
+
       ctx.save();
       ctx.translate(state.x, state.y);
       ctx.rotate((getRotation() * Math.PI) / 180);
       const alpha = getOpacity();
+      const src: CanvasImageSource = designProc ?? design;
       // Multiply blend settles the design into skin tones like real ink.
       ctx.globalCompositeOperation = "multiply";
       if (wrapToggle?.checked) {
-        // Cylindrical illusion without tracking (see computeWrapStrips):
-        // strips render seam-free onto a cached offscreen canvas at full
-        // alpha, a smooth cos(θ) gradient shades the sides via
-        // destination-in, and the result composites onto the frame ONCE —
-        // per-strip alpha on the main canvas left antialiased seams
-        // (visible vertical striping) in the previous implementation.
-        const { projW, strips } = computeWrapStrips(design.naturalWidth, w, 64);
+        // Cylindrical illusion, calibrated to the REAL inputs: the wrap
+        // span comes from tattoo width vs the placement's circumference
+        // (small piece on a thigh ≈ flat; wide piece on a wrist curls
+        // hard), and the side shading is modulated by the sampled
+        // luminance of the camera frame so it tracks the actual lighting.
+        // Strips render seam-free onto a cached offscreen canvas and
+        // composite once.
+        const span = wrapSpanRadians(tattooWCm, circumferenceCm);
+        const { projW, strips } = computeWrapStrips(design.naturalWidth, w, 64, span);
         const off = (wrapCanvas ??= document.createElement("canvas"));
         const offW = Math.max(2, Math.ceil(projW));
         const offH = Math.max(2, Math.ceil(h));
@@ -243,14 +325,15 @@ export function setupCameraPreview(
         if (octx) {
           octx.clearRect(0, 0, offW, offH);
           for (const s of strips) {
-            octx.drawImage(design, s.u0, 0, s.u1 - s.u0, design.naturalHeight,
+            octx.drawImage(src, s.u0, 0, s.u1 - s.u0, design.naturalHeight,
                            s.x0 + projW / 2, 0, s.x1 - s.x0, offH);
           }
           const g = octx.createLinearGradient(0, 0, offW, 0);
           for (let i = 0; i <= 8; i++) {
             const t = i / 8;
-            const shade = 0.35 + 0.65 * Math.cos((t - 0.5) * Math.PI);
-            g.addColorStop(t, `rgba(0,0,0,${shade.toFixed(3)})`);
+            let shade = wrapShadeAt(t, span);
+            if (lum) shade *= lum[Math.min(lum.length - 1, Math.floor(t * lum.length))];
+            g.addColorStop(t, `rgba(0,0,0,${Math.min(1, shade).toFixed(3)})`);
           }
           octx.globalCompositeOperation = "destination-in";
           octx.fillStyle = g;
@@ -261,7 +344,7 @@ export function setupCameraPreview(
         }
       } else {
         ctx.globalAlpha = alpha;
-        ctx.drawImage(design, -w / 2, -h / 2, w, h);
+        ctx.drawImage(src, -w / 2, -h / 2, w, h);
       }
       ctx.restore();
     }
@@ -292,6 +375,7 @@ export function setupCameraPreview(
     refs.stopBtn.hidden = false;
     refs.shotBtn.hidden = false;
     if (wrapLabel) wrapLabel.hidden = false;
+    if (removeBgLabel) removeBgLabel.hidden = false;
     updateHint();
     raf = requestAnimationFrame(render);
   }
@@ -306,6 +390,7 @@ export function setupCameraPreview(
     refs.stopBtn.hidden = true;
     refs.shotBtn.hidden = true;
     if (wrapLabel) wrapLabel.hidden = true;
+    if (removeBgLabel) removeBgLabel.hidden = true;
     refs.hint.textContent = "";
     ctx?.clearRect(0, 0, refs.canvas.width, refs.canvas.height);
   }
@@ -369,16 +454,18 @@ export function setupCameraPreview(
   function updateHint(): void {
     if (!stream) return;
     const size = tattooWCm > 0 ? `${tattooWCm} × ${tattooHCm} cm${placement ? " on " + placement : ""} · ` : "";
-    refs.hint.textContent = `${size}drag to position · pinch to calibrate scale · sliders set angle & opacity`;
+    refs.hint.textContent = `${size}drag to position · pinch to calibrate scale · wrap curvature follows your size + placement`;
   }
 
   return {
     setDesign(img: HTMLImageElement): void {
       design = img;
+      rebuildProcessedDesign();
       refs.startBtn.disabled = false;
       if (!stream) refs.hint.textContent = "Design loaded — start the camera to preview it on your body.";
     },
-    setTattooSize(wCm: number, hCm: number, placementLabel: string): void {
+    setTattooSize(wCm: number, hCm: number, placementLabel: string, circCm?: number): void {
+      circumferenceCm = circCm ?? 0;
       tattooWCm = wCm;
       tattooHCm = hCm;
       placement = placementLabel;
