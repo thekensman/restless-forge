@@ -15,6 +15,7 @@ Several tools carry rate data that changes yearly (see
 | IRS standard mileage rate | `tools/side-hustle-reality/frontend/src/index.html` + `scripts/maintenance/data/mileage_rate.json` | IRS Notice (~late Dec) |
 | CPI annual average | `tools/is-my-raise-real/frontend/src/index.html` | BLS (~Jan 11; `scripts/maintenance/scripts/update_cpi.py` fetches it) |
 | Subscription preset prices | `tools/subscription-audit/frontend/src/index.html` + `scripts/maintenance/data/subscription_prices.json` | vendor pricing pages |
+| TattooSafe hourly-rate tiers (sanity pass only — market ranges, not year-keyed) | `tools/tattoosafe/frontend/src/engine.ts` (`HOURLY_RATES`) | industry surveys / studio listings |
 
 Instead of one scheduled job per tool, there is **one consolidated
 "Annual data refresh" routine** covering the whole matrix, plus a
@@ -83,7 +84,11 @@ updating everything to the CURRENT year:
    tools/subscription-audit/frontend/src/index.html against current
    vendor pricing; update the file and
    scripts/maintenance/data/subscription_prices.json for clear changes.
-5. Search all tool copy for hard-coded stale year references tied to
+5. TattooSafe HOURLY_RATES (tools/tattoosafe/frontend/src/engine.ts):
+   sanity-pass the four tier ranges against current studio rates; only
+   adjust on clear, sourced market drift (these are ranges, not indexed
+   figures — most years this is a no-op).
+6. Search all tool copy for hard-coded stale year references tied to
    this data and update them.
 
 If any figure is unpublished or sources conflict, do NOT guess — open
