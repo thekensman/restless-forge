@@ -177,6 +177,12 @@ describe("generateSilhouetteSvg", () => {
   it("returns empty for bad ID", () => {
     expect(generateSilhouetteSvg("nonexistent", 170, 8, 12)).toBe("");
   });
+  it("labels dimensions in inches when unit is 'in'", () => {
+    const svg = generateSilhouetteSvg("inner_forearm", 170, 10.16, 12.7, { unit: "in" });
+    expect(svg).toContain("4 in");
+    expect(svg).toContain("5 in");
+    expect(svg).not.toContain("cm</text>");
+  });
 });
 
 // ─── Pricing Market Data ─────────────────────────────────────
@@ -372,23 +378,25 @@ describe("silhouette zone alignment", () => {
   });
 });
 
-import { removeFlatBackground } from "../engine";
+import { removeFlatBackground, invertForDarkBackdrop } from "../engine";
+
+// Build a WxH RGBA buffer from a grid of [r,g,b] rows; alpha defaults 255.
+const grid = (rows: number[][][]): { data: number[]; width: number; height: number } => {
+  const height = rows.length;
+  const width = rows[0].length;
+  const data: number[] = [];
+  for (const row of rows) for (const [r, g, b] of row) data.push(r, g, b, 255);
+  return { data, width, height };
+};
+const alphaAt = (buf: { data: number[]; width: number }, x: number, y: number): number =>
+  buf.data[(y * buf.width + x) * 4 + 3];
+
+const D: [number, number, number] = [20, 20, 25]; // background (dark)
+const S: [number, number, number] = [212, 164, 78]; // subject (gold)
+const W: [number, number, number] = [248, 248, 248]; // white (matte / light lines)
+const K: [number, number, number] = [5, 5, 5]; // near-black field
 
 describe("removeFlatBackground (edge flood-fill)", () => {
-  // Build a WxH RGBA buffer from a grid of [r,g,b] rows; alpha defaults 255.
-  const grid = (rows: number[][][]): { data: number[]; width: number; height: number } => {
-    const height = rows.length;
-    const width = rows[0].length;
-    const data: number[] = [];
-    for (const row of rows) for (const [r, g, b] of row) data.push(r, g, b, 255);
-    return { data, width, height };
-  };
-  const alphaAt = (buf: { data: number[]; width: number }, x: number, y: number): number =>
-    buf.data[(y * buf.width + x) * 4 + 3];
-
-  const D: [number, number, number] = [20, 20, 25]; // background (dark)
-  const S: [number, number, number] = [212, 164, 78]; // subject (gold)
-
   it("removes a border-connected flat background, keeps the subject", () => {
     const buf = grid([
       [D, D, D, D, D],
@@ -397,9 +405,23 @@ describe("removeFlatBackground (edge flood-fill)", () => {
       [D, S, S, S, D],
       [D, D, D, D, D],
     ]);
-    expect(removeFlatBackground(buf)).toBe(true);
+    const res = removeFlatBackground(buf);
+    expect(res.removed).toBe(true);
     expect(alphaAt(buf, 0, 0)).toBe(0);   // corner removed
     expect(alphaAt(buf, 2, 2)).toBe(255); // center subject kept
+  });
+
+  it("reports the removed backdrop's luminance", () => {
+    const buf = grid([
+      [D, D, D, D, D],
+      [D, S, S, S, D],
+      [D, S, S, S, D],
+      [D, S, S, S, D],
+      [D, D, D, D, D],
+    ]);
+    const res = removeFlatBackground(buf);
+    expect(res.backdropLum).not.toBeNull();
+    expect(res.backdropLum!).toBeLessThan(30); // D is dark
   });
 
   it("KEEPS a background-coloured hole enclosed by the subject (flood-fill's win over a global key)", () => {
@@ -410,7 +432,7 @@ describe("removeFlatBackground (edge flood-fill)", () => {
       [D, S, S, S, D],
       [D, D, D, D, D],
     ]);
-    expect(removeFlatBackground(buf)).toBe(true);
+    expect(removeFlatBackground(buf).removed).toBe(true);
     expect(alphaAt(buf, 0, 0)).toBe(0);   // outer background gone
     expect(alphaAt(buf, 2, 2)).toBe(255); // enclosed pocket survives
   });
@@ -420,7 +442,9 @@ describe("removeFlatBackground (edge flood-fill)", () => {
       Array.from({ length: 5 }, (_, x): [number, number, number] => [x * 50, 120, 200 - y * 40]),
     );
     const buf = grid(rows);
-    expect(removeFlatBackground(buf)).toBe(false);
+    const res = removeFlatBackground(buf);
+    expect(res.removed).toBe(false);
+    expect(res.backdropLum).toBeNull();
     expect(alphaAt(buf, 0, 0)).toBe(255); // untouched
   });
 
@@ -433,8 +457,79 @@ describe("removeFlatBackground (edge flood-fill)", () => {
       [near(4), S, S, S, near(4)],
       [near(0), near(4), near(8), near(4), near(0)],
     ]);
-    expect(removeFlatBackground(buf)).toBe(true);
+    expect(removeFlatBackground(buf).removed).toBe(true);
     expect(alphaAt(buf, 0, 0)).toBe(0);
     expect(alphaAt(buf, 2, 2)).toBe(255);
+  });
+
+  it("peels a matte frame AND the flat field behind it (white-bordered black poster), keeping the art", () => {
+    // 20×20: 1px white matte frame, black field inside, a 6×2 gold bar as
+    // the "art". The white frame and the black field are separate flat
+    // fields — both must go; the art must stay.
+    const size = 20;
+    const rows: number[][][] = [];
+    for (let y = 0; y < size; y++) {
+      const row: number[][] = [];
+      for (let x = 0; x < size; x++) {
+        const isFrame = x === 0 || y === 0 || x === size - 1 || y === size - 1;
+        const isArt = y >= 9 && y <= 10 && x >= 7 && x <= 12;
+        row.push(isFrame ? W : isArt ? S : K);
+      }
+      rows.push(row);
+    }
+    const buf = grid(rows);
+    const res = removeFlatBackground(buf);
+    expect(res.removed).toBe(true);
+    expect(alphaAt(buf, 0, 0)).toBe(0);    // matte frame removed
+    expect(alphaAt(buf, 3, 3)).toBe(0);    // black field removed
+    expect(alphaAt(buf, 8, 9)).toBe(255);  // art kept
+    expect(res.backdropLum!).toBeLessThan(30); // dominant backdrop = the black field
+  });
+
+  it("does NOT eat thin line art after removing the primary background", () => {
+    // 20×20 white background with a thin dark rectangle outline (the
+    // design). After the white is removed the lines form the next
+    // frontier, but a fill over them is thin (area ≈ boundary) and must
+    // be rolled back.
+    const size = 20;
+    const rows: number[][][] = [];
+    for (let y = 0; y < size; y++) {
+      const row: number[][] = [];
+      for (let x = 0; x < size; x++) {
+        const onOutline =
+          (x >= 4 && x <= 15 && (y === 4 || y === 15)) ||
+          (y >= 4 && y <= 15 && (x === 4 || x === 15));
+        row.push(onOutline ? K : W);
+      }
+      rows.push(row);
+    }
+    const buf = grid(rows);
+    expect(removeFlatBackground(buf).removed).toBe(true);
+    expect(alphaAt(buf, 0, 0)).toBe(0);    // white background removed
+    expect(alphaAt(buf, 4, 4)).toBe(255);  // outline (the design) kept
+    expect(alphaAt(buf, 10, 10)).toBe(255); // enclosed pocket kept
+  });
+});
+
+describe("invertForDarkBackdrop", () => {
+  it("inverts opaque pixels when the removed backdrop was dark", () => {
+    const buf = grid([[W, K], [S, W]]);
+    buf.data[7] = 0; // make K transparent (as if removed)
+    expect(invertForDarkBackdrop(buf, 4)).toBe(true);
+    expect(buf.data.slice(0, 3)).toEqual([7, 7, 7]); // white → near-black
+    expect(buf.data.slice(4, 7)).toEqual([...K]);    // transparent pixel untouched
+    expect(buf.data.slice(8, 11)).toEqual([255 - S[0], 255 - S[1], 255 - S[2]]);
+  });
+
+  it("leaves the design alone when the backdrop was light", () => {
+    const buf = grid([[K, W]]);
+    expect(invertForDarkBackdrop(buf, 250)).toBe(false);
+    expect(buf.data.slice(0, 3)).toEqual([...K]);
+  });
+
+  it("does nothing when no backdrop was removed", () => {
+    const buf = grid([[K, W]]);
+    expect(invertForDarkBackdrop(buf, null)).toBe(false);
+    expect(buf.data.slice(0, 3)).toEqual([...K]);
   });
 });

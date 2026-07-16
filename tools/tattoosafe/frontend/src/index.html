@@ -104,6 +104,14 @@
       <h2 class="settings__title">Placement Settings</h2>
 
       <div class="field">
+        <label class="field__label" for="unit-select">Units</label>
+        <select class="field__select" id="unit-select">
+          <option value="metric" selected>Metric (cm)</option>
+          <option value="imperial">Imperial (inches)</option>
+        </select>
+      </div>
+
+      <div class="field">
         <label class="field__label" for="body-part-select">Body Part</label>
         <select class="field__select" id="body-part-select"></select>
         <p class="field__desc" id="body-part-desc"></p>
@@ -113,12 +121,9 @@
 
       <div class="field">
         <label class="field__label" for="height-input">Your Height</label>
-        <div class="field__row">
+        <div class="field__row" id="height-metric">
           <input class="field__input field__input--short" type="number" id="height-input" value="170" min="100" max="250" step="1">
-          <select class="field__select field__select--unit" id="height-unit">
-            <option value="cm" selected>cm</option>
-            <option value="ft">ft / in</option>
-          </select>
+          <span class="field__unit-label">cm</span>
         </div>
         <div class="field__row" id="height-imperial" style="display:none">
           <input class="field__input field__input--short" type="number" id="height-ft" value="5" min="3" max="8" step="1">
@@ -134,19 +139,27 @@
         <label class="field__label">Tattoo Size</label>
         <div class="field__row">
           <div class="field__input-group">
-            <input class="field__input field__input--short" type="number" id="tattoo-width" value="8" min="0.5" max="100" step="0.5">
+            <input class="field__input field__input--short" type="number" id="tattoo-width" value="8" min="0.5" max="100" step="0.5" aria-label="Tattoo width">
             <span class="field__unit-label" id="width-unit-label">cm</span>
           </div>
           <span class="field__x">&times;</span>
           <div class="field__input-group">
-            <input class="field__input field__input--short" type="number" id="tattoo-height" value="12" min="0.5" max="100" step="0.5">
+            <input class="field__input field__input--short" type="number" id="tattoo-height" value="12" min="0.5" max="100" step="0.5" aria-label="Tattoo height">
             <span class="field__unit-label" id="height-unit-label">cm</span>
           </div>
-          <select class="field__select field__select--unit" id="size-unit">
-            <option value="cm" selected>cm</option>
-            <option value="in">inches</option>
-          </select>
         </div>
+        <div class="size-slider">
+          <span class="size-slider__label">W</span>
+          <input class="field__range" type="range" id="tattoo-width-range" min="0.5" max="60" step="0.5" value="8" aria-label="Tattoo width slider">
+        </div>
+        <div class="size-slider">
+          <span class="size-slider__label">H</span>
+          <input class="field__range" type="range" id="tattoo-height-range" min="0.5" max="60" step="0.5" value="12" aria-label="Tattoo height slider">
+        </div>
+        <label class="field__check">
+          <input type="checkbox" id="aspect-lock">
+          Lock aspect ratio <span class="field__check-hint">(uses your design&rsquo;s proportions once one is uploaded)</span>
+        </label>
       </div>
 
       <div class="field">
