@@ -198,11 +198,16 @@
         <button class="btn" id="ar-stop" hidden>Stop Camera</button>
         <button class="btn" id="ar-screenshot" hidden>Save Screenshot</button>
         <label class="ar__wrap-toggle" id="ar-wrap-label" hidden>
-          <input type="checkbox" id="ar-wrap"> Wrap around limb
+          <input type="checkbox" id="ar-wrap"> Curve around a limb
         </label>
-          <label class="ar__wrap-toggle" id="ar-removebg-label" hidden><input type="checkbox" id="ar-removebg" checked> Remove design background</label>
+        <label class="ar__curve" id="ar-curve-label" hidden>
+          Curvature
+          <input type="range" id="ar-curve" min="0" max="100" value="40" aria-label="Wrap curvature">
+        </label>
+        <label class="ar__wrap-toggle" id="ar-removebg-label" hidden><input type="checkbox" id="ar-removebg" checked> Remove flat background</label>
       </div>
-      <p class="ar__note">Upload a design above to enable the camera preview.</p>
+      <p class="ar__note">Upload a design above to enable the camera preview. The overlay is a
+      static try-on aid — position it against your reflection; it doesn't track your body.</p>
     </section>
 
     <!-- ─── Error ─── -->
