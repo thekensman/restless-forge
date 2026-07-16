@@ -372,53 +372,69 @@ describe("silhouette zone alignment", () => {
   });
 });
 
-import { wrapSpanRadians, keyOutBackground, BODY_PARTS as BP2 } from "../engine";
+import { removeFlatBackground } from "../engine";
 
-describe("wrapSpanRadians + circumference data", () => {
-  it("every body part carries a plausible circumference", () => {
-    for (const bp of BP2) {
-      expect(bp.circumferenceCm).toBeGreaterThan(10);
-      expect(bp.circumferenceCm).toBeLessThan(130);
-    }
-  });
-  it("span is proportional to width over circumference", () => {
-    // 6.5cm-wide piece on a 26cm forearm covers 1/4 of the circumference → π/2
-    expect(wrapSpanRadians(6.5, 26)).toBeCloseTo(Math.PI / 2, 6);
-  });
-  it("caps at a half cylinder", () => {
-    expect(wrapSpanRadians(100, 20)).toBe(Math.PI);
-  });
-  it("falls back to π when inputs are missing", () => {
-    expect(wrapSpanRadians(0, 26)).toBe(Math.PI);
-    expect(wrapSpanRadians(10, 0)).toBe(Math.PI);
-  });
-  it("small tattoo on a large limb is nearly flat", () => {
-    expect(wrapSpanRadians(3, 55)).toBeLessThan(0.35);
-  });
-});
+describe("removeFlatBackground (edge flood-fill)", () => {
+  // Build a WxH RGBA buffer from a grid of [r,g,b] rows; alpha defaults 255.
+  const grid = (rows: number[][][]): { data: number[]; width: number; height: number } => {
+    const height = rows.length;
+    const width = rows[0].length;
+    const data: number[] = [];
+    for (const row of rows) for (const [r, g, b] of row) data.push(r, g, b, 255);
+    return { data, width, height };
+  };
+  const alphaAt = (buf: { data: number[]; width: number }, x: number, y: number): number =>
+    buf.data[(y * buf.width + x) * 4 + 3];
 
-describe("keyOutBackground", () => {
-  const buf = (pixels: number[][]): { data: number[]; width: number; height: number } => ({
-    data: pixels.flat(),
-    width: 4,
-    height: 4,
-  });
-  const px = (r: number, g: number, b: number): number[] => [r, g, b, 255];
+  const D: [number, number, number] = [20, 20, 25]; // background (dark)
+  const S: [number, number, number] = [212, 164, 78]; // subject (gold)
 
-  it("keys a uniform dark background, keeps a distinct subject", () => {
-    const dark = px(20, 20, 25);
-    const gold = px(212, 164, 78);
-    const grid = Array.from({ length: 16 }, (_, i) => ([5, 6, 9, 10].includes(i) ? [...gold] : [...dark]));
-    const b = buf(grid);
-    expect(keyOutBackground(b)).toBe(true);
-    expect(b.data[3]).toBe(0);              // corner is transparent
-    expect(b.data[(5 * 4) + 3]).toBe(255);  // subject untouched
+  it("removes a border-connected flat background, keeps the subject", () => {
+    const buf = grid([
+      [D, D, D, D, D],
+      [D, S, S, S, D],
+      [D, S, S, S, D],
+      [D, S, S, S, D],
+      [D, D, D, D, D],
+    ]);
+    expect(removeFlatBackground(buf)).toBe(true);
+    expect(alphaAt(buf, 0, 0)).toBe(0);   // corner removed
+    expect(alphaAt(buf, 2, 2)).toBe(255); // center subject kept
   });
 
-  it("refuses when corners disagree (photo, not a logo)", () => {
-    const grid = Array.from({ length: 16 }, (_, i) => px(i * 15, 120, 200 - i * 10));
-    const b = buf(grid);
-    expect(keyOutBackground(b)).toBe(false);
-    expect(b.data[3]).toBe(255);
+  it("KEEPS a background-coloured hole enclosed by the subject (flood-fill's win over a global key)", () => {
+    const buf = grid([
+      [D, D, D, D, D],
+      [D, S, S, S, D],
+      [D, S, D, S, D], // center pixel is bg-coloured but walled in by subject
+      [D, S, S, S, D],
+      [D, D, D, D, D],
+    ]);
+    expect(removeFlatBackground(buf)).toBe(true);
+    expect(alphaAt(buf, 0, 0)).toBe(0);   // outer background gone
+    expect(alphaAt(buf, 2, 2)).toBe(255); // enclosed pocket survives
+  });
+
+  it("refuses when the border isn't a single flat colour (a photo)", () => {
+    const rows = Array.from({ length: 5 }, (_, y) =>
+      Array.from({ length: 5 }, (_, x): [number, number, number] => [x * 50, 120, 200 - y * 40]),
+    );
+    const buf = grid(rows);
+    expect(removeFlatBackground(buf)).toBe(false);
+    expect(alphaAt(buf, 0, 0)).toBe(255); // untouched
+  });
+
+  it("tolerates a slight border gradient within tolerance", () => {
+    const near = (n: number): [number, number, number] => [20 + n, 20 + n, 25 + n];
+    const buf = grid([
+      [near(0), near(4), near(8), near(4), near(0)],
+      [near(4), S, S, S, near(4)],
+      [near(8), S, S, S, near(8)],
+      [near(4), S, S, S, near(4)],
+      [near(0), near(4), near(8), near(4), near(0)],
+    ]);
+    expect(removeFlatBackground(buf)).toBe(true);
+    expect(alphaAt(buf, 0, 0)).toBe(0);
+    expect(alphaAt(buf, 2, 2)).toBe(255);
   });
 });

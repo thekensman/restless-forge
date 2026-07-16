@@ -265,18 +265,7 @@ export function fmtTime(totalMinutes: number): string {
   return `${hrs} hr${hrs !== 1 ? "s" : ""}`;
 }
 
-/* ── AR wrap + design processing helpers ── */
-
-/**
- * How far around the limb the design wraps, in radians. Arc length =
- * tattoo width; span = 2π · width / circumference, capped at a half
- * cylinder (π — the far side isn't visible anyway). Missing inputs fall
- * back to π, the pre-calibration look.
- */
-export function wrapSpanRadians(tattooWCm: number, circumferenceCm: number): number {
-  if (!(tattooWCm > 0) || !(circumferenceCm > 0)) return Math.PI;
-  return Math.min(Math.PI, (2 * Math.PI * tattooWCm) / circumferenceCm);
-}
+/* ── Design background removal ── */
 
 export interface PixelBuffer {
   data: Uint8ClampedArray | number[];
@@ -285,35 +274,62 @@ export interface PixelBuffer {
 }
 
 /**
- * Key out a uniform background in-place: samples the four corners; when
- * they agree on a colour, pixels near that colour go transparent (soft
- * threshold). Returns false (buffer untouched) when the corners disagree —
- * i.e. the image has no uniform background to remove. Fixes dark-boxed
- * logo uploads under multiply blending.
+ * Remove a FLAT/UNIFORM background in-place by flood-filling inward from
+ * every border pixel: any pixel connected to the edge and within
+ * `tolerance` of the average border colour is made transparent. This
+ * beats a global colour key in two ways — an interior region that happens
+ * to match the background colour (e.g. a gap enclosed by the subject)
+ * survives because it isn't connected to the edge, and the subject is
+ * never touched. Deliberately scoped to logos / line-art / clean-cut
+ * designs; it will NOT cleanly separate a photographic (busy or gradient)
+ * background — that needs ML segmentation, which this tool omits by
+ * design. Returns false (buffer untouched) when the border isn't a single
+ * consistent colour, i.e. there's no flat background to remove.
  */
-export function keyOutBackground(px: PixelBuffer, tolerance = 70): boolean {
+export function removeFlatBackground(px: PixelBuffer, tolerance = 60): boolean {
   const { data, width, height } = px;
-  if (width < 2 || height < 2) return false;
-  const at = (x: number, y: number): [number, number, number] => {
-    const i = (y * width + x) * 4;
-    return [Number(data[i]), Number(data[i + 1]), Number(data[i + 2])];
-  };
-  const corners = [at(0, 0), at(width - 1, 0), at(0, height - 1), at(width - 1, height - 1)];
+  if (width < 3 || height < 3) return false;
+  const rgb = (i: number): [number, number, number] => [
+    Number(data[i]), Number(data[i + 1]), Number(data[i + 2]),
+  ];
   const dist = (a: number[], b: number[]): number =>
     Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
-  for (let i = 0; i < corners.length; i++) {
-    for (let j = i + 1; j < corners.length; j++) {
-      if (dist(corners[i], corners[j]) > 110) return false;
+
+  // Reference colour = average of the four corners; bail if they disagree
+  // (a photo, not a flat backdrop).
+  const corners = [
+    rgb(0), rgb((width - 1) * 4),
+    rgb((width * (height - 1)) * 4), rgb((width * height - 1) * 4),
+  ];
+  for (let i = 0; i < 4; i++)
+    for (let j = i + 1; j < 4; j++)
+      if (dist(corners[i], corners[j]) > tolerance * 1.7) return false;
+  const bg = [0, 1, 2].map((c) => corners.reduce((s, k) => s + k[c], 0) / 4);
+
+  // BFS flood fill from the border.
+  const visited = new Uint8Array(width * height);
+  const stack: number[] = [];
+  const seed = (x: number, y: number): void => {
+    const p = y * width + x;
+    if (!visited[p] && dist(rgb(p * 4), bg) <= tolerance) {
+      visited[p] = 1;
+      stack.push(p);
     }
+  };
+  for (let x = 0; x < width; x++) { seed(x, 0); seed(x, height - 1); }
+  for (let y = 0; y < height; y++) { seed(0, y); seed(width - 1, y); }
+
+  let removed = 0;
+  while (stack.length) {
+    const p = stack.pop()!;
+    data[p * 4 + 3] = 0;
+    removed++;
+    const x = p % width;
+    const y = (p - x) / width;
+    if (x > 0) seed(x - 1, y);
+    if (x < width - 1) seed(x + 1, y);
+    if (y > 0) seed(x, y - 1);
+    if (y < height - 1) seed(x, y + 1);
   }
-  const bg = [0, 1, 2].map((c) => corners.reduce((s2, k) => s2 + k[c], 0) / 4);
-  const soft = tolerance * 0.6;
-  for (let i = 0; i < width * height * 4; i += 4) {
-    const d = dist([Number(data[i]), Number(data[i + 1]), Number(data[i + 2])], bg);
-    if (d < soft) data[i + 3] = 0;
-    else if (d < tolerance) {
-      data[i + 3] = Math.round(Number(data[i + 3]) * ((d - soft) / (tolerance - soft)));
-    }
-  }
-  return true;
+  return removed > 0;
 }

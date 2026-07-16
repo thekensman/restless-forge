@@ -35,12 +35,22 @@ prior-year constants), and opens **one PR**:
 `claude/annual-data-refresh-<YEAR>`. You review and merge; the deploy
 workflow ships it.
 
-**Credentials (either one):** the `ANTHROPIC_API_KEY` repository secret
-(an Anthropic API key from console.anthropic.com), or
-`CLAUDE_CODE_OAUTH_TOKEN` for subscription auth (run `claude setup-token`
-locally, paste the token — runs then draw down your claude.ai plan
-instead of API credit, like the old claude.ai routine did). With
-**neither** secret set the workflow skips cleanly (green run with a
+**Credentials (either one; OAuth takes precedence):** the workflow checks
+secrets in this order:
+
+1. **`CLAUDE_CODE_OAUTH_TOKEN`** (subscription auth) — **preferred**. Run
+   `claude setup-token` locally, copy the token from claude.ai, and add it
+   as a repository secret. The workflow uses your claude.ai subscription
+   plan — no API credit needed, runs draw down your active plan. Preferred
+   because it's under your control (no external API keys in the repo's
+   secret store) and your subscription plan is already paid.
+
+2. **`ANTHROPIC_API_KEY`** (Anthropic API key from
+   console.anthropic.com) — **fallback**. Uses your $25-monthly or
+   pay-as-you-go API credit. Set this only if you don't have a
+   claude.ai subscription plan or prefer to use API credit instead.
+
+With **neither** secret set the workflow skips cleanly (green run with a
 notice), and the Jan 20 freshness check remains the backstop: it opens
 an issue if the data is stale, and the canonical prompt below can be
 pasted into any Claude Code session to do the refresh by hand.

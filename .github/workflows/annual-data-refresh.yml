@@ -10,11 +10,11 @@ name: Annual data refresh
 # BLS annual CPI release (~Jan 13), and four days before the freshness
 # safety net (annual-data-check.yml, Jan 20) verifies the result.
 #
-# Credentials (either one; checked in this order):
-#   ANTHROPIC_API_KEY        — an Anthropic API key (console.anthropic.com)
+# Credentials (either one; OAuth takes precedence):
 #   CLAUDE_CODE_OAUTH_TOKEN  — subscription auth: run `claude setup-token`
 #                              locally and paste the token (no API credit
 #                              needed — runs draw down your claude.ai plan)
+#   ANTHROPIC_API_KEY        — fallback: an Anthropic API key (console.anthropic.com)
 # With NEITHER set, the workflow SKIPS cleanly (green, with a notice) —
 # the Jan 20 freshness check still catches a missed refresh, and the
 # canonical prompt in docs/automation.md can always be run by hand.
@@ -42,15 +42,15 @@ jobs:
       - name: Check credentials
         id: creds
         run: |
-          if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
-            echo "mode=api_key" >> "$GITHUB_OUTPUT"
-            echo "Using ANTHROPIC_API_KEY."
-          elif [ -n "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ]; then
+          if [ -n "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ]; then
             echo "mode=oauth" >> "$GITHUB_OUTPUT"
             echo "Using CLAUDE_CODE_OAUTH_TOKEN (subscription auth)."
+          elif [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "mode=api_key" >> "$GITHUB_OUTPUT"
+            echo "Using ANTHROPIC_API_KEY."
           else
             echo "mode=skip" >> "$GITHUB_OUTPUT"
-            echo "::notice::No ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN secret set — skipping the automated refresh. The Jan 20 freshness check (annual-data-check.yml) will open an issue if the data goes stale; run the canonical prompt from docs/automation.md manually to refresh."
+            echo "::notice::No CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY secret set — skipping the automated refresh. The Jan 20 freshness check (annual-data-check.yml) will open an issue if the data goes stale; run the canonical prompt from docs/automation.md manually to refresh."
           fi
 
       - uses: actions/checkout@v4
