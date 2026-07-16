@@ -125,12 +125,15 @@ export const FIGURE_REGIONS: Record<string, { x: number; y: number; w: number; h
 
 export function generateSilhouetteSvg(
   bodyPartId: string, heightCm: number, tattooWCm: number, tattooHCm: number,
-  options: { rotation?: number; opacity?: number } = {},
+  options: { rotation?: number; opacity?: number; unit?: "cm" | "in" } = {},
 ): string {
   const bp = getBodyPart(bodyPartId);
   if (!bp) return "";
   const rotation = options.rotation ?? 0;
   const opacity = options.opacity ?? 0.85;
+  const unit = options.unit ?? "cm";
+  const dim = (cm: number): string =>
+    unit === "in" ? `${Math.round(cmToIn(cm) * 10) / 10} in` : `${Math.round(cm * 10) / 10} cm`;
   const vw = 200, vh = 400;
   const zx = bp.zone.x * vw, zy = bp.zone.y * vh, zw = bp.zone.w * vw, zh = bp.zone.h * vh;
   const maxW = heightCm * bp.widthRatio, maxH = heightCm * bp.heightRatio;
@@ -156,9 +159,9 @@ export function generateSilhouetteSvg(
     <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="none" stroke="#c9b0ff" stroke-width="0.6" rx="1"/>
   </g>
   <line x1="${tx}" y1="${ty - 6}" x2="${tx + tw}" y2="${ty - 6}" stroke="#c9b0ff" stroke-width="0.4"/>
-  <text x="${cx}" y="${ty - 10}" text-anchor="middle" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${tattooWCm} cm</text>
+  <text x="${cx}" y="${ty - 10}" text-anchor="middle" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${dim(tattooWCm)}</text>
   <line x1="${tx + tw + 6}" y1="${ty}" x2="${tx + tw + 6}" y2="${ty + th}" stroke="#c9b0ff" stroke-width="0.4"/>
-  <text x="${tx + tw + 10}" y="${cy + 2}" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${tattooHCm} cm</text>
+  <text x="${tx + tw + 10}" y="${cy + 2}" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${dim(tattooHCm)}</text>
   <text x="100" y="${vh - 10}" text-anchor="middle" fill="#706b82" font-size="7" font-family="Inter, sans-serif">${bp.label}</text>
 </svg>`;
 }
@@ -276,60 +279,183 @@ export interface PixelBuffer {
 /**
  * Remove a FLAT/UNIFORM background in-place by flood-filling inward from
  * every border pixel: any pixel connected to the edge and within
- * `tolerance` of the average border colour is made transparent. This
+ * `tolerance` of the border's average colour is made transparent. This
  * beats a global colour key in two ways — an interior region that happens
  * to match the background colour (e.g. a gap enclosed by the subject)
  * survives because it isn't connected to the edge, and the subject is
- * never touched. Deliberately scoped to logos / line-art / clean-cut
- * designs; it will NOT cleanly separate a photographic (busy or gradient)
- * background — that needs ML segmentation, which this tool omits by
- * design. Returns false (buffer untouched) when the border isn't a single
- * consistent colour, i.e. there's no flat background to remove.
+ * never touched.
+ *
+ * Peels in PASSES: each pass flood-fills the largest flat colour cluster
+ * on the current frontier (initially the image border), then the boundary
+ * that fill exposed joins the frontier for the next pass. This handles
+ * e.g. a white product-photo matte around a black poster — the white
+ * frame is one pass, the black field behind it the next. Two guards keep
+ * a pass from eating the design itself: a fill after the first must be
+ * FAT (a backdrop's area dwarfs its boundary; line art is thin, its area
+ * is comparable to its boundary) and must leave pixels behind. A fill
+ * that fails either guard is rolled back.
+ *
+ * Deliberately scoped to logos / line-art / clean-cut designs; it will
+ * NOT cleanly separate a photographic (busy or gradient) background —
+ * that needs ML segmentation, which this tool omits by design. Returns
+ * `removed: false` (buffer untouched) when the corners/border don't agree
+ * on a flat backdrop colour, i.e. there's no flat background to remove.
+ *
+ * `backdropLum` is the luminance of the dominant removed field — the
+ * colour the artist drew against. The caller uses it to decide whether
+ * the surviving art is light-on-dark (see invertForDarkBackdrop).
  */
-export function removeFlatBackground(px: PixelBuffer, tolerance = 60): boolean {
+export interface RemoveBackgroundResult {
+  removed: boolean;
+  /** Luminance (0–255) of the largest removed fill; null if nothing was removed. */
+  backdropLum: number | null;
+}
+
+export function removeFlatBackground(px: PixelBuffer, tolerance = 60, maxFills = 4): RemoveBackgroundResult {
+  const none: RemoveBackgroundResult = { removed: false, backdropLum: null };
   const { data, width, height } = px;
-  if (width < 3 || height < 3) return false;
-  const rgb = (i: number): [number, number, number] => [
-    Number(data[i]), Number(data[i + 1]), Number(data[i + 2]),
+  if (width < 3 || height < 3) return none;
+  const total = width * height;
+  const rgb = (p: number): [number, number, number] => [
+    Number(data[p * 4]), Number(data[p * 4 + 1]), Number(data[p * 4 + 2]),
   ];
   const dist = (a: number[], b: number[]): number =>
     Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
 
-  // Reference colour = average of the four corners; bail if they disagree
-  // (a photo, not a flat backdrop).
-  const corners = [
-    rgb(0), rgb((width - 1) * 4),
-    rgb((width * (height - 1)) * 4), rgb((width * height - 1) * 4),
-  ];
+  // Photo refusal: the four corners must agree on a colour; otherwise
+  // there's no flat backdrop to remove.
+  const corners = [0, width - 1, width * (height - 1), total - 1].map(rgb);
   for (let i = 0; i < 4; i++)
     for (let j = i + 1; j < 4; j++)
-      if (dist(corners[i], corners[j]) > tolerance * 1.7) return false;
-  const bg = [0, 1, 2].map((c) => corners.reduce((s, k) => s + k[c], 0) / 4);
+      if (dist(corners[i], corners[j]) > tolerance * 1.7) return none;
 
-  // BFS flood fill from the border.
-  const visited = new Uint8Array(width * height);
-  const stack: number[] = [];
-  const seed = (x: number, y: number): void => {
-    const p = y * width + x;
-    if (!visited[p] && dist(rgb(p * 4), bg) <= tolerance) {
-      visited[p] = 1;
-      stack.push(p);
+  // First frontier = the image border.
+  let frontier: number[] = [];
+  for (let x = 0; x < width; x++) frontier.push(x, width * (height - 1) + x);
+  for (let y = 1; y < height - 1; y++) frontier.push(y * width, y * width + width - 1);
+
+  const stamp = new Int32Array(total); // last fill that examined this pixel
+  let opaque = 0;
+  for (let p = 0; p < total; p++) if (data[p * 4 + 3] !== 0) opaque++;
+  let removedTotal = 0;
+  let fills = 0;
+  let biggestFill = 0;
+  let backdropLum: number | null = null;
+
+  // Two stages. BORDER: every flat colour cluster touching the image
+  // border is a legitimate background field (a matte AND the poster it
+  // frames can both reach the edge). INTERIOR: fills seeded from the
+  // boundary a border fill exposed — here the design itself is at risk,
+  // so the fatness guard applies and peeling stops once a substantial
+  // share of the image is gone (the real backdrop has been removed;
+  // anything further would be the design).
+  let stage: "border" | "interior" = "border";
+  let interiorNext: number[] = [];
+
+  while (fills < maxFills) {
+    if (stage === "interior" && removedTotal >= total * 0.35) break;
+    const live = frontier.filter((p) => data[p * 4 + 3] !== 0);
+
+    // Largest colour cluster on the frontier = this fill's reference.
+    const anchors: { c: [number, number, number]; members: number[] }[] = [];
+    for (const p of live) {
+      const c = rgb(p);
+      const a = anchors.find((an) => dist(an.c, c) <= tolerance);
+      if (a) a.members.push(p);
+      else if (anchors.length < 8) anchors.push({ c, members: [p] });
     }
-  };
-  for (let x = 0; x < width; x++) { seed(x, 0); seed(x, height - 1); }
-  for (let y = 0; y < height; y++) { seed(0, y); seed(width - 1, y); }
+    anchors.sort((a, b) => b.members.length - a.members.length);
+    const cluster = anchors[0];
+    // No frontier left, or one so fragmented that no cluster dominates
+    // (not a flat backdrop): move on from the border to the exposed
+    // interior boundaries, or stop.
+    if (!cluster || cluster.members.length / live.length < 0.2) {
+      if (stage === "border") {
+        stage = "interior";
+        frontier = interiorNext;
+        interiorNext = [];
+        continue;
+      }
+      break;
+    }
+    const inCluster = new Set(cluster.members);
+    const mean = [0, 0, 0];
+    for (const p of cluster.members) { const c = rgb(p); mean[0] += c[0]; mean[1] += c[1]; mean[2] += c[2]; }
+    for (let c = 0; c < 3; c++) mean[c] /= cluster.members.length;
 
-  let removed = 0;
-  while (stack.length) {
-    const p = stack.pop()!;
-    data[p * 4 + 3] = 0;
-    removed++;
-    const x = p % width;
-    const y = (p - x) / width;
-    if (x > 0) seed(x - 1, y);
-    if (x < width - 1) seed(x + 1, y);
-    if (y > 0) seed(x, y - 1);
-    if (y < height - 1) seed(x, y + 1);
+    const mark = fills + 1;
+    const stack: number[] = [];
+    const boundary: number[] = [];
+    const removedIdx: number[] = [];
+    const removedAlpha: number[] = [];
+    const consider = (p: number): void => {
+      if (stamp[p] === mark || data[p * 4 + 3] === 0) return;
+      stamp[p] = mark;
+      if (dist(rgb(p), mean) <= tolerance) stack.push(p);
+      else boundary.push(p);
+    };
+    for (const p of cluster.members) consider(p);
+    while (stack.length) {
+      const p = stack.pop()!;
+      removedIdx.push(p);
+      removedAlpha.push(Number(data[p * 4 + 3]));
+      data[p * 4 + 3] = 0;
+      const x = p % width;
+      if (x > 0) consider(p - 1);
+      if (x < width - 1) consider(p + 1);
+      if (p >= width) consider(p - width);
+      if (p < total - width) consider(p + width);
+    }
+
+    // Guards (never on the very first fill — that's the trusted primary
+    // background): every later fill must leave a design behind, and an
+    // interior fill must additionally be FAT like a backdrop (line art is
+    // thin — its area is comparable to its boundary). A fill that fails
+    // is rolled back.
+    const survivors = opaque - removedIdx.length;
+    const fatness = removedIdx.length / Math.max(1, boundary.length);
+    if (fills > 0 && (survivors < total * 0.01 || (stage === "interior" && fatness < 8))) {
+      for (let k = 0; k < removedIdx.length; k++) data[removedIdx[k] * 4 + 3] = removedAlpha[k];
+      break;
+    }
+    removedTotal += removedIdx.length;
+    opaque = survivors;
+    fills++;
+    if (removedIdx.length > biggestFill) {
+      biggestFill = removedIdx.length;
+      backdropLum = 0.2126 * mean[0] + 0.7152 * mean[1] + 0.0722 * mean[2];
+    }
+    if (stage === "border") {
+      // Keep working the border's other colour clusters; what the fill
+      // exposed queues up for the interior stage.
+      frontier = live.filter((p) => !inCluster.has(p));
+      interiorNext = interiorNext.concat(boundary);
+    } else {
+      frontier = live.filter((p) => !inCluster.has(p)).concat(boundary);
+    }
   }
-  return removed > 0;
+  return { removed: removedTotal > 0, backdropLum };
+}
+
+/**
+ * Art drawn on a DARK backdrop is light — after that backdrop is removed,
+ * the surviving lines would be invisible under the camera preview's
+ * multiply blend (white lines × skin = skin). This inverts the surviving
+ * (opaque) pixels in place when the removed backdrop was dark, so the
+ * linework reads as ink either way. The backdrop's own colour is the
+ * decision signal — statistics over the surviving pixels are unreliable
+ * because background removal leaves an anti-aliased halo around the art.
+ * Returns true when an inversion was applied.
+ */
+export function invertForDarkBackdrop(px: PixelBuffer, backdropLum: number | null): boolean {
+  if (backdropLum === null || backdropLum >= 128) return false;
+  const { data, width, height } = px;
+  const total = width * height;
+  for (let p = 0; p < total; p++) {
+    if (Number(data[p * 4 + 3]) === 0) continue;
+    data[p * 4] = 255 - Number(data[p * 4]);
+    data[p * 4 + 1] = 255 - Number(data[p * 4 + 1]);
+    data[p * 4 + 2] = 255 - Number(data[p * 4 + 2]);
+  }
+  return true;
 }

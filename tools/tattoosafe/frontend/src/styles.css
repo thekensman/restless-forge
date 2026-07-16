@@ -49,6 +49,11 @@ a { color: var(--accent); } a:hover { color: var(--accent-light); }
 .field__range { width: 100%; accent-color: var(--accent); }
 .field__range-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); }
 .field__input-group { display: flex; align-items: center; gap: 0.3rem; }
+.size-slider { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; }
+.size-slider__label { font-size: 0.75rem; color: var(--text-muted); width: 1em; text-align: center; }
+.field__check { display: flex; align-items: baseline; gap: 0.45rem; margin-top: 0.6rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; }
+.field__check input { accent-color: var(--accent); }
+.field__check-hint { font-size: 0.75rem; color: var(--text-muted); }
 .fit-indicator { font-size: 0.82rem; font-weight: 500; }
 .fit-indicator--ok { color: var(--success); }
 .fit-indicator--warn { color: var(--error); }

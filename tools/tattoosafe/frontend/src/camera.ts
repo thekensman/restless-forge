@@ -10,7 +10,7 @@
  * in setupCameraPreview().
  */
 
-import { removeFlatBackground } from "./engine";
+import { removeFlatBackground, invertForDarkBackdrop } from "./engine";
 
 // ─── Overlay state & pure helpers ────────────────────────────
 
@@ -153,8 +153,11 @@ interface CameraRefs {
 export interface CameraController {
   /** Give the preview the (new) design image. Enables the start button. */
   setDesign(img: HTMLImageElement): void;
-  /** Reflect the size panel: real-world dimensions drive the overlay's base size. */
-  setTattooSize(wCm: number, hCm: number, placementLabel: string): void;
+  /**
+   * Reflect the size panel: real-world dimensions (always cm — they drive
+   * the overlay's base size) plus the unit the size hint should display.
+   */
+  setTattooSize(wCm: number, hCm: number, placementLabel: string, displayUnit?: "cm" | "in"): void;
   /** True while the camera is streaming. */
   isActive(): boolean;
 }
@@ -186,6 +189,7 @@ export function setupCameraPreview(
   let tattooWCm = 0;
   let tattooHCm = 0;
   let placement = "";
+  let hintUnit: "cm" | "in" = "cm";
   const wrapToggle = document.querySelector<HTMLInputElement>("#ar-wrap");
   const wrapLabel = document.querySelector<HTMLElement>("#ar-wrap-label");
   const curveSlider = document.querySelector<HTMLInputElement>("#ar-curve");
@@ -203,7 +207,9 @@ export function setupCameraPreview(
 
   // "Remove design background": flood-fill the flat backdrop of logo/
   // line-art uploads to transparent so they don't render as a dark box
-  // under multiply blend. No-op (raw design used) for photographic
+  // under multiply blend; light-on-dark art (e.g. white-on-black poster
+  // designs) is then inverted so the lines read as ink instead of
+  // vanishing under multiply. No-op (raw design used) for photographic
   // backgrounds — see removeFlatBackground.
   function rebuildProcessedDesign(): void {
     designProc = null;
@@ -216,7 +222,9 @@ export function setupCameraPreview(
       if (!cctx) return;
       cctx.drawImage(design, 0, 0);
       const px = cctx.getImageData(0, 0, c.width, c.height);
-      if (removeFlatBackground(px)) {
+      const res = removeFlatBackground(px);
+      if (res.removed) {
+        invertForDarkBackdrop(px, res.backdropLum);
         cctx.putImageData(px, 0, 0);
         designProc = c;
       }
@@ -423,7 +431,11 @@ export function setupCameraPreview(
 
   function updateHint(): void {
     if (!stream) return;
-    const size = tattooWCm > 0 ? `${tattooWCm} × ${tattooHCm} cm${placement ? " on " + placement : ""} · ` : "";
+    const fmt = (cm: number): number =>
+      Math.round((hintUnit === "in" ? cm / 2.54 : cm) * 10) / 10;
+    const size = tattooWCm > 0
+      ? `${fmt(tattooWCm)} × ${fmt(tattooHCm)} ${hintUnit}${placement ? " on " + placement : ""} · `
+      : "";
     refs.hint.textContent = `${size}drag to position · pinch to calibrate scale · curve slider bends the design around a limb (manual)`;
   }
 
@@ -434,10 +446,11 @@ export function setupCameraPreview(
       refs.startBtn.disabled = false;
       if (!stream) refs.hint.textContent = "Design loaded — start the camera to preview it on your body.";
     },
-    setTattooSize(wCm: number, hCm: number, placementLabel: string): void {
+    setTattooSize(wCm: number, hCm: number, placementLabel: string, displayUnit: "cm" | "in" = "cm"): void {
       tattooWCm = wCm;
       tattooHCm = hCm;
       placement = placementLabel;
+      hintUnit = displayUnit;
       updateHint();
     },
     isActive: () => stream !== null,
