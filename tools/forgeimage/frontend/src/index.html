@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
   <title>ForgeImage — Restless Forge</title>
-  <meta name="description" content="Resize, crop, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
+  <meta name="description" content="Resize, crop, brush out details, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
   <link rel="canonical" href="https://restless-forge.dev/tools/forgeimage/">
 
   <!-- Open Graph -->
   <meta property="og:title" content="ForgeImage">
-  <meta property="og:description" content="Resize, crop, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
+  <meta property="og:description" content="Resize, crop, brush out details, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://restless-forge.dev/tools/forgeimage/">
   <meta property="og:image" content="https://restless-forge.dev/tools/forgeimage/og-image.png">
@@ -28,7 +28,7 @@
     "@type": "WebApplication",
     "name": "ForgeImage",
     "url": "https://restless-forge.dev/tools/forgeimage",
-    "description": "Resize, crop, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.",
+    "description": "Resize, crop, brush out details, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.",
     "applicationCategory": "UtilityApplication",
     "operatingSystem": "Any",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -55,11 +55,12 @@
 
   <main>
     <section class="tool-intro">
-      <h1>ForgeImage: Resize, crop, convert &amp; compress — in your browser</h1>
+      <h1>ForgeImage: Resize, crop, brush, convert &amp; compress — in your browser</h1>
       <p>
-        The five image operations you actually open an editor for, with no
-        uploads, no account, and no watermark. Files are processed on your
-        device with the Canvas API and never leave it.
+        The six image operations you actually open an editor for — including a
+        brush to redact addresses, names, or faces — with no uploads, no
+        account, and no watermark. Files are processed on your device with the
+        Canvas API and never leave it.
       </p>
     </section>
 
@@ -77,6 +78,7 @@
     <nav class="op-tabs" role="tablist" aria-label="Image operations">
       <button class="op-tab is-active" data-op="resize" role="tab" aria-selected="true">Resize</button>
       <button class="op-tab" data-op="crop" role="tab" aria-selected="false">Crop</button>
+      <button class="op-tab" data-op="brush" role="tab" aria-selected="false">Brush</button>
       <button class="op-tab" data-op="convert" role="tab" aria-selected="false">Convert</button>
       <button class="op-tab" data-op="compress" role="tab" aria-selected="false">Compress</button>
       <button class="op-tab" data-op="social" role="tab" aria-selected="false">Social sizes</button>
@@ -108,6 +110,26 @@
       </label>
       <p class="op-meta" id="cr-meta"></p>
       <button class="op-run" id="cr-run">Download crop</button>
+    </section>
+
+    <section class="op-panel" id="panel-brush" role="tabpanel" hidden>
+      <p class="op-help">Paint directly on the preview above — cover an address, redact a name,
+      black out a face. Edits carry into every other tab (resize, convert, compress…).</p>
+      <div class="slider-field">
+        <span class="field__label">Brush size <b id="br-size-out">—</b> px</span>
+        <div class="slider-pair">
+          <input type="range" id="br-size-slider" min="1" max="200" value="24" aria-label="Brush size">
+          <input type="number" id="br-size" min="1" value="24" aria-label="Brush size in pixels">
+        </div>
+      </div>
+      <label class="field field--color"><span class="field__label">Colour</span>
+        <input type="color" id="br-color" value="#000000">
+      </label>
+      <div class="brush-actions">
+        <button class="op-mini" id="br-undo" disabled>↩ Undo stroke</button>
+        <button class="op-mini" id="br-clear" disabled>Clear all</button>
+      </div>
+      <button class="op-run" id="br-run">Download edited image</button>
     </section>
 
     <section class="op-panel" id="panel-convert" role="tabpanel" hidden>

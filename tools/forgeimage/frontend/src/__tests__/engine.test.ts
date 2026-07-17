@@ -188,3 +188,49 @@ describe("hitCropHandle", () => {
     expect(hitCropHandle(50, 50, rect, 8)).toBeNull();
   });
 });
+
+import { stageToImagePoint, farEnough, defaultBrushSize, maxBrushSize } from "../engine";
+
+describe("stageToImagePoint", () => {
+  const img = { w: 1200, h: 800 };
+  it("maps stage coords back to image space via the fit scale", () => {
+    // stage shows the image at 50%
+    expect(stageToImagePoint(300, 200, 0.5, img)).toEqual({ x: 600, y: 400 });
+  });
+  it("clamps outside points to the image bounds", () => {
+    expect(stageToImagePoint(-40, 900, 0.5, img)).toEqual({ x: 0, y: 800 });
+    expect(stageToImagePoint(9999, -5, 0.5, img)).toEqual({ x: 1200, y: 0 });
+  });
+  it("is identity at scale 1", () => {
+    expect(stageToImagePoint(37, 41, 1, img)).toEqual({ x: 37, y: 41 });
+  });
+  it("degrades safely at scale 0", () => {
+    expect(stageToImagePoint(100, 100, 0, img)).toEqual({ x: 0, y: 0 });
+  });
+});
+
+describe("farEnough", () => {
+  it("always accepts the first point", () => {
+    expect(farEnough(undefined, { x: 5, y: 5 }, 10)).toBe(true);
+  });
+  it("rejects points closer than minDist", () => {
+    expect(farEnough({ x: 0, y: 0 }, { x: 1, y: 1 }, 2)).toBe(false);
+  });
+  it("accepts points at or beyond minDist", () => {
+    expect(farEnough({ x: 0, y: 0 }, { x: 3, y: 4 }, 5)).toBe(true);
+    expect(farEnough({ x: 0, y: 0 }, { x: 0, y: 2 }, 2)).toBe(true);
+  });
+});
+
+describe("brush sizing defaults", () => {
+  it("default is ~1/25 of the short side", () => {
+    expect(defaultBrushSize({ w: 2000, h: 1000 })).toBe(40);
+  });
+  it("default never drops below 4 px", () => {
+    expect(defaultBrushSize({ w: 40, h: 30 })).toBe(4);
+  });
+  it("max is half the short side, floored at 64", () => {
+    expect(maxBrushSize({ w: 2000, h: 1000 })).toBe(500);
+    expect(maxBrushSize({ w: 100, h: 80 })).toBe(64);
+  });
+});

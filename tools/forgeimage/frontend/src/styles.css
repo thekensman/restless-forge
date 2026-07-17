@@ -112,6 +112,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
 .stage { max-width: 100%; touch-action: none; display: none; margin: 0 auto; }
 .stage.is-visible { display: block; }
 .stage.is-cropping { cursor: crosshair; }
+.stage.is-brushing { cursor: crosshair; }
 .stage__empty { color: var(--text-dim); font-size: 0.9rem; padding: 26px 0; }
 .stage__caption { color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; min-height: 1em; }
 .slider-field { margin: 12px 0; }
@@ -120,3 +121,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
 .slider-pair input[type="range"] { width: 100%; accent-color: var(--accent); }
 .slider-pair input[type="number"] { background: #10141c; color: var(--text);
   border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
+
+/* ── brush panel ── */
+.field--color input { width: 64px; height: 38px; padding: 3px; cursor: pointer; }
+.brush-actions { display: flex; gap: 10px; margin: 12px 0 2px; }
+.op-mini:disabled { opacity: 0.4; cursor: default; }
