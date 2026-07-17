@@ -212,6 +212,45 @@ export function dragCropRect(
   return clampCrop({ x, y, w, h }, img);
 }
 
+/* ── brush strokes ── */
+
+export interface BrushPoint {
+  x: number;
+  y: number;
+}
+
+/** One brush stroke, in IMAGE pixels (size = diameter). */
+export interface BrushStroke {
+  size: number;
+  color: string;
+  points: BrushPoint[];
+}
+
+/** Map a stage-space point to image space, clamped inside the image. */
+export function stageToImagePoint(x: number, y: number, scale: number, img: Dims): BrushPoint {
+  if (scale <= 0) return { x: 0, y: 0 };
+  return {
+    x: Math.min(Math.max(x / scale, 0), img.w),
+    y: Math.min(Math.max(y / scale, 0), img.h),
+  };
+}
+
+/** Density control: append a point only when it moved at least minDist. */
+export function farEnough(prev: BrushPoint | undefined, next: BrushPoint, minDist: number): boolean {
+  if (!prev) return true;
+  return (prev.x - next.x) ** 2 + (prev.y - next.y) ** 2 >= minDist * minDist;
+}
+
+/** Default brush diameter for an image: ~1/25 of the short side. */
+export function defaultBrushSize(img: Dims): number {
+  return Math.max(4, Math.round(Math.min(img.w, img.h) / 25));
+}
+
+/** Brush slider maximum: half the short side (at least 64 px). */
+export function maxBrushSize(img: Dims): number {
+  return Math.max(64, Math.round(Math.min(img.w, img.h) / 2));
+}
+
 /** Which handle (if any) a display-space point hits; tolerance in px. */
 export function hitCropHandle(
   px: number,

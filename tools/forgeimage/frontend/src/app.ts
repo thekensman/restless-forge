@@ -11,9 +11,15 @@ import {
   fitWithin,
   dragCropRect,
   hitCropHandle,
+  stageToImagePoint,
+  farEnough,
+  defaultBrushSize,
+  maxBrushSize,
   fmtBytes,
   CropRect,
   CropHandle,
+  BrushStroke,
+  BrushPoint,
   ASPECT_PRESETS,
   FORMATS,
   SOCIAL_PRESETS,
@@ -35,6 +41,14 @@ let cropRect: CropRect | null = null;
 let dragging: { handle: CropHandle; lastX: number; lastY: number } | null = null;
 let convertTimer = 0;
 
+/* Brush edits live on an offscreen canvas at natural resolution (image +
+   strokes composited); every operation reads from it, so a redaction made
+   here carries into resize/convert/compress/social exports too. */
+let strokes: BrushStroke[] = [];
+let activeStroke: BrushStroke | null = null;
+let edited: HTMLCanvasElement | null = null;
+let brushHover: BrushPoint | null = null;
+
 const status = (msg: string, isError = false): void => {
   const el = $("op-status");
   el.textContent = msg;
@@ -53,6 +67,53 @@ function toBlob(canvas: HTMLCanvasElement, mime: string, quality?: number): Prom
   );
 }
 
+/** The working image: the upload, plus any brush strokes composited in. */
+function source(): HTMLImageElement | HTMLCanvasElement {
+  if (!img) throw new Error("Pick an image first");
+  return (strokes.length || activeStroke) && edited ? edited : img;
+}
+
+function paintStroke(ctx: CanvasRenderingContext2D, stroke: BrushStroke, fromIdx = 0): void {
+  const pts = stroke.points;
+  if (!pts.length) return;
+  ctx.strokeStyle = stroke.color;
+  ctx.fillStyle = stroke.color;
+  ctx.lineWidth = stroke.size;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  if (pts.length === 1) {
+    ctx.beginPath();
+    ctx.arc(pts[0].x, pts[0].y, stroke.size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+  ctx.beginPath();
+  const start = Math.max(0, fromIdx - 1);
+  ctx.moveTo(pts[start].x, pts[start].y);
+  for (let i = start + 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+}
+
+/** Rebuild the composite from scratch (image load, undo, clear). */
+function rebuildEdited(): void {
+  if (!img) {
+    edited = null;
+    return;
+  }
+  edited ??= document.createElement("canvas");
+  edited.width = img.naturalWidth;
+  edited.height = img.naturalHeight;
+  const ctx = edited.getContext("2d");
+  if (!ctx) return;
+  ctx.drawImage(img, 0, 0);
+  for (const s of strokes) paintStroke(ctx, s);
+}
+
+function syncBrushButtons(): void {
+  $<HTMLButtonElement>("br-undo").disabled = strokes.length === 0;
+  $<HTMLButtonElement>("br-clear").disabled = strokes.length === 0;
+}
+
 function draw(sx: number, sy: number, sw: number, sh: number, dw: number, dh: number): HTMLCanvasElement {
   if (!img) throw new Error("Pick an image first");
   const c = document.createElement("canvas");
@@ -60,7 +121,7 @@ function draw(sx: number, sy: number, sw: number, sh: number, dw: number, dh: nu
   c.height = Math.max(1, Math.round(dh));
   const ctx = c.getContext("2d");
   if (!ctx) throw new Error("Canvas unavailable");
-  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  ctx.drawImage(source(), sx, sy, sw, sh, 0, 0, c.width, c.height);
   return c;
 }
 
@@ -116,6 +177,18 @@ function onResizeAxis(axis: "width" | "height", value: number): void {
   renderStage();
 }
 
+/* ── brush controls ── */
+function readBrushSize(): number {
+  return Math.max(1, Number($<HTMLInputElement>("br-size").value) || 24);
+}
+
+function setBrushSize(v: number): void {
+  const size = Math.max(1, Math.round(v));
+  $<HTMLInputElement>("br-size").value = String(size);
+  $<HTMLInputElement>("br-size-slider").value = String(size);
+  $("br-size-out").textContent = String(size);
+}
+
 /* ── stage rendering ── */
 function stageCtx(): { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
   const c = $<HTMLCanvasElement>("stage");
@@ -136,22 +209,44 @@ function renderStage(): void {
   empty.hidden = true;
   c.classList.add("is-visible");
   c.classList.toggle("is-cropping", activeOp === "crop");
+  c.classList.toggle("is-brushing", activeOp === "brush");
 
   if (activeOp === "resize") {
     const target = readResizeDims();
     const fit = fitWithin(target, STAGE_MAX_W, STAGE_MAX_H);
     c.width = fit.w;
     c.height = fit.h;
-    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, fit.w, fit.h);
+    ctx.drawImage(source(), 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, fit.w, fit.h);
     caption(`Output: ${target.w} × ${target.h} px${fit.scale < 1 ? ` (preview at ${(fit.scale * 100).toFixed(0)}%)` : ""}`);
     return;
   }
 
-  // Default: source image fitted to the stage (crop adds its overlay).
+  // Default: working image fitted to the stage (crop/brush add overlays).
   const fit = fitWithin({ w: img.naturalWidth, h: img.naturalHeight }, STAGE_MAX_W, STAGE_MAX_H);
   c.width = fit.w;
   c.height = fit.h;
-  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, fit.w, fit.h);
+  ctx.drawImage(source(), 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, fit.w, fit.h);
+
+  if (activeOp === "brush") {
+    if (brushHover) {
+      // Cursor ring sized to the brush, double-stroked so it reads on any image.
+      const r = (readBrushSize() / 2) * fit.scale;
+      ctx.beginPath();
+      ctx.arc(brushHover.x * fit.scale, brushHover.y * fit.scale, Math.max(r, 1), 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(brushHover.x * fit.scale, brushHover.y * fit.scale, Math.max(r + 1.5, 2), 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0,0,0,0.7)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    caption(strokes.length
+      ? `${strokes.length} stroke${strokes.length !== 1 ? "s" : ""} — paint on the preview`
+      : "Paint on the preview — drag to draw");
+    return;
+  }
 
   if (activeOp === "crop" && cropRect) {
     const s = fit.scale;
@@ -255,6 +350,61 @@ function initCropPointer(): void {
   c.addEventListener("pointercancel", stop);
 }
 
+/* ── brush pointer interaction ── */
+function initBrushPointer(): void {
+  const c = $<HTMLCanvasElement>("stage");
+  const imgDims = () => ({ w: img!.naturalWidth, h: img!.naturalHeight });
+
+  c.addEventListener("pointerdown", (e) => {
+    if (activeOp !== "brush" || !img) return;
+    if (!edited) rebuildEdited();
+    const p = stagePoint(e);
+    const pt = stageToImagePoint(p.x, p.y, p.scale, imgDims());
+    activeStroke = {
+      size: readBrushSize(),
+      color: $<HTMLInputElement>("br-color").value,
+      points: [pt],
+    };
+    const ctx = edited?.getContext("2d");
+    if (ctx) paintStroke(ctx, activeStroke);
+    c.setPointerCapture(e.pointerId);
+    e.preventDefault();
+    renderStage();
+  });
+
+  c.addEventListener("pointermove", (e) => {
+    if (activeOp !== "brush" || !img) return;
+    const p = stagePoint(e);
+    const pt = stageToImagePoint(p.x, p.y, p.scale, imgDims());
+    brushHover = pt;
+    if (activeStroke) {
+      const prev = activeStroke.points[activeStroke.points.length - 1];
+      // ~1 stage pixel of movement, expressed in image pixels.
+      if (farEnough(prev, pt, 1 / p.scale)) {
+        activeStroke.points.push(pt);
+        const ctx = edited?.getContext("2d");
+        if (ctx) paintStroke(ctx, activeStroke, activeStroke.points.length - 1);
+      }
+    }
+    renderStage();
+  });
+
+  const finish = (): void => {
+    if (!activeStroke) return;
+    strokes.push(activeStroke);
+    activeStroke = null;
+    syncBrushButtons();
+    renderStage();
+  };
+  c.addEventListener("pointerup", finish);
+  c.addEventListener("pointercancel", finish);
+  c.addEventListener("pointerleave", () => {
+    if (activeOp !== "brush") return;
+    brushHover = null;
+    renderStage();
+  });
+}
+
 function resetCropRect(): void {
   if (!img) return;
   const dims = { w: img.naturalWidth, h: img.naturalHeight };
@@ -288,6 +438,7 @@ function initTabs(): void {
 function init(): void {
   initTabs();
   initCropPointer();
+  initBrushPointer();
 
   $<HTMLSelectElement>("cr-aspect").innerHTML =
     `<option value="free">Free</option>` +
@@ -317,6 +468,15 @@ function init(): void {
       }
       setResize(el.naturalWidth, el.naturalHeight);
       resetCropRect();
+      // fresh image: drop edits, seed the brush to the image's scale
+      strokes = [];
+      activeStroke = null;
+      brushHover = null;
+      rebuildEdited();
+      syncBrushButtons();
+      const dims = { w: el.naturalWidth, h: el.naturalHeight };
+      $<HTMLInputElement>("br-size-slider").max = String(maxBrushSize(dims));
+      setBrushSize(defaultBrushSize(dims));
       renderStage();
     };
     el.onerror = () => status("Could not read that image.", true);
@@ -344,6 +504,35 @@ function init(): void {
       const d = readResizeDims();
       const c = draw(0, 0, img.naturalWidth, img.naturalHeight, d.w, d.h);
       offerBlob(await toBlob(c, "image/png"), `${baseName()}-${d.w}x${d.h}.png`);
+    }),
+  );
+
+  // brush: slider ↔ number, undo/clear, export
+  $("br-size-slider").addEventListener("input", () => {
+    setBrushSize(Number($<HTMLInputElement>("br-size-slider").value));
+    renderStage();
+  });
+  $("br-size").addEventListener("input", () => {
+    setBrushSize(Number($<HTMLInputElement>("br-size").value) || 1);
+    renderStage();
+  });
+  $("br-undo").addEventListener("click", () => {
+    strokes.pop();
+    rebuildEdited();
+    syncBrushButtons();
+    renderStage();
+  });
+  $("br-clear").addEventListener("click", () => {
+    strokes = [];
+    rebuildEdited();
+    syncBrushButtons();
+    renderStage();
+  });
+  $("br-run").addEventListener("click", () =>
+    runOp("Exporting", async () => {
+      if (!img) throw new Error("Pick an image first");
+      const c = draw(0, 0, img.naturalWidth, img.naturalHeight, img.naturalWidth, img.naturalHeight);
+      offerBlob(await toBlob(c, "image/png"), `${baseName()}-edited.png`);
     }),
   );
 
