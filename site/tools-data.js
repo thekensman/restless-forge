@@ -8,12 +8,9 @@
      "live" — rendered with a launch link on the landing page and directory
      "soon" — counted in the "in the forge" teaser; never linked
 
-   To launch a tool:
-     1. flip its status to "live"
-     2. remove the `<meta name="robots" content="noindex">` line from every
-        HTML page under tools/<id>/frontend/src/
-     3. add its URLs to site/sitemap.xml
-   Nothing else. */
+   To launch a tool, follow the canonical checklist in
+   docs/launching-a-tool.md (status flip, noindex removal, ads, sitemap,
+   static-HTML regen, copy consistency). */
 (function () {
   'use strict';
 
@@ -76,7 +73,7 @@
     { id: 'forgeresume', label: 'ForgeResume', category: 'Utility', status: 'soon',
       desc: 'ATS-friendly resume builder with a free keyword check against any job description. No account, no dark patterns.' },
     { id: 'forgeimage', label: 'ForgeImage', category: 'Creative', status: 'soon',
-      desc: 'Resize, crop, convert, compress, and generate social-media sizes — the five image jobs you actually need, with no uploads.' },
+      desc: 'Resize, crop, brush out details, convert, compress, and generate social-media sizes — the six image jobs you actually need, with no uploads.' },
   ];
 
   /**

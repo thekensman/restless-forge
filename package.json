@@ -6,7 +6,8 @@
     "dev": "node scripts/dev-all.mjs",
     "dev:site": "vite",
     "build": "./build.sh",
-    "test": "node scripts/test-all.mjs"
+    "test": "node scripts/test-all.mjs",
+    "sync-static": "node scripts/sync-static-html.mjs"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

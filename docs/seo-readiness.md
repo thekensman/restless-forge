@@ -38,10 +38,8 @@ These need real content, not mechanics — flagged per tool:
 4. **Meta descriptions**: re-read at launch — several describe planned
    features rather than what the tool actually does.
 
-## Launch checklist (also in tools-data.js / adding-a-tool.md)
+## Launch checklist
 
-1. Flip `status: "soon"` → `"live"` in `site/tools-data.js`
-2. Remove `<meta name="robots" content="noindex">` from every page under
-   `tools/<id>/frontend/src/`
-3. Add URLs to `site/sitemap.xml`
-4. Sanity-check title/meta-description against the shipped feature set
+Moved: the canonical launch procedure (directory, noindex, ads, sitemap,
+static-HTML regen, copy consistency, verification) lives in
+**`docs/launching-a-tool.md`** — follow it there; don't duplicate it here.

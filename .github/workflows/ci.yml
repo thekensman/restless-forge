@@ -18,6 +18,14 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
+      # The static nav/footer/tool-grid blocks in site/*.html are generated
+      # from tools-data.js + shared.js. Regenerate and fail on drift so the
+      # crawlable HTML can never fall out of sync with the runtime renderers.
+      - name: Check generated static HTML is in sync
+        run: |
+          node scripts/sync-static-html.mjs
+          git diff --exit-code site/
+
       # build.sh runs `npm ci` + typecheck + vite build per tool,
       # then assembles dist/ exactly as production expects.
       - name: Build site

@@ -208,9 +208,21 @@ scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 build.sh, the root dev/test scripts, and the root vite proxy all
 DISCOVER tools automatically from `tools/*/frontend/` (ports and base
 paths are read from each tool's `vite.config.ts` by
-`scripts/tools.mjs`). The only manual steps left are the tool hub cards
-(commented out while the tool is unfinished) and sitemap entries when
-it goes public.
+`scripts/tools.mjs`). Launching a finished tool (directory status flip,
+noindex removal, ads, sitemap, static-HTML regen, copy consistency)
+follows the canonical checklist in `docs/launching-a-tool.md`.
+
+### Static crawlable chrome (generated — never hand-edit)
+
+The global nav/footer and the tools grids on `/` and `/tools/` are
+JS-injected at runtime, but each placeholder div also carries a static
+pre-rendered copy for crawlers, bounded by `<!-- generated:* -->`
+markers. `scripts/sync-static-html.mjs` (`npm run sync-static`) emits
+those blocks by running the REAL renderers from `site/shared.js` +
+`site/tools-data.js` in a sandbox — so there is exactly one source of
+truth and zero copy-pasted markup. CI regenerates and fails on drift.
+After changing nav links, footer links, or tool directory data, re-run
+`npm run sync-static` and commit the result.
 
 ### Adding an essay
 
@@ -326,5 +338,7 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
   `public/shared.js` or `window.rfDonateHtml` will be undefined.
 - **Old domain redirects**: keep SSL certs renewed for holopath.art,
   sandpath.art, whatismytimeworth.app as long as 301 redirects are active.
-- **Essays are placeholders**: the 3 essay files under `site/essays/` contain
-  stub content and need real essays before AdSense approval.
+- **Essays are real content**: `site/essays/` holds published essays
+  (global philosophy / meta-project pieces only — tool-specific articles
+  live with their tool). Never re-add "coming soon" stub pages; thin
+  indexed content is an AdSense liability.
