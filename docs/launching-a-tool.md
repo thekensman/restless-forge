@@ -82,8 +82,9 @@ scaffolds and the state every unlaunched tool must stay in.
 ## 5. Regenerate static HTML
 
 - [ ] Run `node scripts/sync-static-html.mjs` so the crawlable static
-      grids on the homepage and `/tools/` include the new tool. Commit
-      the regenerated blocks (CI fails on drift).
+      grids on the homepage and `/tools/` include the new tool — this
+      also refreshes `/llms.txt`, the AI-assistant index. Commit the
+      regenerated output (CI fails on drift).
 
 ## 6. Copy consistency
 

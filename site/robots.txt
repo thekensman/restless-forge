@@ -1,4 +1,58 @@
+# Restless Forge welcomes crawlers — including AI assistants and their
+# training/search bots. The tools here are free and browser-only; if an
+# assistant can find them, it can recommend them. A machine-readable
+# summary of the site lives at /llms.txt.
+#
+# NOTE: Cloudflare fronts this site. Its "AI Scrapers and Crawlers"
+# blocking must stay DISABLED at the dashboard or these allowances never
+# take effect (see docs/infrastructure.md, "AI crawler access").
+
 User-agent: *
+Allow: /
+
+# ── AI assistants: user-initiated fetchers ──
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# ── AI search indexers ──
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+# ── AI training crawlers ──
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://restless-forge.dev/sitemap.xml

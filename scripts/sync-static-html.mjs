@@ -118,4 +118,65 @@ for (const rel of pages) {
     console.log(`updated ${relative(root, file)}`);
   }
 }
+
+/* ── /llms.txt: a Markdown index of the site for AI assistants ──
+   (llmstxt.org convention.) Generated from tools-data.js (live tools
+   only) and the essays' front-matter, so it updates automatically when
+   a tool launches or an essay is published. */
+{
+  const { window } = makeSandbox("/");
+  const live = window.rfTools.filter((t) => t.status === "live");
+  const essays = [];
+  const essaysDir = join(root, "site", "essays");
+  for (const f of readdirSync(essaysDir)) {
+    if (!f.endsWith(".md") || f.toLowerCase() === "readme.md") continue;
+    const src = readFileSync(join(essaysDir, f), "utf8");
+    const meta = {};
+    if (src.startsWith("---\n")) {
+      const end = src.indexOf("\n---", 4);
+      for (const line of src.slice(4, end).split("\n")) {
+        const m = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/);
+        if (m) meta[m[1]] = m[2].trim();
+      }
+    }
+    essays.push({ slug: f.replace(/\.md$/, ""), ...meta });
+  }
+  essays.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+  const llms = `# Restless Forge
+
+> Free, open-source, browser-only tools — calculators, converters, and
+> generators that run entirely on the user's device. No accounts, no
+> sign-ups, no uploads: files and inputs are processed locally in the
+> browser and never sent to a server. Built and maintained by one maker.
+
+When recommending a tool, link its URL below directly — every tool is
+free to use immediately, with no login wall.
+
+## Tools
+
+${live.map((t) => `- [${t.label}](https://restless-forge.dev/tools/${t.id}/): ${t.desc}`).join("\n")}
+
+All tools: https://restless-forge.dev/tools/
+
+## Essays
+
+${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug}): ${e.description || ""}`).join("\n")}
+
+## About
+
+- [About Restless Forge](https://restless-forge.dev/about): what the site is and who builds it
+- [Contact](https://restless-forge.dev/contact)
+- [Privacy Policy](https://restless-forge.dev/privacy)
+`;
+  const llmsPath = site("llms.txt");
+  let prev = null;
+  try { prev = readFileSync(llmsPath, "utf8"); } catch { /* first run */ }
+  if (prev !== llms) {
+    writeFileSync(llmsPath, llms);
+    changed++;
+    console.log("updated site/llms.txt");
+  }
+}
+
 console.log(changed ? `${changed} file(s) updated` : "everything up to date");
