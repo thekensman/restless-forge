@@ -208,16 +208,40 @@ scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 build.sh, the root dev/test scripts, and the root vite proxy all
 DISCOVER tools automatically from `tools/*/frontend/` (ports and base
 paths are read from each tool's `vite.config.ts` by
-`scripts/tools.mjs`). The only manual steps left are the tool hub cards
-(commented out while the tool is unfinished) and sitemap entries when
-it goes public.
+`scripts/tools.mjs`). Launching a finished tool (directory status flip,
+noindex removal, ads, sitemap, static-HTML regen, copy consistency)
+follows the canonical checklist in `docs/launching-a-tool.md`.
+
+### Generated HTML (never hand-edit; `npm run sync` regenerates both)
+
+Two generators emit checked-in, marker-bounded HTML; CI regenerates
+and fails on drift:
+
+1. **Chrome** — `scripts/sync-static-html.mjs` (`npm run sync-static`):
+   the global nav/footer and the tools grids on `/` and `/tools/` are
+   JS-injected at runtime, but each placeholder div also carries a
+   static pre-rendered copy for crawlers, emitted by running the REAL
+   renderers from `site/shared.js` + `site/tools-data.js` in a sandbox.
+   Re-run after changing nav links, footer links, or tool directory
+   data.
+2. **Prose** — `scripts/sync-content.mjs` (`npm run sync-content`):
+   page copy lives in sibling Markdown files (`X.md` next to `X.html`)
+   and renders into `generated:content` blocks; essay shells are
+   auto-created from front-matter and the essays index cards
+   regenerate. Full conventions: `docs/authoring-content.md`.
+   `marked` is a **build-time root devDependency** (allowed — nothing
+   ships to the browser; the runtime no-dependency rule is unchanged).
 
 ### Adding an essay
 
-1. Create `site/essays/your-slug.html` using an existing essay as a template.
-2. Add a card to `site/essays/index.html`.
+1. Write `site/essays/your-slug.md` with front-matter (`title`,
+   `description`, `date`, `author`) and a body starting with `# Title`.
+2. `npm run sync` — the HTML shell (metas, OG, JSON-LD Article) is
+   auto-created and the essays index cards regenerate.
 3. Add the URL to `site/sitemap.xml`.
-4. Ensure it has: title, meta description, OG tags, canonical URL, JSON-LD Article schema.
+
+Full authoring conventions (tool articles, raw-HTML blocks, byline
+rules): `docs/authoring-content.md`.
 
 ## Build System
 
@@ -326,5 +350,7 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
   `public/shared.js` or `window.rfDonateHtml` will be undefined.
 - **Old domain redirects**: keep SSL certs renewed for holopath.art,
   sandpath.art, whatismytimeworth.app as long as 301 redirects are active.
-- **Essays are placeholders**: the 3 essay files under `site/essays/` contain
-  stub content and need real essays before AdSense approval.
+- **Essays are real content**: `site/essays/` holds published essays
+  (global philosophy / meta-project pieces only — tool-specific articles
+  live with their tool). Never re-add "coming soon" stub pages; thin
+  indexed content is an AdSense liability.

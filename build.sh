@@ -19,6 +19,9 @@ mkdir -p "${DIST_DIR}"
 # ── Copy global site pages ──
 echo "[2/5] Copying global site pages..."
 cp -r "${SCRIPT_DIR}/site/"* "${DIST_DIR}/"
+# Markdown content sources (rendered into the HTML by sync-content) are
+# authoring files, not deployables.
+find "${DIST_DIR}" -name '*.md' -delete
 
 # ─────────────────────────────────────────────────────────────────────────────
 # build_vite_tool <label> <dir-name>

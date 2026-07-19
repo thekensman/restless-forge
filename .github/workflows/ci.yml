@@ -18,6 +18,16 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
+      # Generated HTML must be in sync with its sources of truth:
+      #   sync-content — Markdown prose → generated:content blocks + essay cards
+      #   sync-static  — nav/footer/tool grids from shared.js + tools-data.js
+      # Regenerate and fail on drift so neither the prose nor the crawlable
+      # chrome can be hand-edited or go stale.
+      - name: Check generated HTML is in sync
+        run: |
+          npm run sync
+          git diff --exit-code site/ tools/
+
       # build.sh runs `npm ci` + typecheck + vite build per tool,
       # then assembles dist/ exactly as production expects.
       - name: Build site

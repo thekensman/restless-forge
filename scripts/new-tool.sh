@@ -60,7 +60,7 @@ mkdir -p "$(dirname "${DST}")"
 cp -r "${SRC}" "${DST}"
 
 # Substitute placeholders in every file under the new tool
-find "${DST}" -type f \( -name "*.ts" -o -name "*.js" -o -name "*.html" -o -name "*.css" -o -name "*.json" \) -print0 |
+find "${DST}" -type f \( -name "*.ts" -o -name "*.js" -o -name "*.html" -o -name "*.css" -o -name "*.json" -o -name "*.md" \) -print0 |
   while IFS= read -r -d '' f; do
     sed -i \
       -e "s|__TOOL_NAME__|${TOOL_NAME}|g" \

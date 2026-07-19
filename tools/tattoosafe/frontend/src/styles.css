@@ -109,3 +109,17 @@ a { color: var(--accent); } a:hover { color: var(--accent-light); }
 
 .ar__curve { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); }
 .ar__curve input[type="range"] { accent-color: var(--accent); width: 120px; }
+
+/* ─── SEO / explainer content ─── */
+.seo-content { width: 100%; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+.seo-content h2 { font-family: var(--font-display); font-size: 1.15rem; color: var(--text-bright); font-weight: 400; margin: 1.4rem 0 0.5rem; }
+.seo-content h2:first-child { margin-top: 0; }
+
+/* ─── Ad Slot ─── */
+.ad-slot--bottom {
+  display: block;
+  margin: 2rem auto 0;
+  max-width: 740px;
+  width: 100%;
+  padding: 0 1.5rem;
+}
