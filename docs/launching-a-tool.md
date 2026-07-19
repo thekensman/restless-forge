@@ -17,7 +17,9 @@ scaffolds and the state every unlaunched tool must stay in.
       mobile (real phone, not just devtools emulation).
 - [ ] Real-content pass done: main page has genuine crawlable copy (not
       scaffold text), sub-pages (about/FAQ/etc.) have real content, and
-      the page doesn't consist almost entirely of interactive UI.
+      the page doesn't consist almost entirely of interactive UI. Prose
+      is authored per `docs/authoring-content.md` (Markdown-backed
+      pages; run `npm run sync-content` after editing).
 - [ ] `<title>` and meta description describe what the tool **actually
       ships**, not planned features (see `docs/seo-readiness.md`).
 - [ ] Tests green (`npm test --prefix tools/<id>/frontend`) and the tool

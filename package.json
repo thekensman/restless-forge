@@ -7,10 +7,13 @@
     "dev:site": "vite",
     "build": "./build.sh",
     "test": "node scripts/test-all.mjs",
-    "sync-static": "node scripts/sync-static-html.mjs"
+    "sync-static": "node scripts/sync-static-html.mjs",
+    "sync-content": "node scripts/sync-content.mjs",
+    "sync": "npm run sync-content && npm run sync-static"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
+    "marked": "^18.0.6",
     "vite": "^5.4.0"
   }
 }

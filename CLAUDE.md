@@ -212,24 +212,36 @@ paths are read from each tool's `vite.config.ts` by
 noindex removal, ads, sitemap, static-HTML regen, copy consistency)
 follows the canonical checklist in `docs/launching-a-tool.md`.
 
-### Static crawlable chrome (generated — never hand-edit)
+### Generated HTML (never hand-edit; `npm run sync` regenerates both)
 
-The global nav/footer and the tools grids on `/` and `/tools/` are
-JS-injected at runtime, but each placeholder div also carries a static
-pre-rendered copy for crawlers, bounded by `<!-- generated:* -->`
-markers. `scripts/sync-static-html.mjs` (`npm run sync-static`) emits
-those blocks by running the REAL renderers from `site/shared.js` +
-`site/tools-data.js` in a sandbox — so there is exactly one source of
-truth and zero copy-pasted markup. CI regenerates and fails on drift.
-After changing nav links, footer links, or tool directory data, re-run
-`npm run sync-static` and commit the result.
+Two generators emit checked-in, marker-bounded HTML; CI regenerates
+and fails on drift:
+
+1. **Chrome** — `scripts/sync-static-html.mjs` (`npm run sync-static`):
+   the global nav/footer and the tools grids on `/` and `/tools/` are
+   JS-injected at runtime, but each placeholder div also carries a
+   static pre-rendered copy for crawlers, emitted by running the REAL
+   renderers from `site/shared.js` + `site/tools-data.js` in a sandbox.
+   Re-run after changing nav links, footer links, or tool directory
+   data.
+2. **Prose** — `scripts/sync-content.mjs` (`npm run sync-content`):
+   page copy lives in sibling Markdown files (`X.md` next to `X.html`)
+   and renders into `generated:content` blocks; essay shells are
+   auto-created from front-matter and the essays index cards
+   regenerate. Full conventions: `docs/authoring-content.md`.
+   `marked` is a **build-time root devDependency** (allowed — nothing
+   ships to the browser; the runtime no-dependency rule is unchanged).
 
 ### Adding an essay
 
-1. Create `site/essays/your-slug.html` using an existing essay as a template.
-2. Add a card to `site/essays/index.html`.
+1. Write `site/essays/your-slug.md` with front-matter (`title`,
+   `description`, `date`, `author`) and a body starting with `# Title`.
+2. `npm run sync` — the HTML shell (metas, OG, JSON-LD Article) is
+   auto-created and the essays index cards regenerate.
 3. Add the URL to `site/sitemap.xml`.
-4. Ensure it has: title, meta description, OG tags, canonical URL, JSON-LD Article schema.
+
+Full authoring conventions (tool articles, raw-HTML blocks, byline
+rules): `docs/authoring-content.md`.
 
 ## Build System
 

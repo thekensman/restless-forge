@@ -12,7 +12,7 @@
  * NEVER hand-edit the generated blocks: re-run this script instead
  * (`npm run sync-static`). CI regenerates and fails on drift.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
 import vm from "node:vm";
@@ -72,11 +72,25 @@ function urlPath(rel) {
   return "/" + rel.replace(/\.html$/, "");
 }
 
-const pages = [
-  "index.html", "about.html", "contact.html", "privacy.html", "terms.html",
-  "faq.html", "tools/index.html", "articles/index.html", "essays/index.html",
-  "essays/why-i-build-these-tools.html", "essays/how-a-tool-gets-built.html",
-];
+/* Every HTML page under site/ that carries a placeholder is processed —
+   discovery, not a registry, so new pages (e.g. auto-created essay
+   shells) are picked up without editing this script. */
+function* walk(dir) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name.startsWith(".") || e.name === "node_modules") continue;
+    const p = join(dir, e.name);
+    if (e.isDirectory()) yield* walk(p);
+    else if (e.name.endsWith(".html")) yield p;
+  }
+}
+const pages = [...walk(join(root, "site"))]
+  .map((p) => relative(join(root, "site"), p))
+  .filter((rel) => {
+    const html = readFileSync(site(rel), "utf8");
+    return ["rf-nav", "rf-footer", "rf-tools-landing", "rf-tools-directory"]
+      .some((id) => html.includes(`id="${id}"`));
+  })
+  .sort();
 
 let changed = 0;
 for (const rel of pages) {

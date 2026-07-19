@@ -44,148 +44,43 @@
 
   <main class="page">
     <article>
-      <h1>How a Tool Gets Built</h1>
-      <p style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">
-        Published July 2026 &middot; By Ken
-      </p>
-
-      <p>
-        Restless Forge currently hosts a handful of live tools and more than
-        twenty in progress behind the scenes. That only works as a one-person
-        operation because the path from "idea" to "live in the directory" is
-        the same every time. This essay walks through that pipeline — the
-        repository, the scaffold, the conventions, and the automation — for
-        anyone curious how a small workshop ships browser-only software
-        repeatedly without drowning in maintenance.
-      </p>
-
-      <h2>One repository, many tools</h2>
-      <p>
-        Everything lives in a single monorepo: the landing site, every tool,
-        the build scripts, and the server configuration. Each tool is a
-        self-contained folder — <code>tools/&lt;name&gt;/frontend/</code> —
-        with its own <code>package.json</code>, its own tests, and its own dev
-        server. The global pages (this essay included) are plain static HTML
-        in a <code>site/</code> folder with no build step at all.
-      </p>
-      <p>
-        The important property is that the platform <em>discovers</em> tools
-        instead of being told about them. The build script, the dev proxy, and
-        the test runner all scan <code>tools/*/frontend/</code> and pick up
-        whatever they find, reading each tool's port and URL base from its own
-        config. Adding tool number twenty-seven doesn't mean editing five
-        lists — the platform notices it exists.
-      </p>
-
-      <h2>Born from a template</h2>
-      <p>
-        No tool starts from a blank folder. A scaffold script
-        (<code>scripts/new-tool.sh</code>) copies a maintained template,
-        substitutes the tool's name, accent prefix, dev port, and emoji, and
-        installs dependencies. Thirty seconds later there's a running skeleton
-        with the site header and footer, a themed page, a test suite with a
-        passing smoke test, and all the metadata plumbing (favicons, social
-        preview images, structured data) already wired.
-      </p>
-      <p>
-        The template encodes the architecture rule that defines the whole
-        site: <strong>no backends</strong>. Every tool is TypeScript compiled
-        to static files, doing its work with browser APIs — Canvas for image
-        processing, Web Workers for heavy loops, <code>getUserMedia</code> for
-        camera features. If a feature can't be done client-side, it doesn't
-        ship. The payoff is that your files never leave your device, and my
-        operational surface is "serve static files," which is about as calm as
-        web operations get.
-      </p>
-
-      <h2>Shared chrome, personal character</h2>
-      <p>
-        Every tool renders the same header and footer from one shared script,
-        and styles them with one shared stylesheet — but each tool defines a
-        small set of CSS custom properties (background, text, accent, border,
-        font) that theme that chrome to match its own personality.
-        <a href="/tools/holopath/">HoloPath</a> feels different from
-        <a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a>,
-        yet the navigation, the support links, and the layout bones are
-        literally the same code. One fix in the shared layer fixes every tool
-        at once; no markup is copy-pasted between tools.
-      </p>
-
-      <h2>Logic you can test without a browser</h2>
-      <p>
-        Inside each tool, the code splits in two. Everything that can be pure
-        — unit conversion, pricing math, crop geometry, path generation —
-        lives in an <code>engine</code> module with no DOM dependencies, and
-        the app file just wires that engine to inputs and canvases. The engine
-        is where the unit tests live: the repo currently runs hundreds of
-        tests across all tool suites on every change. When a field test turns
-        up a bug (and field tests always turn up bugs), the fix usually lands
-        in a pure function next to a new test that would have caught it.
-      </p>
-
-      <h2>The pipeline: push, verify, deploy</h2>
-      <p>
-        Work happens on branches; every pull request runs the full build and
-        every tool's test suite in CI. Merging to <code>main</code> triggers
-        the deploy workflow: it compiles each tool, assembles everything into
-        one <code>dist/</code> folder with cache-busting hashes on the shared
-        assets, syncs it to the server, and reloads nginx with a validation
-        check and automatic rollback if the config is bad. A scheduled health
-        check hits the live site every half hour and opens an issue if
-        anything — pages, certificates, cache headers — looks wrong.
-      </p>
-      <p>
-        There's even automation for the content itself: some tools carry data
-        that changes yearly (tax brackets, mileage rates, price indexes), and
-        a scheduled job refreshes the whole matrix each January and opens a
-        pull request with sources cited, with a separate freshness check as a
-        backstop in case that job ever fails silently.
-      </p>
-
-      <h2>Hidden until ready</h2>
-      <p>
-        Here's the part visitors never see: most of the forge is dark. A new
-        tool deploys to production long before it launches — reachable by
-        direct URL for field testing on real phones, but marked
-        <code>noindex</code> so search engines ignore it, absent from the
-        <a href="/tools/">directory</a>, and excluded from the sitemap. It
-        stays that way through however many rounds of testing it takes; the
-        camera-preview tool went through several field-test cycles before its
-        rough edges were honestly labeled or fixed.
-      </p>
-      <p>
-        Launching, when it finally happens, is deliberately boring: flip one
-        status flag in the directory data (the single source of truth that
-        renders the homepage and directory cards), remove the
-        <code>noindex</code> tags, add the pages to the sitemap, add the ad
-        units, and redeploy. A written checklist keeps that honest — the same
-        steps in the same order, every time.
-      </p>
-
-      <h2>Why bother with all this for free tools?</h2>
-      <p>
-        Because process is what makes "free" sustainable. Every hour not spent
-        on bespoke infrastructure is an hour spent on the tools themselves,
-        and every convention means a bug fixed once instead of twenty-six
-        times. The forge stays restless precisely because the machinery around
-        it is calm. The "why" behind that — the philosophy, and the honest
-        deal with ads that funds it — gets its own essay:
-        <a href="/essays/why-i-build-these-tools">Why I Build These Tools</a>.
-      </p>
-
-      <hr style="border: none; border-top: 1px solid var(--border); margin: 3rem 0;">
-
-      <h3>Tools mentioned in this essay</h3>
-      <ul>
-        <li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> — Real hourly wage calculator</li>
-        <li><a href="/tools/holopath/">HoloPath</a> — Hologram GIF generator</li>
-        <li><a href="/tools/sandpath/">SandPath</a> — Sand table pattern converter</li>
-      </ul>
-      <h3>Related</h3>
-      <ul>
-        <li><a href="/essays/why-i-build-these-tools">Why I Build These Tools</a> — the philosophy behind the workshop</li>
-        <li><a href="https://github.com/thekensman/" target="_blank" rel="noopener">The code on GitHub</a></li>
-      </ul>
+      <!-- generated:content — do not edit; edit how-a-tool-gets-built.md and run `npm run sync-content` -->
+<h1>How a Tool Gets Built</h1>
+<p class="content-byline" style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">
+  Published July 2026 &middot; By Ken
+</p>
+<p>Restless Forge currently hosts a handful of live tools and more than twenty in progress behind the scenes. That only works as a one-person operation because the path from &quot;idea&quot; to &quot;live in the directory&quot; is the same every time. This essay walks through that pipeline — the repository, the scaffold, the conventions, and the automation — for anyone curious how a small workshop ships browser-only software repeatedly without drowning in maintenance.</p>
+<h2>One repository, many tools</h2>
+<p>Everything lives in a single monorepo: the landing site, every tool, the build scripts, and the server configuration. Each tool is a self-contained folder — <code>tools/&lt;name&gt;/frontend/</code> — with its own <code>package.json</code>, its own tests, and its own dev server. The global pages (this essay included) are plain static HTML in a <code>site/</code> folder with no build step at all.</p>
+<p>The important property is that the platform <em>discovers</em> tools instead of being told about them. The build script, the dev proxy, and the test runner all scan <code>tools/*/frontend/</code> and pick up whatever they find, reading each tool&#39;s port and URL base from its own config. Adding tool number twenty-seven doesn&#39;t mean editing five lists — the platform notices it exists.</p>
+<h2>Born from a template</h2>
+<p>No tool starts from a blank folder. A scaffold script (<code>scripts/new-tool.sh</code>) copies a maintained template, substitutes the tool&#39;s name, accent prefix, dev port, and emoji, and installs dependencies. Thirty seconds later there&#39;s a running skeleton with the site header and footer, a themed page, a test suite with a passing smoke test, and all the metadata plumbing (favicons, social preview images, structured data) already wired.</p>
+<p>The template encodes the architecture rule that defines the whole site: <strong>no backends</strong>. Every tool is TypeScript compiled to static files, doing its work with browser APIs — Canvas for image processing, Web Workers for heavy loops, <code>getUserMedia</code> for camera features. If a feature can&#39;t be done client-side, it doesn&#39;t ship. The payoff is that your files never leave your device, and my operational surface is &quot;serve static files,&quot; which is about as calm as web operations get.</p>
+<h2>Shared chrome, personal character</h2>
+<p>Every tool renders the same header and footer from one shared script, and styles them with one shared stylesheet — but each tool defines a small set of CSS custom properties (background, text, accent, border, font) that theme that chrome to match its own personality. <a href="/tools/holopath/">HoloPath</a> feels different from <a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a>, yet the navigation, the support links, and the layout bones are literally the same code. One fix in the shared layer fixes every tool at once; no markup is copy-pasted between tools.</p>
+<h2>Logic you can test without a browser</h2>
+<p>Inside each tool, the code splits in two. Everything that can be pure — unit conversion, pricing math, crop geometry, path generation — lives in an <code>engine</code> module with no DOM dependencies, and the app file just wires that engine to inputs and canvases. The engine is where the unit tests live: the repo currently runs hundreds of tests across all tool suites on every change. When a field test turns up a bug (and field tests always turn up bugs), the fix usually lands in a pure function next to a new test that would have caught it.</p>
+<h2>The pipeline: push, verify, deploy</h2>
+<p>Work happens on branches; every pull request runs the full build and every tool&#39;s test suite in CI. Merging to <code>main</code> triggers the deploy workflow: it compiles each tool, assembles everything into one <code>dist/</code> folder with cache-busting hashes on the shared assets, syncs it to the server, and reloads nginx with a validation check and automatic rollback if the config is bad. A scheduled health check hits the live site every half hour and opens an issue if anything — pages, certificates, cache headers — looks wrong.</p>
+<p>There&#39;s even automation for the content itself: some tools carry data that changes yearly (tax brackets, mileage rates, price indexes), and a scheduled job refreshes the whole matrix each January and opens a pull request with sources cited, with a separate freshness check as a backstop in case that job ever fails silently.</p>
+<h2>Hidden until ready</h2>
+<p>Here&#39;s the part visitors never see: most of the forge is dark. A new tool deploys to production long before it launches — reachable by direct URL for field testing on real phones, but marked <code>noindex</code> so search engines ignore it, absent from the <a href="/tools/">directory</a>, and excluded from the sitemap. It stays that way through however many rounds of testing it takes; the camera-preview tool went through several field-test cycles before its rough edges were honestly labeled or fixed.</p>
+<p>Launching, when it finally happens, is deliberately boring: flip one status flag in the directory data (the single source of truth that renders the homepage and directory cards), remove the <code>noindex</code> tags, add the pages to the sitemap, add the ad units, and redeploy. A written checklist keeps that honest — the same steps in the same order, every time.</p>
+<h2>Why bother with all this for free tools?</h2>
+<p>Because process is what makes &quot;free&quot; sustainable. Every hour not spent on bespoke infrastructure is an hour spent on the tools themselves, and every convention means a bug fixed once instead of twenty-six times. The forge stays restless precisely because the machinery around it is calm. The &quot;why&quot; behind that — the philosophy, and the honest deal with ads that funds it — gets its own essay: <a href="/essays/why-i-build-these-tools">Why I Build These Tools</a>.</p>
+<hr>
+<h3>Tools mentioned in this essay</h3>
+<ul>
+<li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> — Real hourly wage calculator</li>
+<li><a href="/tools/holopath/">HoloPath</a> — Hologram GIF generator</li>
+<li><a href="/tools/sandpath/">SandPath</a> — Sand table pattern converter</li>
+</ul>
+<h3>Related</h3>
+<ul>
+<li><a href="/essays/why-i-build-these-tools">Why I Build These Tools</a> — the philosophy behind the workshop</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/thekensman/">The code on GitHub</a></li>
+</ul>
+<!-- /generated:content -->
     </article>
   </main>
 

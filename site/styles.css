@@ -413,3 +413,8 @@ img { max-width: 100%; height: auto; }
 .tool-directory__teaser {
   margin-top: 2rem; font-style: italic; color: var(--text-dim, #7a7770);
 }
+/* Markdown-generated article rules (essays): style the semantic <hr> the
+   content pipeline emits, instead of inline styles in prose. */
+.page article hr {
+  border: none; border-top: 1px solid var(--border, #252a35); margin: 3rem 0;
+}

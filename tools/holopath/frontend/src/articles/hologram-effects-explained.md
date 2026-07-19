@@ -1,0 +1,43 @@
+# Understanding Holographic Effects: Scan Lines, Glow, and Chromatic Aberration Explained
+
+Holographic imagery has a recognisable visual vocabulary — a set of layered effects that, in combination, signal "advanced technology" or "digital projection" to a viewer. None of these effects are arbitrary. Each one has a real origin in physics, display technology, or the history of imaging science, and understanding where they come from makes them much more effective to use. Here is the story behind every major effect, and how HoloPath's sliders let you dial each one in.
+
+## Scan Lines
+
+The scan line effect — horizontal dark bands at regular intervals across the image — is a direct visual inheritance from cathode ray tube (CRT) television. CRT screens painted images by sweeping an electron beam across the screen one horizontal line at a time. The beam could only illuminate one line at a given moment, so the rest of the screen was briefly dark between each sweep. At normal viewing distances, your eye averaged across these lines and saw a continuous image, but up close the line structure was clearly visible.
+
+When viewers see scan lines on a digital hologram, they read it as a projected or transmitted image rather than a physical object. The effect communicates "this is a signal being displayed" — exactly the right message for a holographic projection. Tightly spaced scan lines (many thin lines) look more like a high-resolution monitor feed; widely spaced lines create a coarser, more retro or degraded feel. In HoloPath's scan line slider, lower values produce fine lines and a subtle effect; higher values produce thick, bold banding reminiscent of old video equipment or a display with failing electronics.
+
+## Glow and Bloom
+
+In physical optics, bright light sources scatter photons into adjacent areas through the atmosphere, through the vitreous humour of the eye, and through the optical systems of cameras and projectors. This scattered light creates a soft luminous halo around any bright region — what photographers call bloom and post-production artists call glow.
+
+In displays, bloom also occurs when bright pixels cause their LCD backlights to spill into neighbouring zones, or when bright areas of a projection diffuse through the projection screen material. The glow effect convincingly suggests that the holographic image is self-luminous — that it is emitting real light from inside rather than being drawn on a flat surface. A holographic figure with strong glow appears to have physical presence and warmth. HoloPath's glow slider blurs and brightens the image edges, most noticeably around high-contrast boundaries between bright subject areas and the dark background.
+
+## Chromatic Aberration
+
+Every lens refracts different wavelengths of light at slightly different angles — a property called dispersion. Cheap or uncorrected lenses fail to focus all colours at exactly the same point, resulting in visible colour fringing around high-contrast edges. Red light focuses slightly differently from blue, and the mismatch produces ghost images in each primary colour offset by a small distance. This is chromatic aberration, and it is a well-known lens defect.
+
+In holographic visual design, chromatic aberration works as a powerful realism cue for projected imagery. It suggests that the hologram has passed through optical elements — projector lenses, waveguides, transmission media — and picked up the colour fringing those components would introduce. The effect is also deeply familiar from low-budget video and early digital cameras, associating the image with authentic recording technology rather than clean CGI. HoloPath's chromatic aberration slider shifts the red and blue channels horizontally relative to the green channel; a small shift is subtle and naturalistic, a large shift creates a pronounced fractured-colour look associated with glitchy or distressed holograms.
+
+## Glitch Effects
+
+Digital glitch aesthetics emerged from the databending and circuit-bending art movements of the early 2000s, in which artists deliberately corrupted digital files or manipulated hardware to produce visual errors. Glitch art celebrates the raw signal beneath the polished surface — shifted rows of pixels, unexpected colour inversions, data block displacement. Rosa Menkman's theoretical work on glitch aesthetics positioned these errors not as failures but as moments of honesty about the underlying processes of digital systems.
+
+For holographic imagery, glitch effects communicate instability and transmission — the suggestion that the hologram is streaming from somewhere else and the signal is imperfect. They add dramatic tension and reinforce the idea that the image has been transmitted rather than rendered locally. HoloPath applies glitch as periodic horizontal displacement of image rows, mimicking the line-sync errors that occur in corrupted video signals.
+
+## Noise and Static
+
+Analogue television static is caused by thermal noise in the receiver's electronics and by ambient electromagnetic radiation being picked up by the antenna. The random grain this produces became, across decades of viewing, the visual signature of a signal on the edge of reception — present but fragile. Psychologically, noise communicates distance, degradation, and transmission from a remote or uncertain source.
+
+Adding noise to a holographic image exploits this association powerfully. It suggests the hologram is being received from far away or is at the limit of the projector's capability. It also breaks up the crisp digital perfection of a clean composited image in ways that feel more organic. HoloPath's noise slider adds luminance grain across the image; at low settings it resembles film grain, at higher settings it approaches the dense static of a barely-received analogue broadcast.
+
+## Grid Overlay
+
+The grid is a direct visual quotation from science fiction. From the wireframe landscapes of Tron to the blue grid floors of holographic briefing rooms in countless films, the grid communicates "this is a constructed digital space." It draws on the conceptual heritage of graph paper and architectural drawing — the grid as the underlying coordinate system of a virtual world. Many real holographic and volumetric display prototypes do show grid artefacts from their optical structures, lending the aesthetic some physical basis. HoloPath's grid overlay adds a fine or coarse square grid at reduced opacity across the entire image.
+
+## Flicker
+
+Any light source driven by alternating current flickers at the AC frequency — 50 Hz in Europe, 60 Hz in North America. Early gas discharge lamps and fluorescent tubes were noticeably susceptible to this. Holographic display prototypes using acousto-optic modulators and pulsed lasers produce brightness variations tied to their modulation rates. Even the human visual system has a detectable flicker threshold; strobing below about 60 Hz is perceptible as unsteadiness. Flicker tells the viewer that the light source is not a stable solid-state display but something more energetic, less controlled, and therefore more extraordinary. HoloPath's flicker effect modulates image brightness in a slow, irregular rhythm, reinforcing the sense of a live projected energy field rather than a static recording.
+
+<p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Try HoloPath Free →</a></p>
