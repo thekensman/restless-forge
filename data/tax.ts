@@ -1,4 +1,4 @@
-/* tools/shared-data/tax.ts — shared, year-keyed US tax data.
+/* data/tax.ts — shared, year-keyed US tax data.
  *
  * SINGLE SOURCE OF TRUTH for tax constants used across tools. Consumers
  * import the CURRENT alias (or a specific year from TAX_YEARS). Bundled

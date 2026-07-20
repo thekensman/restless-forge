@@ -9,7 +9,7 @@ Several tools carry rate data that changes yearly (see
 
 | Data | Target file(s) | Source |
 |---|---|---|
-| Federal brackets, standard deductions | `tools/shared-data/tax.ts` (year-keyed `TAX_YEARS` — append, never overwrite) | IRS Rev. Proc. (published ~Oct/Nov) |
+| Federal brackets, standard deductions | `data/tax.ts` (year-keyed `TAX_YEARS` — append, never overwrite) | IRS Rev. Proc. (published ~Oct/Nov) |
 | SS wage base | same | SSA announcement (~Oct) |
 | State income tax rates (sanity pass) | same (`stateRates`) | Tax Foundation |
 | IRS standard mileage rate | `tools/side-hustle-reality/frontend/src/index.html` + `scripts/maintenance/data/mileage_rate.json` | IRS Notice (~late Dec) |
@@ -24,7 +24,7 @@ Instead of one scheduled job per tool, there is **one consolidated
 "Annual data refresh" routine** covering the whole matrix, plus a
 **GitHub Actions freshness check** that catches silent failures.
 
-**Shared data layer:** cross-tool datasets live in `tools/shared-data/`
+**Shared data layer:** cross-tool datasets live in `data/`
 (currently `tax.ts`), imported by consuming tools and bundled at build
 time — no runtime fetches. Tool-specific data (PetDose doses, PromptDrop
 bands, TattooSafe rates) stays in each tool's engine.
@@ -90,7 +90,7 @@ restless-forge repo (thekensman/restless-forge). Work through the data
 matrix in docs/automation.md and scripts/maintenance/DEPENDENCIES.md,
 updating everything to the CURRENT year:
 
-1. Shared tax data (tools/shared-data/tax.ts): APPEND a new year
+1. Shared tax data (data/tax.ts): APPEND a new year
    entry to TAX_YEARS (copy the prior year, update brackets, standard
    deductions, ssWageBase, and the source field) and bump
    CURRENT_TAX_YEAR (the freshness check greps it). Do NOT delete

@@ -5,7 +5,7 @@
  * All monetary values in USD. All time in the units specified.
  */
 
-import { TAX, CURRENT_TAX_YEAR } from "../../../shared-data/tax";
+import { TAX, CURRENT_TAX_YEAR } from "../../../../data/tax";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -124,7 +124,7 @@ export interface JobComparisonResult {
 
 // ─── Tax Constants ───────────────────────────────────────────
 
-// All year-keyed values live in tools/shared-data/tax.ts (single source
+// All year-keyed values live in data/tax.ts (single source
 // across tools; current year via CURRENT_TAX_YEAR, updated annually per
 // docs/automation.md). Aliased here to keep the calculation code terse.
 export const TAX_YEAR = CURRENT_TAX_YEAR;
@@ -615,7 +615,7 @@ export const DECISION_PRESETS: DecisionPreset[] = [
 
 // ─── State Tax Rates ─────────────────────────────────────────
 
-// Lives in tools/shared-data/tax.ts; re-exported to keep this engine's
+// Lives in data/tax.ts; re-exported to keep this engine's
 // public API unchanged.
 export const STATE_TAX_RATES: { id: string; name: string; rate: number }[] = TAX.stateRates;
 

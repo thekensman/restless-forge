@@ -13,7 +13,7 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 
 | Tool | Data Source | Update Frequency | When to Run | Risk if Stale |
 |------|-----------|-----------------|-------------|---------------|
-| WIMTW (via `tools/shared-data/tax.ts`) | Federal tax brackets | Annually | **Jan 1** (IRS publishes Oct/Nov for next year) | Medium — wrong tax estimates |
+| WIMTW (via `data/tax.ts`) | Federal tax brackets | Annually | **Jan 1** (IRS publishes Oct/Nov for next year) | Medium — wrong tax estimates |
 | WIMTW | State income tax rates | Annually | **Jan 1** | Low — simplified flat rates |
 | WIMTW | FICA rate | Rarely (last changed 2013) | **Jan 1** (verify) | Low |
 | WIMTW | SS wage base | Annually | **Jan 1** | Very low — only affects high earners |
@@ -49,7 +49,7 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 ### 2. Federal Tax Brackets (IRS)
 - **Source:** IRS Revenue Procedure (published Oct/Nov for following tax year)
 - **No clean API** — data is in PDF/HTML revenue procedures
-- **Updates:** `tools/shared-data/tax.ts` → append a new `TAX_YEARS`
+- **Updates:** `data/tax.ts` → append a new `TAX_YEARS`
   entry and bump `CURRENT_TAX_YEAR` (year-keyed, append-only — prior
   years are kept as history). No helper script; the annual agent (or a
   human) edits the file directly, sources cited in comments.
@@ -62,7 +62,7 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 ### 4. State Tax Rates
 - **Source:** Tax Foundation annual compilation
 - **No clean API** — scraped from Tax Foundation or manually entered
-- **Updates:** `tools/shared-data/tax.ts` → `stateRates` in the current
+- **Updates:** `data/tax.ts` → `stateRates` in the current
   year's entry (sanity pass; same file as the federal data).
 
 ### 5. FICA / SE Tax Rates

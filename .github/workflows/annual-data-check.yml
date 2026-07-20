@@ -37,8 +37,8 @@ jobs:
               if not cond:
                   stale.append(f"- **{label}** — {detail}")
 
-          # Shared tax data (tools/shared-data/tax.ts, year-keyed with history)
-          s = open("tools/shared-data/tax.ts").read()
+          # Shared tax data (data/tax.ts, year-keyed with history)
+          s = open("data/tax.ts").read()
           m = re.search(r"CURRENT_TAX_YEAR = (\d{4})", s)
           expect(m and int(m.group(1)) == year, "Shared tax data",
                  f"tax.ts CURRENT_TAX_YEAR={m.group(1) if m else 'none'}, expected {year}")
