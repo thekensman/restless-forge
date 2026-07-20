@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Why I Build These Tools — Restless Forge</title>
-  <meta name="description" content="The philosophy behind Restless Forge: why the tools are free and browser-only, why your files never leave your device, and how ads keep it that way without compromising it.">
+  <meta name="description" content="Notes on why these tools are free and browser-only, and how the site pays for itself without collecting anything from you.">
   <link rel="canonical" href="https://restless-forge.dev/essays/why-i-build-these-tools">
 
   <!-- Favicons -->
@@ -15,7 +15,7 @@
   <meta property="og:image" content="https://restless-forge.dev/og-image.png">
 
   <meta property="og:title" content="Why I Build These Tools">
-  <meta property="og:description" content="The philosophy behind Restless Forge: free, browser-only tools, files that never leave your device, and the honest deal behind the ads.">
+  <meta property="og:description" content="Notes on why these tools are free and browser-only, and how the site pays for itself without collecting anything from you.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://restless-forge.dev/essays/why-i-build-these-tools">
 
@@ -24,7 +24,7 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Why I Build These Tools",
-    "description": "The philosophy behind Restless Forge: why the tools are free and browser-only, and how advertising keeps them that way.",
+    "description": "Notes on why these tools are free and browser-only, and how the site pays for itself without collecting anything from you.",
     "author": { "@type": "Person", "name": "Ken", "url": "https://restless-forge.dev/about" },
     "publisher": { "@type": "Organization", "name": "Restless Forge", "url": "https://restless-forge.dev" },
     "datePublished": "2026-07-18",
@@ -50,36 +50,32 @@
   Published July 2026 &middot; By Ken
 </p>
 <h2>Where this started</h2>
-<p>Restless Forge didn&#39;t begin as a grand plan. It began as three separate itches. I wanted to know what my time was actually worth after taxes, commuting, and all the invisible costs of working — so I built a calculator. I wanted to make those mesmerizing hologram-pyramid GIFs without uploading my photos to a stranger&#39;s server — so I built a generator. I wanted to turn images into paths my sand table could actually draw — so I built a converter.</p>
-<p>Each tool lived on its own little domain, with its own hosting and its own certificate to babysit. At some point the obvious question arrived: why am I running three tiny websites when what I actually have is one workshop? So everything moved under one roof — <strong>restless-forge.dev</strong> — and the workshop got a name that fits how it operates. Restless, because there&#39;s always another tool half-formed on the bench. Forge, because everything here is hammered out by hand, in public, and shaped by use.</p>
-<h2>The rule that shapes everything: your files stay yours</h2>
-<p>Every tool on this site runs entirely in your browser. That&#39;s not a marketing line — it&#39;s an architectural rule that has never been broken. There are no backends. When you feed a photo into <a href="/tools/holopath/">HoloPath</a>, drop an image into <a href="/tools/sandpath/">SandPath</a>, or type your salary into <a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a>, that data is processed on your device by code running in your browser, and it never leaves. There is no server to send it to, because I never built one.</p>
-<p>This constraint costs me features. Some things genuinely need heavy computation or machine learning, and when a feature can&#39;t be done honestly in the browser, I&#39;d rather ship a manual control with an honest label than fake a capability by quietly shipping your data somewhere else. But the constraint buys something better than features: you don&#39;t have to trust me. You can read the code — it&#39;s on <a target="_blank" rel="noopener" href="https://github.com/thekensman/">GitHub</a> — or just watch your network tab. The tool works the same either way.</p>
-<h2>The ad philosophy: an honest deal, stated plainly</h2>
-<p>Free tools still cost money to run — a server to serve the static files, domains, certificates, and a large amount of evening and weekend time. I fund that with two things: ads and voluntary support (Ko-fi, Buy Me a Coffee, and the Substack). Here&#39;s the deal as plainly as I can state it:</p>
-<ul>
-<li><strong>The tools are free, without accounts or paywalls.</strong> Nothing is locked. There is no &quot;premium&quot; tier, and no feature held hostage to an email address.</li>
-<li><strong>Ads pay the bills, but they don&#39;t get your data from me.</strong> Your files and inputs are processed locally and never touch a server, so there is nothing of yours for me to hand to an advertiser. The ads are served by Google AdSense, which may use its own cookies — that&#39;s disclosed in the <a href="/privacy">Privacy Policy</a>, not hidden in it.</li>
-<li><strong>Ads never sit inside the work.</strong> They don&#39;t interrupt a conversion, disguise themselves as download buttons, or push the tool below the fold. If an ad ever gets between you and the thing you came to do, that&#39;s a bug — <a href="/contact">tell me</a>.</li>
-</ul>
-<p>I think about it like a workshop with a small sign out front. The sign pays the rent. The moment the sign starts blocking the doorway, the workshop has failed at its actual job.</p>
-<h2>The maker philosophy: small, finished, and honest</h2>
-<p>Every tool here starts the same way: with a real problem I actually have. Not a market analysis — a Tuesday-evening annoyance. The wage calculator exists because &quot;what&#39;s your time worth?&quot; turns out to have a surprisingly slippery answer once taxes and commutes get involved. SandPath exists because my sand table wanted paths and my images were pixels. That origin keeps the tools honest: I am always the first user, and I have no patience for my own bad UX.</p>
-<p>I&#39;d rather ship something small that does its one job well than something sprawling that does ten jobs badly. Small tools can be finished — genuinely finished, tested, fast, and understandable. And when a tool can&#39;t do something, it says so. The camera preview in one of the newer tools doesn&#39;t pretend to track your body with AI it doesn&#39;t have; it gives you a manual slider and tells you exactly what it is. I consider that label a feature.</p>
-<p>&quot;Restless&quot; is the other half. The forge currently has more than twenty tools in various states of completion behind the scenes, each waiting until it&#39;s actually good before it gets a place in the <a href="/tools/">directory</a>. Some will graduate. Some will be melted down for parts. That churn is the point — a workshop where nothing is being made isn&#39;t a workshop, it&#39;s a museum.</p>
+<p>Restless Forge didn&#39;t begin as a plan. It began as three unrelated problems that each bugged me enough to write code. The first was a question: what is an hour of my time actually worth, once taxes and the commute are counted? The second was a craft project. I wanted to make those hologram-pyramid GIFs without uploading my photos to a stranger&#39;s server. The third was a sand table that needed paths to draw, while everything I had was pixels. Each problem turned into a small tool, and each tool ended up on its own little domain with its own hosting bill and its own certificate to babysit.</p>
+<p>At some point the obvious question arrived: why was I running three tiny websites when what I actually had was one workshop? So everything moved under one roof at <strong>restless-forge.dev</strong>, and the workshop got a name that fits how it operates. Restless, because there is always another half-formed tool on the bench. Forge, because the work here is hammered out by hand and shaped by use.</p>
+<h2>Your files stay on your device</h2>
+<p>Every tool on this site runs entirely in your browser. There are no backends. When you drop an image into <a href="/tools/sandpath/">SandPath</a> or type a salary into <a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a>, the processing happens on your device and the data never leaves it. There is no server waiting on the other end. I never built one.</p>
+<p>This rule costs me features. Some things genuinely want heavy computation or a trained model, and when a feature can&#39;t be done honestly in the browser I would rather ship a manual control with a plain label than fake the capability by sending your data somewhere behind the scenes. What the rule buys is worth more than the features it costs: you don&#39;t have to trust me. The code is on <a target="_blank" rel="noopener" href="https://github.com/thekensman/">GitHub</a>, and your browser&#39;s network tab tells the same story.</p>
+<h2>How the ads work</h2>
+<p>Free tools still cost money. A server has to hand out the static files, domains and certificates renew, and the building itself eats evenings and weekends. Ads cover those bills, along with voluntary support through Ko-fi, Buy Me a Coffee, and the Substack.</p>
+<p>The deal, stated as plainly as I can manage. The tools are free, with no accounts and no premium tier; nothing is held hostage to an email address. The ads are served by Google AdSense, which may set its own cookies, and the <a href="/privacy">Privacy Policy</a> says so out loud instead of burying it. Your files and inputs never reach a server, so there is nothing of yours for me to hand an advertiser even if I wanted to. And the ads keep out of the work itself: they don&#39;t imitate download buttons, and they don&#39;t wedge themselves into the middle of a running conversion. If one ever does, that&#39;s a bug. <a href="/contact">Tell me</a> and I&#39;ll fix it.</p>
+<p>I think of it like a workshop with a small sign out front. The sign pays the rent. If the sign ever blocks the doorway, the workshop has failed at its job.</p>
+<h2>Small and finished</h2>
+<p>Every tool here starts with a problem I personally have. Not a market analysis, a Tuesday-evening annoyance. The wage calculator exists because &quot;what is your time worth&quot; turns out to be a slippery question once taxes and commutes get involved. SandPath exists because my sand table wanted paths and my images were pixels. I&#39;m always the first user, and I have no patience for my own bad UX.</p>
+<p>I would rather ship something small that does one job well than something sprawling that does ten jobs badly. A small tool can genuinely be finished. And when a tool can&#39;t do something, it should say so. The camera preview in one of the newer tools doesn&#39;t pretend to track your body with AI it doesn&#39;t have; it gives you a manual slider and a label that says exactly what it is. I count that label as a feature.</p>
+<p>As for the restless half: more than twenty tools sit behind the scenes in various states of completion, each waiting until it&#39;s actually good before it earns a spot in the <a href="/tools/">directory</a>. Some will make it; others will get melted down for parts. A workshop where nothing is being made is just a museum.</p>
 <h2>What you can hold me to</h2>
-<p>Free, without accounts. Processed on your device, never on mine. Open source, so you can check. Ads that stay out of the way and a privacy policy that says what actually happens. Tools that do what their labels say — and labels that admit what the tools can&#39;t do. If the site ever drifts from any of that, the <a href="/contact">contact page</a> works, and I read it.</p>
-<p>If you&#39;re curious how a tool actually goes from idea to the directory — the scaffolding, the conventions, the pipeline — I wrote that up too: <a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a>.</p>
+<p>The tools stay free and never ask for an account. Whatever you put into them is processed on your device, and the code is public, so you can verify that claim instead of trusting it. The privacy policy describes what actually happens, and the label on each tool admits what it can&#39;t do. If the site ever drifts from any of that, the <a href="/contact">contact page</a> works, and I read it.</p>
+<p>If you&#39;re curious how an idea actually becomes a directory entry here, the scaffolding and conventions and pipeline, I wrote that up separately: <a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a>.</p>
 <hr>
 <h3>Tools mentioned in this essay</h3>
 <ul>
-<li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> — Real hourly wage calculator</li>
-<li><a href="/tools/holopath/">HoloPath</a> — Hologram GIF generator</li>
-<li><a href="/tools/sandpath/">SandPath</a> — Sand table pattern converter</li>
+<li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> - real hourly wage calculator</li>
+<li><a href="/tools/holopath/">HoloPath</a> - hologram GIF generator</li>
+<li><a href="/tools/sandpath/">SandPath</a> - sand table pattern converter</li>
 </ul>
 <h3>Related</h3>
 <ul>
-<li><a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a> — the technical pipeline behind every Restless Forge tool</li>
+<li><a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a> - the technical pipeline behind every Restless Forge tool</li>
 <li><a href="/about">About Restless Forge</a></li>
 </ul>
 <!-- /generated:content -->

@@ -19,8 +19,8 @@ All tools: https://restless-forge.dev/tools/
 
 ## Essays
 
-- [How a Tool Gets Built](https://restless-forge.dev/essays/how-a-tool-gets-built): The technical pipeline behind every Restless Forge tool: one monorepo, a scaffold script, shared conventions, tests, automated deploys, and a hidden-until-ready launch process.
-- [Why I Build These Tools](https://restless-forge.dev/essays/why-i-build-these-tools): The philosophy behind Restless Forge: why the tools are free and browser-only, why your files never leave your device, and how ads keep it that way without compromising it.
+- [How a Tool Gets Built](https://restless-forge.dev/essays/how-a-tool-gets-built): A walk through the machinery that turns an idea into a live tool on this site, from scaffold script to automated deploy, and why most of the forge stays hidden.
+- [Why I Build These Tools](https://restless-forge.dev/essays/why-i-build-these-tools): Notes on why these tools are free and browser-only, and how the site pays for itself without collecting anything from you.
 
 ## About
 
