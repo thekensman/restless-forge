@@ -37,11 +37,11 @@ jobs:
               if not cond:
                   stale.append(f"- **{label}** — {detail}")
 
-          # WIMTW federal tax constants (engine.ts carries a "Tax year YYYY" marker)
-          s = open("tools/what-is-my-time-worth/frontend/src/engine.ts").read()
-          m = re.search(r"Tax year (\d{4})", s)
-          expect(m and int(m.group(1)) == year, "WIMTW tax constants",
-                 f"engine.ts marker says {m.group(1) if m else 'none'}, expected {year}")
+          # Shared tax data (tools/shared-data/tax.ts, year-keyed with history)
+          s = open("tools/shared-data/tax.ts").read()
+          m = re.search(r"CURRENT_TAX_YEAR = (\d{4})", s)
+          expect(m and int(m.group(1)) == year, "Shared tax data",
+                 f"tax.ts CURRENT_TAX_YEAR={m.group(1) if m else 'none'}, expected {year}")
 
           # IRS mileage rate JSON
           j = json.load(open("scripts/maintenance/data/mileage_rate.json"))

@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 DATA_FILE = Path(__file__).parent.parent / "data" / "subscription_prices.json"
-SUB_AUDIT_FILE = Path(__file__).parent.parent / "subscription-audit" / "index.html"
+SUB_AUDIT_FILE = Path(__file__).parents[3] / "tools" / "subscription-audit" / "frontend" / "src" / "index.html"
 
 # Prices as of Q1 2026 — update these quarterly
 DEFAULT_DATA = {

@@ -22,6 +22,7 @@ restless-forge/
 │   ├── shared.js        → `rf*` utilities (donate links, nav/footer separators)
 │   └── tool-chrome.css  → Shared .site-header / .footer styles for every tool
 ├── tools/
+│   ├── shared-data/          → Cross-tool datasets (tax.ts: year-keyed, append-only)
 │   ├── template/frontend/    → Turnkey scaffold (copy via scripts/new-tool.sh)
 │   ├── what-is-my-time-worth/frontend/
 │   ├── holopath/frontend/
@@ -65,6 +66,7 @@ static assets served verbatim — Vite does not treat them as navigable pages.
 
 - **Monorepo**: all tool source + global pages in one repo.
 - **Client-only**: no backends. If a tool needs heavy computation, it runs in the browser (Canvas, Workers, Wasm, etc.).
+- **Shared data layer**: cross-tool refreshed datasets (tax brackets, …) live in `tools/shared-data/` as year-keyed, append-only TS modules, imported by consuming tools and bundled at build time. Tool-specific data stays in each tool's engine. Refresh procedure: `docs/automation.md`.
 - **Vite base paths**: each tool's `vite.config.ts` uses `defineToolConfig({ base: '/tools/<name>', ... })` via the shared factory in `tools/vite-tool-config.ts`.
 - **Shared chrome, per-tool theme**: every tool renders the same `.site-header` / `.footer` markup (from `public/shared.js`), styled by the shared `site/tool-chrome.css`, themed through a set of `--rf-*` CSS custom properties each tool defines.
 - **Global pages**: static HTML in `site/` — no build step, just copy to dist.

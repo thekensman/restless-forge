@@ -9,9 +9,9 @@ Several tools carry rate data that changes yearly (see
 
 | Data | Target file(s) | Source |
 |---|---|---|
-| Federal brackets, standard deductions | `tools/what-is-my-time-worth/frontend/src/engine.ts` | IRS Rev. Proc. (published ~Oct/Nov) |
+| Federal brackets, standard deductions | `tools/shared-data/tax.ts` (year-keyed `TAX_YEARS` — append, never overwrite) | IRS Rev. Proc. (published ~Oct/Nov) |
 | SS wage base | same | SSA announcement (~Oct) |
-| State income tax rates (sanity pass) | same (`STATE_TAX_RATES`) | Tax Foundation |
+| State income tax rates (sanity pass) | same (`stateRates`) | Tax Foundation |
 | IRS standard mileage rate | `tools/side-hustle-reality/frontend/src/index.html` + `scripts/maintenance/data/mileage_rate.json` | IRS Notice (~late Dec) |
 | CPI annual average | `tools/is-my-raise-real/frontend/src/index.html` | BLS (~Jan 11; `scripts/maintenance/scripts/update_cpi.py` fetches it) |
 | Subscription preset prices | `tools/subscription-audit/frontend/src/index.html` + `scripts/maintenance/data/subscription_prices.json` | vendor pricing pages |
@@ -23,6 +23,18 @@ Several tools carry rate data that changes yearly (see
 Instead of one scheduled job per tool, there is **one consolidated
 "Annual data refresh" routine** covering the whole matrix, plus a
 **GitHub Actions freshness check** that catches silent failures.
+
+**Shared data layer:** cross-tool datasets live in `tools/shared-data/`
+(currently `tax.ts`), imported by consuming tools and bundled at build
+time — no runtime fetches. Tool-specific data (PetDose doses, PromptDrop
+bands, TattooSafe rates) stays in each tool's engine.
+
+**History convention:** shared datasets are **year-keyed and
+append-only** — the refresh adds the new year and keeps every prior
+year, so old values can be referenced or restored directly. For
+tool-specific, non-year-keyed data, git history plus the refresh PR
+trail is the historical record (every change lands as a reviewed diff
+with sources cited).
 
 ### 1. Annual data refresh (`.github/workflows/annual-data-refresh.yml`)
 
@@ -78,11 +90,13 @@ restless-forge repo (thekensman/restless-forge). Work through the data
 matrix in docs/automation.md and scripts/maintenance/DEPENDENCIES.md,
 updating everything to the CURRENT year:
 
-1. WIMTW (tools/what-is-my-time-worth/frontend/src/engine.ts):
-   FEDERAL_BRACKETS_SINGLE / FEDERAL_BRACKETS_MFJ limits,
-   STANDARD_DEDUCTION_SINGLE / _MFJ, SS_WAGE_BASE. Update the
-   "Tax year YYYY" comment marker (the freshness check greps it).
-   Sanity-pass STATE_TAX_RATES for well-sourced changes only.
+1. Shared tax data (tools/shared-data/tax.ts): APPEND a new year
+   entry to TAX_YEARS (copy the prior year, update brackets, standard
+   deductions, ssWageBase, and the source field) and bump
+   CURRENT_TAX_YEAR (the freshness check greps it). Do NOT delete
+   prior years — the file keeps history by design. Sanity-pass
+   stateRates for well-sourced changes only. Consumers (currently
+   WIMTW) pick the new year up automatically.
    Sources: IRS annual inflation-adjustment revenue procedure and the
    SSA wage-base announcement; cross-check two sources per number.
 2. IRS standard mileage rate: update IRS_MILE and every "$X.XX/mi"
@@ -121,9 +135,10 @@ per dataset and source links. Do not merge it yourself.
 ### 2. Freshness safety net (`.github/workflows/annual-data-check.yml`)
 
 GitHub Actions, cron **Jan 20 yearly** (+ manual `workflow_dispatch`).
-Verifies the current-year markers across all the datasets above (WIMTW
-"Tax year" comment, mileage JSON year, Side-Hustle rate parity with the
-JSON, CPI table entry for the prior year) and **opens a GitHub issue**
+Verifies the current-year markers across all the datasets above
+(shared tax.ts CURRENT_TAX_YEAR, mileage JSON year, Side-Hustle rate
+parity with the JSON, CPI table entry for the prior year, PromptDrop
+and PetDose "last verified" stamps) and **opens a GitHub issue**
 listing anything stale. Zero external dependencies — it can't fail the
 way a research job can, so a silent refresh failure now surfaces within
 two weeks instead of never.

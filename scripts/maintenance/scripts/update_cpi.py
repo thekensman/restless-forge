@@ -24,7 +24,7 @@ BLS_API_URL = "https://api.bls.gov/publicAPI/v1/timeseries/data/"
 CPI_SERIES = "CUUR0000SA0"  # CPI-U, All items, US city average, not seasonally adjusted
 
 # Default file location relative to this script
-DEFAULT_FILE = Path(__file__).parent.parent / "is-my-raise-real" / "index.html"
+DEFAULT_FILE = Path(__file__).parents[3] / "tools" / "is-my-raise-real" / "frontend" / "src" / "index.html"
 
 
 def fetch_cpi_data(start_year: int, end_year: int) -> dict:

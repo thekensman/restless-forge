@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 DATA_FILE = Path(__file__).parent.parent / "data" / "mileage_rate.json"
-SIDE_HUSTLE_FILE = Path(__file__).parent.parent / "side-hustle-reality" / "index.html"
+SIDE_HUSTLE_FILE = Path(__file__).parents[3] / "tools" / "side-hustle-reality" / "frontend" / "src" / "index.html"
 
 # Historical IRS standard mileage rates (business use)
 DEFAULT_DATA = {
