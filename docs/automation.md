@@ -16,8 +16,8 @@ Several tools carry rate data that changes yearly (see
 | CPI annual average | `tools/is-my-raise-real/frontend/src/index.html` | BLS (~Jan 11; `scripts/maintenance/scripts/update_cpi.py` fetches it) |
 | Subscription preset prices | `tools/subscription-audit/frontend/src/index.html` + `scripts/maintenance/data/subscription_prices.json` | vendor pricing pages |
 | TattooSafe hourly-rate tiers (sanity pass only — market ranges, not year-keyed) | `tools/tattoosafe/frontend/src/engine.ts` (`HOURLY_RATES`) | industry surveys / studio listings |
-| PromptDrop water-footprint bands (energy/task, WUE, EWIF) + bump the "last verified YYYY" stamp | `tools/promptdrop/frontend/src/engine.ts` | company disclosures (Google, OpenAI, AWS/Microsoft WUE) + research (UC Riverside, NREL, Hugging Face) |
-| PetDose dosing table — **sanity pass ONLY: never change dose values in the refresh PR.** If any reference disagrees, open a blocking issue for veterinary review; bump the "last verified: YYYY" stamp only when sources agree | `tools/petdose/frontend/src/engine.ts` (`MEDICATIONS`) | veterinary references (Plumb's, Merck Vet Manual) |
+| PromptDrop water-footprint bands (energy/task, WUE, EWIF) + bump `DATA_VERIFIED_YEAR` | `tools/promptdrop/frontend/src/engine.ts` | company disclosures (Google, OpenAI, AWS/Microsoft WUE) + research (UC Riverside, NREL, Hugging Face) |
+| PetDose dosing table — **sanity pass ONLY: never change dose values in the refresh PR.** If any reference disagrees, open a blocking issue for veterinary review; bump `DATA_VERIFIED_YEAR` only when sources agree | `tools/petdose/frontend/src/engine.ts` (`MEDICATIONS`) | veterinary references (Plumb's, Merck Vet Manual) |
 | Repair-or-Replace appliance lifespans + Pet Cost averages (optional sanity pass — stable data) | respective `frontend/src/` | industry lifespan surveys / ASPCA cost data |
 
 Instead of one scheduled job per tool, there is **one consolidated
@@ -135,10 +135,11 @@ per dataset and source links. Do not merge it yourself.
 ### 2. Freshness safety net (`.github/workflows/annual-data-check.yml`)
 
 GitHub Actions, cron **Jan 20 yearly** (+ manual `workflow_dispatch`).
-Verifies the current-year markers across all the datasets above
-(shared tax.ts CURRENT_TAX_YEAR, mileage JSON year, Side-Hustle rate
-parity with the JSON, CPI table entry for the prior year, PromptDrop
-and PetDose "last verified" stamps) and **opens a GitHub issue**
+Runs `scripts/check-data-freshness.mjs` (also runnable locally), which
+imports the data modules directly — data/tax.ts `CURRENT_TAX_YEAR`, the
+PromptDrop and PetDose `DATA_VERIFIED_YEAR` exports — and checks the
+mileage JSON year, Side-Hustle rate parity, and the CPI table entry,
+then **opens a GitHub issue**
 listing anything stale. Zero external dependencies — it can't fail the
 way a research job can, so a silent refresh failure now surfaces within
 two weeks instead of never.

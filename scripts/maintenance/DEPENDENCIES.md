@@ -24,8 +24,8 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 | Repair or Replace | Appliance lifespan data | Rarely | **Annually** (Jan) | Very low — stable data |
 | Pet Cost | Average pet cost data | Annually (optional) | **Jan** | Low — users can override |
 | TattooSafe | Hourly-rate tiers (`HOURLY_RATES`) | Annually (sanity pass) | **Jan** | Low — market ranges, wide bands |
-| PromptDrop | Water-footprint bands (energy/WUE/EWIF) | Annually (stamp: "last verified YYYY") | **Jan** | Medium — research moves fast, tool cites sources |
-| PetDose | Dosing table (`MEDICATIONS`) | Annually (sanity pass; **vet-review gated — never auto-edit values**) | **Jan** | High — safety-critical; stamp: "last verified: YYYY" |
+| PromptDrop | Water-footprint bands (energy/WUE/EWIF) | Annually (stamp: `DATA_VERIFIED_YEAR`) | **Jan** | Medium — research moves fast, tool cites sources |
+| PetDose | Dosing table (`MEDICATIONS`) | Annually (sanity pass; **vet-review gated — never auto-edit values**) | **Jan** | High — safety-critical; stamp: `DATA_VERIFIED_YEAR` |
 
 ### Tools with ZERO external dependencies:
 - **Am I Actually Saving Money?** — Pure math, user inputs everything. Nothing to update. Ever.

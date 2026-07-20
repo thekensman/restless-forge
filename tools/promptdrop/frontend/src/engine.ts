@@ -19,7 +19,8 @@
    datacenter construction, model training amortization) is excluded —
    see the About page for why.
 
-   Sources (last verified 2026 — re-verify yearly per docs/automation.md):
+   Sources (re-verify yearly per docs/automation.md; the freshness
+   check reads DATA_VERIFIED_YEAR below):
    - Google (Aug 2025): median Gemini text prompt = 0.24 Wh,
      0.26 mL water, 0.03 gCO2e.
    - OpenAI / Altman (Jun 2025): average ChatGPT query ≈ 0.34 Wh,
@@ -38,6 +39,10 @@
    - MIT Tech Review (2025): 5-second AI video clip estimates range
      from tens of Wh to ≈ 950 Wh (3.4 MJ) for research-scale models.
    ═══════════════════════════════════════════════════════ */
+
+/* Bumped by the annual refresh after the sources above are re-verified.
+   Read programmatically by scripts/check-data-freshness.mjs. */
+export const DATA_VERIFIED_YEAR = 2026;
 
 export interface Band {
   low: number;
