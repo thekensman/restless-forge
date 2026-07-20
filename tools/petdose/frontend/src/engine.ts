@@ -6,6 +6,10 @@ export const SPECIES = {
   cat: { label: 'Cat', weightRange: [0.5, 12] },
 };
 
+/* Dosing data last verified: 2026. Annual sanity pass per
+   docs/automation.md — NEVER change dose values in an automated
+   refresh; if any reference disagrees, open a blocking issue for
+   veterinary review and leave the values untouched. */
 export const MEDICATIONS = [
   { id:'benadryl', name:'Benadryl (Diphenhydramine)', species:['dog','cat'],
     dog: { dosePerKg: 2, unit:'mg', frequency:'Every 8-12 hours', maxDaily: 3 },

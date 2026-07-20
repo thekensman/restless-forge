@@ -16,6 +16,9 @@ Several tools carry rate data that changes yearly (see
 | CPI annual average | `tools/is-my-raise-real/frontend/src/index.html` | BLS (~Jan 11; `scripts/maintenance/scripts/update_cpi.py` fetches it) |
 | Subscription preset prices | `tools/subscription-audit/frontend/src/index.html` + `scripts/maintenance/data/subscription_prices.json` | vendor pricing pages |
 | TattooSafe hourly-rate tiers (sanity pass only — market ranges, not year-keyed) | `tools/tattoosafe/frontend/src/engine.ts` (`HOURLY_RATES`) | industry surveys / studio listings |
+| PromptDrop water-footprint bands (energy/task, WUE, EWIF) + bump the "last verified YYYY" stamp | `tools/promptdrop/frontend/src/engine.ts` | company disclosures (Google, OpenAI, AWS/Microsoft WUE) + research (UC Riverside, NREL, Hugging Face) |
+| PetDose dosing table — **sanity pass ONLY: never change dose values in the refresh PR.** If any reference disagrees, open a blocking issue for veterinary review; bump the "last verified: YYYY" stamp only when sources agree | `tools/petdose/frontend/src/engine.ts` (`MEDICATIONS`) | veterinary references (Plumb's, Merck Vet Manual) |
+| Repair-or-Replace appliance lifespans + Pet Cost averages (optional sanity pass — stable data) | respective `frontend/src/` | industry lifespan surveys / ASPCA cost data |
 
 Instead of one scheduled job per tool, there is **one consolidated
 "Annual data refresh" routine** covering the whole matrix, plus a

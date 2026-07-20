@@ -23,9 +23,17 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 | Subscription Audit | Preset subscription prices | Quarterly (optional) | **Jan/Apr/Jul/Oct** | Very low — users can override |
 | Repair or Replace | Appliance lifespan data | Rarely | **Annually** (Jan) | Very low — stable data |
 | Pet Cost | Average pet cost data | Annually (optional) | **Jan** | Low — users can override |
+| TattooSafe | Hourly-rate tiers (`HOURLY_RATES`) | Annually (sanity pass) | **Jan** | Low — market ranges, wide bands |
+| PromptDrop | Water-footprint bands (energy/WUE/EWIF) | Annually (stamp: "last verified YYYY") | **Jan** | Medium — research moves fast, tool cites sources |
+| PetDose | Dosing table (`MEDICATIONS`) | Annually (sanity pass; **vet-review gated — never auto-edit values**) | **Jan** | High — safety-critical; stamp: "last verified: YYYY" |
 
 ### Tools with ZERO external dependencies:
 - **Am I Actually Saving Money?** — Pure math, user inputs everything. Nothing to update. Ever.
+- **CookScale** — ingredient densities and unit conversions; physical constants, stable.
+
+> The refresh itself is executed by the annual agent job described in
+> `docs/automation.md` — that file's matrix is what the agent reads.
+> Keep the two matrices in sync when adding a data-carrying tool.
 
 ---
 

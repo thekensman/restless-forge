@@ -59,6 +59,20 @@ jobs:
           expect(re.search(rf"{year - 1}\s*:", s), "CPI table",
                  f"is-my-raise-real has no {year - 1} CPI entry")
 
+          # PromptDrop water-footprint sources carry a "last verified YYYY" stamp
+          s = open("tools/promptdrop/frontend/src/engine.ts").read()
+          m = re.search(r"last verified (\d{4})", s)
+          expect(m and int(m.group(1)) == year, "PromptDrop water data",
+                 f"engine.ts sources verified {m.group(1) if m else 'never'}, expected {year}")
+
+          # PetDose dosing data carries a "last verified: YYYY" stamp
+          # (values themselves are vet-review gated; the stamp proves the
+          # annual sanity pass against references happened)
+          s = open("tools/petdose/frontend/src/engine.ts").read()
+          m = re.search(r"last verified: (\d{4})", s)
+          expect(m and int(m.group(1)) == year, "PetDose dosing data",
+                 f"engine.ts dosing verified {m.group(1) if m else 'never'}, expected {year}")
+
           if stale:
               print(f"## Annual data refresh incomplete for {year}\n")
               print("\n".join(stale))
