@@ -2,7 +2,7 @@
 
 Audit of the 17 unlaunched tools (2026-07). Re-run the checks before each
 launch; the goal is that launching a tool is *only* the three steps in
-`site/tools-data.js` (flip status, remove noindex, sitemap).
+`site/tools-data.js` (flip status + blurb, remove noindex, sync).
 
 ## What was already in place (verified on every pending tool)
 
@@ -40,6 +40,7 @@ These need real content, not mechanics — flagged per tool:
 
 ## Launch checklist
 
-Moved: the canonical launch procedure (directory, noindex, ads, sitemap,
-static-HTML regen, copy consistency, verification) lives in
-**`docs/launching-a-tool.md`** — follow it there; don't duplicate it here.
+Moved: the canonical launch procedure (directory + blurb, noindex, ads,
+regen — which now covers sitemap and page copy — and verification) lives
+in **`docs/launching-a-tool.md`** — follow it there; don't duplicate it
+here.

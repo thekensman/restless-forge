@@ -8,9 +8,14 @@
      "live" — rendered with a launch link on the landing page and directory
      "soon" — counted in the "in the forge" teaser; never linked
 
+   Live tools also carry a `blurb`: a short lowercase noun phrase
+   ("a real hourly wage calculator and ...") that `npm run sync` renders
+   into the tool lists on /about and /terms, the FAQ answer, and its
+   JSON-LD copy. sitemap.xml is generated from this file too.
+
    To launch a tool, follow the canonical checklist in
-   docs/launching-a-tool.md (status flip, noindex removal, ads, sitemap,
-   static-HTML regen, copy consistency). */
+   docs/launching-a-tool.md (status flip + blurb, noindex removal, ads,
+   static-HTML regen — sitemap and page copy regenerate from here). */
 (function () {
   'use strict';
 
@@ -18,16 +23,20 @@
     // ── Live ──
     { id: 'what-is-my-time-worth', label: 'What Is My Time Worth?', category: 'Financial', status: 'live',
       cta: 'Launch Calculator',
-      desc: 'Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.' },
+      desc: 'Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.',
+      blurb: 'a real hourly wage calculator and DIY-vs-hire decision engine' },
     { id: 'holopath', label: 'HoloPath', category: 'Creative', status: 'live',
       cta: 'Launch Generator',
-      desc: 'Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.' },
+      desc: 'Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.',
+      blurb: 'a hologram GIF generator that processes images, GIFs, and videos in the browser' },
     { id: 'sandpath', label: 'SandPath', category: 'Maker', status: 'live',
       cta: 'Launch Converter',
-      desc: 'Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.' },
+      desc: 'Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.',
+      blurb: 'a converter that turns images and SVGs into sand table patterns (.thr / .gcode)' },
     { id: 'tattoosafe', label: 'TattooSafe', category: 'Lifestyle', status: 'live',
       cta: 'Launch Preview',
-      desc: 'Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.' },
+      desc: 'Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.',
+      blurb: 'a tattoo sizing, camera try-on, and pricing preview tool' },
 
     // ── In the forge (never rendered as links) ──
     { id: 'is-my-raise-real', label: 'Is My Raise Real?', category: 'Financial', status: 'soon',
