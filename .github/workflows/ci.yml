@@ -20,7 +20,8 @@ jobs:
 
       # Generated HTML must be in sync with its sources of truth:
       #   sync-content — Markdown prose → generated:content blocks + essay cards
-      #   sync-static  — nav/footer/tool grids from shared.js + tools-data.js
+      #   sync-static  — nav/footer/tool grids, sitemap.xml, llms.txt, and
+      #                  the about/terms/FAQ tool copy from shared.js + tools-data.js
       # Regenerate and fail on drift so neither the prose nor the crawlable
       # chrome can be hand-edited or go stale.
       - name: Check generated HTML is in sync

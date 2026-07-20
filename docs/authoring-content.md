@@ -60,9 +60,9 @@ author: Ken
 2. `npm run sync-content` — the page shell is auto-created from
    `scripts/templates/essay-shell.html` (metas, OG, Article JSON-LD
    filled from front-matter) and the essays index cards regenerate.
-3. Add `/essays/<slug>` to `site/sitemap.xml`.
-4. `npm run sync-static` (nav/footer for the new page) — or just
-   `npm run sync`, which runs both.
+3. `npm run sync-static` (nav/footer for the new page, plus the essay's
+   sitemap.xml and llms.txt entries) — or just `npm run sync`, which
+   runs both.
 
 ## Adding a tool article
 
@@ -70,8 +70,9 @@ author: Ken
    (head metas + empty `generated:content` markers + ad slot), update
    its metas/canonical.
 2. Write the sibling `.md`; run `npm run sync-content`.
-3. Add the article to the tool's `articles/index.html` listing and to
-   `site/sitemap.xml` (if the tool is live).
+3. Add the article to the tool's `articles/index.html` listing.
+   (`site/sitemap.xml` picks it up automatically at `npm run sync` if
+   the tool is live.)
 
 ## What is (and isn't) Markdown-backed
 

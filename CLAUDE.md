@@ -208,22 +208,29 @@ scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 build.sh, the root dev/test scripts, and the root vite proxy all
 DISCOVER tools automatically from `tools/*/frontend/` (ports and base
 paths are read from each tool's `vite.config.ts` by
-`scripts/tools.mjs`). Launching a finished tool (directory status flip,
-noindex removal, ads, sitemap, static-HTML regen, copy consistency)
-follows the canonical checklist in `docs/launching-a-tool.md`.
+`scripts/tools.mjs`). Launching a finished tool (directory status flip
++ blurb, noindex removal, ads, `npm run sync`) follows the canonical
+checklist in `docs/launching-a-tool.md` — sync regenerates the sitemap,
+llms.txt, grids, and the about/terms/FAQ tool copy automatically.
 
 ### Generated HTML (never hand-edit; `npm run sync` regenerates both)
 
 Two generators emit checked-in, marker-bounded HTML; CI regenerates
 and fails on drift:
 
-1. **Chrome** — `scripts/sync-static-html.mjs` (`npm run sync-static`):
-   the global nav/footer and the tools grids on `/` and `/tools/` are
-   JS-injected at runtime, but each placeholder div also carries a
-   static pre-rendered copy for crawlers, emitted by running the REAL
-   renderers from `site/shared.js` + `site/tools-data.js` in a sandbox.
-   Re-run after changing nav links, footer links, or tool directory
-   data.
+1. **Chrome + site metadata** — `scripts/sync-static-html.mjs`
+   (`npm run sync-static`): the global nav/footer and the tools grids
+   on `/` and `/tools/` are JS-injected at runtime, but each
+   placeholder div also carries a static pre-rendered copy for
+   crawlers, emitted by running the REAL renderers from
+   `site/shared.js` + `site/tools-data.js` in a sandbox. The same run
+   generates **`site/sitemap.xml`** (site pages must have a rule in the
+   script — it fails on unknown pages; live-tool sub-pages are
+   discovered, with legal/noindex pages excluded), **`/llms.txt`**, and
+   the live-tool lists on `/about`, `/terms`, and the FAQ answer
+   (visible + JSON-LD) from each live tool's `blurb`. Re-run after
+   changing nav links, footer links, tool directory data, or launching
+   a tool.
 2. **Prose** — `scripts/sync-content.mjs` (`npm run sync-content`):
    page copy lives in sibling Markdown files (`X.md` next to `X.html`)
    and renders into `generated:content` blocks; essay shells are
@@ -237,8 +244,8 @@ and fails on drift:
 1. Write `site/essays/your-slug.md` with front-matter (`title`,
    `description`, `date`, `author`) and a body starting with `# Title`.
 2. `npm run sync` — the HTML shell (metas, OG, JSON-LD Article) is
-   auto-created and the essays index cards regenerate.
-3. Add the URL to `site/sitemap.xml`.
+   auto-created, the essays index cards regenerate, and sitemap.xml +
+   llms.txt pick up the new essay.
 
 Full authoring conventions (tool articles, raw-HTML blocks, byline
 rules): `docs/authoring-content.md`.

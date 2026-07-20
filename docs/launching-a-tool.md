@@ -33,6 +33,10 @@ scaffolds and the state every unlaunched tool must stay in.
       confirm `label`, `category`, `cta`, and `desc` read well — the
       landing page and `/tools/` directory cards render from this entry
       automatically.
+- [ ] Add a `blurb` to the entry: a short lowercase noun phrase
+      ("a real hourly wage calculator and ..."). It renders into the
+      tool lists on `/about` and `/terms` and the FAQ's "What is
+      Restless Forge?" answer (visible + JSON-LD) at sync time.
 
 ## 2. Indexing
 
@@ -73,31 +77,25 @@ scaffolds and the state every unlaunched tool must stay in.
       download buttons, and never inside the working area of the tool.
 - [ ] `ads.txt` is site-global — nothing to do per tool.
 
-## 4. Sitemap
+## 4. Regenerate everything else (one command)
 
-- [ ] Add the tool's main URL and its **content** sub-pages (about, FAQ,
-      how-it-works, pricing, articles) to `site/sitemap.xml`. Skip
-      boilerplate legal duplicates (per-tool privacy/terms/contact).
+- [ ] Run `npm run sync` and commit the regenerated output (CI fails
+      on drift). This single step now covers what used to be manual:
+      - the crawlable static grids on the homepage and `/tools/`
+      - **`site/sitemap.xml`** — the tool's main URL plus every content
+        sub-page found in its `src/` (per-tool privacy/terms/contact
+        and any page still carrying `noindex` are excluded
+        automatically)
+      - **`/llms.txt`**, the AI-assistant index
+      - the live-tool lists on `/about` and `/terms`, and the FAQ's
+        "What is Restless Forge?" answer (visible + JSON-LD), all
+        rendered from the entry's `blurb`
+- [ ] Skim the diff on `about.html` / `terms.html` / `faq.html` /
+      `sitemap.xml` — the generated copy should read well, not just
+      exist. (`/contact` points at the single monorepo issues page and
+      needs no per-tool edit.)
 
-## 5. Regenerate static HTML
-
-- [ ] Run `node scripts/sync-static-html.mjs` so the crawlable static
-      grids on the homepage and `/tools/` include the new tool — this
-      also refreshes `/llms.txt`, the AI-assistant index. Commit the
-      regenerated output (CI fails on drift).
-
-## 6. Copy consistency
-
-These global pages enumerate the live tools and must be updated (keep
-this list short — if a page doesn't need to enumerate tools, don't make
-it):
-
-- [ ] `site/about.html` — "The Tools" list
-- [ ] `site/contact.html` — per-tool GitHub issues list
-- [ ] `site/terms.html` — services list
-- [ ] `site/faq.html` — "What is Restless Forge?" answer
-
-## 7. Verify
+## 5. Verify
 
 - [ ] `npm test` (all suites) and `./build.sh` — green.
 - [ ] Merge → deploy runs automatically. Then on the live site:
@@ -109,6 +107,7 @@ it):
 
 ## De-launching (rollback)
 
-Reverse order: remove sitemap entries, flip status back to `"soon"`,
-re-add `noindex` to every page, remove the loader + ad units, re-run
-`scripts/sync-static-html.mjs`.
+Reverse order: flip status back to `"soon"`, re-add `noindex` to every
+page, remove the loader + ad units, then `npm run sync` — the sitemap,
+grids, llms.txt, and the about/terms/FAQ copy all drop the tool
+automatically.
