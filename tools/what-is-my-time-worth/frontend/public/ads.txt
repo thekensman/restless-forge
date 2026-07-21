@@ -1,2 +1,2 @@
-google.com, pub-5516736042033534, DIRECT, f08c47fec0942fa0
+google.com, __RF_ADSENSE_PUB__, DIRECT, f08c47fec0942fa0
 
