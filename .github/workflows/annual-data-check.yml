@@ -24,54 +24,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # All module-shaped datasets (data/tax.ts, tool engines) are
+      # imported and inspected programmatically — no source grepping.
+      # See scripts/check-data-freshness.mjs for the two documented
+      # inline-HTML exceptions that retire at the finance tools' refactor.
       - name: Check dataset years
         id: check
         run: |
-          python3 - <<'PY' > stale_report.md || true
-          import json, re, datetime, sys
-
-          year = datetime.date.today().year
-          stale = []
-
-          def expect(cond, label, detail):
-              if not cond:
-                  stale.append(f"- **{label}** — {detail}")
-
-          # WIMTW federal tax constants (engine.ts carries a "Tax year YYYY" marker)
-          s = open("tools/what-is-my-time-worth/frontend/src/engine.ts").read()
-          m = re.search(r"Tax year (\d{4})", s)
-          expect(m and int(m.group(1)) == year, "WIMTW tax constants",
-                 f"engine.ts marker says {m.group(1) if m else 'none'}, expected {year}")
-
-          # IRS mileage rate JSON
-          j = json.load(open("scripts/maintenance/data/mileage_rate.json"))
-          expect(j.get("current_year") == year, "IRS mileage rate",
-                 f"mileage_rate.json current_year={j.get('current_year')}, expected {year}")
-
-          # Side Hustle Reality hard-coded rate must match the JSON
-          s = open("tools/side-hustle-reality/frontend/src/index.html").read()
-          m = re.search(r"IRS_MILE = ([0-9.]+)", s)
-          expect(m and float(m.group(1)) == j.get("current_rate"), "Side Hustle Reality mileage",
-                 f"IRS_MILE={m.group(1) if m else 'none'} vs JSON {j.get('current_rate')}")
-
-          # Is My Raise Real CPI table must include last year's annual average
-          s = open("tools/is-my-raise-real/frontend/src/index.html").read()
-          expect(re.search(rf"{year - 1}\s*:", s), "CPI table",
-                 f"is-my-raise-real has no {year - 1} CPI entry")
-
-          if stale:
-              print(f"## Annual data refresh incomplete for {year}\n")
-              print("\n".join(stale))
-              print("\nRun the annual data refresh (see docs/automation.md) and update the entries above.")
-              sys.exit(1)
-          PY
-          if [ -s stale_report.md ]; then
-            echo "stale=true" >> "$GITHUB_OUTPUT"
-          else
+          if node scripts/check-data-freshness.mjs > stale_report.md 2>/dev/null; then
             echo "stale=false" >> "$GITHUB_OUTPUT"
-            echo "All datasets current."
+            cat stale_report.md
+          else
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+            cat stale_report.md
           fi
-
       - name: Open issue if stale
         if: steps.check.outputs.stale == 'true'
         env:

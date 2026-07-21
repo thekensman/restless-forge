@@ -5,6 +5,8 @@
  * All monetary values in USD. All time in the units specified.
  */
 
+import { TAX, CURRENT_TAX_YEAR } from "../../../../data/tax";
+
 // ─── Types ───────────────────────────────────────────────────
 
 export interface WageInputs {
@@ -122,33 +124,15 @@ export interface JobComparisonResult {
 
 // ─── Tax Constants ───────────────────────────────────────────
 
-// Tax year 2026 (IRS Rev. Proc. 2025-32; SSA 2026 wage-base announcement).
-// Updated annually by the "WIMTW annual tax data update" routine — see
-// docs/automation.md.
-const SS_WAGE_BASE = 184_500;
-
-const FEDERAL_BRACKETS_SINGLE: { limit: number; rate: number }[] = [
-  { limit: 12_400, rate: 0.10 },
-  { limit: 50_400, rate: 0.12 },
-  { limit: 105_700, rate: 0.22 },
-  { limit: 201_775, rate: 0.24 },
-  { limit: 256_225, rate: 0.32 },
-  { limit: 640_600, rate: 0.35 },
-  { limit: Infinity, rate: 0.37 },
-];
-
-const FEDERAL_BRACKETS_MFJ: { limit: number; rate: number }[] = [
-  { limit: 24_800, rate: 0.10 },
-  { limit: 100_800, rate: 0.12 },
-  { limit: 211_400, rate: 0.22 },
-  { limit: 403_550, rate: 0.24 },
-  { limit: 512_450, rate: 0.32 },
-  { limit: 768_700, rate: 0.35 },
-  { limit: Infinity, rate: 0.37 },
-];
-
-const STANDARD_DEDUCTION_SINGLE = 16_100;
-const STANDARD_DEDUCTION_MFJ = 32_200;
+// All year-keyed values live in data/tax.ts (single source
+// across tools; current year via CURRENT_TAX_YEAR, updated annually per
+// docs/automation.md). Aliased here to keep the calculation code terse.
+export const TAX_YEAR = CURRENT_TAX_YEAR;
+const SS_WAGE_BASE = TAX.ssWageBase;
+const FEDERAL_BRACKETS_SINGLE = TAX.bracketsSingle;
+const FEDERAL_BRACKETS_MFJ = TAX.bracketsMfj;
+const STANDARD_DEDUCTION_SINGLE = TAX.standardDeductionSingle;
+const STANDARD_DEDUCTION_MFJ = TAX.standardDeductionMfj;
 
 // ─── Tax Calculations ────────────────────────────────────────
 
@@ -187,14 +171,14 @@ export function calcStateTax(grossIncome: number, rate: number): number {
 export function calcFICA(grossIncome: number): number {
   if (grossIncome <= 0) return 0;
 
-  // Social Security: 6.2% up to wage base
+  // Social Security up to the wage base
   const ssIncome = Math.min(grossIncome, SS_WAGE_BASE);
-  const ssTax = ssIncome * 0.062;
+  const ssTax = ssIncome * TAX.ficaSocialSecurityRate;
 
-  // Medicare: 1.45% on all income + additional 0.9% above $200k
-  let medicareTax = grossIncome * 0.0145;
-  if (grossIncome > 200_000) {
-    medicareTax += (grossIncome - 200_000) * 0.009;
+  // Medicare on all income + surtax above the threshold
+  let medicareTax = grossIncome * TAX.ficaMedicareRate;
+  if (grossIncome > TAX.medicareSurtaxThreshold) {
+    medicareTax += (grossIncome - TAX.medicareSurtaxThreshold) * TAX.medicareSurtaxRate;
   }
 
   return Math.round((ssTax + medicareTax) * 100) / 100;
@@ -631,59 +615,9 @@ export const DECISION_PRESETS: DecisionPreset[] = [
 
 // ─── State Tax Rates ─────────────────────────────────────────
 
-export const STATE_TAX_RATES: { id: string; name: string; rate: number }[] = [
-  { id: "none", name: "No state tax", rate: 0 },
-  { id: "AL", name: "Alabama", rate: 0.05 },
-  { id: "AK", name: "Alaska", rate: 0 },
-  { id: "AZ", name: "Arizona", rate: 0.025 },
-  { id: "AR", name: "Arkansas", rate: 0.044 },
-  { id: "CA", name: "California", rate: 0.093 },
-  { id: "CO", name: "Colorado", rate: 0.044 },
-  { id: "CT", name: "Connecticut", rate: 0.05 },
-  { id: "DE", name: "Delaware", rate: 0.066 },
-  { id: "FL", name: "Florida", rate: 0 },
-  { id: "GA", name: "Georgia", rate: 0.055 },
-  { id: "HI", name: "Hawaii", rate: 0.075 },
-  { id: "ID", name: "Idaho", rate: 0.058 },
-  { id: "IL", name: "Illinois", rate: 0.0495 },
-  { id: "IN", name: "Indiana", rate: 0.0305 },
-  { id: "IA", name: "Iowa", rate: 0.06 },
-  { id: "KS", name: "Kansas", rate: 0.057 },
-  { id: "KY", name: "Kentucky", rate: 0.04 },
-  { id: "LA", name: "Louisiana", rate: 0.0425 },
-  { id: "ME", name: "Maine", rate: 0.0715 },
-  { id: "MD", name: "Maryland", rate: 0.0575 },
-  { id: "MA", name: "Massachusetts", rate: 0.05 },
-  { id: "MI", name: "Michigan", rate: 0.0425 },
-  { id: "MN", name: "Minnesota", rate: 0.0785 },
-  { id: "MS", name: "Mississippi", rate: 0.05 },
-  { id: "MO", name: "Missouri", rate: 0.048 },
-  { id: "MT", name: "Montana", rate: 0.059 },
-  { id: "NE", name: "Nebraska", rate: 0.0584 },
-  { id: "NV", name: "Nevada", rate: 0 },
-  { id: "NH", name: "New Hampshire", rate: 0 },
-  { id: "NJ", name: "New Jersey", rate: 0.0637 },
-  { id: "NM", name: "New Mexico", rate: 0.049 },
-  { id: "NY", name: "New York", rate: 0.0685 },
-  { id: "NC", name: "North Carolina", rate: 0.045 },
-  { id: "ND", name: "North Dakota", rate: 0.0195 },
-  { id: "OH", name: "Ohio", rate: 0.035 },
-  { id: "OK", name: "Oklahoma", rate: 0.0475 },
-  { id: "OR", name: "Oregon", rate: 0.09 },
-  { id: "PA", name: "Pennsylvania", rate: 0.0307 },
-  { id: "RI", name: "Rhode Island", rate: 0.0599 },
-  { id: "SC", name: "South Carolina", rate: 0.065 },
-  { id: "SD", name: "South Dakota", rate: 0 },
-  { id: "TN", name: "Tennessee", rate: 0 },
-  { id: "TX", name: "Texas", rate: 0 },
-  { id: "UT", name: "Utah", rate: 0.0465 },
-  { id: "VT", name: "Vermont", rate: 0.066 },
-  { id: "VA", name: "Virginia", rate: 0.0575 },
-  { id: "WA", name: "Washington", rate: 0 },
-  { id: "WV", name: "West Virginia", rate: 0.052 },
-  { id: "WI", name: "Wisconsin", rate: 0.053 },
-  { id: "WY", name: "Wyoming", rate: 0 },
-];
+// Lives in data/tax.ts; re-exported to keep this engine's
+// public API unchanged.
+export const STATE_TAX_RATES: { id: string; name: string; rate: number }[] = TAX.stateRates;
 
 // ─── Formatting Helpers ──────────────────────────────────────
 
