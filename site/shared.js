@@ -6,6 +6,14 @@
   'use strict';
   var p = window.location.pathname;
 
+  // ── Support/donate destination URLs ──
+  // Single source of truth so the three support UIs (tool-footer donate block,
+  // tool-header support strip, site-footer support block) can't drift apart.
+  var RF_KOFI     = 'https://ko-fi.com/restless-forge';
+  var RF_BMC      = 'https://buymeacoffee.com/restlessforge';
+  var RF_SUBSTACK = 'https://restlessforge.substack.com';
+  var RF_GITHUB   = 'https://github.com/thekensman/';
+
   function active(href) {
     if (href === '/') return p === '/' || p === '/index.html';
     return p.startsWith(href);
@@ -35,10 +43,10 @@
   // Available to all tool pages that include /shared.js before their own shared.js.
 
   window.rfDonateLinks = [
-    ['https://ko-fi.com/restless-forge', 'Ko-fi'],
-    ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee'],
-    ['https://substack.com/@restlessforge', 'Substack'],
-    ['https://github.com/thekensman/', 'GitHub'],
+    [RF_KOFI, 'Ko-fi'],
+    [RF_BMC, 'Buy Me a Coffee'],
+    [RF_SUBSTACK, 'Substack'],
+    [RF_GITHUB, 'GitHub'],
   ];
 
   // Renders the "Support Restless Forge" donate block used in tool page footers.
@@ -128,9 +136,9 @@
     function renderSupportHtml() {
       var extra = config.extraSupportLinks || [];
       var all = extra.concat([
-        ['https://restlessforge.substack.com', 'Substack', window.rfSubstackSvg],
-        ['https://ko-fi.com/restless-forge', 'Ko-fi', window.rfHeartSvg],
-        ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee', '&#x2615;'],
+        [RF_SUBSTACK, 'Substack', window.rfSubstackSvg],
+        [RF_KOFI, 'Ko-fi', window.rfHeartSvg],
+        [RF_BMC, 'Buy Me a Coffee', '&#x2615;'],
       ]);
       var links = all.map(function (l) {
         return '<a class="site-header__support-link" href="' + l[0] + '" target="_blank" rel="noopener">' + l[2] + ' ' + l[1] + '</a>';
@@ -170,10 +178,10 @@
   };
 
   var support = [
-    ['https://ko-fi.com/restless-forge', 'Ko-fi'],
-    ['https://buymeacoffee.com/restlessforge', 'Buy Me a Coffee'],
-    ['https://substack.com/@restlessforge', 'Subscribe on Substack'],
-    ['https://github.com/thekensman/', 'GitHub'],
+    [RF_KOFI, 'Ko-fi'],
+    [RF_BMC, 'Buy Me a Coffee'],
+    [RF_SUBSTACK, 'Subscribe on Substack'],
+    [RF_GITHUB, 'GitHub'],
   ];
 
   // Personal recommendations — friends & family sites, not RF's own work.
@@ -205,7 +213,7 @@
     }).join('');
 
     var friends = window.rfFriendLinks.map(function (l) {
-      return '<a href="' + l[0] + '" target="_blank" rel="noopener noreferrer nofollow">' + l[1] + '</a>' +
+      return '<a href="' + l[0] + '" target="_blank" rel="noopener noreferrer">' + l[1] + '</a>' +
         '<span class="site-footer__friends-desc">' + l[2] + '</span>';
     }).join('');
 
