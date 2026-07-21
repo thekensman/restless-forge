@@ -3,19 +3,15 @@
  * current. Run by .github/workflows/annual-data-check.yml (Jan 20) and
  * runnable locally: `node scripts/check-data-freshness.mjs`.
  *
- * Datasets are read PROGRAMMATICALLY wherever a module boundary exists:
- * data/tax.ts and the tool engines are imported directly (Node strips
- * types natively, ≥22.18) and their exported values inspected — no
- * grepping source text. The two remaining regex checks target inline
- * <script> constants in tools that predate the shared data layer; they
- * are marked INLINE-HTML below and retire when those tools migrate to
- * bundled TS + data/ at launch prep (see docs/automation.md).
+ * Every dataset is read PROGRAMMATICALLY: the shared data modules
+ * (data/tax.ts, data/mileage.ts, data/cpi.ts) and the tool engines are
+ * imported directly (Node strips types natively, ≥22.18) and their
+ * exported values inspected — no grepping or regexing source text.
  *
  * Exit code 0 = everything current; 1 = stale (report on stdout as
  * Markdown, consumed by the workflow's issue-opening step).
  * CHECK_YEAR env var overrides the expected year (for testing).
  */
-import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -43,22 +39,17 @@ const petdose = await import(join(root, "tools/petdose/frontend/src/engine.ts"))
 expect(petdose.DATA_VERIFIED_YEAR === year, "PetDose dosing data",
   `DATA_VERIFIED_YEAR=${petdose.DATA_VERIFIED_YEAR}, expected ${year}`);
 
-/* ── IRS mileage rate JSON ── */
-const mileage = JSON.parse(readFileSync(join(root, "scripts/maintenance/data/mileage_rate.json"), "utf8"));
-expect(mileage.current_year === year, "IRS mileage rate",
-  `mileage_rate.json current_year=${mileage.current_year}, expected ${year}`);
+/* ── IRS mileage rate: shared data/mileage.ts ── */
+const mileage = await import(join(root, "data/mileage.ts"));
+expect(mileage.CURRENT_MILEAGE_YEAR === year, "IRS mileage rate",
+  `data/mileage.ts CURRENT_MILEAGE_YEAR=${mileage.CURRENT_MILEAGE_YEAR}, expected ${year}`);
+expect(mileage.MILEAGE_RATES[mileage.CURRENT_MILEAGE_YEAR] !== undefined, "IRS mileage rate",
+  `MILEAGE_RATES has no entry for ${mileage.CURRENT_MILEAGE_YEAR}`);
 
-/* ── INLINE-HTML (regex until the finance tools' TS refactor) ── */
-// Side Hustle Reality's inline IRS_MILE must match the JSON.
-const shr = readFileSync(join(root, "tools/side-hustle-reality/frontend/src/index.html"), "utf8");
-const mMile = shr.match(/IRS_MILE = ([0-9.]+)/);
-expect(mMile && Number(mMile[1]) === mileage.current_rate, "Side Hustle Reality mileage",
-  `IRS_MILE=${mMile ? mMile[1] : "none"} vs JSON ${mileage.current_rate}`);
-
-// Is My Raise Real's inline CPI table must include last year's average.
-const imrr = readFileSync(join(root, "tools/is-my-raise-real/frontend/src/index.html"), "utf8");
-expect(new RegExp(`${year - 1}\\s*:`).test(imrr), "CPI table",
-  `is-my-raise-real has no ${year - 1} CPI entry`);
+/* ── CPI: shared data/cpi.ts must include last year's annual average ── */
+const cpi = await import(join(root, "data/cpi.ts"));
+expect(cpi.CPI_ANNUAL[year - 1] !== undefined, "CPI table",
+  `data/cpi.ts has no ${year - 1} annual-average entry`);
 
 if (stale.length) {
   console.log(`## Annual data refresh incomplete for ${year}\n`);

@@ -12,9 +12,9 @@ Several tools carry rate data that changes yearly (see
 | Federal brackets, standard deductions | `data/tax.ts` (year-keyed `TAX_YEARS` — append, never overwrite) | IRS Rev. Proc. (published ~Oct/Nov) |
 | SS wage base | same | SSA announcement (~Oct) |
 | State income tax rates (sanity pass) | same (`stateRates`) | Tax Foundation |
-| IRS standard mileage rate | `tools/side-hustle-reality/frontend/src/index.html` + `scripts/maintenance/data/mileage_rate.json` | IRS Notice (~late Dec) |
-| CPI annual average | `tools/is-my-raise-real/frontend/src/index.html` | BLS (~Jan 11; `scripts/maintenance/scripts/update_cpi.py` fetches it) |
-| Subscription preset prices | `tools/subscription-audit/frontend/src/index.html` + `scripts/maintenance/data/subscription_prices.json` | vendor pricing pages |
+| IRS standard mileage rate | `data/mileage.ts` (year-keyed `MILEAGE_RATES` — append) | IRS Notice (~late Dec) |
+| CPI annual average | `data/cpi.ts` (year-keyed `CPI_ANNUAL` — append) | BLS series CUUR0000SA0 (~Jan 11) |
+| Subscription preset prices | `data/subscription-presets.ts` (`SUBSCRIPTION_PRESETS`) | vendor pricing pages |
 | TattooSafe hourly-rate tiers (sanity pass only — market ranges, not year-keyed) | `tools/tattoosafe/frontend/src/engine.ts` (`HOURLY_RATES`) | industry surveys / studio listings |
 | PromptDrop water-footprint bands (energy/task, WUE, EWIF) + bump `DATA_VERIFIED_YEAR` | `tools/promptdrop/frontend/src/engine.ts` | company disclosures (Google, OpenAI, AWS/Microsoft WUE) + research (UC Riverside, NREL, Hugging Face) |
 | PetDose dosing table — **sanity pass ONLY: never change dose values in the refresh PR.** If any reference disagrees, open a blocking issue for veterinary review; bump `DATA_VERIFIED_YEAR` only when sources agree | `tools/petdose/frontend/src/engine.ts` (`MEDICATIONS`) | veterinary references (Plumb's, Merck Vet Manual) |
@@ -99,18 +99,16 @@ updating everything to the CURRENT year:
    WIMTW) pick the new year up automatically.
    Sources: IRS annual inflation-adjustment revenue procedure and the
    SSA wage-base announcement; cross-check two sources per number.
-2. IRS standard mileage rate: update IRS_MILE and every "$X.XX/mi"
-   label in tools/side-hustle-reality/frontend/src/index.html AND
-   scripts/maintenance/data/mileage_rate.json (current_year,
-   current_rate, source, history entry). Source: IRS Notice
-   (published late December).
-3. CPI: run scripts/maintenance/scripts/update_cpi.py (BLS API) or
-   research the prior year's annual average CPI-U; add it to the CPI
-   table in tools/is-my-raise-real/frontend/src/index.html.
-4. Subscription prices: spot-check the preset prices in
-   tools/subscription-audit/frontend/src/index.html against current
-   vendor pricing; update the file and
-   scripts/maintenance/data/subscription_prices.json for clear changes.
+2. IRS standard mileage rate (data/mileage.ts): append a new
+   MILEAGE_RATES entry (rate + source) and bump CURRENT_MILEAGE_YEAR.
+   side-hustle-reality imports it — no per-tool edit. Also check any
+   "$X.XX/mi" copy in that tool's HTML. Source: IRS Notice (late Dec).
+3. CPI (data/cpi.ts): research the prior year's annual-average CPI-U
+   (BLS series CUUR0000SA0) and append it to CPI_ANNUAL. is-my-raise-real
+   imports it.
+4. Subscription prices (data/subscription-presets.ts): spot-check the
+   SUBSCRIPTION_PRESETS costs against current vendor pricing; update in
+   place for clear changes.
 5. TattooSafe HOURLY_RATES (tools/tattoosafe/frontend/src/engine.ts):
    sanity-pass the four tier ranges against current studio rates; only
    adjust on clear, sourced market drift (these are ranges, not indexed
@@ -136,18 +134,17 @@ per dataset and source links. Do not merge it yourself.
 
 GitHub Actions, cron **Jan 20 yearly** (+ manual `workflow_dispatch`).
 Runs `scripts/check-data-freshness.mjs` (also runnable locally), which
-imports the data modules directly — data/tax.ts `CURRENT_TAX_YEAR`, the
-PromptDrop and PetDose `DATA_VERIFIED_YEAR` exports — and checks the
-mileage JSON year, Side-Hustle rate parity, and the CPI table entry,
-then **opens a GitHub issue**
+imports every data module directly — `CURRENT_TAX_YEAR` (data/tax.ts),
+`CURRENT_MILEAGE_YEAR` (data/mileage.ts), the prior-year `CPI_ANNUAL`
+entry (data/cpi.ts), and the PromptDrop and PetDose `DATA_VERIFIED_YEAR`
+exports — then **opens a GitHub issue**
 listing anything stale. Zero external dependencies — it can't fail the
 way a research job can, so a silent refresh failure now surfaces within
 two weeks instead of never.
 
-### Maintenance scripts (`scripts/maintenance/`)
+### Data dependency map (`scripts/maintenance/DEPENDENCIES.md`)
 
-Helper updaters + canonical data JSONs from the tool drop.
-`update_cpi.py` is a real BLS API fetcher; the others are guided
-editors pointing at their sources. `DEPENDENCIES.md` is the
-authoritative matrix of what needs updating when, and the annual
-routine treats it as its work order.
+The authoritative matrix of what data needs updating when and where it
+lives; the annual routine treats it as its work order. (The old
+per-dataset Python updaters + mirror JSONs were retired when the data
+moved into the typed `data/` modules — the agent edits those directly.)

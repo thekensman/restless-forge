@@ -36,6 +36,10 @@ export interface TaxYearData {
   bracketsMfj: TaxBracket[];
   standardDeductionSingle: number;
   standardDeductionMfj: number;
+  /** Self-employment tax rate (SS + Medicare), statutory — 15.3% since 1990. */
+  selfEmploymentRate: number;
+  /** Net-earnings factor: SE tax applies to 92.35% of net SE income. */
+  selfEmploymentNetFactor: number;
   /** Simplified flat effective rates (Tax Foundation) — sanity-passed yearly. */
   stateRates: StateTaxRate[];
 }
@@ -70,6 +74,8 @@ export const TAX_YEARS: Record<number, TaxYearData> = {
     ],
     standardDeductionSingle: 16_100,
     standardDeductionMfj: 32_200,
+    selfEmploymentRate: 0.153,
+    selfEmploymentNetFactor: 0.9235,
     stateRates: [
       { id: "none", name: "No state tax", rate: 0 },
       { id: "AL", name: "Alabama", rate: 0.05 },

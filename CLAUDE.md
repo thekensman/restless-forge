@@ -21,7 +21,7 @@ restless-forge/
 ├── site/                → Static HTML/CSS for global pages (landing, about, privacy, ...)
 │   ├── shared.js        → `rf*` utilities (donate links, nav/footer separators)
 │   └── tool-chrome.css  → Shared .site-header / .footer styles for every tool
-├── data/                → Cross-tool datasets (tax.ts: year-keyed, append-only)
+├── data/                → Cross-tool datasets (tax.ts, mileage.ts, cpi.ts: year-keyed, append-only; subscription-presets.ts)
 ├── tools/
 │   ├── template/frontend/    → Turnkey scaffold (copy via scripts/new-tool.sh)
 │   ├── what-is-my-time-worth/frontend/

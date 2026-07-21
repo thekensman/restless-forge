@@ -118,13 +118,29 @@ function renderFaqAnswer(live) {
 }
 
 /* The FAQ JSON-LD answer can't carry HTML-comment markers (it's JSON),
-   so the sync rewrites the "text" of the "What is Restless Forge?"
-   question in place. */
+   so the sync parses the FAQPage block, updates the "What is Restless
+   Forge?" answer on the real object, and re-serializes it (indentation
+   preserved so the drift check stays stable). Parsing rather than
+   regexing means malformed JSON-LD fails loudly here instead of shipping. */
 function syncFaqJsonLd(html, live, file) {
   const text = `Restless Forge is a collection of free, open-source web tools built by Ken. It includes ${joinBlurbs(live)}. All tools are privacy-first and run in your browser.`;
-  const re = /("name": "What is Restless Forge\?",[\s\S]*?"text": ")[^"]*(")/;
-  if (!re.test(html)) throw new Error(`${file}: FAQ JSON-LD "What is Restless Forge?" question not found`);
-  return html.replace(re, (_, pre, post) => pre + text + post);
+  const blockRe = /(<script type="application\/ld\+json">\n)([\s\S]*?)(\n[ \t]*<\/script>)/g;
+  let updated = false;
+  const out = html.replace(blockRe, (whole, open, body, close) => {
+    let data;
+    try { data = JSON.parse(body); }
+    catch { return whole; } // not our block (or malformed non-FAQ block) — leave it
+    if (data["@type"] !== "FAQPage" || !Array.isArray(data.mainEntity)) return whole;
+    const q = data.mainEntity.find((e) => e.name === "What is Restless Forge?");
+    if (!q || !q.acceptedAnswer) throw new Error(`${file}: FAQPage JSON-LD has no "What is Restless Forge?" question`);
+    q.acceptedAnswer.text = text;
+    const indent = body.match(/^[ \t]*/)[0]; // base indent of the block's first line
+    const json = JSON.stringify(data, null, 2).split("\n").map((l) => indent + l).join("\n");
+    updated = true;
+    return open + json + close;
+  });
+  if (!updated) throw new Error(`${file}: no FAQPage JSON-LD block found to sync`);
+  return out;
 }
 
 /* ── URL path each page is served at (drives the nav's active state) ── */
