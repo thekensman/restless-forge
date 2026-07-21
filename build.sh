@@ -8,6 +8,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DIST_DIR="${SCRIPT_DIR}/dist"
 
+# ads.txt is fetched directly by ad-network crawlers as plain static text —
+# no browser, no JS — so its publisher ID can't be runtime-resolved like the
+# rest of the AdSense wiring (see window.rfAdsenseClientId in site/shared.js,
+# which every page uses instead). Keep this value in sync with that constant.
+RF_ADSENSE_PUB="pub-5516736042033534"
+
 echo "═══ Restless Forge Build ═══"
 echo ""
 
@@ -135,6 +141,26 @@ if [ -f "${DIST_DIR}/tool-chrome.css" ]; then
     {} \;
   echo "  → /tool-chrome.css?v=${site_chrome_hash}"
 fi
+
+# ── Substitute the AdSense publisher ID into ads.txt ──
+# Source ads.txt files carry the __RF_ADSENSE_PUB__ placeholder instead of
+# the literal ID (see RF_ADSENSE_PUB above). Substitute it in, then fail the
+# build loudly if anything was missed or the value looks wrong — a broken
+# ads.txt fails silently in production otherwise.
+find "${DIST_DIR}" -name "ads.txt" -exec sed -i \
+  "s/__RF_ADSENSE_PUB__/${RF_ADSENSE_PUB}/g" {} \;
+
+leftover=$(grep -rl "__RF_ADSENSE_PUB__" "${DIST_DIR}" || true)
+if [ -n "${leftover}" ]; then
+  echo "ERROR: __RF_ADSENSE_PUB__ placeholder left unsubstituted in:" >&2
+  echo "${leftover}" >&2
+  exit 1
+fi
+if [ "$(grep -rl "${RF_ADSENSE_PUB}" "${DIST_DIR}" --include=ads.txt | wc -l)" -eq 0 ]; then
+  echo "ERROR: ads.txt substitution produced zero matches — check RF_ADSENSE_PUB." >&2
+  exit 1
+fi
+echo "  → ads.txt: ${RF_ADSENSE_PUB}"
 
 # ── Summary ──
 echo ""

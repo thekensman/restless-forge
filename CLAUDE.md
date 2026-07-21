@@ -11,6 +11,7 @@ Currently live:
 1. **What Is My Time Worth?** — Real hourly wage calculator (formerly whatismytimeworth.app)
 2. **HoloPath** — Hologram GIF generator (formerly holopath.art)
 3. **SandPath** — Image/SVG to sand table converter (formerly sandpath.art)
+4. **TattooSafe** — AR tattoo scale/placement preview and pricing calculator
 
 Global support pages (about, contact, privacy, terms, FAQ, essays, articles) live at the domain root.
 
@@ -26,7 +27,8 @@ restless-forge/
 │   ├── template/frontend/    → Turnkey scaffold (copy via scripts/new-tool.sh)
 │   ├── what-is-my-time-worth/frontend/
 │   ├── holopath/frontend/
-│   └── sandpath/frontend/
+│   ├── sandpath/frontend/
+│   └── tattoosafe/frontend/
 ├── scripts/
 │   └── new-tool.sh      → Scaffolds tools/<name>/frontend/ from tools/template/
 ├── nginx/               → Production nginx configs (main site + 301 redirects)
@@ -68,7 +70,7 @@ static assets served verbatim — Vite does not treat them as navigable pages.
 - **Client-only**: no backends. If a tool needs heavy computation, it runs in the browser (Canvas, Workers, Wasm, etc.).
 - **Shared data layer**: cross-tool refreshed datasets (tax brackets, …) live in `data/` (repo root — referenced by tools, not a tool itself) as year-keyed, append-only TS modules, imported by consuming tools and bundled at build time. Tool-specific data stays in each tool's engine. Refresh procedure: `docs/automation.md`.
 - **Vite base paths**: each tool's `vite.config.ts` uses `defineToolConfig({ base: '/tools/<name>', ... })` via the shared factory in `tools/vite-tool-config.ts`.
-- **Shared chrome, per-tool theme**: every tool renders the same `.site-header` / `.footer` markup (from `public/shared.js`), styled by the shared `site/tool-chrome.css`, themed through a set of `--rf-*` CSS custom properties each tool defines.
+- **Shared chrome, per-tool theme**: every tool renders the same `.site-header` / `.footer` markup, produced by `window.rfMountToolChrome(config)` (in `site/shared.js`) from a small per-tool config object in each tool's `public/shared.js`, styled by the shared `site/tool-chrome.css`, themed through a set of `--rf-*` CSS custom properties each tool defines.
 - **Global pages**: static HTML in `site/` — no build step, just copy to dist.
 
 ## Shared Resource Architecture
@@ -77,10 +79,11 @@ static assets served verbatim — Vite does not treat them as navigable pages.
 Served at `/shared.js` in dev and prod. Single source of truth for:
 - `window.rfDonateLinks` — array of `[url, label]` donation links
 - `window.rfDonateHtml()` — renders the "Support Restless Forge" donate block
-- `window.rfNavSep` — `<span class="nav-sep">|</span>` between tool and RF nav links
-- `window.rfFooterSep` — `<span class="footer-sep">|</span>` for footer separators
+- `window.rfNavSep` / `window.rfFooterSep` — `<span class="nav-sep">|</span>` / `<span class="footer-sep">|</span>` separators between tool and RF links
+- `window.rfGlobalNavLinks` / `window.rfGlobalFooterLinks` — the Restless Forge / All Tools (nav) and Privacy / Terms / Restless Forge / All Tools (footer) tails every tool appends after its own links
+- `window.rfMountToolChrome(config)` — the shared tool header/footer engine. Every `tools/<name>/frontend/public/shared.js` calls this once with `{ base, idPrefix, brand, navLinks, footerLinks, copyrightHtml, extraSupportLinks? }` — `navLinks`/`footerLinks` are tool-specific only (the engine appends the global tails), and `extraSupportLinks` lets a tool prepend its own support link (e.g. SandPath's Ko-fi shop) before the shared Substack/Ko-fi/Buy Me a Coffee links. Returns `{ header, footer }` render functions and wires the `<div id="<prefix>-header">`/`<div id="<prefix>-footer">` DOMContentLoaded injection.
 
-Every tool page loads `/shared.js` first, then the tool's own `public/shared.js`.
+Every tool page loads `/shared.js` first, then the tool's own `public/shared.js` (which must call `rfMountToolChrome`, not hand-roll header/footer HTML).
 
 ### `site/tool-chrome.css` — shared header/footer CSS
 Served at `/tool-chrome.css`. Owns all `.site-header*`, `.nav-toggle`,
