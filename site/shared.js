@@ -45,6 +45,7 @@
     ['/essays/', 'Essays'],
     ['/about', 'About'],
     ['/contact', 'Contact'],
+    ['/sites-i-like', 'Sites I Like'],
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/faq', 'FAQ'],
@@ -198,9 +199,25 @@
   // Personal recommendations — friends & family sites, not RF's own work.
   // Kept separate from rfDonateLinks/support on purpose: this is not
   // monetization or affiliate tracking, just sites worth a visit.
+  // Rendered onto the /sites-i-like page by rfRenderFriends() below.
   window.rfFriendLinks = [
-    ['https://freerollvegas.com', 'FreeRoll Vegas', 'Poker tournament schedules'],
+    ['https://freerollvegas.com', 'FreeRoll Vegas', 'Las Vegas deals, savings, and free things to do'],
   ];
+
+  // Renders the friends/recommendations list onto the /sites-i-like page.
+  // Pre-rendered statically by scripts/sync-static-html.mjs and re-run at
+  // runtime — same pattern as rfRenderTools (site/tools-data.js). Links stay
+  // followable (no nofollow): these are genuine editorial recommendations.
+  window.rfRenderFriends = function (containerId) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = '<ul class="friends-list">' + window.rfFriendLinks.map(function (l) {
+      return '<li class="friends-list__item">' +
+        '<a class="friends-list__link" href="' + l[0] + '" target="_blank" rel="noopener noreferrer">' + l[1] + '</a>' +
+        '<span class="friends-list__desc">' + l[2] + '</span>' +
+        '</li>';
+    }).join('') + '</ul>';
+  };
 
   window.rfNav = function () {
     var items = nav.map(function (l) {
@@ -223,19 +240,10 @@
       return '<a href="' + l[0] + '">' + l[1] + '</a>';
     }).join('');
 
-    var friends = window.rfFriendLinks.map(function (l) {
-      return '<a href="' + l[0] + '" target="_blank" rel="noopener noreferrer">' + l[1] + '</a>' +
-        '<span class="site-footer__friends-desc">' + l[2] + '</span>';
-    }).join('');
-
     return '<footer class="site-footer"><div class="site-footer__inner">' +
       '<div class="site-footer__support"><h3>Support Restless Forge</h3>' +
       '<div class="support-links">' + sup + '</div></div>' +
       '<nav class="site-footer__nav">' + links + '</nav>' +
-      '<div class="site-footer__friends"><h4>Sites I Like</h4>' +
-      '<div class="friend-links">' + friends + '</div>' +
-      '<p class="site-footer__friends-note">Personal recommendations from friends &amp; family — not affiliated with Restless Forge.</p>' +
-      '</div>' +
       '<p class="site-footer__copy">&copy; 2026 Restless Forge. All rights reserved.</p>' +
       '</div></footer>';
   };

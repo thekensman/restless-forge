@@ -177,6 +177,38 @@ img { max-width: 100%; height: auto; }
   line-height: 1.7;
 }
 
+/* ── Sites I Like (friends/recommendations list) ── */
+.friends-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.friends-list__item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.friends-list__item:last-child { border-bottom: none; }
+
+.friends-list__link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.friends-list__link:hover { text-decoration: underline; }
+
+.friends-list__desc {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
 /* ── Tool Cards ── */
 .tools-grid {
   display: grid;
@@ -381,51 +413,6 @@ img { max-width: 100%; height: auto; }
 }
 
 .site-footer__nav a:hover { color: var(--accent); }
-
-.site-footer__friends {
-  text-align: center;
-  margin: 0 0 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
-
-.site-footer__friends h4 {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-dim);
-  margin-bottom: 0.75rem;
-}
-
-.friend-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-}
-
-.friend-links a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s ease;
-}
-
-.friend-links a:hover { border-bottom-color: currentColor; }
-
-.site-footer__friends-desc {
-  color: var(--text-dim);
-  margin-right: 0.75rem;
-}
-
-.site-footer__friends-note {
-  margin-top: 0.5rem;
-  font-size: 0.65rem;
-  color: var(--text-dim);
-}
 
 .site-footer__copy {
   text-align: center;
