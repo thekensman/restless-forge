@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 /* sync-static-html.mjs — pre-render the JS-injected chrome as static HTML.
  *
- * The homepage tools grid, /tools/ directory, and global nav/footer are
- * rendered client-side from the single sources of truth (site/tools-data.js
- * and site/shared.js). Crawlers that don't execute JS see empty divs. This
- * script runs THE SAME renderers in a sandbox and writes their output into
- * the placeholder divs, between generated-content markers. The runtime JS
- * still overwrites those containers on DOMContentLoaded, so behavior is
- * unchanged — the static copy is a crawlable fallback, never a fork.
+ * The homepage tools grid, the /tools/ directory, and the live-tool lists on
+ * about/terms/FAQ are data-derived CONTENT (from site/tools-data.js) — this
+ * script pre-renders them into placeholder divs between generated-content
+ * markers so crawlers that don't execute JS still see them. Chrome
+ * (nav/footer/header) is NOT generated: it renders at runtime from the single
+ * sources (site/shared.js rfNav/rfFooter, and each tool's rfMountToolChrome)
+ * into empty placeholder divs. The runtime JS overwrites the generated
+ * content containers on DOMContentLoaded too, so behavior is unchanged — the
+ * static copy is a crawlable fallback, never a fork.
  *
  * NEVER hand-edit the generated blocks: re-run this script instead
  * (`npm run sync-static`). CI regenerates and fails on drift.
@@ -150,9 +152,11 @@ function urlPath(rel) {
   return "/" + rel.replace(/\.html$/, "");
 }
 
-/* Every HTML page under site/ that carries a placeholder is processed —
+/* Every HTML page under site/ that needs generated CONTENT is processed —
    discovery, not a registry, so new pages (e.g. auto-created essay
-   shells) are picked up without editing this script. */
+   shells) are picked up without editing this script. Nav/footer chrome is
+   runtime-only now, so a page qualifies only if it carries a tool-grid
+   placeholder or is one of the tool-list pages (about/terms/FAQ). */
 function* walk(dir) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (e.name.startsWith(".") || e.name === "node_modules") continue;
@@ -161,11 +165,13 @@ function* walk(dir) {
     else if (e.name.endsWith(".html")) yield p;
   }
 }
+const TOOL_LIST_PAGES = ["about.html", "terms.html", "faq.html"];
 const pages = [...walk(join(root, "site"))]
   .map((p) => relative(join(root, "site"), p))
   .filter((rel) => {
+    if (TOOL_LIST_PAGES.includes(rel)) return true;
     const html = readFileSync(site(rel), "utf8");
-    return ["rf-nav", "rf-footer", "rf-tools-landing", "rf-tools-directory"]
+    return ["rf-tools-landing", "rf-tools-directory"]
       .some((id) => html.includes(`id="${id}"`));
   })
   .sort();
@@ -179,12 +185,11 @@ for (const rel of pages) {
   let html = before;
   const { window } = makeSandbox(urlPath(rel));
 
-  if (html.includes('id="rf-nav"')) {
-    html = inject(html, "rf-nav", "nav", window.rfNav(), rel);
-  }
-  if (html.includes('id="rf-footer"')) {
-    html = inject(html, "rf-footer", "footer", window.rfFooter(), rel);
-  }
+  // Nav/footer chrome is NOT generated — it renders at runtime from
+  // rfNav()/rfFooter() into the empty <div id="rf-nav"/"rf-footer">
+  // placeholders, the same single-source pattern tool pages use. Only
+  // data-derived content (the tool grid + the about/terms/FAQ tool lists)
+  // is pre-rendered below.
   if (html.includes('id="rf-tools-landing"')) {
     html = inject(html, "rf-tools-landing", "tools-landing", renderGrid("landing"), rel);
   }
