@@ -14,6 +14,17 @@
   var RF_SUBSTACK = 'https://restlessforge.substack.com';
   var RF_GITHUB   = 'https://github.com/thekensman/';
 
+  // Exposed so prose links can resolve programmatically: any
+  // <a data-rf-link="kofi|bmc|substack|github"> gets its href set from here
+  // on DOMContentLoaded (see resolver at the bottom of this file), so a URL
+  // change is a one-line edit even in hand-written page copy.
+  window.rfLinks = {
+    kofi: RF_KOFI,
+    bmc: RF_BMC,
+    substack: RF_SUBSTACK,
+    github: RF_GITHUB,
+  };
+
   function active(href) {
     if (href === '/') return p === '/' || p === '/index.html';
     return p.startsWith(href);
@@ -232,10 +243,22 @@
   // Auto-inject nav and footer into standard placeholder elements.
   // HTML pages only need <div id="rf-nav"></div> and <div id="rf-footer"></div>;
   // no inline scripts required.
+  // Resolve prose support links from the single-source window.rfLinks map.
+  // Prose copy uses <a data-rf-link="substack"> (no hard-coded href); this
+  // fills the href in so donate/Substack URLs live in exactly one place.
+  function resolveProseLinks() {
+    var links = document.querySelectorAll('a[data-rf-link]');
+    for (var i = 0; i < links.length; i++) {
+      var url = window.rfLinks[links[i].getAttribute('data-rf-link')];
+      if (url) links[i].setAttribute('href', url);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var navEl = document.getElementById('rf-nav');
     if (navEl) navEl.outerHTML = window.rfNav();
     var footerEl = document.getElementById('rf-footer');
     if (footerEl) footerEl.outerHTML = window.rfFooter();
+    resolveProseLinks();
   });
 })();
