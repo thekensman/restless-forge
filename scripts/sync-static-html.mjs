@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 /* sync-static-html.mjs — pre-render the JS-injected chrome as static HTML.
  *
- * The homepage tools grid, /tools/ directory, and global nav/footer are
- * rendered client-side from the single sources of truth (site/tools-data.js
- * and site/shared.js). Crawlers that don't execute JS see empty divs. This
- * script runs THE SAME renderers in a sandbox and writes their output into
- * the placeholder divs, between generated-content markers. The runtime JS
- * still overwrites those containers on DOMContentLoaded, so behavior is
+ * The homepage tools grid, /tools/ directory, global nav/footer, AND each
+ * tool page's own header/footer chrome are rendered client-side from the
+ * single sources of truth (site/tools-data.js, site/shared.js, and each
+ * tool's public/shared.js). Crawlers that don't execute JS see empty divs.
+ * This script runs THE SAME renderers in a sandbox and writes their output
+ * into the placeholder divs, between generated-content markers. The runtime
+ * JS still overwrites those containers on DOMContentLoaded, so behavior is
  * unchanged — the static copy is a crawlable fallback, never a fork.
  *
  * NEVER hand-edit the generated blocks: re-run this script instead
  * (`npm run sync-static`). CI regenerates and fails on drift.
  */
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
 import vm from "node:vm";
@@ -47,6 +48,35 @@ function renderGrid(mode) {
   const id = mode === "landing" ? "rf-tools-landing" : "rf-tools-directory";
   window.rfRenderTools(id, { mode });
   return elements.get(id).innerHTML;
+}
+
+/* ── tool chrome sandbox: site/shared.js + one tool's public/shared.js ──
+   The tool's shared.js calls rfMountToolChrome(), which records the tool's
+   header()/footer() renderers on window.rfToolChrome. Reuse one sandbox per
+   tool and mutate window.location.pathname per page for the active state. */
+function makeToolSandbox(toolId) {
+  const fakeEl = () => ({ innerHTML: "", addEventListener() {} });
+  const window = { location: { pathname: "/" } };
+  const document = {
+    addEventListener() {},
+    querySelectorAll: () => [],
+    querySelector: () => null,
+    getElementById: () => fakeEl(),
+  };
+  const ctx = vm.createContext({ window, document });
+  vm.runInContext(readFileSync(site("shared.js"), "utf8"), ctx, { filename: "shared.js" });
+  const toolShared = join(root, "tools", toolId, "frontend", "public", "shared.js");
+  vm.runInContext(readFileSync(toolShared, "utf8"), ctx, { filename: `${toolId}/shared.js` });
+  if (!window.rfToolChrome) throw new Error(`${toolId}: public/shared.js did not call rfMountToolChrome`);
+  return window;
+}
+
+/* URL a tool page is served at (drives the chrome's active nav state). */
+function toolUrlPath(rel, toolId) {
+  const base = `/tools/${toolId}/`;
+  if (rel === "index.html") return base;
+  if (rel.endsWith("/index.html")) return base + rel.slice(0, -"index.html".length);
+  return base + rel.replace(/\.html$/, "");
 }
 
 /* ── marker-bounded injection inside a placeholder div ──
@@ -206,6 +236,41 @@ for (const rel of pages) {
     writeFileSync(file, html);
     changed++;
     console.log(`updated ${relative(root, file)}`);
+  }
+}
+
+/* ── tool pages: pre-render each tool's own header/footer chrome ──
+   Same idea as the site pages above, but the renderers come from each tool's
+   public/shared.js (via rfMountToolChrome) instead of the global rfNav/rfFooter.
+   Every tool src/ page with a <prefix>-header/-footer placeholder gets the
+   crawlable static chrome; runtime JS still overwrites it with an identical
+   render. Discovery, not a registry — new tools/pages are picked up here. */
+for (const toolId of readdirSync(join(root, "tools")).sort()) {
+  if (toolId === "template") continue;
+  const srcDir = join(root, "tools", toolId, "frontend", "src");
+  const toolShared = join(root, "tools", toolId, "frontend", "public", "shared.js");
+  if (!existsSync(srcDir) || !existsSync(toolShared)) continue;
+
+  const window = makeToolSandbox(toolId);
+  const chrome = window.rfToolChrome;
+  const prefix = chrome.idPrefix;
+
+  for (const abs of walk(srcDir)) {
+    const rel = relative(srcDir, abs);
+    const before = readFileSync(abs, "utf8");
+    const hasHeader = before.includes(`id="${prefix}-header"`);
+    const hasFooter = before.includes(`id="${prefix}-footer"`);
+    if (!hasHeader && !hasFooter) continue;
+
+    window.location.pathname = toolUrlPath(rel, toolId);
+    let html = before;
+    if (hasHeader) html = inject(html, `${prefix}-header`, "header", chrome.header(), rel);
+    if (hasFooter) html = inject(html, `${prefix}-footer`, "footer", chrome.footer(), rel);
+    if (html !== before) {
+      writeFileSync(abs, html);
+      changed++;
+      console.log(`updated ${relative(root, abs)}`);
+    }
   }
 }
 
