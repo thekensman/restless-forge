@@ -185,10 +185,6 @@
       if (f) f.outerHTML = footer();
     });
 
-    // Stable handle so the build-time pre-renderer (scripts/sync-static-html.mjs)
-    // can grab this tool's renderers without knowing its idPrefix.
-    window.rfToolChrome = { header: header, footer: footer, idPrefix: config.idPrefix };
-
     return { header: header, footer: footer };
   };
 
