@@ -51,6 +51,12 @@ function renderGrid(mode) {
   return elements.get(id).innerHTML;
 }
 
+function renderFriends() {
+  const { window, elements } = makeSandbox("/");
+  window.rfRenderFriends("rf-friends");
+  return elements.get("rf-friends").innerHTML;
+}
+
 /* ── marker-bounded injection inside a placeholder div ──
    With containerId null the markers must already exist in the page
    (used for inline blocks like the tool lists, which live inside an
@@ -171,7 +177,7 @@ const pages = [...walk(join(root, "site"))]
   .filter((rel) => {
     if (TOOL_LIST_PAGES.includes(rel)) return true;
     const html = readFileSync(site(rel), "utf8");
-    return ["rf-tools-landing", "rf-tools-directory"]
+    return ["rf-tools-landing", "rf-tools-directory", "rf-friends"]
       .some((id) => html.includes(`id="${id}"`));
   })
   .sort();
@@ -195,6 +201,9 @@ for (const rel of pages) {
   }
   if (html.includes('id="rf-tools-directory"')) {
     html = inject(html, "rf-tools-directory", "tools-directory", renderGrid("directory"), rel);
+  }
+  if (html.includes('id="rf-friends"')) {
+    html = inject(html, "rf-friends", "friends", renderFriends(), rel);
   }
   if (rel === "about.html") {
     html = inject(html, null, "tools-about", renderAboutToolList(live), rel);
@@ -293,6 +302,7 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
     ["/articles/", ["weekly", "0.7"]],
     ["/about", ["monthly", "0.6"]],
     ["/contact", ["yearly", "0.5"]],
+    ["/sites-i-like", ["monthly", "0.4"]],
     ["/privacy", ["yearly", "0.3"]],
     ["/terms", ["yearly", "0.3"]],
     ["/faq", ["monthly", "0.6"]],

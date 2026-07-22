@@ -82,6 +82,7 @@ Served at `/shared.js` in dev and prod. Single source of truth for:
 - `window.rfNavSep` / `window.rfFooterSep` — `<span class="nav-sep">|</span>` / `<span class="footer-sep">|</span>` separators between tool and RF links
 - `window.rfGlobalNavLinks` / `window.rfGlobalFooterLinks` — the Restless Forge / All Tools (nav) and Privacy / Terms / Restless Forge / All Tools (footer) tails every tool appends after its own links
 - `window.rfMountToolChrome(config)` — the shared tool header/footer engine. Every `tools/<name>/frontend/public/shared.js` calls this once with `{ base, idPrefix, brand, navLinks, footerLinks, copyrightHtml, extraSupportLinks? }` — `navLinks`/`footerLinks` are tool-specific only (the engine appends the global tails), and `extraSupportLinks` lets a tool prepend its own support link (e.g. SandPath's Ko-fi shop) before the shared Substack/Ko-fi/Buy Me a Coffee links. Returns `{ header, footer }` render functions and wires the `<div id="<prefix>-header">`/`<div id="<prefix>-footer">` DOMContentLoaded injection.
+- `window.rfFriendLinks` (`[url, name, desc]`) + `window.rfRenderFriends(id)` — the curated "Sites I Like" recommendations. Single data source; `rfRenderFriends` renders the list onto the `/sites-i-like` page's `<div id="rf-friends">` (pre-rendered statically by `sync-static`, re-run at runtime — same pattern as `rfRenderTools`). Linked from the site footer only (`footerNav`), not the top nav.
 
 Every tool page loads `/shared.js` first, then the tool's own `public/shared.js` (which must call `rfMountToolChrome`, not hand-roll header/footer HTML).
 
@@ -274,7 +275,7 @@ rules): `docs/authoring-content.md`.
 | `/` | `site/index.html` |
 | `/shared.js` | `site/shared.js` |
 | `/tool-chrome.css` | `site/tool-chrome.css` |
-| `/about`, `/contact`, `/privacy`, `/terms`, `/faq` | `site/<page>.html` (nginx try_files) |
+| `/about`, `/contact`, `/privacy`, `/terms`, `/faq`, `/sites-i-like` | `site/<page>.html` (nginx try_files) |
 | `/tools/` | `site/tools/index.html` |
 | `/tools/<name>/` | `tools/<name>/frontend/dist/` |
 | `/essays/*` | `site/essays/*.html` |
