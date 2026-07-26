@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
   <title>Rise &amp; Rhyme — Restless Forge</title>
-  <meta name="description" content="TODO: page description">
+  <meta name="description" content="Wake up to an AI song about your day. Rise &amp; Rhyme reads your calendar, writes morning lyrics, and plays them over an upbeat backing track as your alarm.">
   <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Rise &amp; Rhyme">
-  <meta property="og:description" content="TODO: OG description">
+  <meta property="og:description" content="Wake up to an AI song about your day. Reads your calendar, writes lyrics, plays them over music.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/">
   <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
@@ -28,7 +28,7 @@
     "@type": "WebApplication",
     "name": "Rise & Rhyme",
     "url": "https://restless-forge.dev/tools/rise-and-rhyme",
-    "description": "TODO",
+    "description": "An AI morning alarm that reads your calendar, writes song lyrics about your day, and plays them over an upbeat backing track.",
     "applicationCategory": "UtilityApplication",
     "operatingSystem": "Any",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -53,7 +53,104 @@
 
   <main>
     <h1>Rise &amp; Rhyme</h1>
-    <p>TODO: tool UI</p>
+    <p class="tagline">Wake up to a song about your day. Rise &amp; Rhyme reads
+    tomorrow's calendar, writes custom lyrics, and plays them over an upbeat
+    backing track as your morning alarm.</p>
+
+    <div class="notice">
+      <strong>☁ Cloud-assisted tool.</strong> Your calendar's public iCal URL is
+      sent to the Restless Forge server once per evening to generate lyrics with
+      Claude. Nothing else leaves your browser — see the
+      <a href="/tools/rise-and-rhyme/privacy/">privacy page</a>.
+      <strong>v1 needs this tab open overnight</strong> to fire the alarm.
+    </div>
+
+    <section class="setup" aria-labelledby="rar-setup-h">
+      <h2 id="rar-setup-h">Setup</h2>
+
+      <label class="field">
+        <span class="field__label">Google Calendar public iCal URL</span>
+        <input type="url" id="rar-ical" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off">
+        <span class="field__hint">Google Calendar → Settings → your calendar →
+        "Secret address in iCal format". The URL stays in this browser's
+        localStorage.</span>
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span class="field__label">Alarm time</span>
+          <input type="time" id="rar-alarm-time" value="06:30">
+        </label>
+        <label class="field">
+          <span class="field__label">Generate song at</span>
+          <input type="time" id="rar-gen-time" value="22:00">
+        </label>
+        <label class="field">
+          <span class="field__label">Snooze (minutes)</span>
+          <input type="number" id="rar-snooze" min="1" max="60" value="9">
+        </label>
+      </div>
+
+      <fieldset class="field" id="rar-days">
+        <legend class="field__label">Alarm days</legend>
+        <label><input type="checkbox" value="0"> Sun</label>
+        <label><input type="checkbox" value="1" checked> Mon</label>
+        <label><input type="checkbox" value="2" checked> Tue</label>
+        <label><input type="checkbox" value="3" checked> Wed</label>
+        <label><input type="checkbox" value="4" checked> Thu</label>
+        <label><input type="checkbox" value="5" checked> Fri</label>
+        <label><input type="checkbox" value="6"> Sat</label>
+      </fieldset>
+
+      <div class="field-row">
+        <label class="field">
+          <span class="field__label">Music style</span>
+          <select id="rar-genre">
+            <option value="any">Surprise me</option>
+            <option value="energetic">Bright electronic</option>
+            <option value="warm">Acoustic strum</option>
+            <option value="groovy">Funk / soul</option>
+            <option value="smooth">Jazz café</option>
+            <option value="cheerful">Indie pop</option>
+            <option value="playful">Chiptune</option>
+            <option value="bold">Marching / fanfare</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Voice</span>
+          <select id="rar-voice"><option value="">Browser default</option></select>
+        </label>
+        <label class="field">
+          <span class="field__label">Volume</span>
+          <input type="range" id="rar-volume" min="0" max="100" value="80">
+        </label>
+      </div>
+
+      <label class="field field--toggle">
+        <input type="checkbox" id="rar-enabled">
+        <span class="field__label">Alarm enabled</span>
+      </label>
+
+      <div class="actions">
+        <button id="rar-save" class="btn btn--primary" type="button">Save settings</button>
+        <button id="rar-preview" class="btn" type="button">▶ Preview my song</button>
+      </div>
+
+      <p id="rar-status" class="status" role="status"></p>
+      <p id="rar-schedule" class="schedule"></p>
+    </section>
+
+    <!-- Alarm overlay -->
+    <div id="rar-alarm" class="alarm" hidden>
+      <div class="alarm__inner">
+        <h2 class="alarm__title">🎵 Good morning!</h2>
+        <div id="rar-lyrics" class="alarm__lyrics"></div>
+        <div class="alarm__actions">
+          <button id="rar-snooze-btn" class="btn" type="button">Snooze</button>
+          <button id="rar-stop" class="btn btn--primary" type="button">I'm up</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Footer injected by DOMContentLoaded in public/shared.js -->
