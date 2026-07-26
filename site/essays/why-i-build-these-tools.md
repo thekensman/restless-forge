@@ -1,6 +1,6 @@
 ---
 title: Why I Build These Tools
-description: Notes on why these tools are free and browser-only, and how the site pays for itself without collecting anything from you.
+description: Notes on why these tools are free and browser-first, and how the site pays for itself without collecting anything from you.
 date: 2026-07-18
 author: Ken
 ---
@@ -15,9 +15,9 @@ At some point the obvious question arrived: why was I running three tiny website
 
 ## Your files stay on your device
 
-Every tool on this site runs entirely in your browser. There are no backends. When you drop an image into [SandPath](/tools/sandpath/) or type a salary into [What Is My Time Worth?](/tools/what-is-my-time-worth/), the processing happens on your device and the data never leaves it. There is no server waiting on the other end. I never built one.
+Nearly every tool on this site runs entirely in your browser. When you drop an image into [SandPath](/tools/sandpath/) or type a salary into [What Is My Time Worth?](/tools/what-is-my-time-worth/), the processing happens on your device and the data never leaves it. For a long time there was no server waiting on the other end at all — I never built one. A small number of newer tools genuinely need one, and those wear a "Cloud-assisted" badge in the directory so the exception is visible before you click, with the tool's own privacy page spelling out exactly what is sent, to whom, and what is kept.
 
-This rule costs me features. Some things genuinely want heavy computation or a trained model, and when a feature can't be done honestly in the browser I would rather ship a manual control with a plain label than fake the capability by sending your data somewhere behind the scenes. What the rule buys is worth more than the features it costs: you don't have to trust me. The code is on [GitHub](https://github.com/thekensman/), and your browser's network tab tells the same story.
+The rule, updated but not softened: a tool is client-side unless it honestly can't be. Some things genuinely want heavy computation or a model on the other end, and when a feature can't be done in the browser I would rather ship a clearly-labeled cloud-assisted tool — or a plain manual control — than fake the capability by sending your data somewhere behind the scenes. What the rule buys is worth more than the features it costs: you don't have to trust me. The code is on [GitHub](https://github.com/thekensman/), and your browser's network tab tells the same story.
 
 ## How the ads work
 

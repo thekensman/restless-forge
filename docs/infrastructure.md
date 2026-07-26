@@ -9,7 +9,7 @@ state, so recovery is "make a new box and press deploy", not archaeology.
 | Thing | Value |
 |---|---|
 | Droplet | `sandpath-01` — 1 GB RAM / 25 GB disk, SFO2, Ubuntu 24.04 LTS |
-| Serves | nginx, static files only (no app processes) |
+| Serves | nginx (static files) + one app process: `restless-forge-api` (FastAPI/uvicorn on loopback :8000, proxied at `/api/` — see `docs/backend.md`) |
 | Web root | `/var/www/restless-forge` (rsynced by the Deploy workflow) |
 | Live vhost | `/etc/nginx/sites-available/restless-forge` (**no `.conf` suffix**), symlinked from `sites-enabled/` — deployed automatically by the Deploy workflow with `nginx -t` + rollback |
 | DNS / edge | Cloudflare in front of the droplet (orange-cloud proxy) |
@@ -19,7 +19,10 @@ state, so recovery is "make a new box and press deploy", not archaeology.
 ## What state lives where
 
 - **In the repo (recoverable by deploy):** all site content, tool builds,
-  the main nginx vhost, CI/CD, this runbook.
+  the backend service code + its systemd unit, the main nginx vhost,
+  CI/CD, this runbook. The deploy also recreates the backend venv
+  (`/opt/restless-forge/venv`) and bootstraps `/etc/restless-forge/api.env`
+  on a fresh box.
 - **On the droplet only (must exist for the site to work):**
   - Let's Encrypt certs + `/etc/letsencrypt/cloudflare.ini` (API token)
   - `/etc/nginx/sites-enabled/restless-forge` symlink
@@ -27,8 +30,14 @@ state, so recovery is "make a new box and press deploy", not archaeology.
     (sshd reads `/root/.ssh/...`, **not** `/home/root/...`)
   - Cloudflare-only firewall rules + `/etc/cron.daily/ip_refresh` (below)
   - legacy redirect vhosts
+  - `/etc/restless-forge/api.env` — backend secrets/knobs. Bootstrapped by
+    the FIRST deploy from the `ANTHROPIC_API_KEY` secret, then owned by
+    the server: later deploys never overwrite it, so key rotation and cap
+    changes are edits here + `systemctl restart restless-forge-api`.
+  - `/var/lib/restless-forge/` — backend SQLite state (rate limits, spend
+    log). Losing it resets rate limiting — annoying, not fatal.
 - **In GitHub secrets:** `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`,
-  `DEPLOY_PATH`.
+  `DEPLOY_PATH`, `ANTHROPIC_API_KEY` (first-deploy bootstrap only).
 
 ## Monitoring
 
@@ -157,8 +166,10 @@ From scratch (~30 min, needs: repo, Cloudflare login, DO login):
 5. `ln -s /etc/nginx/sites-available/restless-forge /etc/nginx/sites-enabled/`
    (the file itself arrives with the first deploy; `rm /etc/nginx/sites-enabled/default`).
 6. Update the `DEPLOY_HOST` secret if the IP changed; run **Deploy** from
-   the Actions tab (workflow_dispatch). It ships `dist/` + the vhost,
-   tests, reloads, and verifies.
+   the Actions tab (workflow_dispatch). It ships `dist/` + the backend
+   (installs python3-venv if missing, recreates the venv, systemd unit,
+   and `api.env` from the `ANTHROPIC_API_KEY` secret) + the vhost, tests,
+   reloads, and verifies.
 7. Re-apply the hardening checklist and the Cloudflare ipset firewall
    (commands above / below).
 
@@ -176,8 +187,11 @@ systemctl reload ssh
 
 ## Deliberate non-additions
 
-- **No backend / DB / containers** — every tool is client-side by design;
-  there is nothing to persist server-side.
+- **One minimal backend, no DB servers or containers** — tools are
+  client-side by design. The single exception is `restless-forge-api`
+  (FastAPI + a SQLite file, deployed by the same workflow, `docs/backend.md`)
+  for the few clearly-labeled cloud-assisted tools. Anything that would
+  need more server-side surface than that doesn't ship.
 - **No load balancer or second droplet** — static content, modest traffic,
   and a 30-minute from-scratch recovery make redundancy premature.
 - **No config management (Ansible etc.)** — the entire server-side surface

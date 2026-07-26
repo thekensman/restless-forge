@@ -7,7 +7,7 @@ author: Ken
 
 # How a Tool Gets Built
 
-Restless Forge currently hosts a handful of live tools and more than twenty in progress behind the scenes. That only works as a one-person operation because the path from idea to live-in-the-directory is the same every time. This is a walk through that machinery, for anyone curious how a small workshop keeps shipping browser-only software without drowning in maintenance.
+Restless Forge currently hosts a handful of live tools and more than twenty in progress behind the scenes. That only works as a one-person operation because the path from idea to live-in-the-directory is the same every time. This is a walk through that machinery, for anyone curious how a small workshop keeps shipping browser-first software without drowning in maintenance.
 
 ## Everything in one repository
 
@@ -19,7 +19,7 @@ The property that matters most is that the platform *discovers* tools instead of
 
 No tool starts from a blank folder. A scaffold script copies a maintained template, substitutes the new tool's name, dev port, and emoji, and installs dependencies. Thirty seconds later there is a running skeleton with the site's header and footer in place, a passing smoke test, and the metadata plumbing (favicons, social previews and so on) already wired.
 
-The template encodes the rule that defines the whole site: no backends. Every tool is TypeScript compiled to static files, doing its work with browser APIs. Canvas handles the image work; a Web Worker takes over when a loop gets heavy. If a feature can't be done client-side, it doesn't ship. The payoff runs in both directions: your files never leave your device, and my operational surface amounts to serving static files, which is about as calm as web operations get.
+The template encodes the rule that defines the whole site: client-side by default. Every tool is TypeScript compiled to static files, doing its work with browser APIs. Canvas handles the image work; a Web Worker takes over when a loop gets heavy. When a feature honestly can't be done client-side, it either doesn't ship or the tool moves to the site's one small API service and wears a "Cloud-assisted" badge that says so up front. The payoff still runs in both directions: for the browser-only majority your files never leave your device, and my operational surface stays a static file server plus one small service, which is about as calm as web operations get.
 
 ## Shared chrome
 

@@ -78,7 +78,17 @@ npm run dev
 | HoloPath | 5173 | `/tools/holopath/` |
 | SandPath | 5174 | `/tools/sandpath/` |
 
-All conversion is client-side — there are no backends to run.
+Almost every tool is fully client-side, with nothing else to run.
+Cloud-assisted tools (badged ☁ in the directory) call the small FastAPI
+service in `backend/` — run it locally with:
+
+```bash
+cd backend
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn main:app --reload --port 8000
+```
+
+Both dev servers proxy `/api` to it. See `docs/backend.md`.
 
 ### Build
 
@@ -104,7 +114,9 @@ sudo nginx -t && sudo systemctl reload nginx
 - **Frontend:** TypeScript, Vite, vanilla CSS (no frameworks)
 - **Server:** nginx, Let's Encrypt, Cloudflare
 - **Zero runtime npm dependencies** — all tools use native browser APIs
-- **Zero backends** — every tool runs entirely in the browser
+- **Client-side by default** — almost every tool runs entirely in the
+  browser; the few clearly-labeled ☁ Cloud-assisted tools use one small
+  FastAPI service (`backend/`, SQLite, no containers)
 
 ## Support
 
