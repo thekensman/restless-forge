@@ -136,6 +136,29 @@ def test_refusal_returns_error_not_crash(settings, monkeypatch):
     assert res.json()["status"] == "error"
 
 
+def test_app_construction_touches_no_filesystem(tmp_path, monkeypatch):
+    """Regression guard for the CI-only failure this suite once had.
+
+    Db used to create its directory in __init__, so building the app (which
+    main.py does at module scope) wrote to the *production* data path just by
+    being imported. That succeeded as root and raised PermissionError on any
+    unprivileged runner, breaking collection before a single test ran. App
+    construction must stay side-effect free; the store initializes on first use.
+    """
+    from config import Settings
+
+    unwritable = tmp_path / "never" / "created" / "api.db"
+    s = Settings()
+    s.db_path = str(unwritable)
+
+    app = main_module.create_app(s)  # must not raise, must not create anything
+    assert not unwritable.parent.exists()
+
+    # ...and the store still initializes itself the moment it is used.
+    TestClient(app).get("/api/v1/rise-and-rhyme/health")
+    assert unwritable.exists()
+
+
 def test_health(client):
     res = client.get("/api/v1/rise-and-rhyme/health")
     assert res.status_code == 200

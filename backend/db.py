@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import threading
 from contextlib import contextmanager
 from typing import Iterator
 
@@ -44,16 +45,44 @@ CREATE TABLE IF NOT EXISTS circuit (
 
 
 class Db:
+    """Lazily-initialized SQLite store.
+
+    Construction is deliberately side-effect free: the directory and schema
+    are created on FIRST USE, not at import/construction time. Creating them
+    in __init__ made `import main` (which builds the app at module scope)
+    touch the production data directory, so the test suite could only be
+    collected by a process allowed to write /var/lib/restless-forge — it
+    passed as root and failed everywhere else.
+    """
+
     def __init__(self, path: str):
         self.path = path
-        if path != ":memory:":
-            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with self.connect() as conn:
-            conn.executescript(SCHEMA)
-            conn.execute("INSERT OR IGNORE INTO circuit (id) VALUES (1)")
+        self._initialized = False
+        # Sync endpoints run in FastAPI's threadpool, so first-use
+        # initialization can be raced by concurrent requests.
+        self._init_lock = threading.Lock()
+
+    def _ensure_initialized(self) -> None:
+        if self._initialized:
+            return
+        with self._init_lock:
+            if self._initialized:  # another thread won the race
+                return
+            if self.path != ":memory:":
+                os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+            conn = sqlite3.connect(self.path, timeout=10)
+            try:
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.executescript(SCHEMA)
+                conn.execute("INSERT OR IGNORE INTO circuit (id) VALUES (1)")
+                conn.commit()
+            finally:
+                conn.close()
+            self._initialized = True
 
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
+        self._ensure_initialized()
         conn = sqlite3.connect(self.path, timeout=10)
         conn.row_factory = sqlite3.Row
         try:
