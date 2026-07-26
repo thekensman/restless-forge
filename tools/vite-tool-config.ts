@@ -27,9 +27,17 @@ export interface ToolConfigOptions {
   port: number;
   /** Absolute path to the tool's frontend/ directory (pass `__dirname`) */
   dir: string;
+  /**
+   * Optional dev-server proxy entries, merged into server.proxy. Used by
+   * cloud-assisted tools to reach the local backend when running the tool's
+   * own dev server (the root :8080 proxy has its own /api entry). Keep
+   * targets free of the literal strings `port:` / `base:` — scripts/tools.mjs
+   * regex-scans this file's callers for those keys.
+   */
+  proxy?: Record<string, string | { target: string; changeOrigin?: boolean }>;
 }
 
-export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
+export function defineToolConfig({ base, port, dir, proxy }: ToolConfigOptions) {
   const srcDir       = resolve(dir, "src");
   const publicDir    = resolve(dir, "public");
   // site/ lives three levels up from tools/<name>/frontend/
@@ -79,7 +87,7 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
       // with no TS modules — they are copied as-is by build.sh after the build.
       rollupOptions: { input: resolve(srcDir, "index.html") },
     },
-    server: { port },
+    server: { port, ...(proxy ? { proxy } : {}) },
     plugins: [
       {
         // Before Vite's HTML processor rebases absolute URLs, swap site-global
