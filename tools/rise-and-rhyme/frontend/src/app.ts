@@ -2,13 +2,16 @@
    v1 requires the tab to stay open overnight (documented in the UI). */
 
 import { generateSong } from "./api";
-import { moodForEvents, type Song } from "./engine";
+import { localDateString, localTimeZone, type Song } from "./engine";
 import { SongPlayer, listVoices } from "./audio";
-import { FALLBACK_JINGLE_ID } from "./tracks";
+import { FALLBACK_JINGLE_ID, FALLBACK_MOOD } from "./tracks";
 import {
   isDue,
+  lastAlarm,
+  lastGeneration,
   nextAlarm,
   nextGeneration,
+  occurrenceKey,
   snoozeUntil,
   type GenerationSlot,
 } from "./scheduler";
@@ -16,8 +19,10 @@ import {
   DEFAULT_PREFS,
   loadCachedSong,
   loadPrefs,
+  markFired,
   saveCachedSong,
   savePrefs,
+  wasFired,
   type CachedSong,
   type RiseAndRhymePrefs,
 } from "./storage";
@@ -27,8 +32,6 @@ const TICK_MS = 20_000;
 const player = new SongPlayer();
 let prefs: RiseAndRhymePrefs = loadPrefs();
 let snoozedUntil: Date | null = null;
-let firedAlarmFor: string | null = null; // alarm day already fired
-let requestedGenFor: string | null = null; // targetDate already requested this session
 let wakeLock: { release(): Promise<void> } | null = null;
 
 function $(id: string): HTMLElement {
@@ -90,7 +93,6 @@ function readForm(): RiseAndRhymePrefs {
 function onSave(): void {
   prefs = readForm();
   savePrefs(prefs);
-  firedAlarmFor = null;
   setStatus("Saved.");
   renderSchedule();
 }
@@ -129,7 +131,12 @@ async function generateFor(slot: GenerationSlot, manual: boolean): Promise<Cache
     return null;
   }
   setStatus(manual ? "Writing your song…" : "Generating tonight's song…");
-  const result = await generateSong(prefs.icalUrl, slot.targetDate, prefs.preferredGenre);
+  const result = await generateSong(
+    prefs.icalUrl,
+    slot.targetDate,
+    prefs.preferredGenre,
+    localTimeZone(),
+  );
   if (result.status === "ok") {
     const cached: CachedSong = { ...result.song, targetDate: slot.targetDate };
     saveCachedSong(cached);
@@ -147,7 +154,7 @@ function fallbackSong(targetDate: string): CachedSong {
   return {
     lyrics: ["Good morning! Your song didn't generate, but it's time to get up. Check your calendar for today's plan."],
     trackId: FALLBACK_JINGLE_ID,
-    mood: moodForEvents([]),
+    mood: FALLBACK_MOOD,
     eventCount: 0,
     generatedAt: new Date().toISOString(),
     cacheUntil: "",
@@ -232,11 +239,7 @@ async function onPreview(): Promise<void> {
     return;
   }
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const p = (n: number) => String(n).padStart(2, "0");
-  const slot: GenerationSlot = {
-    fireAt: now,
-    targetDate: `${tomorrow.getFullYear()}-${p(tomorrow.getMonth() + 1)}-${p(tomorrow.getDate())}`,
-  };
+  const slot: GenerationSlot = { fireAt: now, targetDate: localDateString(tomorrow) };
   const song = await generateFor(slot, true);
   await playSong(song ?? fallbackSong(slot.targetDate));
 }
@@ -255,22 +258,24 @@ async function tick(): Promise<void> {
     return;
   }
 
-  // Evening generation: look back slightly so a slot that just passed is seen.
-  const lookback = new Date(now.getTime() - TICK_MS * 2);
-  const gen = nextGeneration(lookback, prefs);
-  if (gen && isDue(gen.fireAt, now) && requestedGenFor !== gen.targetDate) {
-    requestedGenFor = gen.targetDate;
+  // Evening generation. Looking BACKWARD at the most recent slot (rather than
+  // forward from a narrow window) means a tab that was throttled or asleep at
+  // 22:00 still generates when it wakes, instead of silently skipping the night.
+  const gen = lastGeneration(now, prefs);
+  if (gen && isDue(gen.fireAt, now) && !wasFired("generation", gen.targetDate)) {
+    markFired("generation", gen.targetDate);
     await generateFor(gen, false);
   }
 
-  // Alarm firing
-  const alarm = nextAlarm(lookback, prefs);
+  // Alarm firing. The marker is persisted, so a reload can't re-fire an alarm
+  // that already went off, and a late tick still fires one that was missed.
+  const alarm = lastAlarm(now, prefs);
   if (alarm && isDue(alarm, now)) {
-    const dateKey = alarm.toDateString();
-    if (firedAlarmFor !== dateKey && $("rar-alarm").hidden) {
-      firedAlarmFor = dateKey;
+    const key = occurrenceKey(alarm);
+    if (!wasFired("alarm", key) && $("rar-alarm").hidden) {
+      markFired("alarm", key);
       const song = loadCachedSong(now);
-      await playSong(song ?? fallbackSong(dateKey));
+      await playSong(song ?? fallbackSong(localDateString(alarm)));
     }
   }
 }

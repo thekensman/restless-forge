@@ -4,8 +4,10 @@ import {
   clearCachedSong,
   loadCachedSong,
   loadPrefs,
+  markFired,
   saveCachedSong,
   savePrefs,
+  wasFired,
   type CachedSong,
 } from "../storage";
 
@@ -71,5 +73,31 @@ describe("cached song", () => {
     saveCachedSong(SONG);
     clearCachedSong();
     expect(loadCachedSong(new Date("2026-07-30T06:30:00Z"))).toBeNull();
+  });
+});
+
+describe("fired markers", () => {
+  it("remembers a fired occurrence across reloads", () => {
+    expect(wasFired("alarm", "2026-07-30T06:30")).toBe(false);
+    markFired("alarm", "2026-07-30T06:30");
+    expect(wasFired("alarm", "2026-07-30T06:30")).toBe(true);
+  });
+
+  it("does not suppress the next day's occurrence", () => {
+    markFired("alarm", "2026-07-30T06:30");
+    expect(wasFired("alarm", "2026-07-31T06:30")).toBe(false);
+  });
+
+  it("tracks alarm and generation independently", () => {
+    markFired("generation", "2026-07-30");
+    expect(wasFired("generation", "2026-07-30")).toBe(true);
+    expect(wasFired("alarm", "2026-07-30")).toBe(false);
+  });
+
+  it("survives corrupted storage", () => {
+    localStorage.setItem("rar:fired:v1", "{not json");
+    expect(wasFired("alarm", "x")).toBe(false);
+    markFired("alarm", "x");
+    expect(wasFired("alarm", "x")).toBe(true);
   });
 });

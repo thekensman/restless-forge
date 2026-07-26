@@ -1,6 +1,7 @@
 import json
 from datetime import date, datetime
 from types import SimpleNamespace
+from zoneinfo import ZoneInfo
 
 import anthropic
 import httpx
@@ -15,10 +16,11 @@ from services.lyric_generator import (
 )
 
 TARGET = date(2026, 7, 30)
+CHICAGO = ZoneInfo("America/Chicago")
 
 EVENTS = [
-    Event(summary="Standup", start=datetime(2026, 7, 30, 9, 0), end=None, all_day=False),
-    Event(summary="Dentist", start=datetime(2026, 7, 30, 14, 0), end=None, all_day=False),
+    Event(summary="Standup", start=datetime(2026, 7, 30, 9, 0, tzinfo=CHICAGO), end=None, all_day=False),
+    Event(summary="Dentist", start=datetime(2026, 7, 30, 14, 0, tzinfo=CHICAGO), end=None, all_day=False),
 ]
 
 
@@ -57,13 +59,19 @@ GOOD_JSON = json.dumps({
     "mood": "cheerful",
 })
 
+EXPECTED_COST = 500 / 1e6 * 5 + 300 / 1e6 * 25
+
 
 def test_prompt_includes_events_and_date():
     prompt = build_prompt(EVENTS, TARGET)
     assert "Thursday, July 30, 2026" in prompt
-    assert "09:00: Standup" in prompt
-    assert "14:00: Dentist" in prompt
+    assert "9:00 AM: Standup" in prompt
+    assert "2:00 PM: Dentist" in prompt
     assert "rhyming couplets" in prompt.lower()
+
+
+def test_prompt_states_times_are_local():
+    assert "local time" in build_prompt(EVENTS, TARGET)
 
 
 def test_format_events_empty():
@@ -71,18 +79,22 @@ def test_format_events_empty():
 
 
 def test_format_events_all_day():
-    e = Event(summary="Holiday", start=datetime(2026, 7, 30), end=None, all_day=True)
+    e = Event(summary="Holiday", start=datetime(2026, 7, 30, tzinfo=CHICAGO), end=None, all_day=True)
     assert "all day: Holiday" in format_events([e])
+
+
+def test_format_events_uses_twelve_hour_clock():
+    e = Event(summary="Midnight run", start=datetime(2026, 7, 30, 0, 5, tzinfo=CHICAGO), end=None, all_day=False)
+    assert "12:05 AM" in format_events([e])
 
 
 def test_successful_generation(settings):
     client = FakeClient(response=fake_response(GOOD_JSON))
-    result = generate_lyrics(EVENTS, TARGET, settings, client=client)
-    assert result is not None
-    assert len(result.lyrics) == 6
-    assert result.mood == "cheerful"
-    # Cost from usage at claude-opus-5 rates: 500/1M*5 + 300/1M*25
-    assert result.cost == pytest.approx(500 / 1e6 * 5 + 300 / 1e6 * 25)
+    outcome = generate_lyrics(EVENTS, TARGET, settings, client=client)
+    assert outcome.ok
+    assert len(outcome.lyrics) == 6
+    assert outcome.mood == "cheerful"
+    assert outcome.cost == pytest.approx(EXPECTED_COST)
     # Request shape: structured output + low effort, no sampling params.
     kwargs = client.last_kwargs
     assert kwargs["model"] == settings.claude_model
@@ -91,21 +103,26 @@ def test_successful_generation(settings):
     assert "temperature" not in kwargs
 
 
-def test_refusal_returns_none(settings):
+def test_refusal_reports_not_ok_but_still_reports_cost(settings):
+    """A refusal consumed billed tokens; dropping the cost hid real spend."""
     client = FakeClient(response=fake_response(text=None, stop_reason="refusal"))
-    assert generate_lyrics(EVENTS, TARGET, settings, client=client) is None
+    outcome = generate_lyrics(EVENTS, TARGET, settings, client=client)
+    assert not outcome.ok
+    assert outcome.cost == pytest.approx(EXPECTED_COST)
 
 
-def test_malformed_json_returns_none(settings):
+def test_malformed_json_reports_cost(settings):
     client = FakeClient(response=fake_response("this is not json"))
-    assert generate_lyrics(EVENTS, TARGET, settings, client=client) is None
+    outcome = generate_lyrics(EVENTS, TARGET, settings, client=client)
+    assert not outcome.ok
+    assert outcome.cost == pytest.approx(EXPECTED_COST)
 
 
-def test_bad_shape_returns_none(settings):
+def test_bad_shape_reports_not_ok(settings):
     client = FakeClient(response=fake_response(json.dumps({"lyrics": [], "mood": "cheerful"})))
-    assert generate_lyrics(EVENTS, TARGET, settings, client=client) is None
+    assert not generate_lyrics(EVENTS, TARGET, settings, client=client).ok
     client = FakeClient(response=fake_response(json.dumps({"lyrics": ["a"], "mood": "furious"})))
-    assert generate_lyrics(EVENTS, TARGET, settings, client=client) is None
+    assert not generate_lyrics(EVENTS, TARGET, settings, client=client).ok
 
 
 def test_api_error_raises_lyric_api_error(settings):

@@ -12,6 +12,10 @@ class GenerateRequest(BaseModel):
     ical_url: str = Field(min_length=12, max_length=2048)
     target_date: date
     preferred_genre: str = "any"
+    # IANA zone the target_date is expressed in. A calendar day is meaningless
+    # without one: expanding "2026-07-30" in UTC for a Chicago user silently
+    # drops their evening events and shifts every time in the lyrics.
+    timezone: str = Field(default="UTC", max_length=64)
 
 
 class GenerateOk(BaseModel):

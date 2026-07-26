@@ -12,6 +12,9 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=/opt/restless-forge/backend
+# Production state path. Set here rather than defaulted in code so a laptop or
+# CI box can never read or write real cost-control state.
+Environment=RF_DB_PATH=/var/lib/restless-forge/api.db
 EnvironmentFile=/etc/restless-forge/api.env
 ExecStart=/opt/restless-forge/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
 Restart=on-failure

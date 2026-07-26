@@ -78,8 +78,10 @@
       the next day, and sends them to the Anthropic Claude API to generate
       song lyrics. Event details are not stored after the lyrics are
       generated. The generated lyrics are returned to your browser and cached
-      there. Your iCal URL is stored as a SHA-256 hash for rate-limiting
-      purposes; the raw URL is not retained. Full details:
+      there. Your iCal URL and your IP address are stored only as SHA-256
+      hashes for rate-limiting purposes — neither is retained in raw form —
+      and both are deleted automatically once their rate-limit window closes.
+      Full details:
       <a href="/tools/rise-and-rhyme/privacy/">Rise &amp; Rhyme privacy</a>.
     </p>
 

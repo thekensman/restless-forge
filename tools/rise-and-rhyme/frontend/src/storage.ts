@@ -28,6 +28,7 @@ export const DEFAULT_PREFS: RiseAndRhymePrefs = {
 
 const PREFS_KEY = "rar:prefs:v1";
 const SONG_KEY = "rar:song:v1";
+const FIRED_KEY = "rar:fired:v1";
 
 function read(key: string): unknown {
   try {
@@ -95,6 +96,30 @@ export function clearCachedSong(): void {
   } catch {
     /* ignore */
   }
+}
+
+// ── Fired markers ──
+// Which alarm/generation occurrences have already been handled. Persisted
+// rather than held in memory so a reload doesn't re-fire an alarm that
+// already went off, and so a tab that was throttled or suspended can still
+// act on an occurrence it slept through without double-firing.
+
+interface FiredMarkers {
+  alarm?: string;
+  generation?: string;
+}
+
+function loadFired(): FiredMarkers {
+  const stored = read(FIRED_KEY);
+  return typeof stored === "object" && stored !== null ? (stored as FiredMarkers) : {};
+}
+
+export function wasFired(kind: keyof FiredMarkers, key: string): boolean {
+  return loadFired()[kind] === key;
+}
+
+export function markFired(kind: keyof FiredMarkers, key: string): void {
+  write(FIRED_KEY, { ...loadFired(), [kind]: key });
 }
 
 function numberOr(v: unknown, fallback: number): number {

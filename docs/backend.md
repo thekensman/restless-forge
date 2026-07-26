@@ -34,6 +34,27 @@ browser ──HTTPS──▶ Cloudflare ──▶ nginx (location ^~ /api/, rate
 | `POST /api/v1/rise-and-rhyme/generate` | iCal → Claude lyrics → track selection |
 | `GET /api/v1/rise-and-rhyme/health` | daily generation count, spend, circuit state |
 
+### Request contract
+
+```json
+{
+  "ical_url": "https://calendar.google.com/calendar/ical/.../basic.ics",
+  "target_date": "2026-07-30",
+  "timezone": "America/Chicago",
+  "preferred_genre": "any"
+}
+```
+
+**`timezone` is load-bearing, not decoration.** A calendar day only means
+something in a zone, and the browser is the only party that knows which one.
+Expanding `target_date` in UTC instead (the original behaviour) broke three
+things at once for anyone west of Greenwich: evening events fell into the next
+UTC day and vanished from the song, every time in the lyrics was shifted by the
+offset, and the response's `cache_until` — then a fixed 12:00Z — expired
+*before* the alarm, so US Pacific users always woke to the fallback jingle.
+The server now expands the day in the caller's zone, renders event times in it,
+and caches until local end-of-day. Unknown zones are rejected with a 400.
+
 ## Environment (`/etc/restless-forge/api.env`)
 
 Bootstrapped by the **first** deploy from the `ANTHROPIC_API_KEY` GitHub
@@ -48,7 +69,9 @@ of truth for ops changes.
 | `DAILY_GEN_CAP` | `500` | global generations/day |
 | `DAILY_SPEND_CAP` | `10.0` | USD/day hard stop |
 | `ALERT_WEBHOOK_URL` | empty | optional webhook for spend/circuit alerts (always logged regardless) |
-| `RF_DB_PATH` | `/var/lib/restless-forge/api.db` | SQLite location |
+| `RF_DB_PATH` | `backend/.data/api.db` (dev) | SQLite location. **Production sets this in the systemd unit** (`/var/lib/restless-forge/api.db`); the code default is deliberately local so a laptop or CI box can never touch real cost-control state. |
+| `GENERATION_LOG_RETENTION_DAYS` | `30` | How long the generation/cost log is kept |
+| `DAILY_STATS_RETENTION_DAYS` | `400` | How long per-day totals are kept |
 
 After editing: `systemctl restart restless-forge-api`.
 
@@ -57,7 +80,7 @@ After editing: `systemctl restart restless-forge-api`.
 | Control | Value |
 |---|---|
 | Per calendar URL (SHA-256 hash) | 1 generation / 12 h |
-| Per IP (`CF-Connecting-IP`) | 3 requests / h |
+| Per IP (SHA-256 of `CF-Connecting-IP`) | 3 requests / h |
 | Global daily generations | `DAILY_GEN_CAP` |
 | Global daily spend (from real response usage) | `DAILY_SPEND_CAP` |
 | Circuit breaker | 3 consecutive Claude API errors → 15 min cooldown |
@@ -65,6 +88,46 @@ After editing: `systemctl restart restless-forge-api`.
 | nginx layer | `limit_req` 10 r/min per CF-Connecting-IP, burst 5 |
 
 Worst-case monthly Claude spend is capped at ~`DAILY_SPEND_CAP × 31`.
+
+Two properties the limiter is responsible for, both of which were holes worth
+understanding before changing this code:
+
+- **Every billed attempt is charged to the caps.** A safety refusal or a
+  malformed model response still consumes billed tokens. An earlier version
+  recorded spend only on the success path, so those calls were invisible to the
+  daily cap *and* left no rate-limit trace — a calendar that reliably produced
+  unusable output could be retried indefinitely. Failures now record spend and
+  the per-IP counter; only the 12-hour per-calendar lock is released, so a
+  server-side problem doesn't cost the user their slot for the day.
+- **Reserving a slot is atomic.** Checking the limits and claiming the slot run
+  in a single `BEGIN IMMEDIATE` transaction. Sync endpoints run in FastAPI's
+  threadpool, so a check-then-record pair let two concurrent requests for the
+  same calendar both pass and both pay.
+
+## Data retention
+
+The SQLite file holds **cost-control state only** — no calendar contents, no
+lyrics, no raw URLs, no raw IP addresses:
+
+| Table | Contents | Retention |
+|---|---|---|
+| `rate_url` | SHA-256 of the calendar URL, timestamp | 12 h (the rate-limit window) |
+| `rate_ip` | SHA-256 of the client IP, timestamp | 1 h (the rate-limit window) |
+| `daily_stats` | date, generation count, spend | `DAILY_STATS_RETENTION_DAYS` (400) |
+| `generations` | timestamp, URL hash, cost, track, mood, event count, success | `GENERATION_LOG_RETENTION_DAYS` (30) |
+| `circuit` | one row: consecutive errors, cooldown expiry | permanent (single row) |
+
+Pruning is enforced by **SQLite triggers**, rebuilt on every start-up so a
+config change takes effect (`db.py::_prune_triggers`). Triggers rather than a
+cron job because they fire on every write path — including ones added later —
+and need nothing scheduled to keep working. `generations` is the only table
+that grows with traffic (up to `DAILY_GEN_CAP` rows/day), which is why it has
+the shortest meaningful retention; everything else is bounded by its window.
+
+Consequence worth knowing: expired rows disappear on the next write to that
+table, so a completely idle service can hold expired rows until traffic
+resumes. They are never *read* — every query filters by window — so this
+affects file size only, and only while nothing is happening.
 
 ## Deploy flow (automatic, `.github/workflows/deploy.yml`)
 
@@ -107,8 +170,8 @@ endpoint every 30 minutes and opens a `site-health` issue when it fails.
 ```bash
 cd backend
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-ANTHROPIC_API_KEY=sk-... RF_DB_PATH=/tmp/rf-api.db \
-  .venv/bin/uvicorn main:app --reload --port 8000
+ANTHROPIC_API_KEY=sk-... .venv/bin/uvicorn main:app --reload --port 8000
+# State lands in backend/.data/api.db (gitignored). Override with RF_DB_PATH.
 ```
 
 The root dev server (`npm run dev`, :8080) and rise-and-rhyme's own dev
@@ -118,8 +181,9 @@ mocked).
 
 ## Privacy posture (what this service must keep true)
 
-- Raw iCal URLs are **not** persisted — only SHA-256 hashes for rate
-  limiting, plus per-generation cost/track/mood/event-count logs.
+- Raw iCal URLs and raw IP addresses are **not** persisted — only SHA-256
+  hashes, each deleted automatically once its rate-limit window closes, plus
+  per-generation cost/track/mood/event-count logs.
 - Calendar event details are sent to the Claude API to write lyrics and
   are not stored after the response is returned.
 - The SSRF allowlist in `backend/services/ical_parser.py` restricts

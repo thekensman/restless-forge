@@ -18,6 +18,8 @@ your settings — runs entirely on your device.
 - **Your iCal URL**, when a song is generated. The server uses it to fetch
   your calendar feed and rejects URLs that don't belong to known calendar
   providers.
+- **Your timezone** (for example `America/Chicago`), so the song covers the
+  right calendar day and sings your events at the times you actually see.
 - Nothing else. No account, no cookies, no analytics from this tool.
 
 ## What Is Sent to Anthropic
@@ -28,13 +30,24 @@ your settings — runs entirely on your device.
 
 ## What the Server Keeps
 
+This is the complete list — nothing else about you is written to disk.
+
 - **A SHA-256 hash of your iCal URL** for rate limiting (one song per
   calendar every 12 hours). The raw URL is not retained after the generation
-  completes.
+  completes. Deleted automatically once the 12 hours are up.
+- **A SHA-256 hash of your IP address**, to limit how many songs one
+  connection can request per hour. The address itself is never written to
+  disk, and the hash is deleted automatically after one hour.
 - **Operational logs**: a timestamp, the hashed URL, the API cost, the chosen
-  track and mood, and the event count — no event titles, no lyrics.
-- Generated lyrics are returned to your browser and cached there; the server
-  does not keep them beyond the request.
+  track and mood, and the event count — no event titles, no lyrics, no
+  timezone. Kept for 30 days so an unexpected bill can be traced, then
+  deleted automatically.
+- **Daily totals** (number of songs and total API cost) so the service can
+  stop itself before it runs up a bill.
+
+Every one of those is removed by the database itself when it expires, so
+nothing accumulates over time. Generated lyrics are returned to your browser
+and cached there; the server does not keep them beyond the request.
 
 ## What Never Leaves Your Browser
 

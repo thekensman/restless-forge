@@ -23,7 +23,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     app = FastAPI(title="Restless Forge API", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.settings = settings
-    app.state.db = Db(settings.db_path)
+    app.state.db = Db(
+        settings.db_path,
+        url_window_sec=settings.url_window_sec,
+        ip_window_sec=settings.ip_window_sec,
+        generation_log_days=settings.generation_log_days,
+        daily_stats_days=settings.daily_stats_days,
+    )
     app.state.limiter = RateLimiter(app.state.db, settings)
     app.include_router(rise_and_rhyme_router)
     return app

@@ -1,7 +1,8 @@
 """Environment-driven configuration for the Restless Forge API.
 
-Every knob is an env var so the systemd unit's EnvironmentFile
-(/etc/restless-forge/api.env) is the single place ops values live.
+Every knob is an env var so the systemd unit (which sets RF_DB_PATH) and its
+EnvironmentFile (/etc/restless-forge/api.env, which holds the secrets) are the
+single place ops values live.
 """
 
 from __future__ import annotations
@@ -24,6 +25,12 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+# Dev-safe default: a file beside the code, NOT the production path. The
+# production location is set explicitly by the systemd unit, so nothing can
+# accidentally read or write real cost-control state from a laptop or a CI box.
+DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".data", "api.db")
+
+
 @dataclass
 class Settings:
     anthropic_api_key: str = field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", ""))
@@ -37,7 +44,7 @@ class Settings:
     daily_spend_cap: float = field(default_factory=lambda: _env_float("DAILY_SPEND_CAP", 10.0))
     alert_webhook_url: str = field(default_factory=lambda: os.getenv("ALERT_WEBHOOK_URL", ""))
 
-    db_path: str = field(default_factory=lambda: os.getenv("RF_DB_PATH", "/var/lib/restless-forge/api.db"))
+    db_path: str = field(default_factory=lambda: os.getenv("RF_DB_PATH", DEFAULT_DB_PATH))
 
     # Rate limiting windows
     url_window_sec: int = 12 * 3600  # 1 generation per iCal URL per 12 h
@@ -47,3 +54,8 @@ class Settings:
     # Circuit breaker: N consecutive Claude API errors -> cooldown
     circuit_error_threshold: int = 3
     circuit_cooldown_sec: int = 15 * 60
+
+    # Retention (see docs/backend.md § Data retention). Rate-limit rows are
+    # pruned as soon as their window closes; these cover the audit tables.
+    generation_log_days: int = field(default_factory=lambda: _env_int("GENERATION_LOG_RETENTION_DAYS", 30))
+    daily_stats_days: int = field(default_factory=lambda: _env_int("DAILY_STATS_RETENTION_DAYS", 400))

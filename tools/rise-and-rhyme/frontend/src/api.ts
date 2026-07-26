@@ -16,6 +16,7 @@ export async function generateSong(
   icalUrl: string,
   targetDate: string,
   preferredGenre: string,
+  timeZone: string,
 ): Promise<GenerateResult> {
   let res: Response;
   try {
@@ -26,6 +27,9 @@ export async function generateSong(
         ical_url: icalUrl,
         target_date: targetDate,
         preferred_genre: preferredGenre,
+        // Without this the server expands the day in UTC: evening events fall
+        // off the end, lyric times are wrong, and the song expires early.
+        timezone: timeZone,
       }),
     });
   } catch {

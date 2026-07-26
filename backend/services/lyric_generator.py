@@ -4,6 +4,11 @@ Model notes (claude-opus-5): thinking is on by default and counts toward
 max_tokens; sampling params (temperature/top_p/top_k) are rejected; a safety
 decline returns HTTP 200 with stop_reason == "refusal" — branch on it, don't
 expect an exception. Spend is computed from response usage, never estimated.
+
+The returned outcome ALWAYS carries the cost, including when the lyrics are
+unusable. A refusal or malformed response still consumed billed tokens, so
+the caller must be able to charge it against the daily cap; an earlier version
+returned None and silently dropped that spend.
 """
 
 from __future__ import annotations
@@ -11,7 +16,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 
 import anthropic
 
@@ -39,7 +44,7 @@ Rules:
 
 Also return a mood tag from: energetic, warm, groovy, smooth, cheerful, playful, bold
 
-Calendar events for {date}:
+Calendar events for {date} (times are the listener's local time):
 {events_formatted}"""
 
 OUTPUT_SCHEMA = {
@@ -62,20 +67,35 @@ class LyricApiError(Exception):
 
 
 @dataclass
-class LyricResult:
-    lyrics: list[str]
-    mood: str
+class LyricOutcome:
+    """Result of one Claude call. `cost` is always meaningful, even when the
+    lyrics are unusable, so failures still count against the spend cap."""
+
+    lyrics: list[str] | None
+    mood: str | None
     cost: float
+
+    @property
+    def ok(self) -> bool:
+        return self.lyrics is not None and self.mood is not None
+
+
+def _format_clock(dt: datetime) -> str:
+    """12-hour local time, e.g. '9:05 AM' — reads better in a lyric than 09:05.
+    Built by hand because %-I / %l are platform-specific."""
+    hour = dt.hour % 12 or 12
+    meridiem = "AM" if dt.hour < 12 else "PM"
+    return f"{hour}:{dt.minute:02d} {meridiem}"
 
 
 def format_events(events: list[Event]) -> str:
+    """Render events for the prompt. Starts are already in the listener's zone
+    (see ical_parser.events_for_date), so these are the times they will see."""
     if not events:
         return "(no events — a completely free day)"
-    lines = []
-    for e in events:
-        when = "all day" if e.all_day else e.start.strftime("%H:%M")
-        lines.append(f"- {when}: {e.summary}")
-    return "\n".join(lines)
+    return "\n".join(
+        f"- {'all day' if e.all_day else _format_clock(e.start)}: {e.summary}" for e in events
+    )
 
 
 def build_prompt(events: list[Event], target: date) -> str:
@@ -88,10 +108,13 @@ def generate_lyrics(
     target: date,
     settings: Settings,
     client: anthropic.Anthropic | None = None,
-) -> LyricResult | None:
-    """One Claude call. Returns None on refusal or malformed output (caller
-    serves the fallback); raises LyricApiError on API failures (caller feeds
-    the circuit breaker)."""
+) -> LyricOutcome:
+    """One Claude call.
+
+    Returns a LyricOutcome; `ok` is False on refusal or malformed output (the
+    caller serves the fallback) but `cost` is populated either way. Raises
+    LyricApiError on API failures so the caller can trip the circuit breaker.
+    """
     client = client or anthropic.Anthropic(api_key=settings.anthropic_api_key)
     try:
         response = client.messages.create(
@@ -112,28 +135,28 @@ def generate_lyrics(
 
     if getattr(response, "stop_reason", None) == "refusal":
         log.warning("Claude declined a lyric request (stop_reason=refusal)")
-        return None
+        return LyricOutcome(None, None, cost)
 
     text = _first_text_block(response)
     if text is None:
-        return None
+        return LyricOutcome(None, None, cost)
     try:
         data = json.loads(text)
     except (TypeError, ValueError):
         log.warning("Claude returned non-JSON lyric output")
-        return None
+        return LyricOutcome(None, None, cost)
 
     lyrics = data.get("lyrics") if isinstance(data, dict) else None
     mood = data.get("mood") if isinstance(data, dict) else None
     if (
         not isinstance(lyrics, list)
         or not (1 <= len(lyrics) <= 12)
-        or not all(isinstance(l, str) and l.strip() for l in lyrics)
+        or not all(isinstance(line, str) and line.strip() for line in lyrics)
         or mood not in MOODS
     ):
         log.warning("Claude returned malformed lyric JSON")
-        return None
-    return LyricResult(lyrics=[l.strip() for l in lyrics], mood=mood, cost=cost)
+        return LyricOutcome(None, None, cost)
+    return LyricOutcome([line.strip() for line in lyrics], mood, cost)
 
 
 def _first_text_block(response: object) -> str | None:

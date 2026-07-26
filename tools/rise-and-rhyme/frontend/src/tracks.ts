@@ -44,6 +44,9 @@ export const TRACKS: Record<Mood, MoodTracks> = {
 
 export const FALLBACK_JINGLE_ID = "fallback-jingle";
 
+/** Mood used for the fallback jingle, which has no mood of its own. */
+export const FALLBACK_MOOD: Mood = "warm";
+
 export function isMood(v: unknown): v is Mood {
   return typeof v === "string" && (MOODS as readonly string[]).includes(v);
 }
@@ -59,8 +62,6 @@ export function isKnownTrackId(trackId: string): boolean {
   return MOODS.some((m) => TRACKS[m].ids.includes(trackId));
 }
 
-/** Deterministic-enough local pick when the server didn't choose a track. */
-export function pickTrackId(mood: Mood, seed = Date.now()): string {
-  const ids = TRACKS[mood].ids;
-  return ids[Math.abs(seed) % ids.length];
-}
+// Track selection lives on the server (services/mood_mapper.py): it is seeded
+// per calendar AND per day so retries are idempotent without pinning a
+// calendar to one track forever.

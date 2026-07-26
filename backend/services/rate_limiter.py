@@ -1,8 +1,23 @@
 """Cost controls: per-URL / per-IP rate limits, global daily caps, spend
-tracking, circuit breaker, and alert notifications."""
+tracking, circuit breaker, and alert notifications.
+
+Two properties this module is responsible for, both learned the hard way:
+
+1. **Reservation is atomic.** Checking the limits and claiming the slot happen
+   inside one BEGIN IMMEDIATE transaction. Sync endpoints run in FastAPI's
+   threadpool, so a check-then-record pair would let two concurrent requests
+   for the same calendar both pass and both pay for a generation.
+
+2. **Every billed attempt is accounted for.** Spend and the per-IP counter are
+   recorded even when the generation ultimately fails (a refusal, or malformed
+   model output), because those calls still cost money. Only the 12-hour
+   per-calendar lock is released on failure, so a user isn't punished for a
+   server-side problem.
+"""
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import time
 from dataclasses import dataclass
@@ -28,16 +43,32 @@ def _today(now: float) -> str:
     return datetime.fromtimestamp(now, tz=timezone.utc).strftime("%Y-%m-%d")
 
 
+def hash_ip(ip: str) -> str:
+    """Store a hash rather than the raw address.
+
+    Rate limiting only needs equality, so the raw IP never has to touch the
+    disk. Pruned after the 1-hour window by a trigger (see db.py)."""
+    return hashlib.sha256(ip.encode()).hexdigest()
+
+
 class RateLimiter:
     def __init__(self, db: Db, settings: Settings):
         self.db = db
         self.s = settings
 
-    # ── Request gating ──
+    # ── Reservation ──
 
-    def check(self, url_hash: str, ip: str, now: Optional[float] = None) -> Optional[Denial]:
+    def reserve(self, url_hash: str, ip: str, now: Optional[float] = None) -> Optional[Denial]:
+        """Atomically check every limit and claim a generation slot.
+
+        Returns None when the caller may proceed (the slot is now claimed), or
+        a Denial explaining which limit stopped it. Callers that fail after
+        reserving should call release_url() so the calendar isn't locked out
+        for 12 hours because of a server-side failure.
+        """
         now = time.time() if now is None else now
-        with self.db.connect() as conn:
+        ip_hash = hash_ip(ip)
+        with self.db.connect(immediate=True) as conn:
             # Per-URL: 1 generation per 12 h
             row = conn.execute("SELECT last_ts FROM rate_url WHERE url_hash = ?", (url_hash,)).fetchone()
             if row is not None:
@@ -51,9 +82,8 @@ class RateLimiter:
 
             # Per-IP: N per rolling hour
             cutoff = now - self.s.ip_window_sec
-            conn.execute("DELETE FROM rate_ip WHERE ts < ?", (cutoff,))
             ip_count = conn.execute(
-                "SELECT COUNT(*) AS c FROM rate_ip WHERE ip = ? AND ts >= ?", (ip, cutoff)
+                "SELECT COUNT(*) AS c FROM rate_ip WHERE ip_hash = ? AND ts >= ?", (ip_hash, cutoff)
             ).fetchone()["c"]
             if ip_count >= self.s.ip_max_per_window:
                 return Denial(
@@ -67,37 +97,48 @@ class RateLimiter:
                 "SELECT count, spend FROM daily_stats WHERE date = ?", (_today(now),)
             ).fetchone()
             if stats is not None:
-                if stats["count"] >= self.s.daily_gen_cap:
+                if stats["count"] >= self.s.daily_gen_cap or stats["spend"] >= self.s.daily_spend_cap:
                     return Denial("capacity", "The forge is busy today. Try again tomorrow.")
-                if stats["spend"] >= self.s.daily_spend_cap:
-                    return Denial("capacity", "The forge is busy today. Try again tomorrow.")
-        return None
 
-    # ── Recording ──
-
-    def record_generation(
-        self,
-        url_hash: str,
-        ip: str,
-        cost: float,
-        track_id: str,
-        mood: str,
-        event_count: int,
-        now: Optional[float] = None,
-    ) -> None:
-        now = time.time() if now is None else now
-        today = _today(now)
-        with self.db.connect() as conn:
-            conn.execute(
-                "INSERT INTO generations (ts, url_hash, cost, track_id, mood, event_count) VALUES (?,?,?,?,?,?)",
-                (now, url_hash, cost, track_id, mood, event_count),
-            )
+            # Claim the slot inside the same transaction.
             conn.execute(
                 "INSERT INTO rate_url (url_hash, last_ts) VALUES (?, ?) "
                 "ON CONFLICT(url_hash) DO UPDATE SET last_ts = excluded.last_ts",
                 (url_hash, now),
             )
-            conn.execute("INSERT INTO rate_ip (ip, ts) VALUES (?, ?)", (ip, now))
+            conn.execute("INSERT INTO rate_ip (ip_hash, ts) VALUES (?, ?)", (ip_hash, now))
+        return None
+
+    def release_url(self, url_hash: str) -> None:
+        """Undo the per-calendar lock after a failed generation.
+
+        The per-IP counter and the recorded spend deliberately stay: the call
+        was made and it cost money, so it must keep counting against the caps.
+        """
+        with self.db.connect() as conn:
+            conn.execute("DELETE FROM rate_url WHERE url_hash = ?", (url_hash,))
+
+    # ── Recording ──
+
+    def record_attempt(
+        self,
+        url_hash: str,
+        cost: float,
+        track_id: str,
+        mood: str,
+        event_count: int,
+        succeeded: bool,
+        now: Optional[float] = None,
+    ) -> None:
+        """Log a generation attempt and its cost. Called for billed failures too."""
+        now = time.time() if now is None else now
+        today = _today(now)
+        with self.db.connect() as conn:
+            conn.execute(
+                "INSERT INTO generations (ts, url_hash, cost, track_id, mood, event_count, succeeded) "
+                "VALUES (?,?,?,?,?,?,?)",
+                (now, url_hash, cost, track_id, mood, event_count, 1 if succeeded else 0),
+            )
             conn.execute(
                 "INSERT INTO daily_stats (date, count, spend) VALUES (?, 1, ?) "
                 "ON CONFLICT(date) DO UPDATE SET count = count + 1, spend = spend + excluded.spend",
@@ -126,7 +167,7 @@ class RateLimiter:
 
     def record_api_error(self, now: Optional[float] = None) -> None:
         now = time.time() if now is None else now
-        with self.db.connect() as conn:
+        with self.db.connect(immediate=True) as conn:
             errors = conn.execute(
                 "SELECT consecutive_errors FROM circuit WHERE id = 1"
             ).fetchone()["consecutive_errors"] + 1
@@ -138,7 +179,10 @@ class RateLimiter:
                 (errors, open_until),
             )
         if open_until:
-            self._notify(f"Circuit breaker OPEN for {self.s.circuit_cooldown_sec // 60} min after {errors} consecutive Claude API errors")
+            self._notify(
+                f"Circuit breaker OPEN for {self.s.circuit_cooldown_sec // 60} min "
+                f"after {errors} consecutive Claude API errors"
+            )
 
     def record_api_success(self) -> None:
         with self.db.connect() as conn:
@@ -152,7 +196,8 @@ class RateLimiter:
             threshold = self.s.daily_spend_cap * fraction
             if spend_total >= threshold > spend_total - last_cost:
                 self._notify(
-                    f"Daily Claude spend crossed {label} of cap: ${spend_total:.2f} / ${self.s.daily_spend_cap:.2f}"
+                    f"Daily Claude spend crossed {label} of cap: "
+                    f"${spend_total:.2f} / ${self.s.daily_spend_cap:.2f}"
                 )
                 break
 
