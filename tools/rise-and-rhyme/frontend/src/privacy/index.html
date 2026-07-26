@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>Privacy — Rise &amp; Rhyme</title>
+  <meta name="description" content="What Rise &amp; Rhyme sends to the server, and what never leaves your browser.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/privacy/">
+  <link rel="icon" type="image/svg+xml" href="/tools/rise-and-rhyme/favicon.svg">
+  <link rel="icon" href="/tools/rise-and-rhyme/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/rise-and-rhyme/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/rise-and-rhyme/site.webmanifest">
+  <meta property="og:title" content="Privacy — Rise &amp; Rhyme">
+  <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/privacy/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/rise-and-rhyme/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/rise-and-rhyme/shared.js"></script>
+</head>
+<body>
+  <!-- Header auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-header"></div>
+
+  <main>
+    <!-- Prose lives in the sibling index.md (docs/authoring-content.md).
+         Fills on the first `npm run sync-content` after scaffolding. -->
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<h1>Rise &amp; Rhyme Privacy</h1>
+<p>What leaves your browser, what doesn&#39;t, and what the server keeps.</p>
+<h2>The Short Version</h2>
+<p>Rise &amp; Rhyme is a <strong>cloud-assisted</strong> tool — unlike most Restless Forge tools,
+one part of it runs on a server. Once per generation (normally the evening
+before your alarm), your browser sends your Google Calendar public iCal URL to
+the Restless Forge server. The server fetches that feed, extracts the next
+day&#39;s event titles and times, and sends them to the <strong>Anthropic Claude API</strong>
+to write your song&#39;s lyrics. The finished lyrics come back to your browser.
+Everything else — the alarm, the music, the text-to-speech voice, and all of
+your settings — runs entirely on your device.</p>
+<h2>What Is Sent to the Server</h2>
+<ul>
+<li><strong>Your iCal URL</strong>, when a song is generated. The server uses it to fetch
+your calendar feed and rejects URLs that don&#39;t belong to known calendar
+providers.</li>
+<li>Nothing else. No account, no cookies, no analytics from this tool.</li>
+</ul>
+<h2>What Is Sent to Anthropic</h2>
+<ul>
+<li><strong>Tomorrow&#39;s event titles and times</strong> from your calendar feed, formatted
+into a lyric-writing prompt for the Claude API. Anthropic processes this
+under its own <a target="_blank" rel="noopener" href="https://www.anthropic.com/legal/privacy">privacy policy</a>.</li>
+</ul>
+<h2>What the Server Keeps</h2>
+<ul>
+<li><strong>A SHA-256 hash of your iCal URL</strong> for rate limiting (one song per
+calendar every 12 hours). The raw URL is not retained after the generation
+completes.</li>
+<li><strong>Operational logs</strong>: a timestamp, the hashed URL, the API cost, the chosen
+track and mood, and the event count — no event titles, no lyrics.</li>
+<li>Generated lyrics are returned to your browser and cached there; the server
+does not keep them beyond the request.</li>
+</ul>
+<h2>What Never Leaves Your Browser</h2>
+<ul>
+<li>Your alarm time, days, snooze, volume, voice, and music-style preferences
+(localStorage).</li>
+<li>The generated song cache used to play your alarm.</li>
+<li>All audio playback and speech synthesis.</li>
+</ul>
+<h2>Your Calendar URL Is a Secret</h2>
+<p>A Google Calendar &quot;secret address&quot; grants read access to that calendar. Rise &amp;
+Rhyme stores it only in your browser&#39;s localStorage. You can revoke it at any
+time from Google Calendar&#39;s settings (&quot;Reset&quot; next to the secret address),
+which invalidates the old URL everywhere.</p>
+<h2>Advertising</h2>
+<p>Restless Forge pages use Google AdSense; see the site-wide
+<a href="/privacy">Privacy Policy</a> for how ad cookies work and how to opt out.</p>
+<h2>Contact</h2>
+<p>Questions about this policy: <a target="_blank" rel="noopener" href="https://github.com/thekensman/restless-forge/issues">GitHub Issues</a>
+or the <a href="/contact">contact page</a>.</p>
+<!-- /generated:content -->
+  </main>
+
+  <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-footer"></div>
+</body>
+</html>

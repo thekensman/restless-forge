@@ -24,11 +24,14 @@
   var navLinks = [
     [base + '/', 'Rise &amp; Rhyme'],
     [base + '/about/', 'About'],
+    [base + '/faq/', 'FAQ'],
   ];
 
   var footerLinks = [
     [base + '/', 'Rise &amp; Rhyme'],
     [base + '/about/', 'About'],
+    [base + '/faq/', 'FAQ'],
+    [base + '/privacy/', 'Privacy'],
   ];
 
   var chrome = window.rfMountToolChrome({
