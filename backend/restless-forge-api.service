@@ -1,0 +1,28 @@
+# Restless Forge API — systemd unit.
+# Installed to /etc/systemd/system/ by the Deploy workflow.
+# Secrets live in /etc/restless-forge/api.env (created once by the deploy,
+# never overwritten): ANTHROPIC_API_KEY plus optional CLAUDE_MODEL,
+# DAILY_GEN_CAP, DAILY_SPEND_CAP, ALERT_WEBHOOK_URL, RF_DB_PATH.
+
+[Unit]
+Description=Restless Forge API
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/restless-forge/backend
+EnvironmentFile=/etc/restless-forge/api.env
+ExecStart=/opt/restless-forge/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5
+
+# Hardening: the service only needs to write its SQLite state dir.
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ReadWritePaths=/var/lib/restless-forge
+
+[Install]
+WantedBy=multi-user.target
