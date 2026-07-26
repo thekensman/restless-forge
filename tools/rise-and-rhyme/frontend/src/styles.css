@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════════════════
+   Rise and Rhyme — Main app styles (Vite-processed)
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* Tool theme tokens — override the defaults here. */
+  --bg: #0b0d12;
+  --text: #d8d4cc;
+  --text-muted: #7a7770;
+  --text-dim: #4a4840;
+  --accent: #d4a44e;
+  --border: #252a35;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text);
+  --rf-muted: var(--text-muted);
+  --rf-dim: var(--text-dim);
+  --rf-accent: var(--accent);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-mono);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+/* Footer outer container; everything inside comes from tool-chrome.css. */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 24px;
+  text-align: center;
+}

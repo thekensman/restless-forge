@@ -83,6 +83,8 @@
       desc: 'ATS-friendly resume builder with a free keyword check against any job description. No account, no dark patterns.' },
     { id: 'forgeimage', label: 'ForgeImage', category: 'Creative', status: 'soon',
       desc: 'Resize, crop, brush out details, convert, compress, and generate social-media sizes — the six image jobs you actually need, with no uploads.' },
+    { id: 'rise-and-rhyme', label: 'Rise &amp; Rhyme', category: 'Lifestyle', status: 'soon', tier: 'cloud',
+      desc: 'Wake up to an AI song about your day. Reads your calendar, writes lyrics, plays them over music.' },
   ];
 
   /**
@@ -98,7 +100,11 @@
     var soonCount = window.rfTools.length - live.length;
 
     function card(t) {
-      return '<div class="tool-card">' +
+      // tier: 'cloud' marks the few tools that use server-side processing;
+      // they get a badge so the browser-only default stays visibly the norm.
+      var cloud = t.tier === 'cloud';
+      return '<div class="tool-card' + (cloud ? ' tool-card--cloud' : '') + '">' +
+        (cloud ? '<span class="tool-card__badge">&#9729; Cloud-assisted</span>' : '') +
         '<div class="tool-card__category">' + t.category + '</div>' +
         '<h3 class="tool-card__title">' + t.label + '</h3>' +
         '<p class="tool-card__desc">' + t.desc + '</p>' +

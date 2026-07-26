@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>Rise &amp; Rhyme — Restless Forge</title>
+  <meta name="description" content="TODO: page description">
+  <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Rise &amp; Rhyme">
+  <meta property="og:description" content="TODO: OG description">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/rise-and-rhyme/favicon.svg">
+  <link rel="icon" href="/tools/rise-and-rhyme/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/rise-and-rhyme/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/rise-and-rhyme/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Rise & Rhyme",
+    "url": "https://restless-forge.dev/tools/rise-and-rhyme",
+    "description": "TODO",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/rise-and-rhyme/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-header"></div>
+
+  <main>
+    <h1>Rise &amp; Rhyme</h1>
+    <p>TODO: tool UI</p>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>
