@@ -52,6 +52,17 @@ jobs:
             *) note "favicon.ico Cache-Control is '$cc' (expected max-age=86400) — deployed nginx vhost may not be live" ;;
           esac
 
+          # Backend API health (the only watcher of the uvicorn process —
+          # a dead service would otherwise go unnoticed until an alarm
+          # morning). Deployed by the same Deploy run that ships this file,
+          # so the endpoint exists whenever this check runs from main.
+          api=$(curl -sf --max-time 15 https://restless-forge.dev/api/v1/rise-and-rhyme/health || true)
+          if [ -z "$api" ]; then
+            note "Backend API /api/v1/rise-and-rhyme/health not reachable — check 'systemctl status restless-forge-api' on the droplet (runbook: docs/backend.md)"
+          elif ! echo "$api" | grep -q '"status"'; then
+            note "Backend API health returned unexpected content: $api"
+          fi
+
           # TLS cert ≥ 14 days remaining
           end=$(echo | openssl s_client -servername restless-forge.dev \
                   -connect restless-forge.dev:443 2>/dev/null \

@@ -10,8 +10,14 @@ name: Deploy
 #                   append deploy_key.pub to ~/.ssh/authorized_keys on the
 #                   VPS, paste deploy_key here.
 #   DEPLOY_PATH     Web root, e.g. /var/www/restless-forge
+#   ANTHROPIC_API_KEY  Claude API key for the backend service. Written to
+#                   /etc/restless-forge/api.env on the FIRST deploy only —
+#                   the file is never overwritten, so key rotation and other
+#                   ops edits happen on the server, not in this workflow.
 #
-# Deploys static files AND the main nginx vhost. Static files are served
+# Deploys static files, the backend API (backend/ → /opt/restless-forge,
+# outside the web root, with venv refresh + systemd restart), AND the main
+# nginx vhost. Static files are served
 # immediately with no reload; the nginx config is copied to
 # /etc/nginx/sites-available/restless-forge (the live vhost name — no
 # .conf suffix), validated with `nginx -t`, and only then reloaded. If
@@ -49,6 +55,7 @@ jobs:
           [ -z "${{ secrets.DEPLOY_USER }}" ]    && missing="$missing DEPLOY_USER"
           [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ] && missing="$missing DEPLOY_SSH_KEY"
           [ -z "${{ secrets.DEPLOY_PATH }}" ]    && missing="$missing DEPLOY_PATH"
+          [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ] && missing="$missing ANTHROPIC_API_KEY"
           if [ -n "$missing" ]; then
             echo "::error::Deploy secrets not visible to this workflow:$missing"
             echo "::error::Add them under Settings → Secrets and variables → Actions as Repository secrets, or as Environment secrets on an environment named 'production'."
@@ -68,6 +75,17 @@ jobs:
 
       - name: Run all tool test suites
         run: npm test
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Run backend test suite
+        run: |
+          pip install -r backend/requirements.txt
+          python -m pytest backend/tests -q
 
       - name: Set up SSH
         run: |
@@ -112,6 +130,85 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key" \
             dist/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/"
 
+      # Backend API: code to /opt/restless-forge/backend (OUTSIDE the web
+      # root, so the dist rsync's --delete never touches it and nginx never
+      # serves .py files), venv refresh, env-file bootstrap (first deploy
+      # only — never overwritten), systemd unit install, restart, and a
+      # local health check that fails the workflow loudly if the service
+      # doesn't come up. The static site is unaffected by a backend failure.
+      - name: Deploy backend API
+        run: |
+          rsync -az --delete \
+            --exclude '.venv' --exclude '__pycache__' --exclude '*.pyc' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            backend/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/restless-forge/backend/"
+
+          # Env file shipped separately and installed only if missing, so
+          # the key never appears on a remote command line and server-side
+          # ops edits (key rotation, cap changes) survive every deploy.
+          umask 077
+          printf 'ANTHROPIC_API_KEY=%s\n' "${{ secrets.ANTHROPIC_API_KEY }}" > /tmp/rf-api-incoming.env
+          scp -i ~/.ssh/deploy_key /tmp/rf-api-incoming.env \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/rf-api-incoming.env"
+          rm -f /tmp/rf-api-incoming.env
+
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" bash -s <<'REMOTE'
+          set -euo pipefail
+
+          # Python + venv (Ubuntu 24.04 ships python3, but venv is a package)
+          if ! python3 -m venv --help >/dev/null 2>&1; then
+            apt-get update -qq && apt-get install -y -qq python3-venv
+          fi
+          if [ ! -x /opt/restless-forge/venv/bin/pip ]; then
+            python3 -m venv /opt/restless-forge/venv
+          fi
+          /opt/restless-forge/venv/bin/pip install --quiet -r /opt/restless-forge/backend/requirements.txt
+
+          # Secrets/env: first deploy only — NEVER overwrite an existing file.
+          mkdir -p /etc/restless-forge
+          if [ -f /etc/restless-forge/api.env ]; then
+            rm -f /tmp/rf-api-incoming.env
+            echo "api.env already present — left untouched"
+          else
+            mv /tmp/rf-api-incoming.env /etc/restless-forge/api.env
+            chown root:www-data /etc/restless-forge/api.env
+            chmod 640 /etc/restless-forge/api.env
+            echo "api.env installed"
+          fi
+
+          # SQLite state dir (survives deploys; outside the rsync targets)
+          mkdir -p /var/lib/restless-forge
+          chown www-data:www-data /var/lib/restless-forge
+
+          # systemd unit: skip if unchanged, else install + daemon-reload
+          UNIT_SRC=/opt/restless-forge/backend/restless-forge-api.service
+          UNIT_DST=/etc/systemd/system/restless-forge-api.service
+          if [ ! -f "$UNIT_DST" ] || ! cmp -s "$UNIT_SRC" "$UNIT_DST"; then
+            cp "$UNIT_SRC" "$UNIT_DST"
+            systemctl daemon-reload
+            echo "systemd unit installed/updated"
+          fi
+          systemctl enable --now restless-forge-api >/dev/null 2>&1 || true
+          systemctl restart restless-forge-api
+
+          # Local health check — fail loudly if the service didn't come up.
+          ok=""
+          for i in 1 2 3 4 5; do
+            sleep 2
+            if curl -sf http://127.0.0.1:8000/api/v1/rise-and-rhyme/health >/dev/null; then
+              ok=1; break
+            fi
+          done
+          if [ -z "$ok" ]; then
+            echo "::error::backend health check FAILED after restart — static site is unaffected, but /api is down"
+            systemctl --no-pager -l status restless-forge-api || true
+            journalctl -u restless-forge-api -n 40 --no-pager || true
+            exit 1
+          fi
+          echo "backend healthy"
+          REMOTE
+
       # Ship the main vhost config with the same safety net an operator
       # would use by hand: skip if unchanged, back up, `nginx -t`, reload
       # only on a clean test, restore the backup on failure.
@@ -152,6 +249,14 @@ jobs:
       - name: Verify deploy
         run: |
           curl -sf -o /dev/null https://restless-forge.dev/ && echo "homepage OK"
+
+          # ── Backend API through nginx + Cloudflare ──
+          if curl -sf https://restless-forge.dev/api/v1/rise-and-rhyme/health | grep -q '"status"'; then
+            echo "api health OK"
+          else
+            echo "::error::/api/v1/rise-and-rhyme/health is not reachable through the public URL (backend or nginx /api/ location problem)"
+            exit 1
+          fi
 
           # ── Content freshness: served bytes must equal what we shipped ──
           # Catches every stale-cache layer at once (CDN, proxy, stale web
