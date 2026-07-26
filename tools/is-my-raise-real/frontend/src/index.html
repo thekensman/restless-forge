@@ -261,6 +261,7 @@ select option { background: var(--bg-card); color: var(--text); }
   <link rel="icon" href="/tools/is-my-raise-real/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/tools/is-my-raise-real/apple-touch-icon.png">
   <link rel="manifest" href="/tools/is-my-raise-real/site.webmanifest">
+  <script src="/shared.js"></script>
 </head>
 <body>
   <header class="header">
@@ -438,20 +439,20 @@ select option { background: var(--bg-card); color: var(--text); }
       <h2 class="about__title">Why This Calculator Exists</h2>
       <p class="about__text">Most people hear "3% raise" and feel good about it. They shouldn't — not without checking what inflation did that year. A raise that doesn't beat inflation is a pay cut wearing a congratulations card. This tool does the math your employer hopes you won't.</p>
       <p class="about__text">The Salary Erosion tab is the one that hurts. It shows the cumulative gap between what you earn and what you'd need to have the same buying power as the day you were hired. For many people, that gap is tens of thousands of dollars.</p>
-      <p class="about__text about__text--dim">CPI data from the U.S. Bureau of Labor Statistics. Built by <a href="https://stygnus.substack.com" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser. Nothing is sent anywhere.</p>
-      <p class="about__text about__text--dim">If this tool changed how you see your next review, <a href="https://ko-fi.com/stygnus" target="_blank" rel="noopener">a coffee helps keep it free and ad-light</a>.</p>
+      <p class="about__text about__text--dim">CPI data from the U.S. Bureau of Labor Statistics. Built by <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser. Nothing is sent anywhere.</p>
+      <p class="about__text about__text--dim">If this tool changed how you see your next review, <a data-rf-link="kofi" target="_blank" rel="noopener">a coffee helps keep it free and ad-light</a>.</p>
     </section>
   </main>
 
   <footer class="footer">
     <div class="footer__links">
-      <a class="footer__link footer__link--heart" href="https://ko-fi.com/stygnus" target="_blank" rel="noopener">
+      <a class="footer__link footer__link--heart" data-rf-link="kofi" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         Ko-fi
       </a>
-      <a class="footer__link" href="https://buymeacoffee.com/stygnus" target="_blank" rel="noopener">Buy Me a Coffee</a>
-      <a class="footer__link" href="https://stygnus.substack.com" target="_blank" rel="noopener">Substack</a>
-      <a class="footer__link" href="https://github.com/thekensman" target="_blank" rel="noopener">GitHub</a>
+      <a class="footer__link" data-rf-link="bmc" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" data-rf-link="substack" target="_blank" rel="noopener">Substack</a>
+      <a class="footer__link" data-rf-link="github" target="_blank" rel="noopener">GitHub</a>
     </div>
     <p class="footer__copy">&copy; 2026 Is My Raise Real? — Your numbers, your browser, your leverage.</p>
     <p class="forge-link">Part of <a href="https://restless-forge.dev" target="_blank" rel="noopener">Restless Forge</a> — free browser-only tools, no signup. <a href="/tools/what-is-my-time-worth/">Know your real hourly wage &rarr;</a></p>
