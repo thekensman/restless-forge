@@ -5,19 +5,20 @@ What leaves your browser, what doesn't, and what the server keeps.
 ## The Short Version
 
 Rise & Rhyme is a **cloud-assisted** tool — unlike most Restless Forge tools,
-one part of it runs on a server. Once per generation (normally the evening
-before your alarm), your browser sends your Google Calendar public iCal URL to
-the Restless Forge server. The server fetches that feed, extracts the next
-day's event titles and times, and sends them to the **Anthropic Claude API**
-to write your song's lyrics. The finished lyrics come back to your browser.
+one part of it runs on a server. Your browser sends your Google Calendar public
+iCal URL to the Restless Forge server when a song is generated (normally the
+evening before your alarm) and when you press **Check my calendar**. The server
+fetches that feed and extracts the next day's event titles and times. To write
+a song it sends those on to the **Anthropic Claude API**, and the finished
+lyrics come back to your browser; a calendar check stops before that step.
 Everything else — the alarm, the music, the text-to-speech voice, and all of
 your settings — runs entirely on your device.
 
 ## What Is Sent to the Server
 
-- **Your iCal URL**, when a song is generated. The server uses it to fetch
-  your calendar feed and rejects URLs that don't belong to known calendar
-  providers.
+- **Your iCal URL**, when a song is generated or when you check your calendar.
+  The server uses it to fetch your calendar feed and rejects URLs that don't
+  belong to known calendar providers.
 - **Your timezone** (for example `America/Chicago`), so the song covers the
   right calendar day and sings your events at the times you actually see.
 - Nothing else. No account, no cookies, no analytics from this tool.
@@ -36,8 +37,9 @@ This is the complete list — nothing else about you is written to disk.
   calendar every 12 hours). The raw URL is not retained after the generation
   completes. Deleted automatically once the 12 hours are up.
 - **A SHA-256 hash of your IP address**, to limit how many songs one
-  connection can request per hour. The address itself is never written to
-  disk, and the hash is deleted automatically after one hour.
+  connection can request per hour, and a second hash for the same purpose on
+  calendar checks. The address itself is never written to disk, and both
+  hashes are deleted automatically after one hour.
 - **Operational logs**: a timestamp, the hashed URL, the API cost, the chosen
   track and mood, and the event count — no event titles, no lyrics, no
   timezone. Kept for 30 days so an unexpected bill can be traced, then
@@ -48,6 +50,13 @@ This is the complete list — nothing else about you is written to disk.
 Every one of those is removed by the database itself when it expires, so
 nothing accumulates over time. Generated lyrics are returned to your browser
 and cached there; the server does not keep them beyond the request.
+
+## Checking Your Calendar
+
+**Check my calendar** reads your feed and shows the events the song will cover,
+along with the timezone it detected. It never calls the AI model, so nothing is
+sent to Anthropic and nothing is generated — it exists so you can confirm the
+URL and timezone are right before a song is written.
 
 ## What Never Leaves Your Browser
 

@@ -32,6 +32,7 @@ browser ──HTTPS──▶ Cloudflare ──▶ nginx (location ^~ /api/, rate
 | Endpoint | Purpose |
 |---|---|
 | `POST /api/v1/rise-and-rhyme/generate` | iCal → Claude lyrics → track selection |
+| `POST /api/v1/rise-and-rhyme/preview` | iCal → event list + mood. **No model call, no cost.** |
 | `GET /api/v1/rise-and-rhyme/health` | daily generation count, spend, circuit state |
 
 ### Request contract
@@ -55,6 +56,40 @@ offset, and the response's `cache_until` — then a fixed 12:00Z — expired
 The server now expands the day in the caller's zone, renders event times in it,
 and caches until local end-of-day. Unknown zones are rejected with a 400.
 
+### Preview (`POST /preview`)
+
+Same request shape as `generate`. Returns what the song will be about instead
+of writing it:
+
+```json
+{
+  "status": "ok",
+  "target_date": "2026-07-30",
+  "timezone": "America/Chicago",
+  "event_count": 3,
+  "truncated": false,
+  "mood": "smooth",
+  "events": [{ "time": "7:00 AM", "summary": "Standup", "all_day": false }]
+}
+```
+
+It exists so someone can confirm their iCal URL works — and, more importantly,
+that the detected timezone is right — without spending the one generation that
+calendar gets per day. Design constraints, all covered by tests in
+`backend/tests/test_preview.py`:
+
+- **Stops before Claude.** It reuses the calendar read and the same mood
+  heuristic the generator uses, so the preview shows the mood the song would
+  actually get. Nothing is billed, and `generations` / `daily_stats` /
+  `rate_url` are untouched.
+- **Its own rate bucket** (`rate_preview_ip`, `PREVIEW_MAX_PER_HOUR`, default
+  10/hour). Sharing the generate bucket would mean three previews locked you
+  out of the song you were previewing.
+- **Same SSRF posture** — identical allowlist, private-IP screen, and streaming
+  size cap, because it is the same attacker-controlled fetch.
+- **Bounded response** — at most 12 events and 200 characters per summary;
+  `truncated` tells the UI to say "plus N more".
+
 ## Environment (`/etc/restless-forge/api.env`)
 
 Bootstrapped by the **first** deploy from the `ANTHROPIC_API_KEY` GitHub
@@ -69,6 +104,7 @@ of truth for ops changes.
 | `DAILY_GEN_CAP` | `500` | global generations/day |
 | `DAILY_SPEND_CAP` | `10.0` | USD/day hard stop |
 | `ALERT_WEBHOOK_URL` | empty | optional webhook for spend/circuit alerts (always logged regardless) |
+| `PREVIEW_MAX_PER_HOUR` | `10` | Calendar previews per IP per hour (separate from the generate budget) |
 | `RF_DB_PATH` | `backend/.data/api.db` (dev) | SQLite location. **Production sets this in the systemd unit** (`/var/lib/restless-forge/api.db`); the code default is deliberately local so a laptop or CI box can never touch real cost-control state. |
 | `GENERATION_LOG_RETENTION_DAYS` | `30` | How long the generation/cost log is kept |
 | `DAILY_STATS_RETENTION_DAYS` | `400` | How long per-day totals are kept |
@@ -80,7 +116,8 @@ After editing: `systemctl restart restless-forge-api`.
 | Control | Value |
 |---|---|
 | Per calendar URL (SHA-256 hash) | 1 generation / 12 h |
-| Per IP (SHA-256 of `CF-Connecting-IP`) | 3 requests / h |
+| Per IP (SHA-256 of `CF-Connecting-IP`) | 3 generate requests / h |
+| Per IP, preview only | `PREVIEW_MAX_PER_HOUR` (10) / h — separate bucket, zero cost |
 | Global daily generations | `DAILY_GEN_CAP` |
 | Global daily spend (from real response usage) | `DAILY_SPEND_CAP` |
 | Circuit breaker | 3 consecutive Claude API errors → 15 min cooldown |
@@ -113,6 +150,7 @@ lyrics, no raw URLs, no raw IP addresses:
 |---|---|---|
 | `rate_url` | SHA-256 of the calendar URL, timestamp | 12 h (the rate-limit window) |
 | `rate_ip` | SHA-256 of the client IP, timestamp | 1 h (the rate-limit window) |
+| `rate_preview_ip` | SHA-256 of the client IP, timestamp | 1 h (the preview window) |
 | `daily_stats` | date, generation count, spend | `DAILY_STATS_RETENTION_DAYS` (400) |
 | `generations` | timestamp, URL hash, cost, track, mood, event count, success | `GENERATION_LOG_RETENTION_DAYS` (30) |
 | `circuit` | one row: consecutive errors, cooldown expiry | permanent (single row) |

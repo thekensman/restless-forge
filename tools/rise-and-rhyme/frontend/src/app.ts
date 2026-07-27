@@ -1,9 +1,10 @@
 /* UI controller: setup form, preview, scheduling loop, and the alarm screen.
    v1 requires the tab to stay open overnight (documented in the UI). */
 
-import { generateSong } from "./api";
+import { generateSong, previewCalendar } from "./api";
 import { localDateString, localTimeZone, type Song } from "./engine";
 import { SongPlayer, listVoices } from "./audio";
+import { renderPreview } from "./preview";
 import { FALLBACK_JINGLE_ID, FALLBACK_MOOD } from "./tracks";
 import {
   isDue,
@@ -229,6 +230,45 @@ async function releaseWakeLock(): Promise<void> {
   }
 }
 
+// ── Calendar check ──
+// Reads the calendar without writing a song, so someone can confirm the URL
+// works and — crucially — that the detected timezone is right, before
+// spending their one generation for the day.
+
+/** The day the next song will cover: the alarm day after the next generation
+    slot, or simply tomorrow when the alarm isn't configured yet. */
+function nextSongDate(now: Date): string {
+  const slot = nextGeneration(now, prefs);
+  if (slot) return slot.targetDate;
+  return localDateString(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+}
+
+async function onCheckCalendar(): Promise<void> {
+  const current = readForm();
+  if (!current.icalUrl) {
+    setStatus("Add your Google Calendar iCal URL first.", true);
+    return;
+  }
+  const box = $("rar-preview");
+  box.hidden = false;
+  box.textContent = "Reading your calendar…";
+  setStatus("");
+
+  const result = await previewCalendar(
+    current.icalUrl,
+    nextSongDate(new Date()),
+    current.preferredGenre,
+    localTimeZone(),
+  );
+  if (result.status === "ok") {
+    box.innerHTML = renderPreview(result.preview);
+  } else {
+    box.textContent = "";
+    box.hidden = true;
+    setStatus(result.message, true);
+  }
+}
+
 // ── Preview ──
 
 async function onPreview(): Promise<void> {
@@ -287,7 +327,8 @@ function init(): void {
   renderSchedule();
 
   $("rar-save").addEventListener("click", onSave);
-  $("rar-preview").addEventListener("click", () => void onPreview());
+  $("rar-check").addEventListener("click", () => void onCheckCalendar());
+  $("rar-preview-unused").addEventListener("click", () => void onPreview());
   $("rar-stop").addEventListener("click", () => {
     snoozedUntil = null;
     hideAlarmScreen();

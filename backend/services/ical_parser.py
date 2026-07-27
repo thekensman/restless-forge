@@ -40,6 +40,18 @@ ALLOWED_HOSTS = {
 ALLOWED_SUFFIXES = (".icloud.com", ".calendar.yahoo.com")
 
 
+def format_clock(dt: datetime) -> str:
+    """12-hour local time, e.g. '9:05 AM'.
+
+    Used both for the lyric prompt and the calendar preview, so what the user
+    sees in the preview is exactly what the songwriter is told. Built by hand
+    because %-I / %l are platform-specific.
+    """
+    hour = dt.hour % 12 or 12
+    meridiem = "AM" if dt.hour < 12 else "PM"
+    return f"{hour}:{dt.minute:02d} {meridiem}"
+
+
 class CalendarError(Exception):
     """User-visible calendar failure (bad URL, unreachable feed, bad data)."""
 

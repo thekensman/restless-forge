@@ -17,6 +17,9 @@ from models.schemas import (
     GenerateRateLimited,
     GenerateRequest,
     Health,
+    PreviewEvent,
+    PreviewOk,
+    PreviewRequest,
 )
 from services import ical_parser, lyric_generator, mood_mapper
 
@@ -135,6 +138,62 @@ def generate(body: GenerateRequest, request: Request) -> JSONResponse:
     finally:
         if not succeeded:
             limiter.release_url(url_hash)
+
+
+MAX_PREVIEW_EVENTS = 12
+MAX_SUMMARY_CHARS = 200
+
+
+@router.post("/preview")
+def preview(body: PreviewRequest, request: Request) -> JSONResponse:
+    """Show what tomorrow's song will be about, without writing it.
+
+    Deliberately stops before Claude: this is a calendar read plus the same
+    mood heuristic the generator uses, so it costs nothing and must not
+    consume the caller's one generation for the day. It has its own rate
+    bucket (see RateLimiter.reserve_preview) because it does still make the
+    server fetch an external URL on demand.
+    """
+    limiter = request.app.state.limiter
+
+    try:
+        url = ical_parser.validate_ical_url(body.ical_url)
+        tz = ical_parser.resolve_timezone(body.timezone)
+    except ical_parser.CalendarError as exc:
+        return JSONResponse(GenerateError(message=str(exc)).model_dump(), status_code=400)
+
+    denial = limiter.reserve_preview(_client_ip(request))
+    if denial is not None:
+        return JSONResponse(
+            GenerateRateLimited(message=denial.message, retry_after=denial.retry_after).model_dump(),
+            status_code=429,
+        )
+
+    try:
+        feed = ical_parser.fetch_feed(url)
+        events = ical_parser.events_for_date(feed, body.target_date, tz)
+    except ical_parser.CalendarError as exc:
+        return JSONResponse(GenerateError(message=str(exc)).model_dump(), status_code=400)
+
+    mood = mood_mapper.mood_for_events([e.summary for e in events], body.preferred_genre)
+    shown = events[:MAX_PREVIEW_EVENTS]
+    return JSONResponse(
+        PreviewOk(
+            target_date=body.target_date.isoformat(),
+            timezone=body.timezone,
+            event_count=len(events),
+            truncated=len(events) > len(shown),
+            mood=mood,
+            events=[
+                PreviewEvent(
+                    time="all day" if e.all_day else ical_parser.format_clock(e.start),
+                    summary=e.summary[:MAX_SUMMARY_CHARS],
+                    all_day=e.all_day,
+                )
+                for e in shown
+            ],
+        ).model_dump()
+    )
 
 
 @router.get("/health")

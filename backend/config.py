@@ -50,6 +50,10 @@ class Settings:
     url_window_sec: int = 12 * 3600  # 1 generation per iCal URL per 12 h
     ip_window_sec: int = 3600
     ip_max_per_window: int = 3
+    # Preview reads a calendar but calls no model, so it gets its own looser
+    # bucket rather than eating into the generate allowance.
+    preview_window_sec: int = 3600
+    preview_max_per_window: int = field(default_factory=lambda: _env_int("PREVIEW_MAX_PER_HOUR", 10))
 
     # Circuit breaker: N consecutive Claude API errors -> cooldown
     circuit_error_threshold: int = 3

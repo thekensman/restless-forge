@@ -109,6 +109,31 @@ class RateLimiter:
             conn.execute("INSERT INTO rate_ip (ip_hash, ts) VALUES (?, ?)", (ip_hash, now))
         return None
 
+    def reserve_preview(self, ip: str, now: Optional[float] = None) -> Optional[Denial]:
+        """Claim a preview slot from the preview-only bucket.
+
+        Preview calls no model, so it must not consume the generate allowance
+        (three previews would otherwise lock you out of the song you were
+        previewing) and must not touch the daily caps. It still needs *a*
+        limit: it makes the server fetch an external URL on demand.
+        """
+        now = time.time() if now is None else now
+        ip_hash = hash_ip(ip)
+        with self.db.connect(immediate=True) as conn:
+            cutoff = now - self.s.preview_window_sec
+            used = conn.execute(
+                "SELECT COUNT(*) AS c FROM rate_preview_ip WHERE ip_hash = ? AND ts >= ?",
+                (ip_hash, cutoff),
+            ).fetchone()["c"]
+            if used >= self.s.preview_max_per_window:
+                return Denial(
+                    "rate_limited",
+                    "Too many calendar previews from this address. Try again in an hour.",
+                    retry_after=self.s.preview_window_sec,
+                )
+            conn.execute("INSERT INTO rate_preview_ip (ip_hash, ts) VALUES (?, ?)", (ip_hash, now))
+        return None
+
     def release_url(self, url_hash: str) -> None:
         """Undo the per-calendar lock after a failed generation.
 

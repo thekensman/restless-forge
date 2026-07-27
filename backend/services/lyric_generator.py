@@ -16,12 +16,12 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 
 import anthropic
 
 from config import Settings
-from services.ical_parser import Event
+from services.ical_parser import Event, format_clock
 from services.mood_mapper import MOODS
 
 log = logging.getLogger("rf.lyrics")
@@ -80,21 +80,13 @@ class LyricOutcome:
         return self.lyrics is not None and self.mood is not None
 
 
-def _format_clock(dt: datetime) -> str:
-    """12-hour local time, e.g. '9:05 AM' — reads better in a lyric than 09:05.
-    Built by hand because %-I / %l are platform-specific."""
-    hour = dt.hour % 12 or 12
-    meridiem = "AM" if dt.hour < 12 else "PM"
-    return f"{hour}:{dt.minute:02d} {meridiem}"
-
-
 def format_events(events: list[Event]) -> str:
     """Render events for the prompt. Starts are already in the listener's zone
     (see ical_parser.events_for_date), so these are the times they will see."""
     if not events:
         return "(no events — a completely free day)"
     return "\n".join(
-        f"- {'all day' if e.all_day else _format_clock(e.start)}: {e.summary}" for e in events
+        f"- {'all day' if e.all_day else format_clock(e.start)}: {e.summary}" for e in events
     )
 
 

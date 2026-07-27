@@ -29,6 +29,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ip_window_sec=settings.ip_window_sec,
         generation_log_days=settings.generation_log_days,
         daily_stats_days=settings.daily_stats_days,
+        preview_window_sec=settings.preview_window_sec,
     )
     app.state.limiter = RateLimiter(app.state.db, settings)
     app.include_router(rise_and_rhyme_router)

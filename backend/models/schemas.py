@@ -45,6 +45,34 @@ class GenerateError(BaseModel):
     message: str
 
 
+class PreviewRequest(BaseModel):
+    ical_url: str = Field(min_length=12, max_length=2048)
+    target_date: date
+    timezone: str = Field(default="UTC", max_length=64)
+    preferred_genre: str = "any"
+
+
+class PreviewEvent(BaseModel):
+    """One row of the preview list. `time` is pre-formatted in the caller's
+    zone so the UI shows exactly what the songwriter will be told."""
+
+    time: str
+    summary: str
+    all_day: bool
+
+
+class PreviewOk(BaseModel):
+    status: Literal["ok"] = "ok"
+    target_date: str
+    # Echoed back so a wrong timezone is visible in the UI — the failure mode
+    # that silently produced wrong songs before it was part of the contract.
+    timezone: str
+    event_count: int
+    events: list[PreviewEvent]
+    truncated: bool
+    mood: str
+
+
 class Health(BaseModel):
     status: str
     generations_today: int

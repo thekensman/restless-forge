@@ -39,6 +39,14 @@ CREATE TABLE IF NOT EXISTS rate_ip (
     ts REAL NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_rate_ip ON rate_ip (ip_hash, ts);
+-- Preview is a separate, looser bucket on purpose: it costs no Claude
+-- tokens, and sharing the generate bucket would mean a few previews locked
+-- you out of the song you were previewing.
+CREATE TABLE IF NOT EXISTS rate_preview_ip (
+    ip_hash TEXT NOT NULL,
+    ts REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rate_preview_ip ON rate_preview_ip (ip_hash, ts);
 CREATE TABLE IF NOT EXISTS daily_stats (
     date TEXT PRIMARY KEY,
     count INTEGER NOT NULL DEFAULT 0,
@@ -56,6 +64,7 @@ CREATE TABLE IF NOT EXISTS circuit (
 # surprising Anthropic bill; daily_stats is one tiny row per day.
 DEFAULT_URL_WINDOW_SEC = 12 * 3600
 DEFAULT_IP_WINDOW_SEC = 3600
+DEFAULT_PREVIEW_WINDOW_SEC = 3600
 DEFAULT_GENERATION_LOG_DAYS = 30
 DEFAULT_DAILY_STATS_DAYS = 400
 
@@ -65,6 +74,7 @@ def _prune_triggers(
     ip_window_sec: int,
     generation_log_days: int,
     daily_stats_days: int,
+    preview_window_sec: int,
 ) -> str:
     """Retention triggers, rebuilt on every init so config changes take effect.
 
@@ -78,6 +88,11 @@ def _prune_triggers(
 DROP TRIGGER IF EXISTS prune_rate_ip;
 CREATE TRIGGER prune_rate_ip AFTER INSERT ON rate_ip BEGIN
     DELETE FROM rate_ip WHERE ts < {now} - {ip_window_sec};
+END;
+
+DROP TRIGGER IF EXISTS prune_rate_preview_ip;
+CREATE TRIGGER prune_rate_preview_ip AFTER INSERT ON rate_preview_ip BEGIN
+    DELETE FROM rate_preview_ip WHERE ts < {now} - {preview_window_sec};
 END;
 
 -- rate_url is written with an upsert, so both paths need a trigger.
@@ -121,9 +136,16 @@ class Db:
         ip_window_sec: int = DEFAULT_IP_WINDOW_SEC,
         generation_log_days: int = DEFAULT_GENERATION_LOG_DAYS,
         daily_stats_days: int = DEFAULT_DAILY_STATS_DAYS,
+        preview_window_sec: int = DEFAULT_PREVIEW_WINDOW_SEC,
     ):
         self.path = path
-        self._retention = (url_window_sec, ip_window_sec, generation_log_days, daily_stats_days)
+        self._retention = (
+            url_window_sec,
+            ip_window_sec,
+            generation_log_days,
+            daily_stats_days,
+            preview_window_sec,
+        )
         self._initialized = False
         # Sync endpoints run in FastAPI's threadpool, so first-use
         # initialization can be raced by concurrent requests.

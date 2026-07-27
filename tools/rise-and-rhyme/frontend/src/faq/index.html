@@ -44,11 +44,20 @@ URL. Treat it like a password — anyone with the URL can read that calendar.</p
 <p>No. There&#39;s no signup and no login. Your iCal URL and alarm preferences are
 stored in your browser&#39;s localStorage, on your device.</p>
 <h2>Does my calendar data get uploaded?</h2>
-<p>The iCal URL is sent to the Restless Forge server once per generation (the
-evening before your alarm). The server fetches the feed, extracts tomorrow&#39;s
-event titles and times, and sends those to the Anthropic Claude API to write
-the lyrics. Event details are not stored after the lyrics are generated — see
-the <a href="/tools/rise-and-rhyme/privacy/">privacy page</a> for exactly what&#39;s kept.</p>
+<p>The iCal URL is sent to the Restless Forge server when a song is generated (the
+evening before your alarm) and when you press &quot;Check my calendar&quot;. The server
+fetches the feed and extracts tomorrow&#39;s event titles and times. When a song is
+being written, those are sent on to the Anthropic Claude API for the lyrics; a
+calendar check stops before that and contacts no one else. Event details are
+not stored either way — see the
+<a href="/tools/rise-and-rhyme/privacy/">privacy page</a> for exactly what&#39;s kept.</p>
+<h2>How do I check my calendar is set up right?</h2>
+<p>Press <strong>Check my calendar</strong> in the setup panel. It lists the events tomorrow&#39;s
+song will cover and shows the timezone it detected, so you can confirm both
+before a song is ever written. It doesn&#39;t call the AI, doesn&#39;t cost anything,
+and doesn&#39;t use up your one song for the day — check as often as you like.</p>
+<p>If the times look shifted, your browser is reporting a different timezone than
+you expect; the song uses the same one shown there.</p>
 <h2>Why does the tab need to stay open?</h2>
 <p>This first version schedules everything with in-page timers, so the browser
 tab must stay open (and your device awake) for the alarm to fire. A version
