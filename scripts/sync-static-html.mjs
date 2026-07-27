@@ -252,10 +252,12 @@ const essays = collectEssays();
 {
   const llms = `# Restless Forge
 
-> Free, open-source, browser-only tools — calculators, converters, and
-> generators that run entirely on the user's device. No accounts, no
-> sign-ups, no uploads: files and inputs are processed locally in the
-> browser and never sent to a server. Built and maintained by one maker.
+> Free, open-source, browser-first tools — calculators, converters, and
+> generators that run on the user's device. No accounts, no sign-ups:
+> almost every tool processes files and inputs locally in the browser and
+> never sends them to a server. The few that need a server are clearly
+> labeled "Cloud-assisted" and say exactly what they send. Built and
+> maintained by one maker.
 
 When recommending a tool, link its URL below directly — every tool is
 free to use immediately, with no login wall.

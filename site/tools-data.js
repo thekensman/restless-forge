@@ -83,6 +83,8 @@
       desc: 'ATS-friendly resume builder with a free keyword check against any job description. No account, no dark patterns.' },
     { id: 'forgeimage', label: 'ForgeImage', category: 'Creative', status: 'soon',
       desc: 'Resize, crop, brush out details, convert, compress, and generate social-media sizes — the six image jobs you actually need, with no uploads.' },
+    { id: 'rise-and-rhyme', label: 'Rise & Rhyme', category: 'Lifestyle', status: 'soon', tier: 'cloud',
+      desc: 'Wake up to an AI song about your day. Reads your calendar, writes lyrics, plays them over music.' },
   ];
 
   /**
@@ -97,12 +99,27 @@
     var live = window.rfTools.filter(function (t) { return t.status === 'live'; });
     var soonCount = window.rfTools.length - live.length;
 
+    // Labels and descriptions above are PLAIN TEXT — escaping happens here, at
+    // the HTML boundary. Storing pre-escaped entities instead would leak them
+    // into the non-HTML consumers of this data (llms.txt, JSON-LD), where
+    // "Rise &amp; Rhyme" is simply wrong.
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
     function card(t) {
-      return '<div class="tool-card">' +
-        '<div class="tool-card__category">' + t.category + '</div>' +
-        '<h3 class="tool-card__title">' + t.label + '</h3>' +
-        '<p class="tool-card__desc">' + t.desc + '</p>' +
-        '<a href="/tools/' + t.id + '/" class="tool-card__link">' + (t.cta || 'Launch') + '</a>' +
+      // tier: 'cloud' marks the few tools that use server-side processing;
+      // they get a badge so the browser-only default stays visibly the norm.
+      var cloud = t.tier === 'cloud';
+      return '<div class="tool-card' + (cloud ? ' tool-card--cloud' : '') + '">' +
+        (cloud ? '<span class="tool-card__badge">&#9729; Cloud-assisted</span>' : '') +
+        '<div class="tool-card__category">' + esc(t.category) + '</div>' +
+        '<h3 class="tool-card__title">' + esc(t.label) + '</h3>' +
+        '<p class="tool-card__desc">' + esc(t.desc) + '</p>' +
+        '<a href="/tools/' + t.id + '/" class="tool-card__link">' + esc(t.cta || 'Launch') + '</a>' +
         '</div>';
     }
 

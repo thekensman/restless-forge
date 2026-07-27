@@ -5,7 +5,10 @@ AI assistant guide for the Restless Forge monorepo.
 ## What This Is
 
 Restless Forge is a single-domain hub (restless-forge.dev) for free,
-browser-only tools. Every tool runs 100% client-side — there are no backends.
+browser-first tools. Tools are client-side by default; a small number of
+clearly-labeled **cloud-assisted** tools (`tier: 'cloud'` in
+`site/tools-data.js`, ☁ badge on their cards) additionally use the shared
+FastAPI backend in `backend/`, served at `/api/*` (see `docs/backend.md`).
 
 Currently live:
 1. **What Is My Time Worth?** — Real hourly wage calculator (formerly whatismytimeworth.app)
@@ -29,6 +32,7 @@ restless-forge/
 │   ├── holopath/frontend/
 │   ├── sandpath/frontend/
 │   └── tattoosafe/frontend/
+├── backend/             → Shared FastAPI service for cloud-assisted tools (/api/*; docs/backend.md)
 ├── scripts/
 │   └── new-tool.sh      → Scaffolds tools/<name>/frontend/ from tools/template/
 ├── nginx/               → Production nginx configs (main site + 301 redirects)
@@ -67,7 +71,7 @@ static assets served verbatim — Vite does not treat them as navigable pages.
 ## Key Architecture Decisions
 
 - **Monorepo**: all tool source + global pages in one repo.
-- **Client-only**: no backends. If a tool needs heavy computation, it runs in the browser (Canvas, Workers, Wasm, etc.).
+- **Client-side by default**: if a tool needs heavy computation, it runs in the browser (Canvas, Workers, Wasm, etc.). A tool gets server-side help only when the feature is impossible client-side (e.g. calling the Claude API); such tools set `tier: 'cloud'` in `site/tools-data.js`, wear the ☁ Cloud-assisted badge, spell out their data flow on a per-tool privacy page, and route through the shared backend at `/api/v1/<tool>/` (`backend/`, FastAPI + SQLite, no containers — `docs/backend.md`).
 - **Shared data layer**: cross-tool refreshed datasets (tax brackets, …) live in `data/` (repo root — referenced by tools, not a tool itself) as year-keyed, append-only TS modules, imported by consuming tools and bundled at build time. Tool-specific data stays in each tool's engine. Refresh procedure: `docs/automation.md`.
 - **Vite base paths**: each tool's `vite.config.ts` uses `defineToolConfig({ base: '/tools/<name>', ... })` via the shared factory in `tools/vite-tool-config.ts`.
 - **Shared chrome, per-tool theme**: every tool renders the same `.site-header` / `.footer` markup, produced by `window.rfMountToolChrome(config)` (in `site/shared.js`) from a small per-tool config object in each tool's `public/shared.js`, styled by the shared `site/tool-chrome.css`, themed through a set of `--rf-*` CSS custom properties each tool defines.
@@ -194,7 +198,8 @@ npm run dev
 | What Is My Time Worth  | 3000 | `dev:wimtw` or root `dev`         |
 | HoloPath               | 5173 | `dev:holopath` or root `dev`      |
 | SandPath               | 5174 | `dev:sandpath` or root `dev`      |
-| New tools              | next free ≥5193 | declared in the tool's own vite.config.ts — discovery handles the rest |
+| Backend API (cloud-assisted tools) | 8000 | manually: `cd backend && uvicorn main:app --reload` — both dev servers proxy `/api` to it |
+| New tools              | next free ≥5199 | declared in the tool's own vite.config.ts — discovery handles the rest |
 
 Global links like `/about`, `/tools/` resolve correctly at the root proxy
 (:8080) but NOT when running a single tool's dev server (it doesn't serve
@@ -280,6 +285,7 @@ rules): `docs/authoring-content.md`.
 | `/tools/<name>/` | `tools/<name>/frontend/dist/` |
 | `/essays/*` | `site/essays/*.html` |
 | `/articles/` | `site/articles/index.html` |
+| `/api/*` | FastAPI service on 127.0.0.1:8000 (nginx `^~ /api/` proxy; `backend/`) |
 
 ## Code Conventions
 
@@ -319,11 +325,14 @@ Work in the tool's own `frontend/` directory. Its dev server is self-contained.
 
 **Normal path: merge to main.** The `Deploy` GitHub Action
 (`.github/workflows/deploy.yml`) builds and rsyncs `dist/` to the VPS on
-every push to main, then deploys `nginx/restless-forge.conf` to
-`/etc/nginx/sites-available/restless-forge` (the live vhost has no `.conf`
-suffix) with an `nginx -t` check, graceful reload, and automatic rollback
-if validation fails. Requires the `DEPLOY_*` repo secrets documented in
-the workflow file. PRs run the `CI` workflow (build + all tests) first.
+every push to main, deploys the backend (`backend/` →
+`/opt/restless-forge/backend`, venv refresh, systemd restart, health
+check — see `docs/backend.md`), then deploys `nginx/restless-forge.conf`
+to `/etc/nginx/sites-available/restless-forge` (the live vhost has no
+`.conf` suffix) with an `nginx -t` check, graceful reload, and automatic
+rollback if validation fails. Requires the `DEPLOY_*` and
+`ANTHROPIC_API_KEY` repo secrets documented in the workflow file. PRs run
+the `CI` workflow (build + all tests, Node and Python) first.
 The old-domain redirect vhosts (`nginx/*-redirect.conf`) are NOT deployed
 automatically — install those by hand.
 
@@ -349,6 +358,7 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 | Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? |
 | New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |
 | Site down / cert expiring / stale assets in prod | `site-health` issues from `.github/workflows/health-check.yml`; server runbook in `docs/infrastructure.md` (Cloudflare edge, DNS-01 cert renewal, disaster recovery) |
+| `/api/*` down or erroring | `systemctl status restless-forge-api` + `journalctl -u restless-forge-api` on the droplet; backend runbook in `docs/backend.md` (cost caps, circuit breaker, key rotation) |
 
 ## Gotchas
 

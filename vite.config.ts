@@ -20,6 +20,11 @@ const proxy = Object.fromEntries(
   ])
 );
 
+// Backend API (cloud-assisted tools). Run it locally with:
+//   cd backend && uvicorn main:app --reload --port 8000
+// In prod, nginx proxies /api/ to the same service.
+proxy["/api"] = { target: "http://localhost:8000", changeOrigin: true };
+
 export default defineConfig({
   root: "site",
   server: {

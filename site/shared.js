@@ -14,15 +14,31 @@
   var RF_SUBSTACK = 'https://restlessforge.substack.com';
   var RF_GITHUB   = 'https://github.com/thekensman/';
 
+  // ── Contact info ──
+  // The email address and repo URLs live here and ONLY here: pages reference
+  // them via <a data-rf-link="..."> so a change is a one-line edit.
+  var RF_EMAIL       = 'ken@restless-forge.dev';
+  var RF_GITHUB_REPO = 'https://github.com/thekensman/restless-forge';
+
   // Exposed so prose links can resolve programmatically: any
-  // <a data-rf-link="kofi|bmc|substack|github"> gets its href set from here
-  // on DOMContentLoaded (see resolver at the bottom of this file), so a URL
-  // change is a one-line edit even in hand-written page copy.
+  // <a data-rf-link="kofi|bmc|substack|github|email|githubRepo|..."> gets its
+  // href set from here on DOMContentLoaded (see resolver at the bottom of this
+  // file), so a URL change is a one-line edit even in hand-written page copy.
+  // Email anchors with no text also get the bare address as their textContent.
   window.rfLinks = {
     kofi: RF_KOFI,
     bmc: RF_BMC,
     substack: RF_SUBSTACK,
     github: RF_GITHUB,
+    email: 'mailto:' + RF_EMAIL,
+    githubRepo: RF_GITHUB_REPO,
+    githubIssues: RF_GITHUB_REPO + '/issues',
+    // Tools that live in their own repos (pre-monorepo); everything else
+    // shares the restless-forge repo above.
+    wimtwRepo: 'https://github.com/thekensman/what-is-my-time-worth',
+    wimtwIssues: 'https://github.com/thekensman/what-is-my-time-worth/issues',
+    holopathRepo: 'https://github.com/thekensman/holopath',
+    sandpathRepo: 'https://github.com/thekensman/sandpath',
   };
 
   function active(href) {
@@ -257,8 +273,15 @@
   function resolveProseLinks() {
     var links = document.querySelectorAll('a[data-rf-link]');
     for (var i = 0; i < links.length; i++) {
-      var url = window.rfLinks[links[i].getAttribute('data-rf-link')];
-      if (url) links[i].setAttribute('href', url);
+      var key = links[i].getAttribute('data-rf-link');
+      var url = window.rfLinks[key];
+      if (!url) continue;
+      links[i].setAttribute('href', url);
+      // Email anchors left empty display the bare address, so the address
+      // itself never appears in static HTML (single-source guarantee).
+      if (key === 'email' && links[i].textContent.trim() === '') {
+        links[i].textContent = url.replace('mailto:', '');
+      }
     }
   }
 

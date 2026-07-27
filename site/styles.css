@@ -270,6 +270,24 @@ img { max-width: 100%; height: auto; }
   color: var(--bg);
 }
 
+/* Cloud-assisted tier: tools that use server-side processing carry a badge
+   so the browser-only default stays visibly the norm. */
+.tool-card--cloud {
+  position: relative;
+  border-color: var(--accent-cloud, #50b8d0);
+}
+
+.tool-card__badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-cloud, #50b8d0);
+}
+
 /* ── Essay Cards ── */
 .essay-card {
   background: var(--bg-card);
