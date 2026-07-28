@@ -152,6 +152,15 @@ jobs:
           RF_METRICS_TOKEN: ${{ secrets.RF_METRICS_TOKEN }}
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
         run: |
+          # rsync only creates the final path component itself, not missing
+          # parents — on a droplet where /opt/restless-forge has never been
+          # created, the mkdir inside rsync fails with "No such file or
+          # directory". Create the full path first so this works on both a
+          # fresh box and every deploy after.
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'mkdir -p /opt/restless-forge/backend'
+
           rsync -az --delete \
             --exclude '.venv' --exclude '__pycache__' --exclude '*.pyc' \
             -e "ssh -i ~/.ssh/deploy_key" \
