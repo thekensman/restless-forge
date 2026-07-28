@@ -26,6 +26,9 @@ import recurring_ical_events
 
 MAX_FEED_BYTES = 1_000_000
 FETCH_TIMEOUT_SEC = 10
+# Leading window searched for BEGIN:VCALENDAR. Bounded so the check costs the
+# same on a 1 MB feed as on a small one.
+FEED_SNIFF_BYTES = 4096
 
 # Known calendar-feed providers. Exact hostnames, plus suffixes for
 # providers that shard across subdomains (iCloud's pNN-caldav hosts).
@@ -38,6 +41,23 @@ ALLOWED_HOSTS = {
     "calendar.proton.me",
 }
 ALLOWED_SUFFIXES = (".icloud.com", ".calendar.yahoo.com")
+
+# Hosts that serve BOTH iCal feeds and ordinary HTML calendar pages, with the
+# feed confined to a known path prefix. Google's "Public URL to this calendar"
+# (/calendar/embed?src=…) is the classic trap: allowlisted host, HTTP 200, and
+# a web page for a body — so without this it sails through validation and dies
+# deep in the parser with an unhelpful "could not be parsed".
+#
+# Only list a host here when its feed prefix is known exactly. Providers whose
+# feed URLs carry no extension (iCloud's /published/<token>) must NOT be listed
+# — the body sniff in fetch_feed is the general safety net for those.
+FEED_PATHS: dict[str, tuple[tuple[str, ...], str]] = {
+    "calendar.google.com": (
+        ("/calendar/ical/",),
+        'In Google Calendar: Settings → your calendar → "Integrate calendar" '
+        '→ copy "Secret address in iCal format" (the link ending in .ics).',
+    ),
+}
 
 
 def format_clock(dt: datetime) -> str:
@@ -84,6 +104,11 @@ def validate_ical_url(url: str) -> str:
     host = (parsed.hostname or "").lower()
     if host not in ALLOWED_HOSTS and not host.endswith(ALLOWED_SUFFIXES):
         raise CalendarError("Unsupported calendar provider.")
+    feed = FEED_PATHS.get(host)
+    if feed is not None and not parsed.path.startswith(feed[0]):
+        raise CalendarError(
+            f"That link is a calendar web page, not a feed. {feed[1]}"
+        )
     return url
 
 
@@ -136,6 +161,19 @@ def fetch_feed(url: str) -> str:
                 raise CalendarError(f"Calendar feed returned HTTP {status}.")
     except httpx.HTTPError as exc:
         raise CalendarError("Could not fetch calendar feed.") from exc
+
+    # A 200 that isn't a calendar is almost always a web page the user copied
+    # instead of the feed (or a provider's login/error page rendered at 200).
+    # Say so here: reaching the parser with HTML only ever produced
+    # "Calendar feed could not be parsed", which tells the user nothing about
+    # what to do next. Every RFC 5545 stream opens with BEGIN:VCALENDAR, so a
+    # leading window is enough — and no HTML page contains it.
+    if "BEGIN:VCALENDAR" not in body[:FEED_SNIFF_BYTES].upper():
+        raise CalendarError(
+            "That URL returned a web page, not a calendar feed. Copy the "
+            "iCal/ICS link — usually the one ending in .ics — rather than "
+            "the calendar's public web page."
+        )
     return body
 
 

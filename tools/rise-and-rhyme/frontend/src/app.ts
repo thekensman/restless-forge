@@ -14,6 +14,7 @@ import {
   nextGeneration,
   occurrenceKey,
   snoozeUntil,
+  songDateFor,
   type GenerationSlot,
 } from "./scheduler";
 import {
@@ -235,14 +236,6 @@ async function releaseWakeLock(): Promise<void> {
 // works and — crucially — that the detected timezone is right, before
 // spending their one generation for the day.
 
-/** The day the next song will cover: the alarm day after the next generation
-    slot, or simply tomorrow when the alarm isn't configured yet. */
-function nextSongDate(now: Date): string {
-  const slot = nextGeneration(now, prefs);
-  if (slot) return slot.targetDate;
-  return localDateString(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
-}
-
 async function onCheckCalendar(): Promise<void> {
   const current = readForm();
   if (!current.icalUrl) {
@@ -256,7 +249,7 @@ async function onCheckCalendar(): Promise<void> {
 
   const result = await previewCalendar(
     current.icalUrl,
-    nextSongDate(new Date()),
+    songDateFor(new Date(), prefs),
     current.preferredGenre,
     localTimeZone(),
   );
@@ -278,8 +271,9 @@ async function onPreview(): Promise<void> {
     await playSong(cached);
     return;
   }
-  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const slot: GenerationSlot = { fireAt: now, targetDate: localDateString(tomorrow) };
+  // Same day the calendar check reports, so "Check my calendar" and the song
+  // it writes can never describe two different days.
+  const slot: GenerationSlot = { fireAt: now, targetDate: songDateFor(now, prefs) };
   const song = await generateFor(slot, true);
   await playSong(song ?? fallbackSong(slot.targetDate));
 }

@@ -9,6 +9,11 @@ for my calendars" → "Integrate calendar" → copy the **Secret address in iCal
 format**. It's a long `https://calendar.google.com/calendar/ical/…/basic.ics`
 URL. Treat it like a password — anyone with the URL can read that calendar.
 
+Don't use "Public URL to this calendar" or the embed code from that same panel:
+those are links to a calendar *web page*, and Rise & Rhyme needs the feed. The
+address you want ends in `.ics`. Outlook, iCloud, Yahoo, and Proton Calendar
+feeds work too — look for "publish", "share", or "subscribe" in their settings.
+
 ## Do I need an account?
 
 No. There's no signup and no login. Your iCal URL and alarm preferences are
