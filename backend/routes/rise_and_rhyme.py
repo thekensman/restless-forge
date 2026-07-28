@@ -5,9 +5,10 @@ from __future__ import annotations
 import hashlib
 import logging
 import random
+import secrets
 from datetime import datetime, time, timezone
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 
 from models.schemas import (
@@ -20,6 +21,7 @@ from models.schemas import (
     PreviewEvent,
     PreviewOk,
     PreviewRequest,
+    SpendMetrics,
 )
 from services import ical_parser, lyric_generator, mood_mapper
 
@@ -197,12 +199,24 @@ def preview(body: PreviewRequest, request: Request) -> JSONResponse:
 
 
 @router.get("/health")
-def health(request: Request) -> Health:
+def health(
+    request: Request,
+    x_metrics_token: str | None = Header(default=None, alias="X-Metrics-Token"),
+) -> Health:
+    """Liveness for anyone; spend figures only for a caller with the token.
+
+    The uptime monitor passes RF_METRICS_TOKEN so it can alert on the bill;
+    everyone else gets status + circuit state, which is all a public health
+    check needs.
+    """
+    settings = request.app.state.settings
     limiter = request.app.state.limiter
-    count, spend = limiter.today_stats()
+
+    authorized = bool(settings.metrics_token) and secrets.compare_digest(
+        x_metrics_token or "", settings.metrics_token
+    )
     return Health(
         status="ok",
-        generations_today=count,
-        spend_today=round(spend, 4),
         circuit_open=limiter.circuit_open(),
+        metrics=SpendMetrics(**limiter.spend_summary()) if authorized else None,
     )

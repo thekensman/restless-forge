@@ -1,10 +1,16 @@
 name: Health check
 
-# Uptime + TLS monitoring for restless-forge.dev. Nothing else watches the
-# droplet, so this is the "know when it's down" layer: every 30 minutes it
-# checks the homepage, a tool page, the nginx vhost fingerprint, and cert
-# expiry, and opens (or updates) a `site-health` issue on failure — GitHub's
-# notification email is the alert channel.
+# Uptime + TLS + spend monitoring for restless-forge.dev. Nothing else watches
+# the droplet, so this is the "know when it's down" layer: every 30 minutes it
+# checks the homepage, a tool page, the nginx vhost fingerprint, the backend
+# API, and cert expiry, and opens (or updates) a `site-health` issue on failure
+# — GitHub's notification email is the alert channel.
+#
+# It is also the slow half of the API's alerting. The backend itself pages in
+# real time through ALERT_WEBHOOK_URL (daily cap at 80% and 100%); this workflow
+# covers what a per-request alert can't see — the breaker staying tripped, and
+# the trailing-30-day Anthropic spend drifting past budget. See
+# docs/backend.md § Monitoring the bill.
 #
 # Legacy domains (holopath.art, sandpath.art, whatismytimeworth.app) are
 # deliberately NOT monitored — they expire naturally with their Namecheap
@@ -23,12 +29,21 @@ concurrency:
   group: health-check
   cancel-in-progress: false
 
+env:
+  # Alert if the trailing-week run rate projects past this many USD per month.
+  # The Claude API is the only thing on the site that costs per use, so this is
+  # the number that protects the Anthropic balance from a slow bleed.
+  MONTHLY_BUDGET_USD: "50"
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - name: Run checks
         id: checks
+        env:
+          RF_METRICS_TOKEN: ${{ secrets.RF_METRICS_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           fails=""
           note() { fails="$fails- $1"$'\n'; }
@@ -56,11 +71,58 @@ jobs:
           # a dead service would otherwise go unnoticed until an alarm
           # morning). Deployed by the same Deploy run that ships this file,
           # so the endpoint exists whenever this check runs from main.
-          api=$(curl -sf --max-time 15 https://restless-forge.dev/api/v1/rise-and-rhyme/health || true)
+          #
+          # With RF_METRICS_TOKEN set, the same response also carries the spend
+          # figures (see docs/backend.md § Monitoring the bill) — this is the
+          # only place the Anthropic balance is watched. Without the secret the
+          # endpoint returns "metrics": null and the money checks are skipped,
+          # so the uptime half keeps working on a fresh clone.
+          health_url=https://restless-forge.dev/api/v1/rise-and-rhyme/health
+          if [ -n "$RF_METRICS_TOKEN" ]; then
+            api=$(curl -sf --max-time 15 -H "X-Metrics-Token: $RF_METRICS_TOKEN" "$health_url" || true)
+          else
+            api=$(curl -sf --max-time 15 "$health_url" || true)
+          fi
           if [ -z "$api" ]; then
             note "Backend API /api/v1/rise-and-rhyme/health not reachable — check 'systemctl status restless-forge-api' on the droplet (runbook: docs/backend.md)"
           elif ! echo "$api" | grep -q '"status"'; then
             note "Backend API health returned unexpected content: $api"
+          else
+            # Circuit open means Claude calls are failing repeatedly and every
+            # alarm is falling back to the jingle. Checked on every run: the
+            # breaker resets itself after 15 minutes, so still seeing it here
+            # means it keeps re-tripping.
+            if [ "$(echo "$api" | jq -r '.circuit_open')" = "true" ]; then
+              note "Backend circuit breaker is OPEN — Claude API calls are failing; songs are falling back to the jingle (runbook: docs/backend.md § Circuit breaker)"
+            fi
+
+            if [ -z "$RF_METRICS_TOKEN" ]; then
+              echo "RF_METRICS_TOKEN not set — skipping spend checks."
+            elif [ "$(echo "$api" | jq -r '.metrics')" = "null" ]; then
+              note "Backend rejected the metrics token — RF_METRICS_TOKEN in this repo no longer matches /etc/restless-forge/api.env on the droplet (spend is unmonitored until fixed)"
+            else
+              spend_today=$(echo "$api" | jq -r '.metrics.spend_today')
+              cap=$(echo "$api" | jq -r '.metrics.daily_spend_cap')
+              spend_30d=$(echo "$api" | jq -r '.metrics.spend_30d')
+              projected=$(echo "$api" | jq -r '.metrics.projected_monthly')
+              gens_30d=$(echo "$api" | jq -r '.metrics.generations_30d')
+              echo "spend: today \$$spend_today / \$$cap · 30d \$$spend_30d ($gens_30d songs) · projected \$$projected/mo"
+
+              # The daily cap and its 80% warning already page in real time via
+              # ALERT_WEBHOOK_URL. Repeating them here every 30 minutes until
+              # UTC midnight would bury the issue thread, so the budget review
+              # runs once a day — on the first scheduled run of hour 13 UTC.
+              # A manual run always reviews: clicking "Run workflow" is asking.
+              hh=$(date -u +%H); mm=$(date -u +%M)
+              if [ "$EVENT_NAME" = "workflow_dispatch" ] || { [ "$hh" = "13" ] && [ "$mm" -lt 30 ]; }; then
+                if awk -v a="$spend_today" -v b="$cap" 'BEGIN{exit !(a>=b)}'; then
+                  note "Daily spend cap reached: \$$spend_today of \$$cap — song generation is refusing new requests until 00:00 UTC"
+                fi
+                if awk -v a="$projected" -v b="$MONTHLY_BUDGET_USD" 'BEGIN{exit !(a>b)}'; then
+                  note "Projected Anthropic spend is \$$projected/month (budget \$$MONTHLY_BUDGET_USD), from \$$spend_30d over the last 30 days across $gens_30d songs — raise MONTHLY_BUDGET_USD in this workflow or tighten DAILY_SPEND_CAP (docs/backend.md § Cost controls)"
+                fi
+              fi
+            fi
           fi
 
           # TLS cert ≥ 14 days remaining

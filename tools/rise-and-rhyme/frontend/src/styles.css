@@ -70,6 +70,24 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
 }
 .field__hint { display: block; font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; }
 
+.field__help { margin: -8px 0 18px; font-size: 0.85rem; }
+.field__help summary {
+  cursor: pointer;
+  color: var(--accent);
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+.field__help summary::-webkit-details-marker { display: none; }
+.field__help summary::marker { display: none; }
+.field__help summary::before { content: '▶'; font-size: 8px; transition: transform 0.15s ease; }
+.field__help[open] summary::before { transform: rotate(90deg); }
+.field__help ul { margin: 10px 0 0; padding-left: 20px; color: var(--text-muted); }
+.field__help li { margin-bottom: 6px; }
+.field__help p { margin-top: 10px; color: var(--text-dim); font-size: 0.8rem; }
+
 .field input[type="url"],
 .field input[type="time"],
 .field input[type="number"],

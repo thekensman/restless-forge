@@ -43,6 +43,11 @@ class Settings:
     daily_gen_cap: int = field(default_factory=lambda: _env_int("DAILY_GEN_CAP", 500))
     daily_spend_cap: float = field(default_factory=lambda: _env_float("DAILY_SPEND_CAP", 10.0))
     alert_webhook_url: str = field(default_factory=lambda: os.getenv("ALERT_WEBHOOK_URL", ""))
+    # Shared secret required to read the spend figures from /health. /health is
+    # public through nginx, and publishing what you've spent also tells anyone
+    # how close the daily cap is to exhausted. Unset = the numbers are omitted
+    # entirely (fail closed), never accidentally public.
+    metrics_token: str = field(default_factory=lambda: os.getenv("RF_METRICS_TOKEN", ""))
 
     db_path: str = field(default_factory=lambda: os.getenv("RF_DB_PATH", DEFAULT_DB_PATH))
 

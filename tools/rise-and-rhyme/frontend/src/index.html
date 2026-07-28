@@ -69,12 +69,21 @@
       <h2 id="rar-setup-h">Setup</h2>
 
       <label class="field">
-        <span class="field__label">Google Calendar public iCal URL</span>
+        <span class="field__label">Calendar public iCal URL</span>
         <input type="url" id="rar-ical" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off">
-        <span class="field__hint">Google Calendar → Settings → your calendar →
-        "Secret address in iCal format". The URL stays in this browser's
-        localStorage.</span>
+        <span class="field__hint">The URL stays in this browser's localStorage.</span>
       </label>
+
+      <details class="field__help">
+        <summary>Where do I find this?</summary>
+        <ul>
+          <li><strong>Google Calendar:</strong> Settings → click your calendar under "Settings for my calendars" → "Integrate calendar" → copy the "Secret address in iCal format".</li>
+          <li><strong>Outlook.com / Office 365:</strong> Settings → Calendar → Shared calendars → "Publish a calendar" → choose your calendar and "Can view all details" → Publish → copy the ICS link.</li>
+          <li><strong>iCloud:</strong> On icloud.com, open Calendar → hover your calendar → the share icon → "Public Calendar" → copy the link.</li>
+          <li><strong>Yahoo Calendar:</strong> Calendar settings → your calendar's menu → Share → "Anyone with a link" → copy the ICS link.</li>
+        </ul>
+        <p>Treat this URL like a password — anyone who has it can read that calendar.</p>
+      </details>
 
       <div class="actions actions--inline">
         <button id="rar-check" class="btn btn--small" type="button">Check my calendar</button>

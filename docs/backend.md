@@ -33,7 +33,7 @@ browser ──HTTPS──▶ Cloudflare ──▶ nginx (location ^~ /api/, rate
 |---|---|
 | `POST /api/v1/rise-and-rhyme/generate` | iCal → Claude lyrics → track selection |
 | `POST /api/v1/rise-and-rhyme/preview` | iCal → event list + mood. **No model call, no cost.** |
-| `GET /api/v1/rise-and-rhyme/health` | daily generation count, spend, circuit state |
+| `GET /api/v1/rise-and-rhyme/health` | liveness + circuit state publicly; spend figures with `X-Metrics-Token` (§ Monitoring the bill) |
 
 ### Request contract
 
@@ -92,9 +92,17 @@ calendar gets per day. Design constraints, all covered by tests in
 
 ## Environment (`/etc/restless-forge/api.env`)
 
-Bootstrapped by the **first** deploy from the `ANTHROPIC_API_KEY` GitHub
-secret; never overwritten afterwards — this file is the server-side source
-of truth for ops changes.
+Bootstrapped by the **first** deploy from the `ANTHROPIC_API_KEY`,
+`RF_METRICS_TOKEN`, and `ALERT_WEBHOOK_URL` GitHub secrets; never overwritten
+afterwards — this file is the server-side source of truth for ops changes.
+
+**On a droplet that is already running, adding a var is a manual edit** — the
+deploy will not touch an existing `api.env`:
+
+```bash
+$EDITOR /etc/restless-forge/api.env
+systemctl restart restless-forge-api
+```
 
 | Var | Default | Meaning |
 |---|---|---|
@@ -104,6 +112,7 @@ of truth for ops changes.
 | `DAILY_GEN_CAP` | `500` | global generations/day |
 | `DAILY_SPEND_CAP` | `10.0` | USD/day hard stop |
 | `ALERT_WEBHOOK_URL` | empty | optional webhook for spend/circuit alerts (always logged regardless) |
+| `RF_METRICS_TOKEN` | empty | shared secret that unlocks the spend figures on `/health`. Empty = they are omitted entirely (fail closed). See § Monitoring the bill. |
 | `PREVIEW_MAX_PER_HOUR` | `10` | Calendar previews per IP per hour (separate from the generate budget) |
 | `RF_DB_PATH` | `backend/.data/api.db` (dev) | SQLite location. **Production sets this in the systemd unit** (`/var/lib/restless-forge/api.db`); the code default is deliberately local so a laptop or CI box can never touch real cost-control state. |
 | `GENERATION_LOG_RETENTION_DAYS` | `30` | How long the generation/cost log is kept |
@@ -121,7 +130,7 @@ After editing: `systemctl restart restless-forge-api`.
 | Global daily generations | `DAILY_GEN_CAP` |
 | Global daily spend (from real response usage) | `DAILY_SPEND_CAP` |
 | Circuit breaker | 3 consecutive Claude API errors → 15 min cooldown |
-| Alerts | WARNING log + optional webhook at 80% and 100% of the spend cap, and on circuit open |
+| Alerts | WARNING log + optional webhook at 80% and 100% of the spend cap, and on circuit open (§ Monitoring the bill) |
 | nginx layer | `limit_req` 10 r/min per CF-Connecting-IP, burst 5 |
 
 Worst-case monthly Claude spend is capped at ~`DAILY_SPEND_CAP × 31`.
@@ -140,6 +149,86 @@ understanding before changing this code:
   in a single `BEGIN IMMEDIATE` transaction. Sync endpoints run in FastAPI's
   threadpool, so a check-then-record pair let two concurrent requests for the
   same calendar both pass and both pay.
+
+## Monitoring the bill
+
+The Claude API is the only part of restless-forge.dev that costs money per
+use, so it gets its own watch. Two channels, split by how fast the thing they
+watch moves:
+
+| Channel | Watches | Latency | Configured by |
+|---|---|---|---|
+| **Webhook** (`ALERT_WEBHOOK_URL`) | daily spend crossing 80% and 100% of `DAILY_SPEND_CAP`; circuit breaker opening | real time, from the request that crosses the line | `api.env` on the droplet |
+| **GitHub issue** (`.github/workflows/health-check.yml`) | API unreachable; breaker still open; the cap having been hit; trailing-30-day spend projecting past `MONTHLY_BUDGET_USD` | every 30 min (budget review once a day, 13:00 UTC) | `RF_METRICS_TOKEN` repo secret |
+
+The split exists because a per-request alert can't see a slow bleed (a month of
+$3 days never crosses a $10 cap), and a 30-minute poll is too slow for "the cap
+just closed the tool for the day". Neither channel is load-bearing on its own.
+
+### The `/health` metrics
+
+`/health` is public through nginx, so it always reports liveness and
+`circuit_open` — but the money is behind `RF_METRICS_TOKEN`. Publishing spend
+would also tell anyone how close the daily cap is to exhausted, which is a
+free denial-of-service hint. With no token configured the `metrics` object is
+omitted entirely (fail closed), never accidentally public.
+
+```bash
+# Public: liveness only
+curl -s https://restless-forge.dev/api/v1/rise-and-rhyme/health
+# {"status":"ok","circuit_open":false,"metrics":null}
+
+# With the token: the numbers
+curl -s -H "X-Metrics-Token: $RF_METRICS_TOKEN" \
+  https://restless-forge.dev/api/v1/rise-and-rhyme/health
+```
+
+| Field | Meaning |
+|---|---|
+| `generations_today`, `spend_today` | today so far (UTC day, same boundary the caps use) |
+| `daily_spend_cap` | the cap `spend_today` is racing, echoed so a monitor needs no config of its own |
+| `spend_7d`, `spend_30d`, `generations_30d` | trailing windows, from `daily_stats` (kept 400 days, so they outlive the 30-day detail log) |
+| `projected_monthly` | the last 7 days as a run rate × 30. A run rate, **not a forecast** — with under a week of history it over-projects, which is the safe direction for a spend warning. |
+
+### Setup
+
+1. Generate a token and put the **same value** in both places:
+   ```bash
+   openssl rand -hex 32
+   ```
+   - droplet: add `RF_METRICS_TOKEN=<value>` to `/etc/restless-forge/api.env`,
+     then `systemctl restart restless-forge-api`
+   - GitHub: Settings → Secrets and variables → Actions → `RF_METRICS_TOKEN`
+2. Optional real-time paging: add `ALERT_WEBHOOK_URL=<incoming webhook>` to
+   `api.env` (Slack/Discord-style `{"text": ...}` payload) and restart.
+3. Adjust `MONTHLY_BUDGET_USD` at the top of `health-check.yml` to whatever
+   monthly Anthropic spend should be worth an email.
+
+If the repo secret and `api.env` ever drift apart, the health check says so
+explicitly ("Backend rejected the metrics token") rather than silently going
+blind.
+
+### These numbers are this service's belief, not Anthropic's
+
+Every dollar figure here is computed from the token counts in each API
+response multiplied by `CLAUDE_INPUT_COST_PER_MTOK` /
+`CLAUDE_OUTPUT_COST_PER_MTOK`. Nothing reads your actual Anthropic balance. So:
+
+- **Set a spend limit in the Anthropic Console.** That is the authoritative
+  backstop; everything in this repo is a courtesy warning in front of it.
+- If the model or its pricing changes, update those two env vars or the
+  accounting silently drifts from reality.
+- Spend accumulates as a SQLite `REAL`, so a threshold alert can fire one
+  generation (~$0.01) late. Bounded and deliberate — see
+  `backend/tests/test_alerting.py`.
+
+### No calendar data is ever in an alert
+
+Alerts and logs carry counts, dollars, and hashes — never event titles, never
+calendar URLs, never IP addresses. This is enforced by
+`test_alerting.py::TestAlertsCarryNoCalendarData`, which runs a full generation
+with distinctive private event titles and asserts that none of them reach the
+webhook payload, the log output, or the health response.
 
 ## Data retention
 
@@ -193,15 +282,26 @@ systemctl restart restless-forge-api
 # Kill switch: stop the service (static site unaffected; /api returns 502)
 systemctl stop restless-forge-api     # `disable` too if it should survive deploys — note the deploy re-enables it
 
-# Today's numbers
-curl -s https://restless-forge.dev/api/v1/rise-and-rhyme/health
+# Today's numbers (add the token for the spend figures — see § Monitoring the bill)
+curl -s -H "X-Metrics-Token: $RF_METRICS_TOKEN" \
+  https://restless-forge.dev/api/v1/rise-and-rhyme/health
 
 # Inspect the state DB
 sqlite3 /var/lib/restless-forge/api.db 'SELECT * FROM daily_stats ORDER BY date DESC LIMIT 7;'
+
+# What the last 30 days actually cost, day by day
+sqlite3 -header -column /var/lib/restless-forge/api.db \
+  "SELECT date, count, ROUND(spend,4) AS usd FROM daily_stats
+   WHERE date >= date('now','-30 day') ORDER BY date DESC;"
+
+# Alerts that fired (they are logged whether or not a webhook is configured)
+journalctl -u restless-forge-api --since '7 days ago' --no-pager | grep ALERT
 ```
 
 Monitoring: `.github/workflows/health-check.yml` probes the health
-endpoint every 30 minutes and opens a `site-health` issue when it fails.
+endpoint every 30 minutes and opens a `site-health` issue when it fails;
+with `RF_METRICS_TOKEN` set it also watches the Anthropic spend. Full
+picture in § Monitoring the bill.
 
 ## Local development
 
