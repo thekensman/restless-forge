@@ -8,6 +8,7 @@ import {
   occurrenceKey,
   parseHm,
   snoozeUntil,
+  songDateFor,
 } from "../scheduler";
 
 // Wed Jul 29 2026, 21:00 local
@@ -144,5 +145,34 @@ describe("occurrenceKey", () => {
     const a = new Date(2026, 6, 30, 6, 30);
     expect(occurrenceKey(a)).toBe(occurrenceKey(new Date(2026, 6, 30, 6, 30)));
     expect(occurrenceKey(a)).not.toBe(occurrenceKey(new Date(2026, 6, 31, 6, 30)));
+  });
+});
+
+describe("songDateFor", () => {
+  // The reported bug: at 22:19 with a 22:00 genTime, the preview named the day
+  // AFTER tomorrow. nextGeneration() had already rolled to tomorrow NIGHT's
+  // slot, whose target is D+2. The song is for the alarm, so ask the alarm.
+  it("says tomorrow once tonight's generation time has passed", () => {
+    const justAfterGen = new Date(2026, 6, 29, 22, 19, 0); // Wed 22:19
+    expect(nextGeneration(justAfterGen, WEEKDAYS)?.targetDate).toBe("2026-07-31");
+    expect(songDateFor(justAfterGen, WEEKDAYS)).toBe("2026-07-30"); // tomorrow
+  });
+
+  it("says tomorrow before the generation time too", () => {
+    expect(songDateFor(WED_EVENING, WEEKDAYS)).toBe("2026-07-30");
+  });
+
+  it("says today when the alarm is still ahead this morning", () => {
+    // 05:00 with a 06:30 alarm: the next song plays in 90 minutes, today.
+    expect(songDateFor(THU_EARLY, WEEKDAYS)).toBe("2026-07-30");
+  });
+
+  it("skips non-alarm days", () => {
+    const friEvening = new Date(2026, 6, 31, 23, 0, 0); // Fri night
+    expect(songDateFor(friEvening, WEEKDAYS)).toBe("2026-08-03"); // Monday
+  });
+
+  it("falls back to tomorrow when no alarm days are enabled", () => {
+    expect(songDateFor(WED_EVENING, { ...WEEKDAYS, alarmDays: [] })).toBe("2026-07-30");
   });
 });

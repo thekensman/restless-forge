@@ -63,6 +63,31 @@ class TestUrlValidation:
         validate_ical_url("https://outlook.office365.com/owa/calendar/x/calendar.ics")
         validate_ical_url("https://p42-caldav.icloud.com/published/2/xyz")
 
+    def test_google_web_page_rejected_with_a_usable_hint(self):
+        """Google's "Public URL to this calendar" is an HTML page on an
+        allowlisted host. Caught here, the user is told which link to copy;
+        allowed through, it 200s and dies in the parser saying nothing."""
+        with pytest.raises(CalendarError) as exc:
+            validate_ical_url(
+                "https://calendar.google.com/calendar/embed?src=someone%40gmail.com"
+            )
+        message = str(exc.value)
+        assert "not a feed" in message
+        assert "iCal format" in message  # names the link to copy instead
+
+    def test_google_ical_forms_still_allowed(self):
+        for url in (
+            "https://calendar.google.com/calendar/ical/me%40gmail.com/public/basic.ics",
+            "https://calendar.google.com/calendar/ical/me%40gmail.com/private-9f3a/basic.ics",
+        ):
+            assert validate_ical_url(url) == url
+
+    def test_extensionless_feeds_are_not_path_checked(self):
+        """iCloud's published feeds carry no .ics, so only hosts with a known
+        feed prefix get a path check — the body sniff covers the rest."""
+        url = "https://p42-caldav.icloud.com/published/2/MTA0NTk3ODk"
+        assert validate_ical_url(url) == url
+
     def test_http_rejected(self):
         with pytest.raises(CalendarError):
             validate_ical_url("http://calendar.google.com/calendar/ical/x/basic.ics")
@@ -189,3 +214,66 @@ class TestSizeCap:
 
         # Bounded by the cap (plus at most one chunk), not unbounded.
         assert delivered["bytes"] <= ical_parser.MAX_FEED_BYTES + len(chunk)
+
+
+class TestNonCalendarBody:
+    """A 200 whose body isn't a calendar is a user error, not a parse error."""
+
+    @staticmethod
+    def _fetch_returning(monkeypatch, body: bytes):
+        class FakeStream:
+            status_code = 200
+            headers: dict[str, str] = {}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def iter_bytes(self):
+                yield body
+
+        class FakeClient:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def stream(self, *a, **k):
+                return FakeStream()
+
+        monkeypatch.setattr(ical_parser.socket, "getaddrinfo",
+                            lambda *a, **k: [(2, 1, 6, "", ("142.250.1.1", 443))])
+        monkeypatch.setattr(ical_parser.httpx, "Client", lambda **k: FakeClient())
+
+    def test_html_body_says_what_to_do(self, monkeypatch):
+        self._fetch_returning(
+            monkeypatch,
+            b"<!DOCTYPE html><html><head><title>Google Calendar</title></head>"
+            b"<body><div id='calendar'></div></body></html>",
+        )
+        with pytest.raises(CalendarError) as exc:
+            ical_parser.fetch_feed(GOOGLE)
+        message = str(exc.value)
+        assert "web page" in message
+        assert ".ics" in message
+        # The old failure mode: a generic parser complaint with no next step.
+        assert "could not be parsed" not in message
+
+    def test_real_feed_still_passes(self, monkeypatch):
+        self._fetch_returning(monkeypatch, FEED.encode())
+        assert ical_parser.fetch_feed(GOOGLE) == FEED
+
+    def test_leading_blank_lines_and_bom_tolerated(self, monkeypatch):
+        self._fetch_returning(monkeypatch, "﻿\r\n\r\n".encode() + FEED.encode())
+        assert "BEGIN:VEVENT" in ical_parser.fetch_feed(GOOGLE)
+
+    def test_sniff_reads_only_the_leading_window(self, monkeypatch):
+        """BEGIN:VCALENDAR buried past the window is still not a feed — the
+        check must stay O(window), not O(feed)."""
+        padded = b"<html>" + b"x" * ical_parser.FEED_SNIFF_BYTES + FEED.encode()
+        self._fetch_returning(monkeypatch, padded)
+        with pytest.raises(CalendarError, match="web page"):
+            ical_parser.fetch_feed(GOOGLE)

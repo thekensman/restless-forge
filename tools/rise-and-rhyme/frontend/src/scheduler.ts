@@ -105,6 +105,23 @@ export function lastGeneration(now: Date, prefs: SchedulePrefs): GenerationSlot 
   return null;
 }
 
+/** The local day the next song covers: the day the next alarm actually rings.
+
+    This is deliberately NOT nextGeneration().targetDate. A generation slot is
+    "the next time we call the backend", which rolls to tomorrow night's slot
+    the moment tonight's genTime passes — so asking it at 22:19 with a 22:00
+    genTime named the day AFTER tomorrow, and the preview showed a day that was
+    off by two. The alarm is the thing the song is for, so ask about the alarm:
+    correct before genTime, after genTime, and at 3am (when the song being
+    written is for later *today*, not tomorrow). */
+export function songDateFor(now: Date, prefs: SchedulePrefs): string {
+  const alarm = nextAlarm(now, prefs);
+  if (alarm) return localDateString(alarm);
+  // No alarm days enabled (or an unparseable time): fall back to tomorrow so
+  // the preview still has something sensible to read.
+  return localDateString(dayOffset(now, 1));
+}
+
 /** True when `t` is due at `now`, within a grace window so a tab that was
     throttled or suspended still acts on an occurrence it slept through. */
 export function isDue(t: Date, now: Date, graceMinutes = 30): boolean {
