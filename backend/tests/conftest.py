@@ -16,6 +16,7 @@ def settings(tmp_path):
     s = Settings()
     s.db_path = str(tmp_path / "test.db")
     s.anthropic_api_key = "test-key"
+    s.metrics_token = "test-metrics-token"
     return s
 
 

@@ -133,9 +133,11 @@ class TestPreviewIsolation:
 
     def test_preview_costs_nothing(self, client):
         client.post("/api/v1/rise-and-rhyme/preview", json=body())
-        health = client.get("/api/v1/rise-and-rhyme/health").json()
-        assert health["generations_today"] == 0
-        assert health["spend_today"] == 0.0
+        health = client.get(
+            "/api/v1/rise-and-rhyme/health", headers={"X-Metrics-Token": "test-metrics-token"}
+        ).json()
+        assert health["metrics"]["generations_today"] == 0
+        assert health["metrics"]["spend_today"] == 0.0
 
     def test_preview_does_not_lock_the_calendar(self, settings, monkeypatch):
         """Previewing then generating the same calendar must work."""

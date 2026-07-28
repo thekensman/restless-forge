@@ -21,7 +21,7 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import httpx
@@ -173,6 +173,50 @@ class RateLimiter:
                 "SELECT spend FROM daily_stats WHERE date = ?", (today,)
             ).fetchone()["spend"]
         self._maybe_alert(spend, cost)
+
+    def spend_summary(self, now: Optional[float] = None) -> dict:
+        """Rolling spend, for keeping an eye on the Anthropic bill.
+
+        Read from `daily_stats` rather than `generations` on purpose: it is a
+        per-day aggregate kept for 400 days, so the 7/30-day windows survive
+        the 30-day pruning of the detailed log.
+
+        `projected_monthly` is a run rate — the last 7 days extrapolated to 30
+        — not a forecast. With fewer than 7 days of history it over-projects,
+        which is the safe direction for a spend warning.
+
+        NOTE: every figure here is computed from token usage times the prices
+        in the environment. It is what this service *believes* it spent, not a
+        reading from Anthropic. Set spend limits in the Anthropic Console too.
+        """
+        now = time.time() if now is None else now
+        today = datetime.fromtimestamp(now, tz=timezone.utc)
+
+        def since(days: int) -> str:
+            return (today - timedelta(days=days - 1)).strftime("%Y-%m-%d")
+
+        with self.db.connect() as conn:
+            def window(days: int) -> tuple[int, float]:
+                row = conn.execute(
+                    "SELECT COALESCE(SUM(count), 0) AS c, COALESCE(SUM(spend), 0) AS s "
+                    "FROM daily_stats WHERE date >= ?",
+                    (since(days),),
+                ).fetchone()
+                return int(row["c"]), float(row["s"])
+
+            today_count, today_spend = window(1)
+            _, spend_7d = window(7)
+            count_30d, spend_30d = window(30)
+
+        return {
+            "generations_today": today_count,
+            "spend_today": round(today_spend, 4),
+            "daily_spend_cap": self.s.daily_spend_cap,
+            "spend_7d": round(spend_7d, 4),
+            "spend_30d": round(spend_30d, 4),
+            "generations_30d": count_30d,
+            "projected_monthly": round(spend_7d / 7 * 30, 2),
+        }
 
     def today_stats(self, now: Optional[float] = None) -> tuple[int, float]:
         now = time.time() if now is None else now

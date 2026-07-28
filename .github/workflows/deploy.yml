@@ -15,6 +15,16 @@ name: Deploy
 #                   the file is never overwritten, so key rotation and other
 #                   ops edits happen on the server, not in this workflow.
 #
+# Optional secrets (monitoring — see docs/backend.md § Monitoring the bill):
+#   RF_METRICS_TOKEN   Shared secret that unlocks the spend figures on
+#                   /health. Set the SAME value here and in api.env; the
+#                   health-check workflow reads it to alert on the Anthropic
+#                   bill. Unset = uptime monitoring only, no spend alerts.
+#   ALERT_WEBHOOK_URL  Chat webhook the API posts to in real time when the
+#                   daily spend cap is neared/hit or the circuit breaker opens.
+# Both are seeded into api.env on a first deploy only; on a droplet that is
+# already running, add them to /etc/restless-forge/api.env by hand and restart.
+#
 # Deploys static files, the backend API (backend/ → /opt/restless-forge,
 # outside the web root, with venv refresh + systemd restart), AND the main
 # nginx vhost. Static files are served
@@ -137,6 +147,10 @@ jobs:
       # local health check that fails the workflow loudly if the service
       # doesn't come up. The static site is unaffected by a backend failure.
       - name: Deploy backend API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RF_METRICS_TOKEN: ${{ secrets.RF_METRICS_TOKEN }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
         run: |
           rsync -az --delete \
             --exclude '.venv' --exclude '__pycache__' --exclude '*.pyc' \
@@ -146,8 +160,20 @@ jobs:
           # Env file shipped separately and installed only if missing, so
           # the key never appears on a remote command line and server-side
           # ops edits (key rotation, cap changes) survive every deploy.
+          #
+          # Reminder: this only seeds a box that has NO api.env yet. On an
+          # already-deployed droplet, adding RF_METRICS_TOKEN / ALERT_WEBHOOK_URL
+          # is a manual edit — see docs/backend.md § Monitoring the bill.
           umask 077
-          printf 'ANTHROPIC_API_KEY=%s\n' "${{ secrets.ANTHROPIC_API_KEY }}" > /tmp/rf-api-incoming.env
+          {
+            printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY"
+            if [ -n "$RF_METRICS_TOKEN" ]; then
+              printf 'RF_METRICS_TOKEN=%s\n' "$RF_METRICS_TOKEN"
+            fi
+            if [ -n "$ALERT_WEBHOOK_URL" ]; then
+              printf 'ALERT_WEBHOOK_URL=%s\n' "$ALERT_WEBHOOK_URL"
+            fi
+          } > /tmp/rf-api-incoming.env
           scp -i ~/.ssh/deploy_key /tmp/rf-api-incoming.env \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/rf-api-incoming.env"
           rm -f /tmp/rf-api-incoming.env

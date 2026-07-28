@@ -73,8 +73,24 @@ class PreviewOk(BaseModel):
     mood: str
 
 
-class Health(BaseModel):
-    status: str
+class SpendMetrics(BaseModel):
     generations_today: int
     spend_today: float
+    daily_spend_cap: float
+    spend_7d: float
+    spend_30d: float
+    generations_30d: int
+    projected_monthly: float
+
+
+class Health(BaseModel):
+    """Liveness is public; the money is not.
+
+    /health is served publicly through nginx, so the spend figures are gated
+    behind RF_METRICS_TOKEN — publishing them would also tell anyone how close
+    the daily cap is to exhausted. `metrics` is None when the caller didn't
+    present the token, or when no token is configured at all (fail closed)."""
+
+    status: str
     circuit_open: bool
+    metrics: SpendMetrics | None = None

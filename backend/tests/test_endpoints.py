@@ -20,6 +20,10 @@ END:VCALENDAR
 
 LYRICS = ["line one", "line two", "line three", "line four", "line five", "line six"]
 
+# Matches settings.metrics_token in the fixture; /health only reports money to
+# a caller who presents it.
+METRICS_HEADER = {"X-Metrics-Token": "test-metrics-token"}
+
 
 def ok_outcome(events, target, settings, client=None):
     return LyricOutcome(lyrics=LYRICS, mood="cheerful", cost=0.01)
@@ -153,9 +157,9 @@ def test_refusal_is_billed_and_reported(settings, monkeypatch):
     assert res.status_code == 502
     assert res.json()["status"] == "error"
 
-    health = tc.get("/api/v1/rise-and-rhyme/health").json()
-    assert health["generations_today"] == 1
-    assert health["spend_today"] == pytest.approx(0.02)
+    health = tc.get("/api/v1/rise-and-rhyme/health", headers=METRICS_HEADER).json()
+    assert health["metrics"]["generations_today"] == 1
+    assert health["metrics"]["spend_today"] == pytest.approx(0.02)
     assert health["circuit_open"] is False  # a refusal is not a service failure
 
 
@@ -212,11 +216,66 @@ def test_health(client):
     data = res.json()
     assert data["status"] == "ok"
     assert data["circuit_open"] is False
-    assert data["generations_today"] == 0
 
 
 def test_health_counts_generations(client):
     client.post("/api/v1/rise-and-rhyme/generate", json=body())
-    data = client.get("/api/v1/rise-and-rhyme/health").json()
-    assert data["generations_today"] == 1
-    assert data["spend_today"] == pytest.approx(0.01)
+    data = client.get("/api/v1/rise-and-rhyme/health", headers=METRICS_HEADER).json()
+    assert data["metrics"]["generations_today"] == 1
+    assert data["metrics"]["spend_today"] == pytest.approx(0.01)
+
+
+class TestHealthMetricsGating:
+    """/health is public through nginx. Liveness is fine to publish; the spend
+    figures are not — they'd tell anyone how close the daily cap is to spent."""
+
+    def test_public_caller_sees_liveness_but_no_money(self, client):
+        client.post("/api/v1/rise-and-rhyme/generate", json=body())
+        data = client.get("/api/v1/rise-and-rhyme/health").json()
+        assert data["status"] == "ok"
+        assert data["circuit_open"] is False
+        assert data["metrics"] is None
+
+    def test_wrong_token_is_treated_as_no_token(self, client):
+        data = client.get(
+            "/api/v1/rise-and-rhyme/health", headers={"X-Metrics-Token": "nope"}
+        ).json()
+        assert data["metrics"] is None
+
+    def test_unconfigured_token_fails_closed(self, settings, monkeypatch):
+        """An empty RF_METRICS_TOKEN must not make an empty header match."""
+        monkeypatch.setattr(ical_parser, "fetch_feed", lambda url: FEED)
+        monkeypatch.setattr(lyric_generator, "generate_lyrics", ok_outcome)
+        settings.metrics_token = ""
+        tc = TestClient(main_module.create_app(settings))
+        assert tc.get("/api/v1/rise-and-rhyme/health").json()["metrics"] is None
+        assert (
+            tc.get("/api/v1/rise-and-rhyme/health", headers={"X-Metrics-Token": ""})
+            .json()["metrics"]
+            is None
+        )
+
+    def test_rolling_windows_and_projection(self, client, settings):
+        """The numbers the uptime monitor alerts on."""
+        client.post("/api/v1/rise-and-rhyme/generate", json=body())
+        m = client.get("/api/v1/rise-and-rhyme/health", headers=METRICS_HEADER).json()["metrics"]
+        assert m["daily_spend_cap"] == settings.daily_spend_cap
+        assert m["spend_7d"] == pytest.approx(0.01)
+        assert m["spend_30d"] == pytest.approx(0.01)
+        assert m["generations_30d"] == 1
+        # 0.01 over the trailing week, annualized to a month.
+        assert m["projected_monthly"] == pytest.approx(round(0.01 / 7 * 30, 2))
+
+    def test_older_days_roll_out_of_the_windows(self, client, settings):
+        """A 40-day-old row must not inflate the 30-day figure."""
+        from datetime import datetime, timedelta, timezone
+
+        old = (datetime.now(timezone.utc) - timedelta(days=40)).strftime("%Y-%m-%d")
+        db = main_module.create_app(settings).state.db
+        with db.connect() as conn:
+            conn.execute(
+                "INSERT INTO daily_stats (date, count, spend) VALUES (?, 5, 9.0)", (old,)
+            )
+        m = client.get("/api/v1/rise-and-rhyme/health", headers=METRICS_HEADER).json()["metrics"]
+        assert m["spend_30d"] == 0.0
+        assert m["generations_30d"] == 0
