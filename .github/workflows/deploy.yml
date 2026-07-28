@@ -224,7 +224,13 @@ jobs:
             systemctl daemon-reload
             echo "systemd unit installed/updated"
           fi
-          systemctl enable --now restless-forge-api >/dev/null 2>&1 || true
+          # Exactly one start action — `enable --now` plus a following
+          # `restart` used to both try to bind :8000 at once, crash-looping
+          # the unit on "address already in use" until systemd's automatic
+          # retry recovered a few seconds later, past the health-check
+          # window below. Enable (without starting) once, then always use
+          # `restart`, which starts a not-yet-running unit just as well.
+          systemctl enable restless-forge-api >/dev/null 2>&1 || true
           systemctl restart restless-forge-api
 
           # Local health check — fail loudly if the service didn't come up.
