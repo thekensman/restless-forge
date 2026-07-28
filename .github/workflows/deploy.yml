@@ -231,6 +231,24 @@ jobs:
           # window below. Enable (without starting) once, then always use
           # `restart`, which starts a not-yet-running unit just as well.
           systemctl enable restless-forge-api >/dev/null 2>&1 || true
+
+          # Nothing else on this box should ever hold 127.0.0.1:8000. If a
+          # past crash left an orphaned process squatting on it (systemd's
+          # cgroup-kill can miss a detached child), every restart fails
+          # immediately with "address already in use" and — since
+          # RestartSec=5 never trips the default burst limiter — keeps
+          # crash-looping forever instead of giving up. Clear the port and
+          # the unit's failure state unconditionally before restarting, so
+          # a stuck deploy is self-healing instead of requiring a manual
+          # SSH intervention.
+          if command -v fuser >/dev/null 2>&1; then
+            fuser -k 8000/tcp 2>/dev/null || true
+          else
+            pid=$(ss -ltnpH 'sport = :8000' 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -1) || true
+            [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null || true
+          fi
+          sleep 1
+          systemctl reset-failed restless-forge-api 2>/dev/null || true
           systemctl restart restless-forge-api
 
           # Local health check — fail loudly if the service didn't come up.
@@ -243,6 +261,8 @@ jobs:
           done
           if [ -z "$ok" ]; then
             echo "::error::backend health check FAILED after restart — static site is unaffected, but /api is down"
+            echo "── what's actually bound to :8000 ──"
+            ss -ltnp 'sport = :8000' || true
             systemctl --no-pager -l status restless-forge-api || true
             journalctl -u restless-forge-api -n 40 --no-pager || true
             exit 1
