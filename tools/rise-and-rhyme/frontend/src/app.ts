@@ -317,12 +317,20 @@ async function tick(): Promise<void> {
 // ── Wire-up ──
 
 function init(): void {
+  // FIRST, before any DOM lookup. $() throws on a missing element, so a single
+  // stale id used to abort the rest of init() — and the scheduling loop, being
+  // last, was the first thing lost. An alarm that silently never rings is the
+  // worst failure this tool has; starting the loop up front means a wiring bug
+  // costs a button, not the alarm. (`prefs` is module-level, so tick() is
+  // already safe to run.) The id contract itself is enforced by app.test.ts.
+  window.setInterval(() => void tick(), TICK_MS);
+
   fillForm();
   renderSchedule();
 
   $("rar-save").addEventListener("click", onSave);
   $("rar-check").addEventListener("click", () => void onCheckCalendar());
-  $("rar-preview-unused").addEventListener("click", () => void onPreview());
+  $("rar-play").addEventListener("click", () => void onPreview());
   $("rar-stop").addEventListener("click", () => {
     snoozedUntil = null;
     hideAlarmScreen();
