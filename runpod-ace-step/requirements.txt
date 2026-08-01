@@ -1,0 +1,13 @@
+# ACE-Step worker deps. Torch itself comes from the CUDA base image.
+runpod>=1.6.0
+
+# AceStepPipeline landed in diffusers after the last tagged release at the time
+# of writing. Pin a commit once a release ships it; until then main is the only
+# source, and an unpinned main can change the call signature under you.
+git+https://github.com/huggingface/diffusers.git@main
+
+transformers>=4.44
+accelerate>=0.33
+huggingface_hub>=0.24
+soundfile>=0.12
+numpy
