@@ -109,6 +109,21 @@ function renderTermsToolList(live) {
   ).join("\n");
 }
 
+/* /privacy enumerates how each live tool handles data. Generated from the same
+   source so the policy can never silently omit a tool (it previously missed
+   TattooSafe). Cloud-assisted tools are called out and linked to their own
+   per-tool privacy page; everything else is browser-only. */
+function renderPrivacyToolList(live) {
+  return live.map((t) => {
+    if (t.tier === "cloud") {
+      return `      <li><strong>${esc(t.label)}</strong> — Cloud-assisted: some processing happens on our server.\n` +
+        `        See <a href="/tools/${t.id}/privacy/">${esc(t.label)} privacy</a> for its exact data flow.</li>`;
+    }
+    return `      <li><strong>${esc(t.label)}</strong> — ${esc(cap(t.blurb))}.\n` +
+      `        Runs entirely in your browser; nothing you enter or open is uploaded.</li>`;
+  }).join("\n");
+}
+
 function joinBlurbs(live) {
   const b = live.map((t) => t.blurb);
   return b.length > 1 ? `${b.slice(0, -1).join(", ")}, and ${b.at(-1)}` : b[0];
@@ -171,7 +186,7 @@ function* walk(dir) {
     else if (e.name.endsWith(".html")) yield p;
   }
 }
-const TOOL_LIST_PAGES = ["about.html", "terms.html", "faq.html"];
+const TOOL_LIST_PAGES = ["about.html", "terms.html", "faq.html", "privacy.html"];
 const pages = [...walk(join(root, "site"))]
   .map((p) => relative(join(root, "site"), p))
   .filter((rel) => {
@@ -210,6 +225,9 @@ for (const rel of pages) {
   }
   if (rel === "terms.html") {
     html = inject(html, null, "tools-terms", renderTermsToolList(live), rel);
+  }
+  if (rel === "privacy.html") {
+    html = inject(html, null, "tools-privacy", renderPrivacyToolList(live), rel);
   }
   if (rel === "faq.html") {
     html = inject(html, null, "tools-faq", renderFaqAnswer(live), rel);
