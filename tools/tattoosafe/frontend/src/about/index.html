@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="/tool-chrome.css">
   <link rel="stylesheet" href="/tools/tattoosafe/pages.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
   <script src="/tools/tattoosafe/shared.js"></script>
 </head>
 <body>
@@ -26,24 +27,79 @@
     <h1>About TattooSafe</h1>
     <p class="page-sub">Free AR tattoo preview &amp; pricing calculator — everything runs in your browser.</p>
 
-    <h2>What It Does</h2>
-    <p>TattooSafe lets you see how a tattoo design will look on your body using your phone or laptop camera.
-    Upload any image, activate the camera, and drag your design into position. The pricing calculator
-    estimates cost based on size, style, placement, and artist experience level using 2024–2025 US market data.</p>
-
-    <h2>How It Works</h2>
-    <p>The AR preview uses the browser Camera API (getUserMedia) and HTML5 Canvas for real-time compositing at 60fps.
-    The silhouette preview generates inline SVGs with anatomically proportioned body outlines scaled to your height.
-    The pricing engine calculates session time from tattoo area × complexity, adjusted for placement difficulty and session overhead.</p>
-
-    <h2>About Your Data</h2>
-    <div class="info-box">
-      <p><strong>Privacy:</strong> Nothing you enter is sent to a server. Camera feed stays on your device. Images are never uploaded. All processing happens in your browser.</p>
-    </div>
-    <p>See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Use</a>.</p>
-
-    <h2>Open Source</h2>
-    <p>Source code is on <a data-rf-link="githubRepo" target="_blank" rel="noopener">GitHub</a>. Contributions, bug reports, and feature requests welcome.</p>
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>TattooSafe answers two questions people have before they get tattooed and
+usually cannot answer well: <strong>how big will this actually be on me</strong>, and <strong>what
+should it cost</strong>. It does both in your browser, with your camera, without an
+account and without sending anything anywhere.</p>
+<h2>The sizing problem</h2>
+<p>Tattoo designs are almost always viewed on a screen — a phone, a shop&#39;s iPad, a
+printed flash sheet. None of those tell you how the piece relates to your
+forearm. A design that looks balanced at 900 pixels wide can arrive as a
+palm-sized piece that swallows your wrist, or a delicate thing that disappears
+on a thigh.</p>
+<p>The traditional fix is a paper stencil at the shop, which works but happens
+late — after you have chosen the design, booked the slot, and paid a deposit.
+TattooSafe moves that check to before the decision.</p>
+<p>Two views handle it. The <strong>camera preview</strong> composites your design onto a live
+video feed so you can move it around your actual body at actual scale. The
+<strong>silhouette view</strong> draws a proportioned body outline scaled to your height and
+places the design on it with real centimetre dimensions — useful when you want
+measurements rather than a vibe, and shareable with your artist.</p>
+<h2>How the silhouette is built</h2>
+<p>The body outline is generated as an inline SVG rather than being a stock image,
+which means it scales to <em>your</em> height instead of a generic model&#39;s. The
+proportions come from standard anatomical ratios — head height as a fraction of
+total height, limb lengths as fractions of that — so a 155 cm and a 195 cm body
+produce genuinely different outlines rather than the same drawing at two sizes.</p>
+<p>Sixteen placements are modelled, each with its own usable area: inner and outer
+forearm, upper arm, shoulder, wrist, chest, upper and lower back, ribs,
+sternum, thigh, calf, ankle, back of neck, behind the ear, and back of the hand.
+When you enter a design&#39;s dimensions, TattooSafe checks them against the
+placement&#39;s maximum and tells you whether it fits, rather than letting you find
+out at the shop.</p>
+<h2>Background removal</h2>
+<p>Reference images usually arrive with a white or near-white box around the
+artwork, which looks wrong composited onto skin. TattooSafe flood-fills inward
+from the image edges, removing contiguous regions that fall within a tolerance
+of the corner colour.</p>
+<p>This is deliberately conservative. It clears flat backgrounds and leaves
+anything textured alone, because the failure mode of an aggressive algorithm —
+eating part of the design — is much worse than leaving a faint edge. Designs on
+busy or photographic backgrounds will need manual cutting out first.</p>
+<h2>The pricing side</h2>
+<p>The estimator converts dimensions into area, applies a time-per-square-inch rate
+for the style, adjusts for how difficult the placement is to work on, adds setup
+and breaks, and multiplies by an hourly rate. Every constant it uses is
+documented on the <a href="/tools/tattoosafe/pricing/">pricing page</a> so you can check
+the reasoning rather than trust the output.</p>
+<p>It is a sanity check, not a quote. A real quote comes from a real artist looking
+at a real design.</p>
+<h2>Your data</h2>
+<p>Nothing you enter or upload is sent to a server. The camera feed is processed
+frame by frame in the browser and never recorded. Images stay on your device.
+There is no account, no upload endpoint, and nothing to delete later.</p>
+<p>This is a property of how the tool is built, not a policy that could quietly
+change. Full details in the <a href="/privacy">privacy policy</a> and
+<a href="/terms">terms of use</a>.</p>
+<h2>Honest limitations</h2>
+<p><strong>It is a preview, not a simulation.</strong> The overlay does not wrap to the curve of
+your arm or respond to how skin moves. Treat placement and scale as a good
+approximation, not a rendering.</p>
+<p><strong>Lighting affects the illusion.</strong> Compositing a flat image onto a lit body
+always reads slightly as a sticker. Judge the size and position, not the
+realism.</p>
+<p><strong>It cannot tell you if a design is good.</strong> It tells you whether it fits and
+roughly what it costs. Whether it is right for you is between you and your
+artist.</p>
+<h2>Part of Restless Forge</h2>
+<p>TattooSafe is one of several tools at <a href="/">Restless Forge</a>, a one-person workshop
+building free, browser-first utilities. Source is on
+<a target="_blank" rel="noopener" href="https://github.com/thekensman/restless-forge">GitHub</a> — bug reports, placement
+corrections, and feature requests are all welcome via the
+<a href="/contact">contact page</a>.</p>
+<p>Ready to try it? Open the <a href="/tools/tattoosafe/">preview tool</a>.</p>
+<!-- /generated:content -->
   </main>
   <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
     <ins class="adsbygoogle" style="display:block"
