@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why Scanlines Look Wrong in Sand</title>
+  <meta name="description" content="The obvious way to convert an image for a sand table is the way that fails. Why raster scanlines produce corduroy, and what the three tracing modes do instead.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/articles/why-scanlines-look-wrong-in-sand/">
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <meta property="og:title" content="Why Scanlines Look Wrong in Sand">
+  <meta property="og:description" content="The obvious way to convert an image for a sand table is the way that fails. Why raster scanlines produce corduroy, and what the three tracing modes do instead.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/articles/why-scanlines-look-wrong-in-sand/">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Why Scanlines Look Wrong in Sand",
+    "description": "The obvious way to convert an image for a sand table is the way that fails. Why raster scanlines produce corduroy, and what the three tracing modes do instead.",
+    "datePublished": "2026-08-04",
+    "dateModified": "2026-08-04",
+    "author": {"@type": "Person", "name": "Kenneth Cross", "url": "https://restlessforge.substack.com"},
+    "publisher": {"@type": "Organization", "name": "SandPath", "url": "https://restless-forge.dev/tools/sandpath"},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://restless-forge.dev/tools/sandpath/articles/why-scanlines-look-wrong-in-sand/"}
+  }
+  </script>
+    <link rel="stylesheet" href="/tool-chrome.css">
+    <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <style>
+    /* ── Article Layout ── */
+    .article{max-width:680px}
+    .breadcrumb{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:28px}
+    .breadcrumb a{color:var(--dim)}
+    .breadcrumb a:hover{color:var(--accent)}
+    .article__tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .article__tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:2px;padding:3px 10px}
+    .article__meta{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .article__body h2{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin:44px 0 16px;display:flex;align-items:center;gap:10px}
+    .article__body h2::before{content:'';display:inline-block;width:18px;height:1px;background:var(--accent);flex-shrink:0}
+    .article__body p{font-size:15px;color:var(--muted);line-height:1.85;margin-bottom:18px}
+    .article__body p:last-child{margin-bottom:0}
+    .article__body strong{color:var(--text);font-weight:600}
+    .article__body em{font-style:italic}
+    .article__body blockquote{border-left:3px solid var(--accent);padding:14px 20px;margin:28px 0;background:var(--surface);border-radius:0 3px 3px 0}
+    .article__body blockquote p{font-size:15px;font-style:italic;color:var(--text);margin-bottom:0}
+    .article__body ul{font-size:15px;color:var(--muted);line-height:1.85;margin:0 0 18px 22px}
+    .article__body ul li{margin-bottom:8px}
+    .formula{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:3px;padding:18px 22px;margin:24px 0;font-family:var(--font-mono);font-size:13px;color:var(--text);line-height:1.7}
+    .formula span{color:var(--muted);font-size:12px;display:block;margin-top:6px}
+    .cta-inline{margin:44px 0;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:3px;padding:28px 24px}
+    .cta-inline p{font-size:14px;color:var(--muted);margin-bottom:16px;font-style:italic}
+    .cta-inline a.btn{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--bg);background:var(--accent);padding:11px 22px;border-radius:3px;text-decoration:none;transition:opacity 0.15s;margin-right:12px;margin-bottom:8px}
+    .cta-inline a.btn:hover{opacity:0.85;text-decoration:none}
+    .cta-inline a.btn--outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  </style>
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+
+  <main>
+    <div class="article">
+      <p class="breadcrumb"><a href="/tools/sandpath/articles/">← Articles</a></p>
+
+      <div class="article__tags">
+        <span class="article__tag">Tracing</span>
+        <span class="article__tag">Image Conversion</span>
+        <span class="article__tag">Edge Detection</span>
+      </div>
+
+      <h1>Why Scanlines Look Wrong in Sand</h1>
+
+      <div class="article__meta">
+        <span>August 4, 2026</span>
+        <span>By <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a></span>
+        <span>8 min read</span>
+      </div>
+
+      <div class="article__body">
+        <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>Here is the obvious way to get a photograph onto a sand table. Convert it to
+greyscale. Walk across it row by row. Where a pixel is dark, wiggle the ball;
+where it is light, move straight. Repeat for every row.</p>
+<p>This is roughly how an inkjet printer works, it is straightforward to implement,
+and several sand table converters do exactly it. The results are consistently
+disappointing, and the reason is worth understanding — it explains what SandPath
+does instead.</p>
+<h2>Why printers get away with it</h2>
+<p>An inkjet lays down opaque dots at a few hundred per inch. Adjacent rows overlap
+slightly, ink bleeds a fraction into the paper fibres, and the eye integrates
+everything above a few dozen rows per inch into continuous tone. The row
+structure exists but is invisible.</p>
+<p>None of those conditions hold in sand.</p>
+<h2>Why sand does not</h2>
+<p><strong>The ball is enormous.</strong> A typical sand table ball is 10–15 mm across. On a
+400 mm bed that is one row per 2.5% of the table&#39;s width — call it forty rows,
+total, versus the several thousand a printer would use across the same distance.</p>
+<p><strong>Rows cannot overlap.</strong> Two adjacent grooves do not blend; the sand between
+them stands up as a ridge. Where a printer gets smooth tone, sand gets
+corduroy.</p>
+<p><strong>Nothing lifts.</strong> A printer&#39;s head moves without printing between rows. The
+ball cannot. Every return sweep ploughs a groove of its own, so the &quot;blank&quot;
+parts of the image are as carved as the dark parts.</p>
+<p><strong>Sand has no tone.</strong> A groove is a groove. There is no darker groove for a
+darker pixel — you can only vary spacing or amplitude, and both are limited by
+the ball&#39;s width.</p>
+<p>Put together: scanlining a photograph gives you forty parallel furrows across
+the table with some wiggle in them. From across a room it may resolve into
+something. Up close, which is where people actually look at sand tables, it is
+visibly a raster.</p>
+<h2>What sand is actually good at</h2>
+<p>The medium&#39;s strength is the opposite of a printer&#39;s. A sand table draws one
+continuous, elegant line of arbitrary length and curvature. The whole aesthetic
+— the reason people buy these things — is a single unbroken path wandering
+through the sand.</p>
+<p>So the right conversion strategy is not &quot;reproduce the image.&quot; It is <strong>find the
+lines in the image and draw those.</strong> That is a vectorisation problem, and it has
+three good answers depending on what the source material is.</p>
+<h2>Outline: edge detection</h2>
+<p><strong>Outline</strong> mode runs Sobel edge detection, convolving the image with a pair of
+gradient kernels — one horizontal, one vertical — to find where brightness
+changes sharply. Combining their responses gives edge strength at every pixel;
+thresholding and following those edges gives contours.</p>
+<p>The output is a sketch: the boundaries in a photograph, without any filled
+areas. This is the mode for photographs and detailed artwork, and the mental
+model to hold is a line drawing done by someone tracing the photo, not a
+reproduction of it.</p>
+<p>It works best when the subject is distinct from the background. Busy scenes
+produce edge detections everywhere and the result reads as noise.</p>
+<h2>Threshold: marching squares</h2>
+<p><strong>Threshold</strong> mode splits the image into two regions at a brightness cutoff,
+then extracts the boundary between them using marching squares — an algorithm
+that examines each 2×2 cell of the binary grid and emits the contour segment
+passing through it, then stitches the segments into closed loops.</p>
+<p>Because the output is closed, well-defined outlines, this is the strongest mode
+for logos, silhouettes, lettering, and high-contrast graphics. It is also the
+mode most sensitive to its threshold: a photograph run through it typically
+yields either a black blob or nothing, depending on which side of the cutoff the
+image sits.</p>
+<h2>Centerline: skeletonisation</h2>
+<p><strong>Centerline</strong> mode iteratively erodes shapes until only a one-pixel-wide medial
+line remains, then traces that.</p>
+<p>The distinction from Outline matters most on line art. Trace a drawn stroke with
+edge detection and you get two lines — one down each side — which in sand reads
+as a hollow tube. Skeletonise it and you get one line down the middle, which is
+what the original stroke was. For handwriting, sketches, and pen drawings this
+is the mode that behaves the way you expect.</p>
+<h2>After tracing: simplification</h2>
+<p>Whichever mode runs, the traced paths carry far more points than the ball can
+express — often one per pixel. Douglas–Peucker simplification recursively
+removes points lying within a tolerance of the line between their neighbours.</p>
+<p>The effect is dramatic and nearly free: point counts commonly drop by an order
+of magnitude while the visible shape is unchanged, because most of the discarded
+points described detail finer than the ball&#39;s diameter. That is the Path Detail
+control.</p>
+<h2>Choosing well</h2>
+<p>The single highest-leverage decision is the trace mode, and the failure mode is
+predictable: photographs run through Threshold, line art run through Outline.
+If a conversion looks wrong, change the mode before touching anything else.</p>
+<p>And accept the medium. A sand table renders an <em>interpretation</em> of a
+photograph — its edges, its structure — not the photograph. Sources that survive
+the trip are ones whose meaning lives in shape rather than tone.</p>
+<p>Ready to try it? <a href="/tools/sandpath/">Open the converter</a>, or read
+<a href="/tools/sandpath/how-it-works/">how the conversion works</a>.</p>
+<!-- /generated:content -->
+      </div>
+    </div>
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>

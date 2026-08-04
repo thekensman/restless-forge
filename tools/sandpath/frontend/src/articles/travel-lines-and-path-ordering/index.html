@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Lines: The Problem You Cannot Fully Solve</title>
+  <meta name="description" content="A sand table ball cannot lift off the sand, so every move between shapes leaves a mark. Why nearest-neighbour ordering helps, why it is not optimal, and how to design around it.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/articles/travel-lines-and-path-ordering/">
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <meta property="og:title" content="Travel Lines: The Problem You Cannot Fully Solve">
+  <meta property="og:description" content="A sand table ball cannot lift off the sand, so every move between shapes leaves a mark. Why nearest-neighbour ordering helps, why it is not optimal, and how to design around it.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/articles/travel-lines-and-path-ordering/">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Travel Lines: The Problem You Cannot Fully Solve",
+    "description": "A sand table ball cannot lift off the sand, so every move between shapes leaves a mark. Why nearest-neighbour ordering helps, why it is not optimal, and how to design around it.",
+    "datePublished": "2026-08-04",
+    "dateModified": "2026-08-04",
+    "author": {"@type": "Person", "name": "Kenneth Cross", "url": "https://restlessforge.substack.com"},
+    "publisher": {"@type": "Organization", "name": "SandPath", "url": "https://restless-forge.dev/tools/sandpath"},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://restless-forge.dev/tools/sandpath/articles/travel-lines-and-path-ordering/"}
+  }
+  </script>
+    <link rel="stylesheet" href="/tool-chrome.css">
+    <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <style>
+    /* ── Article Layout ── */
+    .article{max-width:680px}
+    .breadcrumb{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:28px}
+    .breadcrumb a{color:var(--dim)}
+    .breadcrumb a:hover{color:var(--accent)}
+    .article__tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .article__tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:2px;padding:3px 10px}
+    .article__meta{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .article__body h2{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin:44px 0 16px;display:flex;align-items:center;gap:10px}
+    .article__body h2::before{content:'';display:inline-block;width:18px;height:1px;background:var(--accent);flex-shrink:0}
+    .article__body p{font-size:15px;color:var(--muted);line-height:1.85;margin-bottom:18px}
+    .article__body p:last-child{margin-bottom:0}
+    .article__body strong{color:var(--text);font-weight:600}
+    .article__body em{font-style:italic}
+    .article__body blockquote{border-left:3px solid var(--accent);padding:14px 20px;margin:28px 0;background:var(--surface);border-radius:0 3px 3px 0}
+    .article__body blockquote p{font-size:15px;font-style:italic;color:var(--text);margin-bottom:0}
+    .article__body ul{font-size:15px;color:var(--muted);line-height:1.85;margin:0 0 18px 22px}
+    .article__body ul li{margin-bottom:8px}
+    .formula{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:3px;padding:18px 22px;margin:24px 0;font-family:var(--font-mono);font-size:13px;color:var(--text);line-height:1.7}
+    .formula span{color:var(--muted);font-size:12px;display:block;margin-top:6px}
+    .cta-inline{margin:44px 0;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:3px;padding:28px 24px}
+    .cta-inline p{font-size:14px;color:var(--muted);margin-bottom:16px;font-style:italic}
+    .cta-inline a.btn{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--bg);background:var(--accent);padding:11px 22px;border-radius:3px;text-decoration:none;transition:opacity 0.15s;margin-right:12px;margin-bottom:8px}
+    .cta-inline a.btn:hover{opacity:0.85;text-decoration:none}
+    .cta-inline a.btn--outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  </style>
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+
+  <main>
+    <div class="article">
+      <p class="breadcrumb"><a href="/tools/sandpath/articles/">← Articles</a></p>
+
+      <div class="article__tags">
+        <span class="article__tag">Path Ordering</span>
+        <span class="article__tag">Travel Moves</span>
+        <span class="article__tag">Optimisation</span>
+      </div>
+
+      <h1>Travel Lines: The Problem You Cannot Fully Solve</h1>
+
+      <div class="article__meta">
+        <span>August 4, 2026</span>
+        <span>By <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a></span>
+        <span>7 min read</span>
+      </div>
+
+      <div class="article__body">
+        <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>A pen plotter draws a shape, lifts, moves, and draws the next one. The lift is
+what makes multi-shape drawings possible.</p>
+<p>A sand table ball cannot lift. It is held by a magnet under the bed, and it
+ploughs a groove wherever it goes. Every move between shapes leaves exactly the
+same mark as the shapes themselves.</p>
+<p>Those marks are travel lines, and they are the single most common complaint
+about converted sand patterns.</p>
+<h2>Why they cannot be eliminated</h2>
+<p>The ball must be somewhere. To draw shape B after shape A it must physically
+traverse the distance between them, through sand, leaving a groove.</p>
+<p>There is no setting that removes them, in SandPath or anywhere else, because the
+constraint is mechanical rather than algorithmic. What can be changed is how
+<em>much</em> travelling happens and how visible it is. That turns out to be a
+well-studied problem wearing a disguise.</p>
+<h2>It is the travelling salesman problem</h2>
+<p>Given a set of shapes, each of which must be drawn, in what order should they be
+visited to minimise the total distance travelled between them?</p>
+<p>That is the travelling salesman problem, one of the classic NP-hard problems in
+computer science. For a handful of shapes you could brute-force it. For an SVG
+with two hundred subpaths, the number of possible orderings is larger than the
+number of atoms in the observable universe, and the exact answer is not
+available at any price.</p>
+<p>So SandPath does what practically everyone does: it approximates.</p>
+<h2>Nearest neighbour</h2>
+<p>The heuristic is simple to state. Start with the first path. When it ends, look
+at every path not yet drawn and jump to whichever one starts closest to where
+you are. Repeat until none are left.</p>
+<p>It runs fast, it is easy to reason about, and it typically lands within
+20–25% of optimal — a large improvement over document order, which is
+effectively random with respect to position and is what you get if you do
+nothing.</p>
+<p>The characteristic weakness is the endgame. Nearest neighbour is greedy: it
+always takes the closest option, which means it happily strands a few remote
+paths that it must eventually cross the whole table to collect. If your pattern
+has one or two very long travel lines while the rest are short, you are looking
+at exactly that.</p>
+<h2>Why not do better?</h2>
+<p>Better algorithms exist — 2-opt, Or-opt, Lin–Kernighan — and they meaningfully
+improve on nearest neighbour. Two arguments against reaching for them here.</p>
+<p>The first is diminishing returns. Total travel distance is not really what you
+care about; <em>visible ugliness</em> is. Ten short travel lines scattered through a
+dense design read as texture. One long one across an empty area reads as a
+scar. Shaving 15% off total distance may not change how the pattern looks at
+all.</p>
+<p>The second is that source geometry dominates. A design drawn as eight
+continuous strokes will beat the same design drawn as two hundred fragments
+under any ordering algorithm, by a wide margin. Effort spent on the input pays
+better than effort spent on the optimiser.</p>
+<h2>Reducing them in practice</h2>
+<p><strong>Fewer, longer paths.</strong> This is the whole game. In vector software, join
+adjacent paths where you can. A single continuous outline is dramatically better
+than the same outline chopped into segments.</p>
+<p><strong>Watch the preview.</strong> The preview shows travel moves. If it shows lines
+slashing across empty space, the sand will too. This is the cheapest possible
+feedback loop and it is worth using before every conversion.</p>
+<p><strong>Prefer designs that are already connected.</strong> Continuous-line art, single-stroke
+lettering, and spiral-based designs convert beautifully because they were
+already one path. Designs built from many isolated elements — a scatter of
+stars, a field of dots — are inherently travel-heavy no matter what you do.</p>
+<p><strong>Mind the trace mode.</strong> Centerline typically produces fewer, longer paths than
+Outline, which tends to yield many short edge fragments. If two modes both give
+acceptable results, the one with fewer paths will have fewer travel lines.</p>
+<p><strong>Let the sand help.</strong> Travel lines are shallower than deliberate strokes at
+some tables&#39; speeds, and they genuinely recede once the whole pattern is down.
+Judging a pattern at 40% complete is unfair to it.</p>
+<h2>When to stop optimising</h2>
+<p>Every sand pattern has travel lines. Photographs of Sisyphus tables in
+marketing materials have travel lines. Once you know to look for them you will
+see them everywhere, which is a slightly unfortunate side effect of understanding
+how the machine works.</p>
+<p>They stop registering as defects once the pattern reads as a whole. The
+reasonable goal is not zero travel lines — it is not having one long obvious
+scar across an otherwise empty area. If the preview does not show that, the
+pattern is fine.</p>
+<p>Ready to try it? <a href="/tools/sandpath/">Open the converter</a>, or read
+<a href="/tools/sandpath/how-it-works/">how the conversion works</a>.</p>
+<!-- /generated:content -->
+      </div>
+    </div>
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>
