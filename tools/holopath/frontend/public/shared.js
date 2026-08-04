@@ -10,13 +10,14 @@
   'use strict';
   var base = '/tools/holopath';
 
+  // Legal + contact are site-global (/privacy, /terms, /contact) — client-side
+  // tools don't ship their own. rfGlobalFooterLinks appends privacy/terms.
   var navLinks = [
     [base + '/', 'Generator'],
     [base + '/how-it-works/', 'How It Works'],
     [base + '/faq/', 'FAQ'],
     [base + '/articles/', 'Articles'],
     [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
   ];
 
   var footerLinks = [
@@ -24,7 +25,7 @@
     [base + '/faq/', 'FAQ'],
     [base + '/articles/', 'Articles'],
     [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
+    ['/contact', 'Contact'],
   ];
 
   var chrome = window.rfMountToolChrome({

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SandPath FAQ — SandPath</title>
+  <meta name="description" content="Answers about SandPath: supported file types, whether files are uploaded, converting photographs, fixing travel lines, and using it on a phone.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/faq/">
+  <!-- Favicons (canonical RF block — tool-scoped) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:title" content="SandPath FAQ — SandPath">
+  <meta property="og:description" content="Answers about SandPath: supported file types, whether files are uploaded, converting photographs, fixing travel lines, and using it on a phone.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/faq/">
+  <meta property="og:site_name" content="SandPath">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+  <main>
+    <h1>Frequently Asked Questions</h1>
+    <p class="page-sub">File formats, privacy, image quality, travel lines, and the questions people actually ask.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<h2>Do I need an account?</h2>
+<p>No. SandPath has no sign-up, no login, and no payment. Open it, convert a file,
+download the result. There is nothing to register for because there is no server
+holding anything to register against.</p>
+<h2>Are my files uploaded anywhere?</h2>
+<p>No. Every stage — parsing SVG paths, tracing raster images, simplifying, and
+generating <code>.thr</code> or G-code — runs in your browser in JavaScript. Your files
+never leave your device. You can verify this the blunt way: load SandPath, turn
+off your network connection, and convert something. It still works.</p>
+<h2>What file types can I upload?</h2>
+<p>SVG vector files, and raster images in JPG, JPEG, PNG, WebP, BMP, GIF, and TIFF.</p>
+<p>SVGs are converted directly from their path data, which is why they give the
+cleanest results. Raster images go through a tracing stage first to produce
+vector paths.</p>
+<h2>Can I convert photographs?</h2>
+<p>Yes, with realistic expectations. Upload the image and SandPath will trace it
+into vector paths, then convert those.</p>
+<p>Use <strong>Outline</strong> mode for photographs — it finds edges and produces a sketch-like
+interpretation. What you will not get is tone or shading: a sand table draws
+lines, not greyscale. Photographs with a clear subject and uncluttered
+background convert far better than busy scenes.</p>
+<h2>Which trace mode should I use?</h2>
+<ul>
+<li><strong>Outline</strong> — photographs, detailed artwork, anything with soft gradients.</li>
+<li><strong>Threshold</strong> — logos, silhouettes, lettering, high-contrast graphics.</li>
+<li><strong>Centerline</strong> — line drawings, handwriting, sketches, where you want the ball
+to travel along each stroke rather than around it.</li>
+</ul>
+<p>If a conversion looks wrong, changing the trace mode fixes it more often than
+any other adjustment.</p>
+<h2>My pattern has ugly straight lines across it. How do I fix that?</h2>
+<p>Those are travel lines — the ball moving between separate shapes. It cannot lift
+off the sand, so every repositioning move leaves a mark.</p>
+<p>SandPath already minimises them with nearest-neighbour path ordering. If they
+are still prominent:</p>
+<ul>
+<li>Use source art with fewer disconnected shapes.</li>
+<li>For SVGs, join separate paths into continuous strokes where you can.</li>
+<li>Increase curve smoothness, which can merge nearby endpoints.</li>
+<li>Accept a few. Every sand pattern has some, and they fade from notice once the
+design reads.</li>
+</ul>
+<h2>What does Path Detail actually change?</h2>
+<p>It controls how densely curves are sampled and how aggressively the traced
+paths are simplified afterwards.</p>
+<p>Coarser settings produce fewer points: smaller files, faster draws, smoother
+curves, less fidelity. Finer settings keep more points: bigger files, longer
+draws, more faithful detail — up to the point where the detail is finer than the
+ball can carve, after which you are paying in draw time for nothing.</p>
+<h2>Why does my fine detail disappear in the sand?</h2>
+<p>Because the ball has a physical width, usually 10–15 mm. Anything narrower than
+that cannot be resolved — adjacent lines merge into a single trench. This is a
+property of the machine, not of the conversion. Simplify the source image, or
+draw it larger relative to the bed.</p>
+<h2>Will a pattern made for one table work on another?</h2>
+<p>If both are circular, usually yes: <code>.thr</code> files use a radius normalised from 0
+to 1, so they scale to any round bed. Fine detail may vanish on a smaller table.</p>
+<p>If either is rectangular, no. G-code uses absolute millimetres, so a file made
+for one bed size will not fit another. Reconvert for the new table.</p>
+<h2>Can I use SandPath on my phone?</h2>
+<p>Yes. The interface is responsive and the file picker accepts files from your
+device, so converting on a phone or tablet works the same way it does on a
+desktop. Large images take longer to trace on mobile hardware, but they do
+complete.</p>
+<h2>Which tables are supported?</h2>
+<p>Oasis Mini and Oasis One, the Sisyphus Mini, End Table and Coffee Table, the
+V1 Engineering ZenXY, plus custom circular and rectangular builds where you
+enter your own bed dimensions. Full details on
+<a href="/tools/sandpath/supported-tables/">supported tables</a>.</p>
+<h2>Is SandPath free?</h2>
+<p>Yes, and there is no paid tier holding features back. The site carries
+advertising to cover hosting. If you want to support it directly there are
+donation links in the footer, but nothing about the tool changes either way.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>

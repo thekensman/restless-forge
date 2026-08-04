@@ -5,18 +5,19 @@
   'use strict';
   var base = '/tools/cncfeed';
 
+  // Legal + contact are site-global (/privacy, /terms, /contact) — client-side
+  // tools don't ship their own. rfGlobalFooterLinks appends privacy/terms.
   var navLinks = [
     [base + '/', 'Calculator'],
     [base + '/faq/', 'FAQ'],
     [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
   ];
 
   var footerLinks = [
     [base + '/', 'Calculator'],
     [base + '/faq/', 'FAQ'],
     [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
+    ['/contact', 'Contact'],
   ];
 
   var chrome = window.rfMountToolChrome({

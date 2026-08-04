@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privacy Policy — Restless Forge</title>
-  <meta name="description" content="How Restless Forge protects your data. All tools are frontend-only — your data never leaves your browser.">
+  <meta name="description" content="How Restless Forge handles your data: browser-only tools, what cloud-assisted tools send, advertising cookies, and your GDPR and CCPA rights.">
   <link rel="canonical" href="https://restless-forge.dev/privacy">
 
   <!-- Favicons -->
@@ -27,7 +27,7 @@
 
   <main class="page">
     <h1>Privacy at Restless Forge</h1>
-    <p><em>Last updated: March 2026</em></p>
+    <p><em>Last updated: August 2026</em></p>
 
     <h2>The Short Version</h2>
     <p>
@@ -51,16 +51,22 @@
 
     <h2>How the Tools Work</h2>
     <p>
-      Each tool on this site processes data entirely in your browser using
-      JavaScript and the Canvas API:
+      Every tool currently published on Restless Forge is listed below. Unless a
+      tool is marked cloud-assisted, it does all of its work in your browser
+      using JavaScript, Canvas, and Web Workers — the files you open and the
+      numbers you type are never transmitted to us.
     </p>
     <ul>
-      <li><strong>What Is My Time Worth?</strong> — All salary, tax, and cost
-        calculations happen in your browser. No data is transmitted.</li>
-      <li><strong>HoloPath</strong> — Images and videos are processed using
-        Canvas 2D directly in the browser. Files are never uploaded.</li>
-      <li><strong>SandPath</strong> — SVG files and image tracing are
-        processed entirely client-side. Files are never uploaded.</li>
+<!-- generated:tools-privacy — do not edit; run `npm run sync-static` -->
+      <li><strong>What Is My Time Worth?</strong> — A real hourly wage calculator and DIY-vs-hire decision engine.
+        Runs entirely in your browser; nothing you enter or open is uploaded.</li>
+      <li><strong>HoloPath</strong> — A hologram GIF generator that processes images, GIFs, and videos in the browser.
+        Runs entirely in your browser; nothing you enter or open is uploaded.</li>
+      <li><strong>SandPath</strong> — A converter that turns images and SVGs into sand table patterns (.thr / .gcode).
+        Runs entirely in your browser; nothing you enter or open is uploaded.</li>
+      <li><strong>TattooSafe</strong> — A tattoo sizing, camera try-on, and pricing preview tool.
+        Runs entirely in your browser; nothing you enter or open is uploaded.</li>
+<!-- /generated:tools-privacy -->
     </ul>
 
     <h2>Cloud-Assisted Tools</h2>
@@ -87,10 +93,69 @@
 
     <h2>Advertising</h2>
     <p>
-      Restless Forge uses Google AdSense to display advertisements. Google may
-      use cookies to serve ads based on your browsing history. You can opt out
-      of personalized advertising at
+      Restless Forge displays advertising through Google AdSense to cover
+      hosting costs and keep every tool free.
+    </p>
+    <ul>
+      <li>Third-party vendors, including Google, use cookies to serve ads based
+        on your prior visits to this and other websites.</li>
+      <li>Google's use of advertising cookies enables it and its partners to
+        serve ads to you based on your visit to this site and/or other sites on
+        the internet.</li>
+      <li>You may opt out of personalised advertising at
+        <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Ad Settings</a>,
+        or opt out of third-party vendor cookies at
+        <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">aboutads.info/choices</a>.</li>
+      <li>For details on how Google handles data from sites that use its
+        services, see
+        <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google's partner-sites policy</a>.</li>
+    </ul>
+    <p>
+      If you are in the European Economic Area, the United Kingdom, or
+      Switzerland, consent for personalised advertising is collected through
+      Google's certified consent management before such cookies are set, and
+      you can review or withdraw that choice at any time via
       <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Ad Settings</a>.
+      Where consent is declined, non-personalised ads may still set a cookie
+      for frequency capping and fraud prevention.
+    </p>
+
+    <h2>Your Privacy Rights</h2>
+    <p>
+      Restless Forge holds no accounts and no personal profiles, so in most
+      cases there is simply no personal data of yours for us to retrieve,
+      correct, or erase. Where data does exist — server logs, or the hashed
+      values described above for cloud-assisted tools — the following apply.
+    </p>
+    <p>
+      <strong>EEA / UK (GDPR).</strong> Our lawful basis for the limited
+      processing we do is legitimate interest: keeping the site secure and
+      available, and preventing abuse of cloud-assisted tools. Advertising
+      cookies are set on the basis of your consent. You have the right to
+      access, rectify, erase, restrict, or object to processing of your
+      personal data, the right to data portability, and the right to lodge a
+      complaint with your local supervisory authority.
+    </p>
+    <p>
+      <strong>California (CCPA/CPRA).</strong> We do not sell or share personal
+      information as those terms are defined by the CCPA/CPRA, and we do not
+      knowingly process the personal information of minors. You have the right
+      to know what personal information is collected, to request deletion, and
+      not to be discriminated against for exercising those rights.
+    </p>
+    <p>
+      To exercise any of these rights, email <a data-rf-link="email"></a>.
+      Because we hold no account data, we may ask you for information that lets
+      us locate the specific records you are asking about.
+    </p>
+
+    <h2>Children's Privacy</h2>
+    <p>
+      Restless Forge is intended for a general audience and is not directed at
+      children under 13 (or under 16 in the EEA/UK). We do not knowingly
+      collect personal information from children. If you believe a child has
+      provided personal information to us, email <a data-rf-link="email"></a>
+      and we will delete it.
     </p>
 
     <h2>Analytics</h2>
@@ -115,10 +180,37 @@
         — Source code is publicly available.</li>
     </ul>
 
+    <h2>Data Retention</h2>
+    <ul>
+      <li><strong>Server logs</strong> (IP address, URL, timestamp) — kept up to
+        14 days for security and debugging, then deleted.</li>
+      <li><strong>Cloud-assisted rate-limit records</strong> — SHA-256 hashes
+        only, deleted automatically when the rate-limit window closes.</li>
+      <li><strong>Everything else</strong> — nothing is retained, because
+        nothing is collected. Tool inputs stay in your browser; clearing your
+        browser storage removes them.</li>
+    </ul>
+
+    <h2>Changes to This Policy</h2>
+    <p>
+      If this policy changes materially, the "last updated" date above changes
+      with it. Continued use of the site after an update means you accept the
+      revised policy.
+    </p>
+
+    <h2>Who Runs This Site</h2>
+    <p>
+      Restless Forge is an independent, one-person project operated by Kenneth
+      Cross as a sole proprietor, based in the United States. It is the data
+      controller for the limited processing described above.
+    </p>
+
     <h2>Contact</h2>
     <p>
-      For privacy questions, email <a data-rf-link="email"></a> or reach out
-      through the links on the <a href="/about">About page</a>.
+      For privacy questions, data-rights requests, or anything else about this
+      policy, email <a data-rf-link="email"></a>. You can also reach me through
+      the channels on the <a href="/contact">Contact page</a>. I aim to respond
+      within 30 days.
     </p>
   </main>
 

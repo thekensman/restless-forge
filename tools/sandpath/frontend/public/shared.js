@@ -10,21 +10,30 @@
   'use strict';
   var base = '/tools/sandpath';
 
+  // Legal + contact are site-global (/privacy, /terms, /contact) — client-side
+  // tools don't ship their own. rfGlobalFooterLinks appends privacy/terms.
   var navLinks = [
     [base + '/', 'Converter'],
-    [base + '/#how-to-use', 'How to Use'],
-    [base + '/#supported-tables', 'Supported Tables'],
+    [base + '/getting-started/', 'Getting Started'],
+    [base + '/how-it-works/', 'How It Works'],
+    [base + '/supported-tables/', 'Supported Tables'],
+    [base + '/faq/', 'FAQ'],
+    [base + '/articles/', 'Articles'],
     // TODO: update href when shop URL is finalized
     ['https://restlessforge.gumroad.com', 'Shop'],
-    [base + '/#about', 'About'],
+    [base + '/about/', 'About'],
   ];
 
   var footerLinks = [
     [base + '/', 'Converter'],
-    [base + '/#how-to-use', 'How to Use'],
-    [base + '/#supported-tables', 'Tables'],
+    [base + '/getting-started/', 'Getting Started'],
+    [base + '/how-it-works/', 'How It Works'],
+    [base + '/supported-tables/', 'Tables'],
+    [base + '/faq/', 'FAQ'],
+    [base + '/articles/', 'Articles'],
     ['https://restlessforge.gumroad.com', 'Shop'],
-    [base + '/#about', 'About'],
+    [base + '/about/', 'About'],
+    ['/contact', 'Contact'],
   ];
 
   // Tool-specific support link — not shared by any other tool.

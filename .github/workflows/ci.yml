@@ -29,6 +29,13 @@ jobs:
           npm run sync
           git diff --exit-code site/ tools/
 
+      # Guards the rules an AdSense rejection taught us: live tools don't ship
+      # their own legal pages, ad-bearing prose sub-pages clear a word floor,
+      # live tools carry no stray noindex, and unlaunched tools stay noindexed
+      # and ad-free. See scripts/check-content-health.mjs for the reasoning.
+      - name: Check content health
+        run: npm run check-content
+
       # build.sh runs `npm ci` + typecheck + vite build per tool,
       # then assembles dist/ exactly as production expects.
       - name: Build site

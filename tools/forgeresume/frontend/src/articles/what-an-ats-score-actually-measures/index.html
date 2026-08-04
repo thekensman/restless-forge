@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>What an ATS Keyword Score Actually Measures</title>
+  <meta name="description" content="It counts how many words from the job description appear in your resume. That is genuinely useful and much narrower than most advice implies.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeresume/articles/what-an-ats-score-actually-measures/">
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeresume/favicon.svg">
+  <link rel="icon" href="/tools/forgeresume/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeresume/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeresume/site.webmanifest">
+  <meta property="og:title" content="What an ATS Keyword Score Actually Measures">
+  <meta property="og:description" content="It counts how many words from the job description appear in your resume. That is genuinely useful and much narrower than most advice implies.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeresume/articles/what-an-ats-score-actually-measures/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeresume/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/forgeresume/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeresume/shared.js"></script>
+</head>
+<body>
+  <div id="fr-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/forgeresume/articles/">← Articles</a></p>
+    <h1>What an ATS Keyword Score Actually Measures</h1>
+    <p class="page-sub">It counts how many words from the job description appear in your resume. That is genuinely useful and much narrower than most advice implies.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>There is a large amount of advice online about &quot;beating the ATS&quot;, most of it
+written with more confidence than evidence. So it is worth being precise about
+what ForgeResume&#39;s score is, because knowing its mechanism tells you exactly how
+far to trust it.</p>
+<h2>The mechanism, in full</h2>
+<ol>
+<li>Take the job description and tokenise it into words.</li>
+<li>Drop stopwords — <em>the</em>, <em>and</em>, <em>with</em>, the connective tissue that appears in
+every document.</li>
+<li>Drop tokens shorter than three characters, unless they contain a digit or a
+<code>+</code>/<code>#</code> — which is how <code>C#</code>, <code>Go</code>, and <code>C++</code> survive a filter that would
+otherwise delete them.</li>
+<li>Count what remains and keep the 30 most frequent.</li>
+<li>Tokenise your resume the same way.</li>
+<li>Score = the percentage of those 30 keywords that appear anywhere in your
+resume.</li>
+</ol>
+<p>That is the whole algorithm. Matched keywords are listed, missing ones are
+listed, and the score is the ratio.</p>
+<h2>What that makes it good for</h2>
+<p><strong>Catching genuine omissions.</strong> You have used PostgreSQL for six years, the
+posting says &quot;PostgreSQL&quot; four times, and your resume says &quot;Postgres&quot;. A human
+reader would not blink. A keyword matcher — and quite possibly a real screening
+system — records a miss. That is a five-second fix and precisely the kind of
+thing this catches.</p>
+<p><strong>Revealing what the posting emphasises.</strong> Frequency ranking is informative on
+its own. If &quot;stakeholder&quot; appears six times and the technical skills appear once
+each, the posting is telling you what the job is actually about, and that is
+worth knowing before you write your cover letter.</p>
+<p><strong>Prompting honest inventory.</strong> A missing keyword is a question: do I actually
+have this? Sometimes the answer is yes and you forgot to mention it. That is the
+tool working.</p>
+<h2>What it categorically does not measure</h2>
+<p><strong>Whether you are a good candidate.</strong> It has no model of skill, seniority, or
+fit. A resume stuffed with all 30 keywords in a footer scores 100% and is
+worthless.</p>
+<p><strong>Where the keyword appears.</strong> &quot;Led a team of eight engineers&quot; and a skills-list
+entry reading &quot;leadership&quot; score identically. Context is invisible to it.</p>
+<p><strong>Synonyms and related concepts.</strong> The matching is exact tokens. &quot;React&quot; does
+not match &quot;ReactJS&quot;. &quot;Managed&quot; does not match &quot;management&quot;. This is a genuine
+limitation, and it cuts both ways — it will report misses that a decent system
+would have matched.</p>
+<p><strong>What a specific employer&#39;s ATS does.</strong> Real systems vary enormously. Some do
+keyword matching close to this. Some do semantic matching. Many do almost
+nothing automatic, and a human reads everything. Nobody outside the vendor knows
+which you are facing.</p>
+<h2>Why 30 keywords</h2>
+<p>It is a judgment call, and worth stating as one. Too few and the score swings
+wildly on one word. Too many and you are matching against incidental vocabulary
+from the company boilerplate at the bottom of the posting.</p>
+<p>Thirty tends to capture the substantive requirements of a normal-length posting
+before it starts dredging up &quot;collaborative&quot; and &quot;fast-paced&quot;. It is not derived
+from anything; it is a value that behaves sensibly across the postings I tested
+it on.</p>
+<h2>Using it without being used by it</h2>
+<p><strong>Treat missing keywords as questions, not instructions.</strong> For each one: do I
+genuinely have this experience? If yes, work it in naturally where it belongs.
+If no, leave it out. A resume claiming skills you lack fails at the interview
+stage, which is a worse place to fail.</p>
+<p><strong>Do not chase 100%.</strong> A perfect score means your resume has been reshaped to
+mirror one posting&#39;s vocabulary, which usually reads badly to the human who
+opens it next. Somewhere in the 60–80% range with the important terms present is
+a better target than 95% achieved by contortion.</p>
+<p><strong>Put keywords where they are true.</strong> &quot;Kubernetes&quot; in a bullet describing what
+you actually deployed is worth more than &quot;Kubernetes&quot; in a comma-separated skills
+list, to both machines and people.</p>
+<p><strong>Remember the human.</strong> Even where an ATS filters first, a person reads what
+survives. Optimising past the point of readability trades a real reader for a
+hypothetical filter.</p>
+<h2>The uncomfortable summary</h2>
+<p>Keyword matching is a crude proxy for relevance, and it is crude in ways that
+disadvantage people who describe their work in their own words rather than in
+the posting&#39;s.</p>
+<p>The score is worth having because the <em>specific</em> failure it catches — a term you
+genuinely own, phrased differently — is common, invisible, and trivially
+fixable. Beyond that, it is measuring vocabulary overlap, and vocabulary overlap
+is not the same thing as being right for the job.</p>
+<p>Ready to try it? <a href="/tools/forgeresume/">Open ForgeResume</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="fr-footer"></div>
+</body>
+</html>

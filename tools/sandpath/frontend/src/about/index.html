@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About SandPath — SandPath</title>
+  <meta name="description" content="SandPath is a free, browser-only converter that turns images and SVG files into sand table patterns. No accounts, no uploads, no paywall.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/about/">
+  <!-- Favicons (canonical RF block — tool-scoped) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:title" content="About SandPath — SandPath">
+  <meta property="og:description" content="SandPath is a free, browser-only converter that turns images and SVG files into sand table patterns. No accounts, no uploads, no paywall.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/about/">
+  <meta property="og:site_name" content="SandPath">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+  <main>
+    <h1>About SandPath</h1>
+    <p class="page-sub">Why a browser-only sand table converter exists, and what it will never do.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>SandPath converts images and SVG files into patterns that kinetic sand tables
+can draw. It runs entirely in your browser, costs nothing, and asks for nothing
+— no account, no email address, no upload.</p>
+<h2>Why it exists</h2>
+<p>Kinetic sand tables are lovely objects with a frustrating gap in their
+ecosystem. The hardware is excellent. The pattern libraries are decent. But the
+moment you want to draw <em>your own</em> thing — a logo, a sketch, a photograph of
+someone — the options thin out fast.</p>
+<p>What existed mostly fell into two camps. Some tools converted images by
+scanlining them, which produces that corduroy texture where you can see every
+row and the picture only works from across the room. Others were desktop
+applications with an install step, or web services that wanted your file on
+their server and your email in their list.</p>
+<p>SandPath was built to skip both problems: proper vector conversion so the ball
+draws continuous strokes, and a browser-only implementation so nothing has to be
+uploaded to anyone.</p>
+<h2>How it works, briefly</h2>
+<p>SVGs are parsed for their actual path data — curves, arcs, subpaths — rather
+than being rasterised and re-traced. Raster images go through edge detection,
+thresholding, or skeletonisation depending on what suits the source. Everything
+is then simplified, reordered to minimise travel moves, and emitted as theta-rho
+or G-code depending on your table&#39;s shape.</p>
+<p>The longer version is on <a href="/tools/sandpath/how-it-works/">how it works</a>.</p>
+<h2>The privacy position</h2>
+<p>There is no server to send files to. Conversion happens in your browser using
+JavaScript, and your images stay on your device from the moment you drop them in
+to the moment you download the result.</p>
+<p>This is not a policy promise that could quietly change — it is a consequence of
+how the tool is built. There is no upload endpoint to repurpose later.</p>
+<h2>What it will not do</h2>
+<p><strong>It will not make detail appear that the ball cannot carve.</strong> A steel ball
+10–15 mm across sets a hard floor on resolution. No amount of conversion
+cleverness gets under it.</p>
+<p><strong>It will not render tone.</strong> Sand tables draw lines. A photograph becomes an
+interpretation of its edges, not a greyscale reproduction, and images that
+depend on shading rather than shape will not survive the trip.</p>
+<p><strong>It will not eliminate travel lines entirely.</strong> The ball cannot lift, so moving
+between shapes always leaves a mark. Path ordering minimises them; nothing
+removes them.</p>
+<p>Being clear about these up front seems better than letting you discover them
+after a forty-minute draw.</p>
+<h2>Part of Restless Forge</h2>
+<p>SandPath is one of several tools at <a href="/">Restless Forge</a>, a one-person workshop
+building free, browser-first utilities. The other tools cover different ground —
+real hourly wage calculation, hologram generation, tattoo sizing — but share the
+same shape: useful, honest about limits, and private by construction.</p>
+<p>The site carries advertising to cover hosting. That is the whole business model.</p>
+<h2>Feedback</h2>
+<p>Bug reports, table profiles that are wrong, and tables that should be supported
+but are not are all genuinely welcome — get in touch via the
+<a href="/contact">contact page</a>.</p>
+<p>Ready to convert something? Open the <a href="/tools/sandpath/">converter</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>

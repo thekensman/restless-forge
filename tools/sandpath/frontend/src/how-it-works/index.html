@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How SandPath Works — SandPath</title>
+  <meta name="description" content="SandPath converts SVGs and images into sand table patterns using real vector paths, Sobel/marching-squares/skeleton tracing, and nearest-neighbour path ordering.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/how-it-works/">
+  <!-- Favicons (canonical RF block — tool-scoped) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:title" content="How SandPath Works — SandPath">
+  <meta property="og:description" content="SandPath converts SVGs and images into sand table patterns using real vector paths, Sobel/marching-squares/skeleton tracing, and nearest-neighbour path ordering.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/how-it-works/">
+  <meta property="og:site_name" content="SandPath">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+  <main>
+    <h1>How SandPath Works Under the Hood</h1>
+    <p class="page-sub">Vector-first conversion, three tracing modes, and the path ordering that keeps travel lines out of your sand.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>Most image-to-sand-table converters take a shortcut: they turn a picture into
+horizontal scanlines, the same way an inkjet printer lays down rows. That works
+on paper because ink is opaque and rows blend into a solid tone. Sand does not
+work that way. A steel ball dragging back and forth in parallel rows leaves a
+visible corduroy texture, and the &quot;image&quot; only resolves if you stand far enough
+away to stop seeing the rows.</p>
+<p>SandPath is built the other way round. Everything is converted into <strong>vector
+paths</strong> first — continuous strokes the ball can follow the way a hand follows a
+pen — and only then translated into your table&#39;s coordinate system.</p>
+<h2>SVG conversion</h2>
+<p>When you hand SandPath an SVG, it parses the real path data out of the markup
+rather than rasterising the file and re-tracing it. That means it handles the
+full set of standard path commands: straight line segments, quadratic and cubic
+Bézier curves, elliptical arcs, and compound subpaths with multiple disconnected
+contours.</p>
+<p>Each curve is <em>sampled</em> into a sequence of points. This is the one place where
+fidelity and file size trade off directly: sample too coarsely and a smooth arc
+becomes a visible polygon; sample too finely and you get a file with tens of
+thousands of coordinate pairs that takes a long time to draw. The Path Detail
+control sets that sampling density.</p>
+<p>Because an SVG&#39;s subpaths are stored in whatever order the authoring tool wrote
+them, drawing them in document order usually means the ball jumps across the
+table between shapes. SandPath reorders the paths using nearest-neighbour
+sorting before output, so each stroke starts near where the previous one ended.</p>
+<h2>Image tracing and vectorisation</h2>
+<p>Raster images — photographs, PNGs, screenshots — have no paths to extract, so
+they go through a tracing stage first. Three modes are available, and choosing
+the right one matters far more than any other setting.</p>
+<p><strong>Outline</strong> runs Sobel edge detection, which convolves the image with a pair of
+gradient kernels to find where brightness changes sharply. The result is a
+sketch: the boundaries and contours of a photograph without any filled areas.
+This is the mode to reach for with photographs and detailed artwork.</p>
+<p><strong>Threshold</strong> applies a brightness cutoff to split the image into black and
+white regions, then walks the boundary between those regions using marching
+squares contour extraction. Because it produces closed, well-defined outlines,
+it is the best choice for logos, silhouettes, lettering, and anything else with
+genuinely high contrast.</p>
+<p><strong>Centerline</strong> skeletonises the image first — iteratively eroding shapes until
+only a one-pixel-wide medial line remains — and traces that. For line drawings,
+handwriting, and sketches this is the mode that behaves the way you expect: the
+ball travels <em>along</em> each stroke rather than looping around both sides of it.</p>
+<p>Whichever mode runs, the traced paths then go through Douglas–Peucker
+simplification, which removes points that sit within a tolerance of the line
+between their neighbours. It sheds most of the point count while leaving the
+visible shape essentially unchanged.</p>
+<h2>Turning paths into table coordinates</h2>
+<p>The final stage converts the vector paths into the format your table actually
+reads, and it is where the two table families diverge.</p>
+<p>Circular tables use <strong>theta-rho</strong>: each line is an angle and a normalised
+radius. Cartesian points have to be converted to polar, and because theta is
+continuous — the arm keeps rotating rather than snapping back to zero —
+SandPath unwraps the angle across the ±π boundary so a path crossing that line
+produces one smooth sweep instead of a full spurious rotation.</p>
+<p>Rectangular tables use <strong>G-code</strong>, where the points stay Cartesian and are
+emitted as <code>G0</code> rapid moves and <code>G1</code> draw moves in millimetres.</p>
+<p>Both paths share the same safety step: coordinates are clipped to the table&#39;s
+usable bed so the ball never drives into the rim. For circular tables that
+limit is the profile&#39;s <code>max_rho</code>, which sits at 0.95 rather than 1.0 to leave a
+margin at the edge.</p>
+<h2>Why this produces better patterns</h2>
+<p>The practical upshot of vector-first conversion is that the ball spends most of
+its time drawing and very little time travelling. Travel moves are the enemy of
+a clean sand pattern: every jump between shapes leaves a straight scar across
+work you already did. Path ordering minimises them, curve sampling keeps strokes
+smooth, and clipping keeps the whole design inside the sand.</p>
+<p>Ready to try it? Head back to the <a href="/tools/sandpath/">converter</a>, or read about
+<a href="/tools/sandpath/supported-tables/">which tables are supported</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>

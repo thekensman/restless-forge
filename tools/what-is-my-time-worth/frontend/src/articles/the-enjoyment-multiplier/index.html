@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Enjoyment Multiplier: Why DIY Math Needs a Fudge Factor</title>
+  <meta name="description" content="Pure hourly math says hire out everything you earn more than. That answer is wrong, and the fix is a multiplier that is openly a heuristic.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/what-is-my-time-worth/articles/the-enjoyment-multiplier/">
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/what-is-my-time-worth/favicon.svg">
+  <link rel="icon" href="/tools/what-is-my-time-worth/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/what-is-my-time-worth/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/what-is-my-time-worth/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/tools/what-is-my-time-worth/og-image.png">
+  <meta property="og:title" content="The Enjoyment Multiplier: Why DIY Math Needs a Fudge Factor">
+  <meta property="og:description" content="Pure hourly math says hire out everything you earn more than. That answer is wrong, and the fix is a multiplier that is openly a heuristic.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/what-is-my-time-worth/articles/the-enjoyment-multiplier/">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Enjoyment Multiplier: Why DIY Math Needs a Fudge Factor",
+    "description": "Pure hourly math says hire out everything you earn more than. That answer is wrong, and the fix is a multiplier that is openly a heuristic.",
+    "datePublished": "2026-08-04",
+    "dateModified": "2026-08-04",
+    "author": {"@type": "Person", "name": "Kenneth Cross", "url": "https://restlessforge.substack.com"},
+    "publisher": {"@type": "Organization", "name": "What Is My Time Worth?", "url": "https://restless-forge.dev/tools/what-is-my-time-worth"},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://restless-forge.dev/tools/what-is-my-time-worth/articles/the-enjoyment-multiplier/"}
+  }
+  </script>
+    <link rel="stylesheet" href="/tool-chrome.css">
+    <link rel="stylesheet" href="/tools/what-is-my-time-worth/pages.css">
+  <style>
+    /* ── Article Layout ── */
+    .article{max-width:680px}
+    .breadcrumb{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:28px}
+    .breadcrumb a{color:var(--dim)}
+    .breadcrumb a:hover{color:var(--accent)}
+    .article__tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .article__tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:2px;padding:3px 10px}
+    .article__meta{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .article__body h2{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin:44px 0 16px;display:flex;align-items:center;gap:10px}
+    .article__body h2::before{content:'';display:inline-block;width:18px;height:1px;background:var(--accent);flex-shrink:0}
+    .article__body p{font-size:15px;color:var(--muted);line-height:1.85;margin-bottom:18px}
+    .article__body p:last-child{margin-bottom:0}
+    .article__body strong{color:var(--text);font-weight:600}
+    .article__body em{font-style:italic}
+    .article__body blockquote{border-left:3px solid var(--accent);padding:14px 20px;margin:28px 0;background:var(--surface);border-radius:0 3px 3px 0}
+    .article__body blockquote p{font-size:15px;font-style:italic;color:var(--text);margin-bottom:0}
+    .article__body ul{font-size:15px;color:var(--muted);line-height:1.85;margin:0 0 18px 22px}
+    .article__body ul li{margin-bottom:8px}
+    .formula{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:3px;padding:18px 22px;margin:24px 0;font-family:var(--font-mono);font-size:13px;color:var(--text);line-height:1.7}
+    .formula span{color:var(--muted);font-size:12px;display:block;margin-top:6px}
+    .cta-inline{margin:44px 0;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:3px;padding:28px 24px}
+    .cta-inline p{font-size:14px;color:var(--muted);margin-bottom:16px;font-style:italic}
+    .cta-inline a.btn{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--bg);background:var(--accent);padding:11px 22px;border-radius:3px;text-decoration:none;transition:opacity 0.15s;margin-right:12px;margin-bottom:8px}
+    .cta-inline a.btn:hover{opacity:0.85;text-decoration:none}
+    .cta-inline a.btn--outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  </style>
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/what-is-my-time-worth/shared.js"></script>
+</head>
+<body>
+  <div id="wimtw-header"></div>
+
+  <main>
+    <div class="article">
+      <p class="breadcrumb"><a href="/tools/what-is-my-time-worth/articles/">← Articles</a></p>
+
+      <div class="article__tags">
+        <span class="article__tag">Decision Engine</span>
+        <span class="article__tag">DIY vs Hire</span>
+        <span class="article__tag">Heuristics</span>
+      </div>
+
+      <h1>The Enjoyment Multiplier: Why DIY Math Needs a Fudge Factor</h1>
+
+      <div class="article__meta">
+        <span>August 4, 2026</span>
+        <span>By <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a></span>
+        <span>7 min read</span>
+      </div>
+
+      <div class="article__body">
+        <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>There is a tidy argument that goes like this: your real hourly wage is $40. A
+painter charges $35 an hour. Therefore you should always hire the painter and
+work an extra hour instead.</p>
+<p>It is clean, it is internally consistent, and if you actually live by it you
+will make some obviously wrong decisions.</p>
+<h2>Where the tidy argument breaks</h2>
+<p>The logic assumes two things that are usually false.</p>
+<p><strong>That you can convert time into money at will.</strong> Most people cannot. Salaried
+workers do not get paid more for the hour they freed up by hiring a painter.
+The hour does not become $40 — it becomes an hour, which you will spend on
+something else entirely.</p>
+<p><strong>That all hours are interchangeable.</strong> An hour of work you enjoy and an hour of
+work you dread are not the same commodity, and no model that treats them
+identically is describing human beings.</p>
+<p>The second point is the one the calculator tries to take seriously.</p>
+<h2>The multiplier</h2>
+<p>The decision engine adjusts the cost of your time by how you feel about the
+task:</p>
+<table>
+<thead>
+<tr>
+<th>Feeling about the task</th>
+<th>Multiplier</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Actively avoid it</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>Dislike it</td>
+<td>1.2</td>
+</tr>
+<tr>
+<td>Neutral</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Enjoy it</td>
+<td>0.7</td>
+</tr>
+<tr>
+<td>Love it</td>
+<td>0.3</td>
+</tr>
+</tbody></table>
+<p>Your DIY time cost is multiplied by that number before being compared against
+the cost of hiring. A task you dread effectively costs you 50% more time than
+the clock says. A task you love costs you less than a third.</p>
+<p>So at a $40 real hourly wage, a four-hour job you dread has an adjusted time
+cost of $240, and paying someone $200 is the better deal. The same four hours
+doing something you love costs $48 — and paying $200 to have it taken away from
+you would be a poor trade.</p>
+<h2>Why this is a heuristic, and why that is fine</h2>
+<p>Those five numbers are not derived from anything. There is no study establishing
+that dread costs exactly 1.5×. I picked values that produce sensible
+recommendations across a realistic range of inputs, and the honest description
+is: <strong>it is a fudge factor, deliberately.</strong></p>
+<p>The alternative is not a more rigorous model. The alternative is pretending the
+factor does not exist and quietly using 1.0 for everything — which is also an
+unjustified assumption, just an invisible one that happens to be wrong.</p>
+<p>An explicit fudge factor you can see and argue with beats an implicit one you
+cannot.</p>
+<h2>What the numbers are meant to capture</h2>
+<p><strong>Above 1.0 — dread.</strong> Tasks you avoid do not only cost the hours they take.
+They cost the procrastination beforehand, the low-grade weight of an
+unfinished job, and the fact that dreaded tasks reliably take longer than
+planned because you keep stopping.</p>
+<p><strong>Below 1.0 — genuine enjoyment.</strong> If you would spend Saturday morning doing
+this anyway, the time is not really a cost. Calling it one produces the absurd
+recommendation to pay someone to take away your hobby.</p>
+<p>The 0.3 for &quot;love&quot; is deliberately aggressive. It exists to stop the model from
+telling a keen gardener to hire a gardener, which is technically defensible
+arithmetic and obviously wrong advice.</p>
+<h2>How to use it honestly</h2>
+<p><strong>Rate the task, not the outcome.</strong> Nearly everyone likes having a painted room.
+The question is whether you like the painting.</p>
+<p><strong>Be careful with &quot;neutral.&quot;</strong> It is the default and the least informative
+answer. Most tasks are not truly neutral — you would rather do them than not, or
+rather not than do. Pushing yourself to pick a side usually produces a better
+recommendation.</p>
+<p><strong>Watch for the flip.</strong> The most useful thing about the multiplier is how often
+it reverses the naive answer. When it does, that is worth a second of thought:
+the arithmetic and your preferences are disagreeing, and the multiplier is the
+model&#39;s attempt to let your preferences win.</p>
+<p><strong>Distrust it at the extremes.</strong> For a task you love that would take eighty
+hours, a 0.3 multiplier will happily recommend DIY. Enjoyment does not scale
+linearly with duration — hour sixty of anything is not hour two. The model does
+not know that. You do.</p>
+<h2>What it is really for</h2>
+<p>The multiplier is not there to produce a precise answer. It is there to stop the
+tool from producing a confidently wrong one.</p>
+<p>A calculator that says &quot;hire out everything below your hourly rate&quot; is
+optimising a number that was never the actual objective. What people are
+actually trying to do is spend their finite time on things worth spending it on
+— and sometimes that means paying someone $200 to make a task disappear, and
+sometimes it means keeping the task because doing it is part of the point.</p>
+<p>Ready to try it?
+<a href="/tools/what-is-my-time-worth/">Open the calculator</a> and use the decision
+engine.</p>
+<!-- /generated:content -->
+      </div>
+    </div>
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="wimtw-footer"></div>
+</body>
+</html>

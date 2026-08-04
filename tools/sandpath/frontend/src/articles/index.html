@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles — SandPath</title>
+  <meta name="description" content="Articles about kinetic sand tables: theta-rho and G-code formats, how image tracing works, and why travel lines happen.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/articles/">
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <meta property="og:title" content="Articles — SandPath">
+  <meta property="og:description" content="Articles about kinetic sand tables: theta-rho and G-code formats, how image tracing works, and why travel lines happen.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/articles/">
+  <meta property="og:type" content="website">
+    <link rel="stylesheet" href="/tool-chrome.css">
+    <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <style>
+    /* ── Post List ── */
+    .post-list{display:flex;flex-direction:column;gap:0}
+    .post-item{display:block;padding:28px 0;border-bottom:1px solid var(--border);text-decoration:none}
+    .post-item:first-child{border-top:1px solid var(--border)}
+    .post-item:hover .post-item__title{color:var(--accent)}
+    .post-item__meta{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:8px;display:flex;gap:14px;align-items:center}
+    .post-item__tag{background:var(--card);border:1px solid var(--border);border-radius:2px;padding:2px 8px;color:var(--muted)}
+    .post-item__title{font-family:var(--font-mono);font-size:16px;font-weight:400;color:var(--text);margin-bottom:10px;line-height:1.4;transition:color 0.15s}
+    .post-item__excerpt{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px}
+    .post-item__read{font-family:var(--font-mono);font-size:12px;color:var(--accent)}
+    /* ── Subscribe CTA ── */
+    .subscribe-box{margin-top:48px;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:3px;padding:28px 24px;text-align:center}
+    .subscribe-box p{font-size:14px;color:var(--muted);margin-bottom:18px;font-style:italic}
+    .subscribe-btn{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--bg);background:var(--accent);padding:11px 24px;border-radius:3px;text-decoration:none;transition:opacity 0.15s}
+    .subscribe-btn:hover{opacity:0.85;text-decoration:none}
+    .subscribe-note{margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--dim)}
+  </style>
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+
+  <main>
+    <h1>Articles</h1>
+    <p class="page-sub">Sand table formats, image tracing, and the mechanics of drawing with a ball.</p>
+
+    <p>Kinetic sand tables look simple from the outside — a ball, some sand, a
+    magnet — and the moment you try to put your own artwork on one you discover
+    they are not. Why does a photograph come out looking like corduroy? Why do
+    straight lines slash across a finished pattern? Why does a file that worked
+    on one table drive the ball into the rim of another?</p>
+
+    <p>These articles work through the parts of that where the answer is
+    genuinely interesting rather than just a setting to change. They are written
+    from how SandPath actually converts files, so they get specific: the polar
+    coordinate system circular tables use, the three tracing algorithms and what
+    each one is really for, and why travel lines are a famous computer science
+    problem wearing a disguise.</p>
+
+    <p>If you just want to convert something, the
+    <a href="/tools/sandpath/getting-started/">getting started guide</a> is the
+    faster route.</p>
+
+    <div class="post-list">
+      <a class="post-item" href="/tools/sandpath/articles/theta-rho-vs-gcode/">
+        <div class="post-item__meta">
+          <span>August 2026</span>
+          <span class="post-item__tag">File Formats</span>
+          <span class="post-item__tag">Theta-Rho</span>
+        </div>
+        <div class="post-item__title">Theta-Rho vs G-code: Two Ways to Describe a Sand Pattern</div>
+        <p class="post-item__excerpt">Circular tables speak polar, rectangular ones speak Cartesian. What that means for portability, why one format survives a table upgrade, and the two problems that only exist in polar coordinates.</p>
+        <span class="post-item__read">Read article →</span>
+      </a>
+      <a class="post-item" href="/tools/sandpath/articles/why-scanlines-look-wrong-in-sand/">
+        <div class="post-item__meta">
+          <span>August 2026</span>
+          <span class="post-item__tag">Tracing</span>
+          <span class="post-item__tag">Edge Detection</span>
+        </div>
+        <div class="post-item__title">Why Scanlines Look Wrong in Sand</div>
+        <p class="post-item__excerpt">The obvious way to convert an image for a sand table is the way that fails. Why raster scanlines produce corduroy, and what Sobel edges, marching squares, and skeletonisation do instead.</p>
+        <span class="post-item__read">Read article →</span>
+      </a>
+      <a class="post-item" href="/tools/sandpath/articles/travel-lines-and-path-ordering/">
+        <div class="post-item__meta">
+          <span>August 2026</span>
+          <span class="post-item__tag">Path Ordering</span>
+          <span class="post-item__tag">Optimisation</span>
+        </div>
+        <div class="post-item__title">Travel Lines: The Problem You Cannot Fully Solve</div>
+        <p class="post-item__excerpt">The ball cannot lift off the sand, so every move between shapes leaves a mark. Why this is the travelling salesman problem in disguise, and why fixing your source art beats fixing the algorithm.</p>
+        <span class="post-item__read">Read article →</span>
+      </a>
+    </div>
+
+    <div class="subscribe-box">
+      <p>New articles when they're ready — no schedule, no filler.</p>
+      <a class="subscribe-btn" data-rf-link="substack" target="_blank" rel="noopener">Subscribe on Substack →</a>
+      <p class="subscribe-note">No spam. Unsubscribe anytime.</p>
+    </div>
+  </main>
+
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+  <div id="sp-footer"></div>
+</body>
+</html>

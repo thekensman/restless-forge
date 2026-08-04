@@ -7,11 +7,13 @@
 
   var navLinks = [
     [base + '/', 'ForgeInvoice'],
+    [base + '/articles/', 'Articles'],
     [base + '/about/', 'About'],
   ];
 
   var footerLinks = [
     [base + '/', 'ForgeInvoice'],
+    [base + '/articles/', 'Articles'],
     [base + '/about/', 'About'],
   ];
 

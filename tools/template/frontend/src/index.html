@@ -56,6 +56,32 @@
     <p>TODO: tool UI</p>
   </main>
 
+  <!-- ═══════════════════════════════════════════════════
+       ADS — deliberately absent until launch.
+       Unlaunched tools carry `noindex`, but noindex only stops indexing; it
+       does NOT stop ad serving. Shipping live ad code on a placeholder page
+       means serving ads against no content, which is an AdSense policy
+       problem. So this stays commented out.
+
+       At launch (see docs/launching-a-tool.md), uncomment BOTH blocks:
+
+       1. In <head>, after <script src="/shared.js"></script>:
+       <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+
+       2. Here, immediately above the footer placeholder:
+       <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+         <ins class="adsbygoogle" style="display:block"
+              data-ad-slot="7057676288"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+         <script>window.rfMountAdsenseSlots();</script>
+       </aside>
+
+       The loader and the slot must BOTH be present — a slot without the
+       loader pushes to a queue nothing consumes, and ads silently never
+       render (this was a real bug on TattooSafe's sub-pages).
+       ═══════════════════════════════════════════════════ -->
+
   <!-- Footer injected by DOMContentLoaded in public/shared.js -->
   <div id="__TOOL_PREFIX__-footer"></div>
 

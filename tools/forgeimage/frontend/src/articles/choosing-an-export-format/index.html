@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>JPEG, PNG, or WebP: Choosing an Export Format</title>
+  <meta name="description" content="Lossy versus lossless is the first question and usually the only one that matters. How to pick, and when re-encoding quietly destroys an image.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeimage/articles/choosing-an-export-format/">
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeimage/favicon.svg">
+  <link rel="icon" href="/tools/forgeimage/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeimage/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeimage/site.webmanifest">
+  <meta property="og:title" content="JPEG, PNG, or WebP: Choosing an Export Format">
+  <meta property="og:description" content="Lossy versus lossless is the first question and usually the only one that matters. How to pick, and when re-encoding quietly destroys an image.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeimage/articles/choosing-an-export-format/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeimage/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/forgeimage/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeimage/shared.js"></script>
+</head>
+<body>
+  <div id="fimg-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/forgeimage/articles/">← Articles</a></p>
+    <h1>JPEG, PNG, or WebP: Choosing an Export Format</h1>
+    <p class="page-sub">Lossy versus lossless is the first question and usually the only one that matters. How to pick, and when re-encoding quietly destroys an image.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>Most format advice is a matrix of features nobody consults at the moment they
+are actually exporting something. In practice one question decides it, and a
+second one covers the exceptions.</p>
+<h2>The question that decides it</h2>
+<p><strong>Does this image have large areas of flat, identical colour, or does it not?</strong></p>
+<p>Photographs do not. Every region of a photograph is subtly varied — noise,
+gradient, texture. Screenshots, logos, diagrams, and charts do. Whole blocks of
+identical pixels.</p>
+<p>That difference is the whole thing, because it is exactly what the two families
+of compression are built for.</p>
+<p><strong>Lossy</strong> formats (JPEG, lossy WebP) discard information the eye is bad at
+noticing — mostly fine colour detail. On photographs this is nearly free: a
+JPEG at reasonable quality is a fraction of the size with no visible difference.
+On a screenshot it is a disaster, producing coloured smears around text and
+halos at every hard edge, because sharp high-contrast boundaries are precisely
+what the discarding step handles worst.</p>
+<p><strong>Lossless</strong> formats (PNG, lossless WebP) keep every pixel exactly and compress
+by describing repetition. On a screenshot with a flat background this is
+enormously effective. On a photograph there is almost no repetition to exploit,
+and the file stays large.</p>
+<p>So: <strong>photograph → lossy. Screenshot, logo, diagram, text → lossless.</strong></p>
+<h2>The second question: transparency</h2>
+<p>If any part of the image needs to be see-through, JPEG is out. It has no alpha
+channel at all, and exporting a transparent image to JPEG silently fills the
+transparent regions — usually with black, which is rarely what anyone wanted.</p>
+<p>PNG and WebP both support alpha.</p>
+<h2>Where WebP fits</h2>
+<p>WebP does both — it has a lossy mode and a lossless mode — and is meaningfully
+smaller than the older format in each case. Roughly 25–35% smaller than JPEG at
+comparable quality, and often better than PNG for lossless.</p>
+<p>The catch is not browser support any more; that argument is over and WebP won.
+It is everything that is not a browser. Some desktop applications, older
+operating system previews, print workflows, and plenty of upload forms still do
+not accept it.</p>
+<p>The practical division:</p>
+<ul>
+<li><strong>Web use you control</strong> — WebP. Smaller, and it displays everywhere it needs
+to.</li>
+<li><strong>Anything you hand to another person or system</strong> — JPEG or PNG. They work
+everywhere without a conversation.</li>
+</ul>
+<h2>Re-encoding is a one-way door</h2>
+<p>This is the one genuine trap, and it is invisible.</p>
+<p>Every time a lossy image is decoded and re-encoded, it loses a little more. Open
+a JPEG, crop it, export as JPEG, and you have applied lossy compression twice.
+Do it a few more times and artifacts accumulate into something visible — the
+&quot;deep fried&quot; look of an image that has been through many hands.</p>
+<p>Two consequences worth internalising:</p>
+<p><strong>Keep an original.</strong> Edit from the highest-quality source you have, not from
+last week&#39;s export. ForgeImage does not modify your file, but the file you feed
+it might already be a fourth-generation copy.</p>
+<p><strong>Do all your edits in one pass.</strong> Crop, resize, and export once rather than
+exporting between each step. One re-encode instead of three.</p>
+<p>Converting a lossy image to a lossless format does not undo any of this. A JPEG
+saved as PNG is a lossless copy of an image that already lost information — same
+artifacts, larger file.</p>
+<h2>On quality settings</h2>
+<p>For JPEG and lossy WebP, quality is roughly:</p>
+<ul>
+<li><strong>0.9–0.95</strong> — visually indistinguishable from the original for nearly all
+photographs. Use when the image matters.</li>
+<li><strong>0.75–0.85</strong> — the sensible default. Small artifacts exist and you will not
+notice them at normal viewing size.</li>
+<li><strong>0.6–0.75</strong> — visible on close inspection, fine for thumbnails.</li>
+<li><strong>Below 0.6</strong> — visible, and only worth it under a hard size constraint.</li>
+</ul>
+<p>Going above 0.95 is close to pointless: file size climbs steeply while the
+visible difference does not.</p>
+<h2>The short version</h2>
+<ul>
+<li>Photograph → JPEG, or WebP if it is for your own site.</li>
+<li>Screenshot, logo, diagram, anything with text → PNG.</li>
+<li>Needs transparency → PNG or WebP, never JPEG.</li>
+<li>Handing it to someone else → the boring format.</li>
+<li>Edit from originals, and export once.</li>
+</ul>
+<p>Ready to try it? <a href="/tools/forgeimage/">Open ForgeImage</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="fimg-footer"></div>
+</body>
+</html>

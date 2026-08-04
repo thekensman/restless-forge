@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supported Sand Tables & Output Formats — SandPath</title>
+  <meta name="description" content="SandPath supports Oasis Mini and One, the Sisyphus Mini, Coffee and End tables, ZenXY, and custom circular or rectangular builds — with .thr or G-code output.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/supported-tables/">
+  <!-- Favicons (canonical RF block — tool-scoped) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:title" content="Supported Sand Tables & Output Formats — SandPath">
+  <meta property="og:description" content="SandPath supports Oasis Mini and One, the Sisyphus Mini, Coffee and End tables, ZenXY, and custom circular or rectangular builds — with .thr or G-code output.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/supported-tables/">
+  <meta property="og:site_name" content="SandPath">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+  <main>
+    <h1>Supported Sand Tables and Output Formats</h1>
+    <p class="page-sub">Every table SandPath targets, its bed size in millimetres, and which file format it expects.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>A kinetic sand table is defined, as far as a pattern file is concerned, by three
+things: whether the bed is round or rectangular, how big it is in millimetres,
+and which file format the controller expects. SandPath ships a profile for each
+supported table so you do not have to know any of that off the top of your head
+— but if you are choosing a table, or building one, the details below are the
+ones that matter.</p>
+<h2>The profiles</h2>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Shape</th>
+<th>Bed size</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Oasis Mini (Grounded)</td>
+<td>Circular</td>
+<td>165 mm (6.5″)</td>
+<td><code>.thr</code></td>
+</tr>
+<tr>
+<td>Oasis One (Grounded)</td>
+<td>Circular</td>
+<td>470 mm (18.5″)</td>
+<td><code>.thr</code></td>
+</tr>
+<tr>
+<td>Sisyphus Mini</td>
+<td>Circular</td>
+<td>394 mm (15.5″)</td>
+<td><code>.thr</code></td>
+</tr>
+<tr>
+<td>Sisyphus End Table</td>
+<td>Circular</td>
+<td>457 mm (18″)</td>
+<td><code>.thr</code></td>
+</tr>
+<tr>
+<td>Sisyphus Coffee Table</td>
+<td>Circular</td>
+<td>622 mm (24.5″)</td>
+<td><code>.thr</code></td>
+</tr>
+<tr>
+<td>ZenXY (V1 Engineering)</td>
+<td>Rectangular</td>
+<td>500 × 350 mm default</td>
+<td><code>.gcode</code></td>
+</tr>
+<tr>
+<td>Custom Circular</td>
+<td>Circular</td>
+<td>You specify</td>
+<td><code>.thr</code></td>
+</tr>
+<tr>
+<td>Custom Rectangular</td>
+<td>Rectangular</td>
+<td>You specify</td>
+<td><code>.gcode</code></td>
+</tr>
+</tbody></table>
+<h2>Circular tables and <code>.thr</code></h2>
+<p>Every circular table here — both Oasis models and all three Sisyphus models —
+takes <strong>theta-rho</strong> files. Each line holds an angle in radians and a radius
+normalised from 0 at the centre to 1 at the rim.</p>
+<p>Because rho is normalised, a <code>.thr</code> file is <em>resolution-independent</em>: the same
+file draws correctly on a 165 mm Oasis Mini and a 622 mm Sisyphus Coffee Table,
+just at different physical scales. This is genuinely useful — a pattern you like
+transfers between tables without reconversion.</p>
+<p>What does not transfer is fine detail. A 3 mm feature on a 622 mm table is
+0.5% of the radius; the same fraction on a 165 mm Mini is under a millimetre,
+far below what a ball roughly 10–15 mm across can physically carve. Detail that
+looks crisp on the big table can disappear entirely on the small one.</p>
+<p>All circular profiles cap out at a <code>max_rho</code> of <strong>0.95</strong> rather than 1.0.
+That 5% margin keeps the ball clear of the rim, where sand piles up and the
+magnet&#39;s pull is least reliable. SandPath clips your paths to that limit rather
+than letting a design run off the edge.</p>
+<h2>Rectangular tables and G-code</h2>
+<p>The <strong>ZenXY</strong> by V1 Engineering is the rectangular table in the lineup, and the
+one you build yourself. It uses G-code — the same numerical-control language
+CNC machines have used since the 1950s — with a deliberately small vocabulary:
+<code>G21</code> to declare millimetres, <code>G90</code> for absolute positioning, <code>G0</code> for rapid
+travel moves, and <code>G1</code> for draw moves.</p>
+<p>The 500 × 350 mm default matches a common ZenXY build, but since it is an
+open-source design with no fixed size, the profile is a starting point rather
+than a specification. Enter your actual bed dimensions if yours differs.</p>
+<p>Unlike <code>.thr</code>, G-code coordinates are absolute millimetres, so a G-code file is
+<strong>not</strong> portable between differently-sized tables. Converting again for a
+different bed is the correct move, not an inconvenience to work around.</p>
+<h2>Custom tables</h2>
+<p>If your table is not listed — a homebuilt polar rig, a modified kit, a
+commercial model SandPath does not yet profile — choose <strong>Custom Circular</strong> or
+<strong>Custom Rectangular</strong> and enter the bed dimensions. The shape choice is what
+determines the output format: circular gives you <code>.thr</code>, rectangular gives you
+G-code.</p>
+<p>Two things to measure before you type numbers in. Use the <strong>sand bed</strong> diameter
+or dimensions, not the outside of the furniture; the enclosure is usually
+several centimetres larger than the drawable area. And if your controller
+expects a different rho ceiling than 0.95, convert with a slightly smaller bed
+size to reproduce the same safety margin.</p>
+<h2>Choosing a size</h2>
+<p>Larger tables are more forgiving of detail and more impressive in a room, but
+they take proportionally longer to draw — a pattern that takes twenty minutes on
+an Oasis Mini can run well over an hour on a Sisyphus Coffee Table, because the
+ball is covering several times the distance at a similar speed.</p>
+<p>If you are converting photographs or dense line art, the bigger beds genuinely
+help. If you mostly want geometric patterns and spirals, a Mini renders them
+just as cleanly.</p>
+<p>Ready to convert something? Open the <a href="/tools/sandpath/">converter</a>, or read
+<a href="/tools/sandpath/how-it-works/">how the conversion works</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>

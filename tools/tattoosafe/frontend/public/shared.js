@@ -5,16 +5,17 @@
   'use strict';
   var base = '/tools/tattoosafe';
 
+  // Legal + contact are site-global (/privacy, /terms, /contact) — client-side
+  // tools don't ship their own. rfGlobalFooterLinks appends privacy/terms.
   var navLinks = [
     [base + '/', 'Preview'], [base + '/pricing/', 'Pricing'],
-    [base + '/faq/', 'FAQ'], [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
+    [base + '/faq/', 'FAQ'], [base + '/articles/', 'Articles'], [base + '/about/', 'About'],
   ];
 
   var footerLinks = [
     [base + '/', 'Preview'], [base + '/pricing/', 'Pricing'],
-    [base + '/faq/', 'FAQ'], [base + '/about/', 'About'],
-    [base + '/contact/', 'Contact'],
+    [base + '/faq/', 'FAQ'], [base + '/articles/', 'Articles'], [base + '/about/', 'About'],
+    ['/contact', 'Contact'],
   ];
 
   var chrome = window.rfMountToolChrome({

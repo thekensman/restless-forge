@@ -26,6 +26,29 @@ scaffolds and the state every unlaunched tool must stay in.
       builds (`./build.sh`).
 - [ ] Any tool-specific safety/accuracy gate is cleared (e.g. PetDose
       stays hidden until veterinary review, regardless of content).
+- [ ] **No per-tool legal or contact pages.** `/privacy`, `/terms` and
+      `/contact` are site-global and every tool's footer already links
+      them via `rfGlobalFooterLinks`. Delete any `src/{privacy,terms,contact}/`
+      the tool inherited from an older scaffold. **Exception:** a
+      `tier: 'cloud'` tool keeps its own `privacy/` page describing its
+      server-side data flow (see CLAUDE.md).
+- [ ] **Every ad-bearing prose sub-page clears ~250 visible words.**
+      Thin pages carrying ads are what "low value content" means to an
+      AdSense reviewer; the site was rejected once for exactly this.
+      Main tool pages are exempt — a calculator's value is the tool, not
+      the prose.
+- [ ] **`npm run check-content` passes.** It enforces the two rules above
+      plus "live tools carry no stray noindex" and "unlaunched tools stay
+      noindexed and ad-free". CI runs it; run it locally first.
+- [ ] **Decide whether this tool warrants articles — it is a judgment
+      call, not a quota.** Articles earn their place when the tool has
+      real domain depth worth explaining (SandPath's coordinate formats,
+      WIMTW's tax arithmetic). Simple file-operation tools and
+      single-purpose calculators legitimately need none. If you do write
+      them, ground each one in the tool's actual engine code rather than
+      generic topic research — a handful of specific articles beats a
+      library of interchangeable ones, and bulk-produced content is what
+      Google's scaled-content-abuse policy targets.
 
 ## 1. Directory listing
 
@@ -50,11 +73,20 @@ scaffolds and the state every unlaunched tool must stay in.
 
 ## 3. Ads
 
-- [ ] Add the AdSense loader to `<head>` of every page:
+- [ ] Add the AdSense loader to `<head>` of every page, **after**
+      `<script src="/shared.js"></script>` (it reads `rfAdsenseClientId`
+      from there — the publisher ID is single-sourced in `site/shared.js`,
+      never hard-coded per page):
 
       ```html
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+      <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
       ```
+
+      The loader and the `<ins>` slot must **both** be present on a page.
+      A slot without the loader pushes to a queue nothing consumes, so ads
+      silently never render — this was a real bug on TattooSafe's
+      sub-pages. `npm run check-content` does not catch it; grep for
+      `adsbygoogle` and `rfAdsenseClientId` and confirm they agree.
 
 - [ ] Add the bottom ad unit before the footer placeholder on the main
       page and each content sub-page (the pattern every live tool uses —
