@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>What Actually Leaves Your Browser</title>
+  <meta name="description" content="Rise & Rhyme is the rare Restless Forge tool that talks to a server. Precisely what it sends, what is kept, and what is hashed rather than stored.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/articles/what-actually-leaves-your-browser/">
+  <link rel="icon" type="image/svg+xml" href="/tools/rise-and-rhyme/favicon.svg">
+  <link rel="icon" href="/tools/rise-and-rhyme/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/rise-and-rhyme/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/rise-and-rhyme/site.webmanifest">
+  <meta property="og:title" content="What Actually Leaves Your Browser">
+  <meta property="og:description" content="Rise & Rhyme is the rare Restless Forge tool that talks to a server. Precisely what it sends, what is kept, and what is hashed rather than stored.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/articles/what-actually-leaves-your-browser/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/rise-and-rhyme/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/rise-and-rhyme/shared.js"></script>
+</head>
+<body>
+  <div id="rr-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/rise-and-rhyme/articles/">← Articles</a></p>
+    <h1>What Actually Leaves Your Browser</h1>
+    <p class="page-sub">Rise & Rhyme is the rare Restless Forge tool that talks to a server. Precisely what it sends, what is kept, and what is hashed rather than stored.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>Nearly everything on Restless Forge runs entirely in your browser. Rise &amp; Rhyme
+is one of the few exceptions, and exceptions deserve to be spelled out rather
+than buried in a policy nobody reads.</p>
+<p>It talks to a server because it has to: generating lyrics means calling a
+language model, and doing that from the browser would mean shipping an API key
+to every visitor. That is not a thing you can do safely. So there is a backend,
+and this is exactly what it receives.</p>
+<h2>What gets sent</h2>
+<p>One request per generation, in the evening before your alarm:</p>
+<ul>
+<li><strong>Your calendar&#39;s public iCal URL.</strong> Fetched server-side to read tomorrow&#39;s
+events.</li>
+<li><strong>Your timezone.</strong> So &quot;tomorrow&quot; means tomorrow where you are.</li>
+<li><strong>Your song preferences</strong> — style and related settings.</li>
+</ul>
+<p>That is the payload. There is no account, no email address, no device
+identifier, and no login.</p>
+<h2>What the server does with it</h2>
+<p>Fetches the iCal feed. Extracts the titles and times of the next day&#39;s events.
+Sends those to the Anthropic Claude API to write lyrics. Returns the lyrics to
+your browser, which caches them locally for the morning.</p>
+<p>The event details are used to build the prompt and are not stored afterwards.
+The generated lyrics live in your browser, not on the server.</p>
+<h2>What is stored, and in what form</h2>
+<p>Rate limiting requires knowing whether a given URL or address has made requests
+recently. That means keeping <em>something</em> — but not the thing itself.</p>
+<p>Your iCal URL and IP address are stored <strong>only as SHA-256 hashes</strong>. A hash is a
+one-way function: it is enough to recognise a repeat request, and it cannot be
+reversed to recover the original. The raw values are never written down.</p>
+<p>This matters more than it might sound for the calendar URL specifically. A
+Google Calendar secret iCal address is a bearer credential — anyone holding it
+can read that calendar. Storing it in plaintext would be creating a database
+worth stealing. Storing a hash means a breach yields a list of hashes that
+cannot be turned back into calendar access.</p>
+<p>Both hashes are deleted automatically once their rate-limit window closes. The
+database has pruning triggers rather than relying on a cleanup job someone
+remembers to run — expired rate-limit rows, old generation records, and aged
+statistics all age out on their own.</p>
+<h2>What is never sent</h2>
+<ul>
+<li><strong>Your calendar contents beyond tomorrow.</strong> Only the next day&#39;s window is
+read.</li>
+<li><strong>Attendee details, locations, or descriptions.</strong> Titles and times.</li>
+<li><strong>Anything at alarm time.</strong> The morning playback is entirely local; the
+network is not involved.</li>
+<li><strong>Anything at all if you never generate.</strong> No calendar URL, no requests.</li>
+</ul>
+<h2>The honest residue</h2>
+<p>Two things are worth stating plainly rather than reassuring past.</p>
+<p><strong>Your event titles reach Anthropic&#39;s API.</strong> They are the raw material for the
+lyrics — there is no version of this that generates a song about your day
+without a model seeing your day. If tomorrow&#39;s calendar contains something you
+would not want a third-party API to process, this tool is not the right fit for
+that day, and you can skip generation.</p>
+<p><strong>The server can see your calendar while it is fetching it.</strong> It has to, in
+order to read it. It does not retain it, but &quot;does not retain&quot; is a policy
+promise about behaviour rather than an architectural impossibility — unlike the
+browser-only tools, where the guarantee comes from there being no server at all.</p>
+<p>That distinction is exactly why cloud-assisted tools carry a badge in the
+directory and their own privacy page. The browser-only guarantee is stronger,
+and blurring the two would be dishonest.</p>
+<h2>Why the badge exists</h2>
+<p>Restless Forge&#39;s default is client-side, and the default is load-bearing — it is
+most of why the tools can promise what they promise. A tool that quietly broke
+that pattern would erode the promise for all of them.</p>
+<p>So cloud-assisted tools are marked in the directory, described in the global
+<a href="/privacy">privacy policy</a>, and carry their own page detailing their data flow.
+The point is that &quot;does this send my data anywhere&quot; should be answerable at a
+glance rather than by reading source code.</p>
+<p>Full details: <a href="/tools/rise-and-rhyme/privacy/">Rise &amp; Rhyme privacy</a>.</p>
+<p>Ready to try it? <a href="/tools/rise-and-rhyme/">Open Rise &amp; Rhyme</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="rr-footer"></div>
+</body>
+</html>

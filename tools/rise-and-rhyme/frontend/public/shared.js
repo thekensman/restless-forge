@@ -23,12 +23,14 @@
   // as you add the matching src/<page>/index.html.
   var navLinks = [
     [base + '/', 'Rise &amp; Rhyme'],
+    [base + '/articles/', 'Articles'],
     [base + '/about/', 'About'],
     [base + '/faq/', 'FAQ'],
   ];
 
   var footerLinks = [
     [base + '/', 'Rise &amp; Rhyme'],
+    [base + '/articles/', 'Articles'],
     [base + '/about/', 'About'],
     [base + '/faq/', 'FAQ'],
     [base + '/privacy/', 'Privacy'],
