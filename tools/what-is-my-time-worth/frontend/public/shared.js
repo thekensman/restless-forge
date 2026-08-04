@@ -5,11 +5,12 @@
   'use strict';
   var base = '/tools/what-is-my-time-worth';
 
+  // Legal + contact are site-global (/privacy, /terms, /contact) — client-side
+  // tools don't ship their own. rfGlobalFooterLinks appends privacy/terms.
   var navLinks = [
     [base + '/', 'Calculator'],
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
-    [base + '/contact/', 'Contact'],
     [base + '/about/', 'About'],
   ];
 
@@ -17,8 +18,8 @@
     [base + '/', 'Calculator'],
     [base + '/articles/', 'Articles'],
     [base + '/faq/', 'FAQ'],
-    [base + '/contact/', 'Contact'],
     [base + '/about/', 'About'],
+    ['/contact', 'Contact'],
   ];
 
   var chrome = window.rfMountToolChrome({

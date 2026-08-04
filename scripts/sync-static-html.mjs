@@ -318,6 +318,10 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
   const SUB_PAGE_DEFAULT = ["monthly", "0.5"];
   const ARTICLES_INDEX_RULE = ["weekly", "0.7"];
   const ARTICLE_RULE = ["monthly", "0.6"];
+  // Client-side tools no longer ship per-tool legal/contact pages (they live
+  // once at /privacy, /terms, /contact), but cloud-assisted tools still carry
+  // a per-tool privacy page for their server-side data flow, and the template
+  // + unlaunched tools may too. Keep excluding these from the sitemap.
   const LEGAL_SUB_PAGES = new Set(["privacy", "terms", "contact"]);
 
   const entry = (path, [changefreq, priority]) =>
