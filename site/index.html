@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Restless Forge — Tools for Makers &amp; Thinkers</title>
-  <meta name="description" content="A collection of web-based tools and essays for freelancers, makers, and curious builders. Calculate your real hourly wage, generate hologram GIFs, convert images to sand table art.">
+  <meta name="description" content="Free browser-based tools and essays for freelancers, makers, and curious builders. Calculate your real hourly wage, preview a tattoo on your body, generate hologram GIFs, and convert images to sand table art.">
   <link rel="canonical" href="https://restless-forge.dev/">
 
   <!-- Favicons -->
@@ -57,28 +57,68 @@
     <h1 class="hero__title">Restless Forge</h1>
     <p class="hero__subtitle">A workshop for making things that matter</p>
     <p class="hero__intro">
-      Free, open-source tools for people who want to understand their time,
-      create holographic art, and convert images into sand table patterns.
-      No accounts, no sign-ups. Your data is processed locally in your
-      browser and never leaves your device.
+      Free, open-source tools for people who want to understand what their time
+      is really worth, preview a tattoo before committing to it, turn images
+      into holographic art, and convert artwork into sand table patterns.
+      No accounts, no sign-ups. Your files and inputs are processed locally in
+      your browser and never leave your device.
     </p>
   </header>
 
   <!-- Tools Grid -->
   <main class="page">
     <div id="rf-tools-landing"><!-- generated:tools-landing — do not edit; run `npm run sync-static` -->
-<div class="tool-card"><div class="tool-card__category">Financial</div><h3 class="tool-card__title">What Is My Time Worth?</h3><p class="tool-card__desc">Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.</p><a href="/tools/what-is-my-time-worth/" class="tool-card__link">Launch Calculator</a></div><div class="tool-card"><div class="tool-card__category">Creative</div><h3 class="tool-card__title">HoloPath</h3><p class="tool-card__desc">Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.</p><a href="/tools/holopath/" class="tool-card__link">Launch Generator</a></div><div class="tool-card"><div class="tool-card__category">Maker</div><h3 class="tool-card__title">SandPath</h3><p class="tool-card__desc">Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.</p><a href="/tools/sandpath/" class="tool-card__link">Launch Converter</a></div><div class="tool-card"><div class="tool-card__category">Lifestyle</div><h3 class="tool-card__title">TattooSafe</h3><p class="tool-card__desc">Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.</p><a href="/tools/tattoosafe/" class="tool-card__link">Launch Preview</a></div><p class="tool-directory__teaser">23 more tools are in the forge.</p>
+<div class="tool-card"><div class="tool-card__category">Financial</div><h3 class="tool-card__title">What Is My Time Worth?</h3><p class="tool-card__desc">Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.</p><a href="/tools/what-is-my-time-worth/" class="tool-card__link">Launch Calculator</a></div><div class="tool-card"><div class="tool-card__category">Creative</div><h3 class="tool-card__title">HoloPath</h3><p class="tool-card__desc">Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.</p><a href="/tools/holopath/" class="tool-card__link">Launch Generator</a></div><div class="tool-card"><div class="tool-card__category">Maker</div><h3 class="tool-card__title">SandPath</h3><p class="tool-card__desc">Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.</p><a href="/tools/sandpath/" class="tool-card__link">Launch Converter</a></div><div class="tool-card"><div class="tool-card__category">Lifestyle</div><h3 class="tool-card__title">TattooSafe</h3><p class="tool-card__desc">Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.</p><a href="/tools/tattoosafe/" class="tool-card__link">Launch Preview</a></div><p class="tool-directory__teaser">23 more tools are in the forge — unlisted until finished, because a link to a half-built thing helps nobody.</p>
 <!-- /generated:tools-landing --></div>
     <script src="/tools-data.js"></script>
     <script>rfRenderTools("rf-tools-landing", { mode: "landing" });</script>
 
 
     <section style="margin-top: 3rem;">
+      <h2>What This Is</h2>
+      <p>
+        Restless Forge is a one-person workshop. Every tool here started as a
+        problem I actually had — working out whether a job was worth the
+        commute, wanting to see how a design would sit on my arm before booking
+        a tattoo, trying to get a photograph onto a kinetic sand table without
+        it looking like corduroy. Each one got built properly rather than
+        abandoned as a half-finished script.
+      </p>
+      <p>
+        There is no freemium tier, no trial, and no upgrade page. The tools are
+        free because they are cheap to run: they execute in your browser, so
+        there is no per-user cost that would need recovering. Advertising covers
+        the hosting bill. That is the entire business model, and stating it
+        plainly seems better than pretending there isn't one.
+      </p>
+
+      <h2>Browser-First, and Why That Matters</h2>
+      <p>
+        Almost everything here runs entirely on your device. When you upload an
+        image to convert, or type a salary into a calculator, that data is
+        processed by JavaScript running in your tab and is never transmitted
+        anywhere. This is not a privacy policy promise that could quietly change
+        next year — for these tools there is no server to send anything to, so
+        there is nothing to change.
+      </p>
+      <p>
+        A small number of tools genuinely cannot work that way. Generating song
+        lyrics means calling a language model, and doing that from the browser
+        would mean handing an API key to every visitor. Those tools are marked
+        with a <strong>☁ Cloud-assisted</strong> badge on their card, described
+        in the <a href="/privacy">privacy policy</a>, and carry their own page
+        spelling out exactly what leaves your browser. The badge exists so the
+        question "does this send my data anywhere?" is answerable at a glance
+        instead of by reading source code.
+      </p>
+
       <h2>From the Workshop</h2>
       <p>
-        Longer-form <a href="/essays/">essays</a> on tools, time, and the
-        maker philosophy — plus shorter
-        <a href="/articles/">articles and tutorials</a> from the bench.
+        Longer-form <a href="/essays/">essays</a> on tools, time, and the maker
+        philosophy — plus <a href="/articles/">articles</a> written from the
+        engines themselves: how a sand table's coordinate system works, what an
+        applicant tracking system actually measures, where invoice rounding goes
+        wrong.
       </p>
       <p>
         Start with <a href="/essays/why-i-build-these-tools">Why I Build These

@@ -145,7 +145,9 @@
     }
     if (soonCount > 0) {
       html += '<p class="tool-directory__teaser">' + soonCount +
-        ' more tool' + (soonCount !== 1 ? 's' : '') + ' are in the forge.</p>';
+        ' more tool' + (soonCount !== 1 ? 's' : '') + ' ' +
+        (soonCount !== 1 ? 'are' : 'is') + ' in the forge — unlisted until ' +
+        'finished, because a link to a half-built thing helps nobody.</p>';
     }
     el.innerHTML = html;
 
