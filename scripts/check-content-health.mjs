@@ -27,6 +27,19 @@
  *      pages are an AdSense policy problem. This locks in the discipline that
  *      kept 76 unlaunched pages clean during the rejection review.
  *
+ *   5. Site-global pages under site/ that load the AdSense script must clear
+ *      the same word floor. The first version of this script only walked
+ *      tools/, which is exactly why /sites-i-like (47 words), /essays/ (121)
+ *      and the /tools/ hub (159) survived a remediation pass untouched — and
+ *      those are a reviewer's first clicks. A page with the loader is a
+ *      monetized page whether or not it has an <ins> slot, because Auto Ads
+ *      serves against the loader alone.
+ *
+ *   6. A page carrying an ad SLOT must also carry the LOADER. Three TattooSafe
+ *      sub-pages had <ins class="adsbygoogle"> and called rfMountAdsenseSlots()
+ *      with no loader script, so the queue was pushed and nothing consumed it —
+ *      ads silently never rendered. Found by hand; nothing caught it.
+ *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
  */
@@ -70,6 +83,17 @@ function visibleWords(file) {
   return html.split(/\s+/).filter(Boolean).length;
 }
 
+/* An ad SLOT (the unit itself) vs the LOADER (the script that fills it).
+   A page needs both: a slot alone pushes to a queue nothing consumes, and a
+   loader alone still monetizes the page via Auto Ads. */
+const hasAdSlot = (html) => /class=["']adsbygoogle|rfMountAdsenseSlots/.test(html);
+const hasAdLoader = (html) => /rfAdsenseClientId/.test(html);
+
+const slotWithoutLoader = (rel) =>
+  `${rel}: has an ad slot but no AdSense loader. The slot pushes to a queue ` +
+  `nothing consumes, so ads never render. Add the loader after ` +
+  `<script src="/shared.js"></script>, or remove the slot.`;
+
 const problems = [];
 const tools = loadTools();
 
@@ -97,8 +121,11 @@ for (const tool of tools) {
     const rel = relative(root, file);
     const html = readFileSync(file, "utf8");
     const noindex = /content=["']noindex/.test(html);
-    const hasAds = /class=["']adsbygoogle|rfMountAdsenseSlots/.test(html);
+    const hasAds = hasAdSlot(html);
     const isMainPage = relative(src, file) === "index.html";
+
+    // ── Rule 6: a slot without a loader renders nothing ──
+    if (hasAds && !hasAdLoader(html)) problems.push(slotWithoutLoader(rel));
 
     if (live) {
       // ── Rule 3: no stray noindex on a launched tool ──
@@ -130,6 +157,30 @@ for (const tool of tools) {
           `indexing, not ad serving — add ads at launch, not before.`,
         );
       }
+    }
+  }
+}
+
+/* ── Rules 5 + 6 for the site-global pages ──
+   These are a reviewer's first clicks and were unguarded until now. Any page
+   loading the AdSense script is monetized — Auto Ads serves against the
+   loader alone — so the word floor applies whether or not an <ins> is
+   present. Generated blocks (tool grids, friend lists) count toward the
+   total: they are real rendered content, just not hand-written. */
+for (const file of walkHtml(join(root, "site"))) {
+  const rel = relative(root, file);
+  const html = readFileSync(file, "utf8");
+
+  if (hasAdSlot(html) && !hasAdLoader(html)) problems.push(slotWithoutLoader(rel));
+
+  if (hasAdLoader(html)) {
+    const words = visibleWords(file);
+    if (words < MIN_WORDS) {
+      problems.push(
+        `${rel}: ${words} words but loads AdSense (floor ${MIN_WORDS}). ` +
+        `Site-global pages are what a reviewer lands on first — expand it, ` +
+        `or drop the loader from this page.`,
+      );
     }
   }
 }
