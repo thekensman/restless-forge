@@ -150,18 +150,15 @@
     table. No account, no installation, no uploads &mdash; everything runs in your browser and your files
     never leave your device.</p>
 
-    <h3 id="how-to-use">How to Use SandPath</h3>
-    <p>Converting a file takes three steps:</p>
-    <p><strong>Step 1 &mdash; Upload your file.</strong> Drag and drop an SVG vector file or a raster image
-    (JPG, PNG, WebP, BMP, GIF, or TIFF) onto the upload area below. SVG files are converted directly from
-    their path data. Raster images are first traced into vector paths using your choice of three tracing modes.</p>
-    <p><strong>Step 2 &mdash; Choose your settings.</strong> Select your sand table model from the device
-    dropdown, or enter custom dimensions. Adjust curve smoothness, fit mode, and padding to control how the
-    pattern fills the sand bed. For raster images, you can also choose a trace mode (Outline, Threshold, or
-    Centerline) and preview the traced paths before converting.</p>
-    <p><strong>Step 3 &mdash; Convert and download.</strong> Click the Convert button. SandPath generates
-    your .thr or .gcode file in seconds. Click Download to save it, then transfer it to your sand table
-    using the manufacturer&rsquo;s app or a USB drive.</p>
+    <p>Converting takes three steps: drop in a file, pick your table and trace
+    mode, then convert and download. New to sand tables? Start with
+    <a href="/tools/sandpath/getting-started/">Getting Started</a>, which walks
+    through the whole process and explains what the file formats mean.</p>
+    <p>More detail:
+    <a href="/tools/sandpath/how-it-works/">how the conversion works</a> &middot;
+    <a href="/tools/sandpath/supported-tables/">supported tables and output formats</a> &middot;
+    <a href="/tools/sandpath/faq/">FAQ</a> &middot;
+    <a href="/tools/sandpath/about/">about SandPath</a></p>
   </article>
 
   <!-- ═══════════════════════════════════════════════════
@@ -372,111 +369,6 @@
   </main>
 
   <!-- ═══════════════════════════════════════════════════
-       SECTION 3: DETAILED CONTENT ARTICLES
-       ═══════════════════════════════════════════════════ -->
-  <article class="seo-content" aria-label="How SandPath works">
-    <h2>How SandPath Works Under the Hood</h2>
-    <p>SandPath is built differently from other sand table pattern tools. Instead of converting raster images
-    into horizontal scanlines (which look unnatural in sand), SandPath uses proper vector-based conversion
-    to produce continuous, flowing paths that look hand-drawn.</p>
-
-    <h3>SVG Conversion</h3>
-    <p>When you upload an SVG file, SandPath parses the actual path data from the SVG markup. It handles all
-    standard SVG path commands including line segments, quadratic and cubic B&eacute;zier curves, elliptical arcs,
-    and compound subpaths. Each curve is sampled into smooth point sequences, and the paths are reordered using
-    nearest-neighbour sorting to minimise travel lines (the ugly straight lines between separate shapes). The
-    result is a file where the ball moves in clean, continuous strokes with minimal visible transitions.</p>
-
-    <h3>Image Tracing and Vectorisation</h3>
-    <p>For raster images like photographs and PNGs, SandPath first converts the image into vector paths through
-    a tracing process. Three tracing modes are available, each suited to different types of source material:</p>
-    <p>The <strong>Outline</strong> mode uses Sobel edge detection to find the boundaries and contours in a
-    photograph or complex artwork. This produces a sketch-like result that captures the major features of the
-    image without filling solid areas.</p>
-    <p>The <strong>Threshold</strong> mode applies a brightness cutoff to separate the image into black and white
-    regions, then traces the boundaries between those regions using marching squares contour extraction. This works
-    best for high-contrast images like logos, silhouettes, and text.</p>
-    <p>The <strong>Centerline</strong> mode skeletonises the image, reducing shapes to their thinnest possible
-    single-pixel lines before tracing. This is ideal for line drawings, handwriting, and sketches where you want
-    the ball to trace along the middle of each stroke rather than around its outline.</p>
-    <p>After tracing, the resulting vector paths go through Douglas-Peucker simplification to reduce point count
-    while preserving shape accuracy. The simplified paths are then converted to your sand table&rsquo;s native
-    format just like an SVG would be.</p>
-
-    <h3 id="supported-tables">Supported Sand Tables and Output Formats</h3>
-    <p>SandPath supports the most popular kinetic sand tables on the market. Circular tables receive
-    <strong>.thr files</strong> (theta-rho format, where each line contains a polar coordinate pair), and
-    rectangular tables receive <strong>.gcode files</strong> (standard CNC G-code with G0/G1 linear moves
-    in millimetre coordinates).</p>
-    <p>The supported devices are:</p>
-    <p><strong>Oasis Mini</strong> by Grounded &mdash; a 6.5-inch circular table, one of the most popular
-    entry-level sand tables. Uses .thr output with a maximum rho of 0.97.</p>
-    <p><strong>Oasis One</strong> by Grounded &mdash; the larger 18.5-inch sibling. Also uses .thr output.</p>
-    <p><strong>Sisyphus Mini</strong> &mdash; a 15.5-inch circular table by Sisyphus Industries. Uses .thr output.</p>
-    <p><strong>Sisyphus Coffee Table</strong> &mdash; a 24.5-inch circular table built into a full-size coffee
-    table. The largest Sisyphus model, using .thr output.</p>
-    <p><strong>Sisyphus End Table</strong> &mdash; an 18-inch circular table in end-table form. Uses .thr output.</p>
-    <p><strong>ZenXY</strong> by V1 Engineering &mdash; an open-source rectangular sand table that you build
-    yourself. This is the only rectangular table in the lineup and outputs .gcode instead of .thr. Build sizes
-    vary, so SandPath lets you enter custom width and height in millimetres.</p>
-    <p><strong>Custom tables</strong> &mdash; if your table isn&rsquo;t listed, you can select &ldquo;Custom
-    Circular&rdquo; or &ldquo;Custom Rectangular&rdquo; and enter your table&rsquo;s exact dimensions. SandPath
-    will generate the appropriate output format for the shape you select.</p>
-  </article>
-
-  <article class="seo-content" aria-label="Getting started guide">
-    <h2>Getting Started with Sand Table Art</h2>
-    <p>Kinetic sand tables use a steel ball guided by magnets beneath a bed of fine sand to draw continuous
-    patterns. The ball follows paths defined in theta-rho (.thr) or G-code (.gcode) files, tracing geometric
-    designs, organic curves, and even converted photographs into the sand surface. The results are
-    mesmerising &mdash; each pattern erases the last as the ball traces its new path through the sand.</p>
-
-    <h3>What is a Theta-Rho (.thr) File?</h3>
-    <p>Theta-rho is a polar coordinate format where each line contains an angle (theta, in radians) and a
-    radius (rho, normalised from 0 to 1). The ball spirals outward and inward following these coordinates.
-    This format is used by circular tables from Oasis (Grounded) and Sisyphus Industries. SandPath converts
-    your SVG paths and traced images into this format automatically, handling coordinate transformation, path
-    ordering, and boundary clipping so the ball never moves beyond the edge of the sand bed.</p>
-
-    <h3>What is G-code?</h3>
-    <p>G-code is the standard language for CNC (computer numerical control) machines and has been in use since
-    the 1950s. Rectangular sand tables like the ZenXY by V1 Engineering use G-code with simple linear move
-    commands: G0 for rapid travel (moving the ball without drawing) and G1 for drawing moves. Coordinates
-    are specified in millimetres with absolute positioning. SandPath generates clean G-code with proper headers,
-    metric unit declaration (G21), and absolute positioning mode (G90) so the file can be loaded directly
-    without any manual editing.</p>
-
-    <h3>Tips for Great Sand Art Patterns</h3>
-    <p>The best sand table patterns use continuous, flowing paths with minimal lift-and-travel moves. When
-    converting images, start with the Outline trace mode for photographs and switch to Threshold for
-    high-contrast logos. The Path Detail slider controls simplification: coarser settings produce smaller files
-    with smoother curves, while finer settings capture more detail at the cost of larger files and longer draw
-    times. For SVG files, designs with single continuous strokes produce the cleanest results. Avoid very fine
-    details smaller than the ball diameter (typically 10&ndash;15 mm on most tables) as they will not resolve
-    clearly in the sand.</p>
-
-    <h3 id="faq">Frequently Asked Questions</h3>
-    <p><strong>Do I need to create an account?</strong> No. SandPath requires no sign-up, login, or payment.
-    Upload a file, convert it, and download the result. The entire process takes seconds.</p>
-    <p><strong>Are my files stored on the server?</strong> There is no server. All processing happens
-    entirely in your browser using JavaScript. Your files are never uploaded anywhere &mdash; they stay on
-    your device from upload to download.</p>
-    <p><strong>Can I convert photographs?</strong> Yes. Upload any JPG, PNG, or WebP image and SandPath will
-    trace it into vector paths using edge detection, thresholding, or centerline extraction before converting
-    to your table&rsquo;s format. You can preview the traced result before committing to a conversion.</p>
-    <p><strong>What file types can I upload?</strong> SandPath accepts SVG vector files and raster images in
-    JPG, JPEG, PNG, WebP, BMP, GIF, and TIFF formats. SVGs are converted directly from their path data.
-    Raster images go through the tracing pipeline first.</p>
-    <p><strong>My pattern has ugly straight lines between shapes. How do I fix this?</strong> These are travel
-    lines &mdash; the path the ball takes between separate shapes. SandPath minimises these using nearest-neighbour
-    path ordering. If they&rsquo;re still visible, try using SVGs with fewer separate shapes, or increase the
-    curve smoothness setting.</p>
-    <p><strong>Can I use SandPath on my phone?</strong> Yes. SandPath is fully responsive and works on any
-    device with a modern web browser, including phones and tablets. The upload area accepts files from your
-    device&rsquo;s file picker.</p>
-  </article>
-
-  <!-- ═══════════════════════════════════════════════════
        SINGLE AD SLOT — below all content, above footer
        ═══════════════════════════════════════════════════ -->
   <aside class="ad-slot ad-slot--bottom" id="ad-bottom">
@@ -487,69 +379,6 @@
          data-full-width-responsive="true"></ins>
     <script>window.rfMountAdsenseSlots();</script>
   </aside>
-
-  <!-- ═══════════════════════════════════════════════════
-       SECTION 4: ABOUT, PRIVACY POLICY, TERMS
-       (essential trust pages for AdSense approval)
-       ═══════════════════════════════════════════════════ -->
-  <section class="legal-content" id="about" aria-label="About SandPath">
-    <h2>About SandPath</h2>
-    <p>SandPath was created by a kinetic sand table enthusiast who was frustrated with the existing tools for
-    converting images and vector art into sand table patterns. Most converters either produce ugly scanline
-    patterns, require desktop software installation, or charge subscription fees for basic conversions.</p>
-    <p>SandPath solves these problems by providing a free, browser-based converter that uses proper vector path
-    parsing and image tracing to generate clean, continuous patterns. The tool is open source and the code is
-    available on <a data-rf-link="sandpathRepo" target="_blank" rel="noopener">GitHub</a>.
-    Contributions, bug reports, and feature requests are welcome.</p>
-    <p>SandPath is not affiliated with, endorsed by, or connected to Oasis (Grounded), Sisyphus Industries,
-    or V1 Engineering. All product names and trademarks are the property of their respective owners.</p>
-    <p>If you find SandPath useful, consider <a data-rf-link="bmc" target="_blank"
-    rel="noopener">buying the developer a coffee</a> to help cover hosting costs and support continued
-    development.</p>
-  </section>
-
-  <section class="legal-content" id="privacy" aria-label="Privacy policy">
-    <h2>Privacy Policy</h2>
-    <p><strong>Last updated:</strong> February 2026</p>
-    <p><strong>Data collection:</strong> SandPath does not collect, store, or transmit any personal information.
-    No account creation is required. No cookies are set by SandPath itself (third-party services like Google
-    AdSense may set their own cookies as described below).</p>
-    <p><strong>File handling:</strong> SandPath processes all files entirely in your browser using JavaScript.
-    No files are ever uploaded to a server. Your images and SVGs never leave your device &mdash; all
-    conversion happens locally, and no data is transmitted or stored anywhere.</p>
-    <p><strong>Advertising:</strong> SandPath uses Google AdSense to display advertisements. Google may use
-    cookies and web beacons to serve ads based on your prior visits to this and other websites. You can opt out
-    of personalised advertising by visiting
-    <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google&rsquo;s Ads Settings</a>.
-    For more information about how Google uses data from partner sites, see
-    <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google&rsquo;s
-    privacy policy</a>.</p>
-    <p><strong>Analytics:</strong> SandPath does not use Google Analytics or any other analytics tracking service.
-    Server access logs (IP address, requested URL, timestamp) are retained for up to 14 days for security and
-    debugging purposes, then automatically deleted via log rotation.</p>
-    <p><strong>Third-party links:</strong> This site contains links to GitHub, Buy Me a Coffee, Ko-fi, and Google.
-    These external sites have their own privacy policies and SandPath is not responsible for their content or
-    practices.</p>
-    <p><strong>Contact:</strong> For privacy-related questions, please open an issue on the
-    <a data-rf-link="sandpathRepo" target="_blank" rel="noopener">SandPath GitHub repository</a>.</p>
-  </section>
-
-  <section class="legal-content" id="terms" aria-label="Terms of use">
-    <h2>Terms of Use</h2>
-    <p>SandPath is provided free of charge, as-is, with no warranty of any kind. By using this tool you agree
-    to the following terms:</p>
-    <p><strong>Acceptable use:</strong> You may use SandPath to convert any images and SVG files that you have
-    the legal right to use. You are responsible for ensuring that your uploaded content does not infringe on
-    any third-party copyright, trademark, or other intellectual property rights.</p>
-    <p><strong>No warranty:</strong> SandPath is provided &ldquo;as is&rdquo; without warranty of any kind,
-    express or implied. The developer does not guarantee that the service will be available, uninterrupted,
-    or error-free. Use of generated files on your sand table is at your own risk.</p>
-    <p><strong>Limitation of liability:</strong> In no event shall the developer of SandPath be liable for any
-    damages arising from the use of this tool, including but not limited to damage to your sand table, loss of
-    data, or any indirect or consequential damages.</p>
-    <p><strong>Changes:</strong> These terms may be updated at any time. Continued use of SandPath after changes
-    constitutes acceptance of the revised terms.</p>
-  </section>
 
   <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
   <div id="sp-footer"></div>

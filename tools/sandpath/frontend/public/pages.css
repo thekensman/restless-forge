@@ -1,0 +1,89 @@
+/* SandPath — Shared Sub-page Styles
+   Mirrors the main app's zen sand palette (src/styles.css) so sub-pages and
+   the converter feel like one tool. Sub-pages are copied verbatim by
+   build.sh (not Vite-processed), so this file must be self-contained. */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap');
+:root {
+  --bg: #0e0e12; --bg-raised: #16161d; --bg-card: #1c1c26;
+  --sand: #d4a44a; --sand-light: #f0cc72; --sand-dim: #8a6d2e;
+  --text: #c8c4b8; --text-muted: #7a766a; --text-bright: #eae6d8;
+  --accent: #e8b84a; --border: #2a2a35;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text-bright);
+  --rf-muted: var(--text);
+  --rf-dim: var(--text-muted);
+  --rf-accent: var(--sand);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-body);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-body); font-weight: 300; background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh; }
+a { color: var(--sand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.site-header { border-bottom: 1px solid var(--border); padding: 20px 24px; }
+.site-header__inner { max-width: 1100px; margin: 0 auto; }
+.site-header__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.site-header__brand { font-family: var(--font-display); font-size: 17px; color: var(--text-bright); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.site-header__brand:hover { text-decoration: none; color: var(--sand); }
+.nav-toggle { display: none; background: none; border: 1px solid var(--border); color: var(--text); font-size: 18px; padding: 4px 10px; border-radius: 3px; cursor: pointer; line-height: 1; }
+.site-header__nav { display: flex; gap: 4px; font-size: 13px; align-items: center; flex-wrap: wrap; }
+.site-header__nav a { color: var(--text); padding: 5px 10px; border-radius: 3px; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.site-header__nav a:hover { color: var(--sand); background: rgba(212,164,74,0.08); }
+.site-header__nav a.active { color: var(--sand); background: rgba(212,164,74,0.12); }
+.nav-sep { color: var(--text-muted); padding: 0 4px; user-select: none; }
+@media (max-width: 640px) {
+  .nav-toggle { display: block; }
+  .site-header__nav { display: none; flex-direction: column; align-items: stretch; gap: 0; padding: 10px 0 4px; border-top: 1px solid var(--border); margin-top: 14px; }
+  .site-header__nav.open { display: flex; }
+  .site-header__nav a { padding: 11px 4px; border-radius: 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .site-header__nav a:last-child { border-bottom: none; }
+  .site-header__nav .nav-sep { display: none; }
+}
+.site-header__support { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.site-header__support-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+.site-header__support-link { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; text-decoration: none; transition: color 0.15s; }
+.site-header__support-link:hover { color: var(--sand); }
+main { max-width: 820px; margin: 0 auto; padding: 52px 24px 40px; }
+h1 { font-family: var(--font-display); font-size: clamp(26px, 4vw, 40px); font-weight: 400; color: var(--sand); letter-spacing: -0.5px; margin-bottom: 14px; }
+.page-sub { font-style: italic; color: var(--text-muted); font-size: 15px; margin-bottom: 36px; padding-left: 16px; border-left: 2px solid var(--sand); line-height: 1.6; }
+h2 { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--text-bright); margin: 40px 0 14px; }
+h3 { font-size: 15px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--sand); margin: 28px 0 10px; }
+p { color: var(--text); margin-bottom: 14px; font-size: 16px; line-height: 1.8; }
+ul, ol { margin: 0 0 18px 1.4rem; color: var(--text); }
+li { margin-bottom: 8px; line-height: 1.7; }
+strong { color: var(--text-bright); font-weight: 500; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--sand-light); }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 15px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+th { color: var(--sand); font-weight: 500; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
+td { color: var(--text); }
+.info-box { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 22px 0; }
+.info-box p:last-child { margin-bottom: 0; }
+.article__cta { margin-top: 36px; }
+.btn--sand { display: inline-block; background: var(--sand); color: #14141a; font-weight: 500; padding: 12px 26px; border-radius: 8px; text-decoration: none; }
+.btn--sand:hover { background: var(--sand-light); text-decoration: none; }
+.footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; margin-top: 60px; }
+.footer__donate { margin-bottom: 20px; }
+.footer__donate-label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.footer__donate-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.footer__donate-link { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+.footer__donate-link:hover { color: var(--sand); }
+.footer__links { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; font-size: 13px; margin-bottom: 12px; }
+.footer__link { color: var(--text-muted); padding: 2px 6px; }
+.footer__link:hover { color: var(--sand); }
+.footer-sep { color: var(--text-muted); padding: 0 4px; }
+.footer__copy { font-size: 12px; color: var(--text-muted); }
+
+/* ─── Ad Slot ─── */
+.ad-slot--bottom {
+  display: block;
+  margin: 2rem auto 0;
+  max-width: 740px;
+  width: 100%;
+  padding: 0 1.5rem;
+}

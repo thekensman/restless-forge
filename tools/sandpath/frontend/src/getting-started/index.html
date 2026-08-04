@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started with Sand Table Art — SandPath</title>
+  <meta name="description" content="How kinetic sand tables work, what .thr and G-code files are, and how to convert your first image or SVG into a sand pattern with SandPath.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/getting-started/">
+  <!-- Favicons (canonical RF block — tool-scoped) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:title" content="Getting Started with Sand Table Art — SandPath">
+  <meta property="og:description" content="How kinetic sand tables work, what .thr and G-code files are, and how to convert your first image or SVG into a sand pattern with SandPath.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/getting-started/">
+  <meta property="og:site_name" content="SandPath">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+  <main>
+    <h1>Getting Started with Sand Table Art</h1>
+    <p class="page-sub">How kinetic sand tables draw, what the file formats mean, and how to get a good pattern on your first try.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>A kinetic sand table is a simple machine doing something quietly hypnotic. A
+steel ball sits in a bed of fine sand. Underneath, a magnet on a motorised arm
+drags it around. The ball ploughs a groove wherever it goes, and because each
+new pattern erases the last, the table is never finished — it just keeps
+redrawing.</p>
+<p>What the table needs from you is a path: an ordered list of coordinates telling
+the magnet where to take the ball. That is all a pattern file is. SandPath&#39;s job
+is turning a picture or a drawing into one.</p>
+<h2>Converting your first pattern</h2>
+<ol>
+<li><strong>Pick your table</strong> from the device list so the output matches what your
+controller expects. If yours is not listed, choose Custom Circular or Custom
+Rectangular and enter the bed size — see
+<a href="/tools/sandpath/supported-tables/">supported tables</a>.</li>
+<li><strong>Drop in a file.</strong> SVG works best. Raster images (JPG, PNG, WebP, BMP, GIF,
+TIFF) are also fine — they go through a tracing step first.</li>
+<li><strong>Choose a trace mode</strong> if you uploaded a raster image. Outline for
+photographs, Threshold for logos and high-contrast art, Centerline for line
+drawings and handwriting.</li>
+<li><strong>Check the preview.</strong> This is the step worth not skipping. The preview shows
+the actual path the ball will follow, including the travel moves between
+shapes.</li>
+<li><strong>Adjust Path Detail</strong> if needed. Coarser means smaller files and smoother
+curves; finer captures more detail at the cost of longer draw times.</li>
+<li><strong>Download</strong> and copy the file to your table however it normally accepts
+patterns.</li>
+</ol>
+<p>Nothing is uploaded at any point — the conversion runs in your browser, and the
+file never leaves your device.</p>
+<h2>What is a theta-rho (.thr) file?</h2>
+<p>Theta-rho is a polar format, which sounds more intimidating than it is. Each
+line has two numbers: <strong>theta</strong>, an angle in radians, and <strong>rho</strong>, a radius from
+0 at the centre of the table to 1 at the edge.</p>
+<pre><code>0.0000 0.0000
+0.0628 0.0100
+0.1257 0.0200
+</code></pre>
+<p>Read those three lines and you have a ball starting at the centre and spiralling
+gently outward. That is the whole format. Circular tables from Grounded (Oasis)
+and Sisyphus Industries use it.</p>
+<p>Because rho is a fraction of the radius rather than a measurement, the same file
+works on any circular table regardless of size — one of the genuinely elegant
+things about the format.</p>
+<h2>What is G-code?</h2>
+<p>G-code is the language CNC machines have spoken since the 1950s, and rectangular
+tables like the ZenXY use a small subset of it:</p>
+<pre><code>G21        ; units are millimetres
+G90        ; absolute positioning
+G0 X10 Y10 ; rapid move — reposition without drawing
+G1 X90 Y40 ; linear move — draw to here
+</code></pre>
+<p><code>G0</code> versus <code>G1</code> is the distinction that matters visually. <code>G0</code> is the ball
+travelling to the start of the next shape; <code>G1</code> is the ball drawing. Every <code>G0</code>
+in a sand table pattern still leaves a mark, which is why minimising them
+matters so much.</p>
+<p>Unlike theta-rho, G-code coordinates are absolute millimetres, so a file made
+for one bed size will not fit another. Reconvert rather than rescale.</p>
+<h2>Getting a good result</h2>
+<p><strong>Start with the right trace mode.</strong> More patterns are ruined by tracing a
+photograph in Threshold mode than by any other single mistake. Threshold wants
+hard edges; photographs rarely have them.</p>
+<p><strong>Respect the ball.</strong> Detail smaller than the ball diameter — typically 10–15 mm
+— cannot physically appear in the sand. Fine cross-hatching and small text will
+turn into mush no matter how good the conversion is. When in doubt, simplify
+the source image before converting rather than after.</p>
+<p><strong>Prefer continuous strokes.</strong> An SVG drawn as a handful of long paths produces
+a far cleaner result than the same image drawn as hundreds of short disconnected
+segments, because the ball spends less time travelling between them.</p>
+<p><strong>Watch the travel lines in the preview.</strong> If the preview shows straight lines
+slashing across your design, that is what the sand will show too. Reducing the
+number of separate shapes usually fixes it.</p>
+<p><strong>Let it finish.</strong> Patterns take time — anywhere from fifteen minutes to well
+over an hour depending on bed size and path length. A pattern that looks wrong
+halfway through often resolves completely once the remaining strokes land.</p>
+<p>Ready? Open the <a href="/tools/sandpath/">converter</a>, or read
+<a href="/tools/sandpath/how-it-works/">how the conversion works</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>
