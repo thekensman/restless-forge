@@ -15,15 +15,22 @@ browser ──HTTPS──▶ Cloudflare ──▶ nginx (location ^~ /api/, rate
                        FastAPI app in /opt/restless-forge/backend
                        venv in       /opt/restless-forge/venv
                        SQLite in     /var/lib/restless-forge/api.db
+                       songs in      /var/lib/restless-forge/song-cache
                        env/secrets   /etc/restless-forge/api.env
                                     │
                                     ▼ (per generation)
                        calendar provider (allowlisted iCal fetch)
                        Anthropic Claude API (lyrics)
+                       RunPod / ACE-Step  (sings them — async job, polled)
+
+nginx also serves /api/v1/rise-and-rhyme/song/*.mp3 straight off disk,
+bypassing the app entirely: it handles Range requests, which Safari and
+iOS need for <audio>.
 ```
 
 - **Code**: `backend/` in the repo. Routes per tool under
-  `/api/v1/<tool>/`; currently `rise_and_rhyme` (generate + health).
+  `/api/v1/<tool>/`; currently `rise_and_rhyme` (generate, preview,
+  song-status, song audio, health).
 - **No containers, no DB server** — stdlib SQLite, single uvicorn worker
   (the droplet has 1 GB RAM).
 
@@ -31,9 +38,49 @@ browser ──HTTPS──▶ Cloudflare ──▶ nginx (location ^~ /api/, rate
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/v1/rise-and-rhyme/generate` | iCal → Claude lyrics → track selection |
+| `POST /api/v1/rise-and-rhyme/generate` | iCal → Claude lyrics → queue the sung song. Returns `pending` (job queued) or `ok` (lyrics only) |
 | `POST /api/v1/rise-and-rhyme/preview` | iCal → event list + mood. **No model call, no cost.** |
+| `GET /api/v1/rise-and-rhyme/song-status/{job_id}` | poll one song job: `pending` / `ready` / `failed` |
+| `GET /api/v1/rise-and-rhyme/song/{token}.mp3` | the recording. **Served by nginx in production**, not this app |
 | `GET /api/v1/rise-and-rhyme/health` | liveness + circuit state publicly; spend figures with `X-Metrics-Token` (§ Monitoring the bill) |
+
+### Why songs are a job, not a response
+
+Generation takes tens of seconds on a GPU. Returning it inline cannot work
+here for two independent reasons: nginx cuts responses at
+`proxy_read_timeout 60s`, and this service runs **one** uvicorn worker (1 GB
+droplet), so a blocking call would hold the entire API — health checks
+included — for the duration. `/generate` therefore returns as soon as the
+lyrics exist, and the browser polls `song-status`.
+
+The poll endpoint has **its own nginx rate-limit zone** (`rf_poll`, 60 r/m).
+The general `rf_api` zone is 10 r/m and a 5-second poll is 12 r/m — sharing it
+would throttle the first song partway through, in production only.
+
+Note the path is `/song-status/{id}`, **not** `/song/{id}/status`: nginx serves
+`/song/` straight off disk, so anything under that prefix never reaches the app.
+
+### Falling back to v1
+
+Sung songs are enabled only when `RUNPOD_API_KEY` **and** `RUNPOD_ENDPOINT_ID`
+are set. Unset is a supported production state, not a misconfiguration — the
+service then behaves exactly as v1 (lyrics + backing track + browser speech).
+**Clearing the two variables and restarting is the rollback.**
+
+Failures degrade rather than propagate, because the worst outcome this tool has
+is an alarm that does not ring:
+
+| Failure | Result |
+|---|---|
+| RunPod submit fails | `ok` + `song: "unavailable"` + a message; caller keeps the lyrics |
+| A poll fails (network) | stays `pending` — a dropped poll says nothing about the job |
+| Job fails on the worker | `failed` + reason; client uses lyrics + TTS |
+| Job exceeds `SONG_JOB_TIMEOUT_SEC` | `failed`; same |
+| Audio swept before playback | 404 with "expired"; client falls back |
+
+The `pending` response deliberately carries the **complete** v1 payload
+(lyrics, track, mood, cache window), so a browser that never manages to poll
+still has everything it needs to ring.
 
 ### Request contract
 
@@ -117,6 +164,13 @@ systemctl restart restless-forge-api
 | `RF_DB_PATH` | `backend/.data/api.db` (dev) | SQLite location. **Production sets this in the systemd unit** (`/var/lib/restless-forge/api.db`); the code default is deliberately local so a laptop or CI box can never touch real cost-control state. |
 | `GENERATION_LOG_RETENTION_DAYS` | `30` | How long the generation/cost log is kept |
 | `DAILY_STATS_RETENTION_DAYS` | `400` | How long per-day totals are kept |
+| `RUNPOD_API_KEY` | empty | RunPod key. **With `RUNPOD_ENDPOINT_ID`, this is the v2 feature flag** — both set = sung songs; either missing = v1 behaviour. See `docs/runpod-setup.md`. |
+| `RUNPOD_ENDPOINT_ID` | empty | RunPod serverless endpoint id |
+| `SONG_DURATION_SEC` | `45` | Length of the generated song. Drives GPU seconds, i.e. the bill. |
+| `SONG_JOB_TIMEOUT_SEC` | `300` | Give up on a job after this long; client falls back to TTS |
+| `RUNPOD_COST_PER_SEC` | `0.0004` | GPU rate used for spend tracking (24 GB tier). Charged against the **same** `DAILY_SPEND_CAP` as Claude. |
+| `SONG_RETENTION_HOURS` | `36` | How long recordings are kept. Floor is "overnight plus the whole target day" — a song made at 22:00 is played the next morning, so 24 is too short. |
+| `RF_SONG_CACHE_DIR` | `backend/.data/song-cache` (dev) | Where MP3s live. **Production sets this in the systemd unit** (`/var/lib/restless-forge/song-cache`). Never under `/var/www`: that path is `rsync --delete`'d every deploy, and `ProtectSystem=strict` makes it unwritable anyway. |
 
 After editing: `systemctl restart restless-forge-api`.
 
@@ -243,6 +297,23 @@ lyrics, no raw URLs, no raw IP addresses:
 | `daily_stats` | date, generation count, spend | `DAILY_STATS_RETENTION_DAYS` (400) |
 | `generations` | timestamp, URL hash, cost, track, mood, event count, success | `GENERATION_LOG_RETENTION_DAYS` (30) |
 | `circuit` | one row: consecutive errors, cooldown expiry | permanent (single row) |
+| `song_jobs` | random job token, RunPod job id, state, duration, billed flag | 72 h |
+
+### Generated audio (on disk, not in SQLite)
+
+MP3s live in `RF_SONG_CACHE_DIR` and are deleted after
+`SONG_RETENTION_HOURS` (36) by a sweep that runs on the write path — same
+reasoning as the triggers above.
+
+Two properties worth preserving if this code is ever touched:
+
+- **Filenames are `secrets.token_urlsafe`, never derived from the calendar
+  URL.** nginx serves these files with no authentication and they *sing the
+  listener's schedule aloud*; a name anyone could compute would publish it.
+  The token is the only credential.
+- **`song_jobs` rows outlive the audio (72 h vs 36 h) on purpose.** A client
+  polling a song that was swept overnight then gets a clear "expired" instead
+  of an unexplained miss at 6:30am.
 
 Pruning is enforced by **SQLite triggers**, rebuilt on every start-up so a
 config change takes effect (`db.py::_prune_triggers`). Triggers rather than a
@@ -324,8 +395,21 @@ mocked).
   per-generation cost/track/mood/event-count logs.
 - Calendar event details are sent to the Claude API to write lyrics and
   are not stored after the response is returned.
+- The lyrics — which *are* the calendar rephrased — are sent to RunPod to be
+  sung. The iCal URL, the IP address, and the raw feed are not.
+- Generated audio is stored under an unguessable random token, never a value
+  derived from the calendar, and deleted within `SONG_RETENTION_HOURS`.
 - The SSRF allowlist in `backend/services/ical_parser.py` restricts
   fetches to known calendar providers over https only.
 
-Public-facing copy that mirrors this: `site/privacy.html` ("Cloud-Assisted
-Tools") and `tools/rise-and-rhyme/frontend/src/privacy/`.
+**Two processors, not one.** Adding RunPod changed what the public copy has to
+say, and four places assert it. All of them must move together:
+
+- `site/privacy.html` ("Cloud-Assisted Tools")
+- `tools/rise-and-rhyme/frontend/src/privacy/index.md`
+- `tools/rise-and-rhyme/frontend/src/about/index.md` (info box)
+- `tools/rise-and-rhyme/frontend/src/articles/what-actually-leaves-your-browser/index.md`
+
+That last one is an article whose entire subject is this data flow. A stale
+version of it is worse than no article, so treat it as part of the code.
+Prose lives in the `.md`; run `npm run sync` to regenerate the HTML.

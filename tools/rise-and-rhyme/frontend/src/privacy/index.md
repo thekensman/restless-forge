@@ -9,10 +9,16 @@ one part of it runs on a server. Your browser sends your Google Calendar public
 iCal URL to the Restless Forge server when a song is generated (normally the
 evening before your alarm) and when you press **Check my calendar**. The server
 fetches that feed and extracts the next day's event titles and times. To write
-a song it sends those on to the **Anthropic Claude API**, and the finished
-lyrics come back to your browser; a calendar check stops before that step.
-Everything else — the alarm, the music, the text-to-speech voice, and all of
-your settings — runs entirely on your device.
+a song it sends those on to the **Anthropic Claude API**, and the lyrics come
+back to your browser. Those lyrics then go to a second provider, **RunPod**,
+which runs a GPU that records them as an actual sung song. A calendar check
+stops before both of those steps. Everything else — the alarm, playback, and
+all of your settings — runs entirely on your device.
+
+Two outside companies are therefore involved in making a song: Anthropic sees
+your event titles, and RunPod sees the lyrics written from them. If that is
+more than you want to share, this is not the right tool for you, and the
+browser-only tools elsewhere on the site have no server at all.
 
 ## What Is Sent to the Server
 
@@ -28,6 +34,29 @@ your settings — runs entirely on your device.
 - **Tomorrow's event titles and times** from your calendar feed, formatted
   into a lyric-writing prompt for the Claude API. Anthropic processes this
   under its own [privacy policy](https://www.anthropic.com/legal/privacy).
+
+## What Is Sent to RunPod
+
+- **The finished lyrics**, plus a description of the musical style. RunPod
+  runs the open-source ACE-Step model on a GPU and returns the recording.
+  Because the lyrics are written from your calendar, they name your events —
+  a line like "standup at nine with the crew" is your schedule in another
+  form. Your iCal URL, your IP address, and the raw calendar feed are never
+  sent. RunPod processes this under its own
+  [privacy policy](https://www.runpod.io/legal/privacy-policy).
+
+## The Recorded Song
+
+The finished MP3 is stored on the Restless Forge server so your browser can
+play it in the morning, under a random filename that is not derived from your
+calendar in any way — nobody can guess or enumerate it. It is deleted
+automatically within 36 hours, which covers the night it is made and the day
+it is for. Nothing links a stored song back to the calendar it came from.
+
+If song generation fails for any reason, the alarm falls back to the earlier
+behaviour: the lyrics are read aloud by your browser's own text-to-speech over
+a backing track, entirely on your device. Nothing extra is sent to make that
+happen, and the tool tells you when it has fallen back.
 
 ## What the Server Keeps
 
@@ -55,14 +84,14 @@ and cached there; the server does not keep them beyond the request.
 
 **Check my calendar** reads your feed and shows the events the song will cover,
 along with the timezone it detected. It never calls the AI model, so nothing is
-sent to Anthropic and nothing is generated — it exists so you can confirm the
-URL and timezone are right before a song is written.
+sent to Anthropic or RunPod and nothing is generated — it exists so you can
+confirm the URL and timezone are right before a song is written.
 
 ## What Never Leaves Your Browser
 
 - Your alarm time, days, snooze, volume, voice, and music-style preferences
   (localStorage).
-- The generated song cache used to play your alarm.
+- The cached lyrics used to play your alarm.
 - All audio playback and speech synthesis.
 
 ## Your Calendar URL Is a Secret

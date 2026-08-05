@@ -2,10 +2,11 @@ Nearly everything on Restless Forge runs entirely in your browser. Rise & Rhyme
 is one of the few exceptions, and exceptions deserve to be spelled out rather
 than buried in a policy nobody reads.
 
-It talks to a server because it has to: generating lyrics means calling a
-language model, and doing that from the browser would mean shipping an API key
-to every visitor. That is not a thing you can do safely. So there is a backend,
-and this is exactly what it receives.
+It talks to a server because it has to. Generating lyrics means calling a
+language model, and turning those lyrics into a song someone actually sings
+means running a music model on a GPU. Neither is something a browser can do,
+and doing either from the browser would mean shipping API keys to every
+visitor. So there is a backend, and this is exactly what it receives.
 
 ## What gets sent
 
@@ -25,8 +26,22 @@ Fetches the iCal feed. Extracts the titles and times of the next day's events.
 Sends those to the Anthropic Claude API to write lyrics. Returns the lyrics to
 your browser, which caches them locally for the morning.
 
+Then a second step: the lyrics go to **RunPod**, a GPU host, which runs the
+open-source ACE-Step model to record them as a sung song. That recording is
+stored on the Restless Forge server under a random filename and your browser
+downloads it. It is deleted automatically within 36 hours — long enough to
+cover the night it was made and the day it was made for.
+
 The event details are used to build the prompt and are not stored afterwards.
-The generated lyrics live in your browser, not on the server.
+The lyrics live in your browser, not on the server.
+
+Worth being precise about the ordering, because it determines what happens
+when something breaks: the lyrics are saved before the song is waited on. If
+the GPU step fails, times out, or is unreachable, you still have a working
+alarm — it reads the lyrics aloud with your browser's own speech synthesis
+over a backing track, which is what the tool did before it could sing. It says
+so on screen when that happens rather than quietly handing you a lesser
+product.
 
 ## What is stored, and in what form
 
@@ -53,19 +68,30 @@ statistics all age out on their own.
 - **Your calendar contents beyond tomorrow.** Only the next day's window is
   read.
 - **Attendee details, locations, or descriptions.** Titles and times.
-- **Anything at alarm time.** The morning playback is entirely local; the
-  network is not involved.
+- **Your calendar URL or IP address, to anyone but us.** Neither Anthropic nor
+  RunPod receives either one.
 - **Anything at all if you never generate.** No calendar URL, no requests.
+
+At alarm time the browser may fetch the recorded song from the server if it
+is not already cached. That is a request for one audio file by its random
+name — it carries no calendar data — and everything else about the morning,
+including the fallback path, is local.
 
 ## The honest residue
 
-Two things are worth stating plainly rather than reassuring past.
+Three things are worth stating plainly rather than reassuring past.
 
 **Your event titles reach Anthropic's API.** They are the raw material for the
 lyrics — there is no version of this that generates a song about your day
 without a model seeing your day. If tomorrow's calendar contains something you
 would not want a third-party API to process, this tool is not the right fit for
 that day, and you can skip generation.
+
+**The lyrics reach RunPod, and the lyrics are your day.** "Standup at nine with
+the crew" is your schedule rephrased, not something separate from it. Making a
+model sing about your morning requires a model that has been told about your
+morning. Two outside companies see a version of tomorrow: one to write it, one
+to sing it.
 
 **The server can see your calendar while it is fetching it.** It has to, in
 order to read it. It does not retain it, but "does not retain" is a policy

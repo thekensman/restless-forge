@@ -82,12 +82,17 @@
       URL to our server once per day (in the evening before your alarm). Our
       server fetches the calendar feed, extracts event titles and times for
       the next day, and sends them to the Anthropic Claude API to generate
-      song lyrics. Event details are not stored after the lyrics are
-      generated. The generated lyrics are returned to your browser and cached
-      there. Your iCal URL and your IP address are stored only as SHA-256
-      hashes for rate-limiting purposes — neither is retained in raw form —
-      and both are deleted automatically once their rate-limit window closes.
-      Full details:
+      song lyrics. The lyrics are then sent to a second provider,
+      <a href="https://www.runpod.io/" rel="noopener">RunPod</a>, which runs
+      the open-source ACE-Step model on a GPU to record them as a sung song.
+      Because the lyrics describe your day, your event details reach RunPod in
+      that form. Event details are not stored after the lyrics are generated.
+      The lyrics are returned to your browser and cached there; the recorded
+      song is stored on our server under a random, unguessable filename and is
+      deleted automatically within 36 hours. Your iCal URL and your IP address
+      are stored only as SHA-256 hashes for rate-limiting purposes — neither
+      is retained in raw form — and both are deleted automatically once their
+      rate-limit window closes. Full details:
       <a href="/tools/rise-and-rhyme/privacy/">Rise &amp; Rhyme privacy</a>.
     </p>
 

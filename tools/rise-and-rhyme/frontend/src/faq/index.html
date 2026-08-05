@@ -51,9 +51,11 @@ stored in your browser&#39;s localStorage, on your device.</p>
 <p>The iCal URL is sent to the Restless Forge server when a song is generated (the
 evening before your alarm) and when you press &quot;Check my calendar&quot;. The server
 fetches the feed and extracts tomorrow&#39;s event titles and times. When a song is
-being written, those are sent on to the Anthropic Claude API for the lyrics; a
-calendar check stops before that and contacts no one else. Event details are
-not stored either way — see the
+being written, those are sent on to the Anthropic Claude API for the lyrics,
+and the lyrics are then sent to RunPod, which sings them on a GPU. Since the
+lyrics describe your day, your events reach RunPod in that form. A calendar
+check stops before both steps and contacts no one else. Event details are not
+stored either way — see the
 <a href="/tools/rise-and-rhyme/privacy/">privacy page</a> for exactly what&#39;s kept.</p>
 <h2>How do I check my calendar is set up right?</h2>
 <p>Press <strong>Check my calendar</strong> in the setup panel. It lists the events tomorrow&#39;s
