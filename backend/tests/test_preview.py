@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 import main as main_module
 from services import ical_parser, lyric_generator
-from services.lyric_generator import LyricOutcome
+from services.lyric_generator import LyricOutcome, Section
 
 GOOGLE = "https://calendar.google.com/calendar/ical/abc123/basic.ics"
 
@@ -144,7 +144,7 @@ class TestPreviewIsolation:
         monkeypatch.setattr(ical_parser, "fetch_feed", lambda url: FEED)
         monkeypatch.setattr(
             lyric_generator, "generate_lyrics",
-            lambda events, target, s, client=None: LyricOutcome(["a", "b"], "cheerful", 0.01),
+            lambda events, target, s, client=None: LyricOutcome([Section("verse", ["a", "b"])], "cheerful", 0.01),
         )
         tc = TestClient(main_module.create_app(settings))
         assert tc.post("/api/v1/rise-and-rhyme/preview", json=body()).status_code == 200
@@ -156,7 +156,7 @@ class TestPreviewIsolation:
         monkeypatch.setattr(ical_parser, "fetch_feed", lambda url: FEED)
         monkeypatch.setattr(
             lyric_generator, "generate_lyrics",
-            lambda events, target, s, client=None: LyricOutcome(["a", "b"], "cheerful", 0.01),
+            lambda events, target, s, client=None: LyricOutcome([Section("verse", ["a", "b"])], "cheerful", 0.01),
         )
         tc = TestClient(main_module.create_app(settings))
         for _ in range(settings.ip_max_per_window + 2):

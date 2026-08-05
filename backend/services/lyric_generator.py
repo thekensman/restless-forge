@@ -28,19 +28,27 @@ log = logging.getLogger("rf.lyrics")
 
 MAX_TOKENS = 2000
 
-PROMPT_TEMPLATE = """You are a morning alarm clock songwriter. Given a list of calendar events for tomorrow, write 6-10 lines of lyrics that summarize the day in a fun, upbeat, slightly cheesy style.
+# Sections ACE-Step understands. Anything outside this set is dropped rather
+# than passed through, so a hallucinated tag can't end up being sung.
+SECTIONS = ("verse", "chorus", "bridge", "outro")
+
+PROMPT_TEMPLATE = """You are a morning alarm clock songwriter. Given a list of calendar events for tomorrow, write a short song that summarizes the day in a fun, upbeat, slightly cheesy style.
+
+Structure the song into sections. A good default is verse, chorus, verse, chorus — but a short day may only need one verse and one chorus. Total 6-12 lines across all sections.
 
 Rules:
-- Rhyming couplets (AABB)
+- Rhyming couplets (AABB) within each section
 - Conversational, not formal
-- First line: greeting with the person's day and date
-- Middle lines: summarize 2-4 key events with specific details (times, names, places)
-- Last 2 lines: motivational sign-off
+- The first verse opens with a greeting naming the day and date
+- Verses summarize 2-4 key events with specific details (times, names, places)
+- The chorus is the hook: short, repeatable, motivational. It is sung more than once, so it must NOT mention specific events or times
+- The last section signs off with encouragement
 - If no events: write about having a free day
 - If 6+ events: pick the top 4 by time, mention "plus N more"
 - Keep it positive. Nobody wants negativity at 6 AM.
 - Slightly cheesy humor is encouraged
 - Do NOT use profanity or controversial references
+- These lines will be SUNG. Keep them short and singable — roughly 6-10 words per line, no parentheticals, no stage directions
 
 Also return a mood tag from: energetic, warm, groovy, smooth, cheerful, playful, bold
 
@@ -50,14 +58,22 @@ Calendar events for {date} (times are the listener's local time):
 OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
-        "lyrics": {
+        "sections": {
             "type": "array",
-            "items": {"type": "string"},
-            "description": "6-10 lines of rhyming lyrics",
+            "description": "The song, in order, split into 2-4 sections",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tag": {"type": "string", "enum": list(SECTIONS)},
+                    "lines": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["tag", "lines"],
+                "additionalProperties": False,
+            },
         },
         "mood": {"type": "string", "enum": list(MOODS)},
     },
-    "required": ["lyrics", "mood"],
+    "required": ["sections", "mood"],
     "additionalProperties": False,
 }
 
@@ -67,17 +83,48 @@ class LyricApiError(Exception):
 
 
 @dataclass
+class Section:
+    """One structural block of the song, e.g. a verse or the chorus."""
+
+    tag: str
+    lines: list[str]
+
+
+@dataclass
 class LyricOutcome:
     """Result of one Claude call. `cost` is always meaningful, even when the
     lyrics are unusable, so failures still count against the spend cap."""
 
-    lyrics: list[str] | None
+    sections: list[Section] | None
     mood: str | None
     cost: float
 
     @property
     def ok(self) -> bool:
-        return self.lyrics is not None and self.mood is not None
+        return self.sections is not None and self.mood is not None
+
+    @property
+    def lyrics(self) -> list[str]:
+        """Every line in order, with no section tags.
+
+        This is what the UI displays and what browser TTS reads in the v1
+        fallback path. Derived rather than returned separately by the model, so
+        the sung song and the on-screen words cannot disagree.
+        """
+        if not self.sections:
+            return []
+        return [line for section in self.sections for line in section.lines]
+
+    def tagged(self) -> str:
+        """The lyrics as ACE-Step wants them: a [tag] line above each section.
+
+        Without these markers the model has no structure to follow and the
+        result wanders — no discernible chorus, no shape.
+        """
+        if not self.sections:
+            return ""
+        blocks = [f"[{s.tag}]\n" + "\n".join(s.lines) for s in self.sections]
+        return "\n\n".join(blocks)
 
 
 def format_events(events: list[Event]) -> str:
@@ -138,17 +185,41 @@ def generate_lyrics(
         log.warning("Claude returned non-JSON lyric output")
         return LyricOutcome(None, None, cost)
 
-    lyrics = data.get("lyrics") if isinstance(data, dict) else None
+    raw_sections = data.get("sections") if isinstance(data, dict) else None
     mood = data.get("mood") if isinstance(data, dict) else None
-    if (
-        not isinstance(lyrics, list)
-        or not (1 <= len(lyrics) <= 12)
-        or not all(isinstance(line, str) and line.strip() for line in lyrics)
-        or mood not in MOODS
-    ):
+    sections = _parse_sections(raw_sections)
+    if sections is None or mood not in MOODS:
         log.warning("Claude returned malformed lyric JSON")
         return LyricOutcome(None, None, cost)
-    return LyricOutcome([line.strip() for line in lyrics], mood, cost)
+    return LyricOutcome(sections, mood, cost)
+
+
+def _parse_sections(raw: object) -> list[Section] | None:
+    """Validate the model's section list. Returns None when unusable.
+
+    Total lines are bounded because they become both an alarm screen and a
+    sung song of fixed length: past ~16 lines ACE-Step runs out of seconds and
+    truncates mid-word.
+    """
+    if not isinstance(raw, list) or not (1 <= len(raw) <= 6):
+        return None
+    sections: list[Section] = []
+    total = 0
+    for item in raw:
+        if not isinstance(item, dict):
+            return None
+        tag = item.get("tag")
+        lines = item.get("lines")
+        if tag not in SECTIONS or not isinstance(lines, list) or not lines:
+            return None
+        clean = [line.strip() for line in lines if isinstance(line, str) and line.strip()]
+        if not clean:
+            return None
+        total += len(clean)
+        sections.append(Section(tag, clean))
+    if not (1 <= total <= 16):
+        return None
+    return sections
 
 
 def _first_text_block(response: object) -> str | None:

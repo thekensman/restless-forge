@@ -173,6 +173,29 @@ fieldset.field { padding: 0; }
 .status--error { color: #e06c6c; }
 .schedule { font-size: 0.85rem; color: var(--text-dim); }
 
+/* Sung-song progress. The page stays interactive while the GPU works, so this
+   is the only thing telling you something is still happening. */
+.progress { display: flex; align-items: center; gap: 0.6rem; margin: 0.6rem 0; }
+.progress[hidden] { display: none; }
+.progress__spinner {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  border: 2px solid var(--text-dim);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: rar-spin 0.8s linear infinite;
+}
+.progress__text { font-size: 0.85rem; color: var(--text-dim); }
+
+@keyframes rar-spin { to { transform: rotate(360deg); } }
+
+/* A spinner is decorative; the text carries the meaning. Motion-sensitive
+   visitors get the same information without the rotation. */
+@media (prefers-reduced-motion: reduce) {
+  .progress__spinner { animation: none; border-top-color: var(--text-dim); opacity: 0.5; }
+}
+
 /* ── Alarm overlay ── */
 .alarm {
   position: fixed;

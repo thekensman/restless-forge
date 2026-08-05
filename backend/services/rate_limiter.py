@@ -174,6 +174,31 @@ class RateLimiter:
             ).fetchone()["spend"]
         self._maybe_alert(spend, cost)
 
+    def record_song_cost(self, cost: float, now: Optional[float] = None) -> None:
+        """Charge GPU time for a sung song against the same daily spend cap.
+
+        One shared cap rather than one per provider: the thing worth bounding
+        is the total bill, and two independent caps can each sit at 90% while
+        the day costs nearly twice what was intended.
+
+        Only `spend` moves — `count` was already incremented by the Claude call
+        that produced the lyrics, and this is the same generation, not another.
+        """
+        if cost <= 0:
+            return
+        now = time.time() if now is None else now
+        today = _today(now)
+        with self.db.connect() as conn:
+            conn.execute(
+                "INSERT INTO daily_stats (date, count, spend) VALUES (?, 0, ?) "
+                "ON CONFLICT(date) DO UPDATE SET spend = spend + excluded.spend",
+                (today, cost),
+            )
+            spend = conn.execute(
+                "SELECT spend FROM daily_stats WHERE date = ?", (today,)
+            ).fetchone()["spend"]
+        self._maybe_alert(spend, cost)
+
     def spend_summary(self, now: Optional[float] = None) -> dict:
         """Rolling spend, for keeping an eye on the Anthropic bill.
 

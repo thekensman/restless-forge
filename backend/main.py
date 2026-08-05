@@ -18,6 +18,8 @@ from services.rate_limiter import RateLimiter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
+log = logging.getLogger("rf.main")
+
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
@@ -33,6 +35,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.limiter = RateLimiter(app.state.db, settings)
     app.include_router(rise_and_rhyme_router)
+    log.info(
+        "sung songs (RunPod): %s",
+        "enabled" if settings.song_generation_enabled else "disabled — serving v1 lyrics + TTS",
+    )
     return app
 
 

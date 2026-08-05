@@ -18,6 +18,12 @@ END:VEVENT
 END:VCALENDAR
 """
 
+from services.lyric_generator import Section
+
+SECTIONS = [
+    Section("verse", ["line one", "line two", "line three", "line four"]),
+    Section("chorus", ["line five", "line six"]),
+]
 LYRICS = ["line one", "line two", "line three", "line four", "line five", "line six"]
 
 # Matches settings.metrics_token in the fixture; /health only reports money to
@@ -26,7 +32,7 @@ METRICS_HEADER = {"X-Metrics-Token": "test-metrics-token"}
 
 
 def ok_outcome(events, target, settings, client=None):
-    return LyricOutcome(lyrics=LYRICS, mood="cheerful", cost=0.01)
+    return LyricOutcome(sections=SECTIONS, mood="cheerful", cost=0.01)
 
 
 @pytest.fixture
@@ -135,7 +141,7 @@ def test_api_failure_frees_the_calendar_for_retry(settings, monkeypatch):
         calls["n"] += 1
         if calls["n"] == 1:
             raise lyric_generator.LyricApiError("api down")
-        return LyricOutcome(lyrics=LYRICS, mood="cheerful", cost=0.01)
+        return LyricOutcome(sections=SECTIONS, mood="cheerful", cost=0.01)
 
     monkeypatch.setattr(lyric_generator, "generate_lyrics", flaky)
     tc = TestClient(main_module.create_app(settings))

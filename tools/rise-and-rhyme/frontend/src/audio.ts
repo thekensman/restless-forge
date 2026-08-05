@@ -12,6 +12,8 @@ export class SongPlayer {
   private source: AudioBufferSourceNode | null = null;
   private lyricTimers: number[] = [];
   private buffers = new Map<string, AudioBuffer>();
+  /** Set only while a sung MP3 is playing; the Web Audio path uses `source`. */
+  private element: HTMLAudioElement | null = null;
   playing = false;
 
   /** Must be called from a user gesture the first time (autoplay policy). */
@@ -40,6 +42,50 @@ export class SongPlayer {
     const buf = await ctx.decodeAudioData(await res.arrayBuffer());
     this.buffers.set(trackId, buf);
     return buf;
+  }
+
+  /** Play a fully sung song (one MP3 from the server).
+   *
+   * Uses an <audio> element rather than the Web Audio path below because the
+   * file is streamed from the network: <audio> starts on the first buffered
+   * chunk and issues Range requests, where decodeAudioData needs the whole
+   * file in memory first — a visible delay at exactly the wrong moment.
+   *
+   * Loops until dismissed. An alarm that plays once and gives up is not an
+   * alarm, and this file has no separate outro region to loop like the
+   * backing tracks do.
+   *
+   * Rejects if the audio can't play, so the caller can fall back to the v1
+   * path; that rejection is the whole reason `songUrl` is optional. */
+  async playSongFile(url: string, opts: { volume: number }): Promise<void> {
+    this.stop();
+    const el = new Audio();
+    el.src = url;
+    el.loop = true;
+    el.volume = Math.min(100, Math.max(0, opts.volume)) / 100;
+    this.element = el;
+    this.playing = true;
+    try {
+      await el.play();
+    } catch (err) {
+      this.playing = false;
+      this.element = null;
+      throw err;
+    }
+  }
+
+  /** Warm the browser cache for a finished song.
+   *
+   * Called when the song lands the evening before, so the morning's playback
+   * comes off disk. Best-effort by design: a failure here costs a slower
+   * start, not the alarm, and the response is `private, max-age=86400` so the
+   * browser is allowed to keep it. */
+  async preloadSongFile(url: string): Promise<void> {
+    try {
+      await fetch(url, { cache: "force-cache" });
+    } catch {
+      /* the alarm re-fetches, and falls back to TTS if that fails too */
+    }
   }
 
   /** Play a song: backing track (looping its outro until stopped) with
@@ -103,6 +149,14 @@ export class SongPlayer {
     for (const t of this.lyricTimers) window.clearTimeout(t);
     this.lyricTimers = [];
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (this.element) {
+      this.element.pause();
+      // Drop the source too: pause() alone leaves the element streaming in
+      // some browsers, and "I'm up" has to mean silence.
+      this.element.removeAttribute("src");
+      this.element.load();
+      this.element = null;
+    }
     if (this.source) {
       try {
         this.source.stop();

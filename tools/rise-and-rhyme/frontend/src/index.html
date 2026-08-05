@@ -155,6 +155,13 @@
         <button id="rar-play" class="btn" type="button">▶ Preview my song</button>
       </div>
 
+      <!-- Sung-song progress. aria-live="polite" so a screen reader hears the
+           song finish without the updates interrupting anything. -->
+      <div id="rar-progress" class="progress" role="status" aria-live="polite" hidden>
+        <span class="progress__spinner" aria-hidden="true"></span>
+        <span id="rar-progress-text" class="progress__text"></span>
+      </div>
+
       <p id="rar-status" class="status" role="status"></p>
       <p id="rar-schedule" class="schedule"></p>
     </section>

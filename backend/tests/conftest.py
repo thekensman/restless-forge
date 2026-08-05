@@ -17,7 +17,19 @@ def settings(tmp_path):
     s.db_path = str(tmp_path / "test.db")
     s.anthropic_api_key = "test-key"
     s.metrics_token = "test-metrics-token"
+    # Scoped to the test's tmp dir so a suite run never writes real song audio.
+    # RunPod stays UNSET here: v1 is the default everywhere, and the tests that
+    # exercise sung songs opt in explicitly (see song_settings).
+    s.song_cache_dir = str(tmp_path / "song-cache")
     return s
+
+
+@pytest.fixture
+def song_settings(settings):
+    """Settings with sung songs switched on — the v2 feature flag."""
+    settings.runpod_api_key = "test-runpod-key"
+    settings.runpod_endpoint_id = "test-endpoint"
+    return settings
 
 
 @pytest.fixture

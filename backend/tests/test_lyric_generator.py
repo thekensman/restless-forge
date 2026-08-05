@@ -48,13 +48,23 @@ class FakeClient:
 
 
 GOOD_JSON = json.dumps({
-    "lyrics": [
-        "Good morning Ken, it's Thursday the thirtieth",
-        "two things on the books, nothing too serious",
-        "standup at nine, the usual crew",
-        "dentist at two, don't forget that's new",
-        "that's your Thursday, light and bright",
-        "grab your coffee, you've got this, alright",
+    "sections": [
+        {
+            "tag": "verse",
+            "lines": [
+                "Good morning Ken, it's Thursday the thirtieth",
+                "two things on the books, nothing too serious",
+                "standup at nine, the usual crew",
+                "dentist at two, don't forget that's new",
+            ],
+        },
+        {
+            "tag": "chorus",
+            "lines": [
+                "that's your Thursday, light and bright",
+                "grab your coffee, you've got this, alright",
+            ],
+        },
     ],
     "mood": "cheerful",
 })
@@ -92,7 +102,11 @@ def test_successful_generation(settings):
     client = FakeClient(response=fake_response(GOOD_JSON))
     outcome = generate_lyrics(EVENTS, TARGET, settings, client=client)
     assert outcome.ok
+    # Flat lyrics are derived from the sections, so the sung song and the words
+    # on the alarm screen cannot disagree.
     assert len(outcome.lyrics) == 6
+    assert outcome.lyrics[0].startswith("Good morning Ken")
+    assert [s.tag for s in outcome.sections] == ["verse", "chorus"]
     assert outcome.mood == "cheerful"
     assert outcome.cost == pytest.approx(EXPECTED_COST)
     # Request shape: structured output + low effort, no sampling params.

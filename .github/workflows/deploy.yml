@@ -216,6 +216,14 @@ jobs:
           mkdir -p /var/lib/restless-forge
           chown www-data:www-data /var/lib/restless-forge
 
+          # Generated song audio. Created here rather than left to the API's
+          # first write so the permissions are deterministic: nginx serves
+          # these files directly and must be able to traverse and read the
+          # directory, whatever umask the service happens to run under.
+          mkdir -p /var/lib/restless-forge/song-cache
+          chown www-data:www-data /var/lib/restless-forge/song-cache
+          chmod 755 /var/lib/restless-forge/song-cache
+
           # systemd unit: skip if unchanged, else install + daemon-reload
           UNIT_SRC=/opt/restless-forge/backend/restless-forge-api.service
           UNIT_DST=/etc/systemd/system/restless-forge-api.service

@@ -69,6 +69,16 @@ export function savePrefs(prefs: RiseAndRhymePrefs): void {
 export interface CachedSong extends Song {
   /** The alarm date this song was generated for ("YYYY-MM-DD"). */
   targetDate: string;
+  /** Job still rendering on the GPU, if any. Persisted rather than held in
+      memory because generation runs at ~22:00 unattended: a reload, a browser
+      restart, or a suspended tab must not orphan the song. */
+  songJobId?: string;
+  /** URL of the finished MP3. When absent the alarm uses the v1 path —
+      backing track plus browser speech — which always works. */
+  songUrl?: string;
+  /** Set when a sung song was expected but won't arrive, so the UI can say
+      what happened instead of silently degrading. */
+  songFailed?: string;
 }
 
 export function saveCachedSong(song: CachedSong): void {

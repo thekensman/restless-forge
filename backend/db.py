@@ -57,6 +57,22 @@ CREATE TABLE IF NOT EXISTS circuit (
     consecutive_errors INTEGER NOT NULL DEFAULT 0,
     open_until REAL NOT NULL DEFAULT 0
 );
+-- One row per sung-song job (RunPod/ACE-Step). `job_id` is an unguessable
+-- token that doubles as the MP3 filename, so nothing here is derived from the
+-- calendar URL: these files are served without auth and sing the listener's
+-- schedule aloud. No lyrics or event data is stored — only what is needed to
+-- poll the job and expire the audio.
+CREATE TABLE IF NOT EXISTS song_jobs (
+    job_id TEXT PRIMARY KEY,
+    runpod_id TEXT NOT NULL,
+    state TEXT NOT NULL,               -- pending | ready | failed
+    message TEXT NOT NULL DEFAULT '',
+    duration_seconds REAL NOT NULL DEFAULT 0,
+    billed INTEGER NOT NULL DEFAULT 0, -- GPU cost charged once, on first terminal poll
+    created_ts REAL NOT NULL,
+    updated_ts REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_song_jobs_created ON song_jobs (created_ts);
 """
 
 # Retention defaults (seconds / days). Rate-limit rows are useless the moment
@@ -67,6 +83,9 @@ DEFAULT_IP_WINDOW_SEC = 3600
 DEFAULT_PREVIEW_WINDOW_SEC = 3600
 DEFAULT_GENERATION_LOG_DAYS = 30
 DEFAULT_DAILY_STATS_DAYS = 400
+# Job rows are kept twice as long as the audio, so a client polling a swept
+# song gets "expired" rather than an unexplained miss.
+DEFAULT_SONG_JOB_RETENTION_SEC = 72 * 3600
 
 
 def _prune_triggers(
@@ -75,6 +94,7 @@ def _prune_triggers(
     generation_log_days: int,
     daily_stats_days: int,
     preview_window_sec: int,
+    song_job_retention_sec: int,
 ) -> str:
     """Retention triggers, rebuilt on every init so config changes take effect.
 
@@ -114,6 +134,14 @@ DROP TRIGGER IF EXISTS prune_daily_stats_insert;
 CREATE TRIGGER prune_daily_stats_insert AFTER INSERT ON daily_stats BEGIN
     DELETE FROM daily_stats WHERE date < date('now', '-{daily_stats_days} days');
 END;
+
+-- Job rows outlive their audio by design: a client still polling a job whose
+-- MP3 has been swept should be told "expired", not handed a 404 with no
+-- explanation. The row is pruned a window later than the file.
+DROP TRIGGER IF EXISTS prune_song_jobs;
+CREATE TRIGGER prune_song_jobs AFTER INSERT ON song_jobs BEGIN
+    DELETE FROM song_jobs WHERE created_ts < {now} - {song_job_retention_sec};
+END;
 """
 
 
@@ -137,6 +165,7 @@ class Db:
         generation_log_days: int = DEFAULT_GENERATION_LOG_DAYS,
         daily_stats_days: int = DEFAULT_DAILY_STATS_DAYS,
         preview_window_sec: int = DEFAULT_PREVIEW_WINDOW_SEC,
+        song_job_retention_sec: int = DEFAULT_SONG_JOB_RETENTION_SEC,
     ):
         self.path = path
         self._retention = (
@@ -145,6 +174,7 @@ class Db:
             generation_log_days,
             daily_stats_days,
             preview_window_sec,
+            song_job_retention_sec,
         )
         self._initialized = False
         # Sync endpoints run in FastAPI's threadpool, so first-use

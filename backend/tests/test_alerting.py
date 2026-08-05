@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 
 import main as main_module
 from services import ical_parser, lyric_generator
-from services.lyric_generator import LyricOutcome
+from services.lyric_generator import LyricOutcome, Section
 from services.rate_limiter import RateLimiter
 
 T0 = 1_800_000_000.0
@@ -204,7 +204,7 @@ class TestAlertsCarryNoCalendarData:
     ):
         self._run(
             settings, monkeypatch, caplog,
-            lambda events, target, s, client=None: LyricOutcome(["a", "b"], "cheerful", 0.01),
+            lambda events, target, s, client=None: LyricOutcome([Section("verse", ["a", "b"])], "cheerful", 0.01),
         )
         assert posted, "the spend alert should have fired"
         self._assert_clean(repr(posted), "webhook payload")
@@ -225,7 +225,7 @@ class TestAlertsCarryNoCalendarData:
     def test_health_metrics_expose_only_aggregates(self, settings, monkeypatch, caplog, posted):
         tc = self._run(
             settings, monkeypatch, caplog,
-            lambda events, target, s, client=None: LyricOutcome(["a", "b"], "cheerful", 0.01),
+            lambda events, target, s, client=None: LyricOutcome([Section("verse", ["a", "b"])], "cheerful", 0.01),
         )
         res = tc.get(
             "/api/v1/rise-and-rhyme/health", headers={"X-Metrics-Token": "test-metrics-token"}

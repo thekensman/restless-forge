@@ -54,3 +54,33 @@ def pick_track(mood: str, rng: random.Random | None = None) -> str:
     """A track id for the mood, e.g. 'cheerful-02'."""
     ids = TRACKS.get(mood) or TRACKS["cheerful"]
     return (rng or random).choice(ids)
+
+
+# ── ACE-Step style prompts ──
+# The music description handed to the song model. Kept here, deterministic and
+# per-mood, rather than asked of Claude: this is the single biggest lever on
+# whether the output sounds good, and it wants tuning by ear against real
+# generations, not re-invention on every request.
+#
+# Every prompt names a genre, a tempo feel, an instrument, and a vocal, because
+# ACE-Step drifts toward generic backing music when any of those is missing.
+STYLE_PROMPTS: dict[str, str] = {
+    "energetic": "upbeat indie pop rock, driving drums, bright electric guitar, energetic male vocal, 125 bpm",
+    "warm": "warm acoustic folk pop, gentle fingerpicked guitar, soft female vocal, relaxed 105 bpm",
+    "groovy": "funk pop groove, syncopated bass, rhythm guitar, soulful vocal, 110 bpm",
+    "smooth": "smooth jazzy soul, electric piano, brushed drums, mellow vocal, laid back 100 bpm",
+    "cheerful": "cheerful bright pop, hand claps, ukulele and piano, sunny female vocal, 120 bpm",
+    "playful": "playful indie pop, bouncy synth, whistling hook, fun male vocal, 135 bpm",
+    "bold": "bold cinematic pop anthem, big drums, confident vocal, triumphant, 115 bpm",
+}
+
+# Morning-alarm framing appended to every style. The listener is half asleep:
+# a clean mix and an intelligible vocal matter more than production ambition,
+# and ACE-Step will happily bury the words under a wall of synths otherwise.
+STYLE_SUFFIX = "clear intelligible vocals, clean mix, morning wake up song"
+
+
+def style_for_mood(mood: str) -> str:
+    """The `prompt` field sent to ACE-Step — the music, never the words."""
+    base = STYLE_PROMPTS.get(mood) or STYLE_PROMPTS["cheerful"]
+    return f"{base}, {STYLE_SUFFIX}"

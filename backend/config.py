@@ -51,6 +51,45 @@ class Settings:
 
     db_path: str = field(default_factory=lambda: os.getenv("RF_DB_PATH", DEFAULT_DB_PATH))
 
+    # ── Sung songs (RunPod / ACE-Step) ──
+    # Both must be set for v2 to activate; see `song_generation_enabled`. Unset
+    # is the supported production state, not a misconfiguration — the service
+    # then behaves exactly as v1 did (lyrics + backing track + browser TTS).
+    runpod_api_key: str = field(default_factory=lambda: os.getenv("RUNPOD_API_KEY", ""))
+    runpod_endpoint_id: str = field(default_factory=lambda: os.getenv("RUNPOD_ENDPOINT_ID", ""))
+    # Length of the generated song. Drives GPU seconds, which is the bill, and
+    # a tight 45s song with a real chorus beats 90s of filler.
+    song_duration_sec: float = field(default_factory=lambda: _env_float("SONG_DURATION_SEC", 45.0))
+    # Wall-clock budget for one song before the client gives up and takes the
+    # TTS fallback. Generous: this is a background job at 22:00, not a page load.
+    song_job_timeout_sec: int = field(default_factory=lambda: _env_int("SONG_JOB_TIMEOUT_SEC", 300))
+    # Billed GPU rate, USD per second, for spend accounting. RunPod reports
+    # executionTime per job; multiplying gives a figure good enough to keep GPU
+    # spend under the same daily cap as Claude. Default is the 24 GB tier.
+    runpod_cost_per_sec: float = field(default_factory=lambda: _env_float("RUNPOD_COST_PER_SEC", 0.0004))
+
+    # Where generated MP3s live. NOT under the deploy root: that path is
+    # rsync --delete'd on every deploy, and the systemd unit's ProtectSystem
+    # =strict only grants write access to /var/lib/restless-forge.
+    song_cache_dir: str = field(
+        default_factory=lambda: os.getenv(
+            "RF_SONG_CACHE_DIR",
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), ".data", "song-cache"),
+        )
+    )
+    # Songs are written the evening before and played the next morning, so the
+    # retention floor is "overnight plus the whole target day".
+    song_retention_hours: int = field(default_factory=lambda: _env_int("SONG_RETENTION_HOURS", 36))
+
+    @property
+    def song_generation_enabled(self) -> bool:
+        """v2 is on only when both RunPod values are present.
+
+        This is the feature flag and the rollback switch: clearing either
+        variable and restarting returns the service to v1 behaviour with no
+        code change."""
+        return bool(self.runpod_api_key and self.runpod_endpoint_id)
+
     # Rate limiting windows
     url_window_sec: int = 12 * 3600  # 1 generation per iCal URL per 12 h
     ip_window_sec: int = 3600
