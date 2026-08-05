@@ -302,8 +302,15 @@ lyrics, no raw URLs, no raw IP addresses:
 ### Generated audio (on disk, not in SQLite)
 
 MP3s live in `RF_SONG_CACHE_DIR` and are deleted after
-`SONG_RETENTION_HOURS` (36) by a sweep that runs on the write path — same
-reasoning as the triggers above.
+`SONG_RETENTION_HOURS` (36) by a sweep that runs on generation **and**, at
+most every 15 minutes, on `/health`.
+
+The second trigger is not redundant. Sweeping on writes alone is fine for
+database rows but not for this: someone who stops using the tool generates
+nothing further, so their last song — which sings their schedule aloud —
+would sit on disk indefinitely while the privacy page promises 36 hours.
+`/health` is polled by the uptime monitor, so expiry keeps happening whether
+or not anyone is still generating.
 
 Two properties worth preserving if this code is ever touched:
 

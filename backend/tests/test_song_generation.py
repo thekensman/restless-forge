@@ -392,6 +392,31 @@ def test_sweep_removes_only_expired_audio(tmp_path):
     assert not song_cache.exists(stale, cache)
 
 
+def test_sweep_if_due_throttles_but_still_expires(tmp_path, monkeypatch):
+    """Audio must expire even when nobody is generating songs any more.
+
+    Sweeping only on the write path would leave the last song of someone who
+    stopped using the tool on disk forever, against a privacy page that
+    promises 36 hours."""
+    cache = str(tmp_path / "songs")
+    stale = song_cache.store(FAKE_MP3, cache, song_cache.new_token())
+
+    import os
+
+    old = time.time() - 40 * 3600
+    os.utime(song_cache.path_for(stale, cache), (old, old))
+
+    monkeypatch.setattr(song_cache, "_last_sweep", 0.0)
+    assert song_cache.sweep_if_due(cache, retention_hours=36) == 1
+    assert not song_cache.exists(stale, cache)
+
+    # Immediately after, the throttle suppresses the directory scan.
+    another = song_cache.store(FAKE_MP3, cache, song_cache.new_token())
+    os.utime(song_cache.path_for(another, cache), (old, old))
+    assert song_cache.sweep_if_due(cache, retention_hours=36) == 0
+    assert song_cache.exists(another, cache)
+
+
 def test_store_is_atomic(tmp_path):
     """The file is readable the moment its token is known, so a partial write
     must never be visible under the final name."""

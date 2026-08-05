@@ -401,6 +401,17 @@ def health(
     settings = request.app.state.settings
     limiter = request.app.state.limiter
 
+    # Expire old audio here as well as on the write path. Generation is the
+    # only other sweep trigger, so a user who stops using the tool would
+    # otherwise leave their last song — which sings their schedule aloud — on
+    # disk indefinitely, against a privacy page that promises 36 hours.
+    # /health is polled by the uptime monitor, so this keeps running regardless.
+    if settings.song_generation_enabled:
+        try:
+            song_cache.sweep_if_due(settings.song_cache_dir, settings.song_retention_hours)
+        except OSError:
+            log.exception("song cache sweep failed")
+
     authorized = bool(settings.metrics_token) and secrets.compare_digest(
         x_metrics_token or "", settings.metrics_token
     )

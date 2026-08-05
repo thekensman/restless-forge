@@ -84,6 +84,31 @@ def delete(token: str, cache_dir: str) -> None:
         pass
 
 
+# Wall-clock of the last sweep, so `sweep_if_due` can run off a frequently
+# hit endpoint without doing a directory scan on every request. In-process
+# only: a restart just means one extra sweep, which is harmless.
+_last_sweep = 0.0
+SWEEP_INTERVAL_SEC = 15 * 60
+
+
+def sweep_if_due(cache_dir: str, retention_hours: int, now: float | None = None) -> int:
+    """Sweep, but at most every SWEEP_INTERVAL_SEC.
+
+    Sweeping only on the write path is not enough for audio the way it is for
+    database rows. If someone stops using the tool, no further generation ever
+    happens — and their last song, which sings their schedule aloud, would sit
+    on disk forever while the privacy page promises deletion within 36 hours.
+    Hanging this off /health (polled by the uptime monitor) means expiry keeps
+    happening whether or not anyone is still generating songs.
+    """
+    global _last_sweep
+    now = time.time() if now is None else now
+    if now - _last_sweep < SWEEP_INTERVAL_SEC:
+        return 0
+    _last_sweep = now
+    return sweep(cache_dir, retention_hours, now)
+
+
 def sweep(cache_dir: str, retention_hours: int, now: float | None = None) -> int:
     """Delete songs past their retention window. Returns how many went.
 
