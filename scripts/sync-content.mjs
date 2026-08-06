@@ -10,11 +10,18 @@
  *   …
  *   <!-- /generated:content -->
  *
- * The shell owns everything else: head metas, chrome placeholders, ad
- * slots, breadcrumbs. Extras this script also handles:
+ * The shell owns everything else: chrome placeholders, ad slots,
+ * breadcrumbs, favicons, the stylesheet and ad loader. Extras this script
+ * also handles:
  *   - site/essays/<slug>.md with no sibling .html → the shell is created
- *     from scripts/templates/essay-shell.html using the front-matter
- *     (new essay = one Markdown file; add it to sitemap.xml yourself).
+ *     from scripts/templates/essay-shell.html (new essay = one Markdown
+ *     file; `npm run sync-static` then adds it to sitemap.xml + llms.txt).
+ *   - an essay's front-matter-derived head tags (title, description,
+ *     canonical, og:*, JSON-LD Article) regenerate every run into a
+ *     `generated:head` block. Non-essay pages hand-write their own head and
+ *     are left alone. This is a marker block and not a one-time template
+ *     substitution because the write-once version rotted silently — see
+ *     essayHead() for the incident.
  *   - the essay cards in site/essays/index.html regenerate from all
  *     essay front-matter (generated:essay-cards block).
  *
@@ -130,10 +137,27 @@ function contentSources() {
 const essaysDir = join(root, "site", "essays");
 const SITE = "https://restless-forge.dev";
 
-function createEssayShell(mdPath, meta) {
-  const slug = basename(mdPath, ".md");
+/* HTML attribute values and JSON string literals need different escaping, and
+   both now carry author-supplied text on every run rather than once. `<`
+   in the JSON keeps a stray "</script>" in a description from closing the
+   JSON-LD block early. */
+const attr = (s) =>
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const jstr = (s) => JSON.stringify(String(s)).replace(/</g, "\\u003c");
+
+/* Every head tag derived from front-matter, regenerated on each run.
+ *
+ * This is a marker block rather than a one-time template substitution because
+ * the write-once version silently rotted: the origin essay's images moved, its
+ * `image:` front-matter was updated, and og:image plus the JSON-LD image kept
+ * pointing at the old path. Nothing renders those tags, so the page looked
+ * correct while every social share was broken. Anything the front-matter feeds
+ * belongs in here; anything fixed (favicons, stylesheet, ad loader) stays in
+ * the shell where an author can edit it.
+ */
+function essayHead(slug, meta, mdPath) {
   for (const k of ["title", "description", "date"]) {
-    if (!meta[k]) throw new Error(`${relative(root, mdPath)}: front-matter needs "${k}" to create its page shell`);
+    if (!meta[k]) throw new Error(`${relative(root, mdPath)}: front-matter needs "${k}"`);
   }
   // Optional `image:` front-matter gives an essay its own social card; without
   // it every essay shares the generic site-wide one. Absolute URL required by
@@ -141,16 +165,41 @@ function createEssayShell(mdPath, meta) {
   const ogImage = meta.image
     ? (meta.image.startsWith("http") ? meta.image : `${SITE}${meta.image}`)
     : `${SITE}/og-image.png`;
+  const url = `${SITE}/essays/${slug}`;
+  const author = meta.author || "Ken";
+  return `  <title>${attr(meta.title)} — Restless Forge</title>
+  <meta name="description" content="${attr(meta.description)}">
+  <link rel="canonical" href="${url}">
+
+  <meta property="og:title" content="${attr(meta.title)}">
+  <meta property="og:description" content="${attr(meta.description)}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${url}">
+  <meta property="og:image" content="${ogImage}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": ${jstr(meta.title)},
+    "description": ${jstr(meta.description)},
+    "author": { "@type": "Person", "name": ${jstr(author)}, "url": "${SITE}/about" },
+    "publisher": { "@type": "Organization", "name": "Restless Forge", "url": "${SITE}" },
+    "datePublished": "${attr(meta.date)}",
+    "image": "${ogImage}",
+    "url": "${url}"
+  }
+  </script>`;
+}
+
+function createEssayShell(mdPath, meta) {
+  const slug = basename(mdPath, ".md");
+  essayHead(slug, meta, mdPath); // validate front-matter before writing a shell
   const shell = readFileSync(join(root, "scripts", "templates", "essay-shell.html"), "utf8")
-    .replaceAll("{{TITLE}}", meta.title)
-    .replaceAll("{{DESCRIPTION}}", meta.description)
-    .replaceAll("{{SLUG}}", slug)
-    .replaceAll("{{DATE}}", meta.date)
-    .replaceAll("{{AUTHOR}}", meta.author || "Ken")
-    .replaceAll("{{OG_IMAGE}}", ogImage);
+    .replaceAll("{{SLUG}}", slug);
   const htmlPath = join(essaysDir, `${slug}.html`);
   writeFileSync(htmlPath, shell);
-  console.log(`created ${relative(root, htmlPath)} — run \`npm run sync-static\` to add it to sitemap.xml and llms.txt`);
+  console.log(`created ${relative(root, htmlPath)}`);
 }
 
 /* ── essay index cards from front-matter ── */
@@ -192,7 +241,13 @@ for (const mdPath of contentSources()) {
   }
 
   const before = readFileSync(htmlPath, "utf8");
-  const after = injectBlock(before, "content", basename(mdPath), html, relative(root, htmlPath));
+  let after = injectBlock(before, "content", basename(mdPath), html, relative(root, htmlPath));
+  // Essay heads are front-matter-derived and resync every run; other pages own
+  // their head by hand, so there is nothing to regenerate for them.
+  if (isEssay) {
+    const slug = basename(mdPath, ".md");
+    after = injectBlock(after, "head", basename(mdPath), essayHead(slug, meta, mdPath), relative(root, htmlPath));
+  }
   if (after !== before) {
     writeFileSync(htmlPath, after);
     changed++;

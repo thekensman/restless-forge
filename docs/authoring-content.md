@@ -48,8 +48,17 @@ author: Ken
 ```
 
 - `date`/`author` render a byline under the first heading.
-- `title`/`description`/`date` drive essay-shell creation and the
-  essays index cards.
+- `title`/`description`/`date` are required on an essay, and drive its
+  `generated:head` block plus the essays index cards.
+- `image` (optional, essays) sets that essay's social card — `og:image`
+  and the JSON-LD `Article.image`. A site-root path is expanded to an
+  absolute URL. Without it the essay uses the site-wide `og-image.png`.
+  Prefer ~1200×630; smaller sources render as a small share card.
+- **Editing an essay's front-matter after publishing is safe** — the head
+  regenerates on every `npm run sync-content`. It did not always: the head
+  was filled in once at shell creation and never revisited, so an essay
+  whose `image:` changed kept advertising the old path to every social
+  scraper while the page itself looked perfect.
 - Tool articles usually need no front-matter (their shells already
   carry the metadata, and their index pages are hand-curated).
 
@@ -58,8 +67,9 @@ author: Ken
 1. Write `site/essays/<slug>.md` with full front-matter, body starting
    with `# Title`.
 2. `npm run sync-content` — the page shell is auto-created from
-   `scripts/templates/essay-shell.html` (metas, OG, Article JSON-LD
-   filled from front-matter) and the essays index cards regenerate.
+   `scripts/templates/essay-shell.html` (chrome, rail + bottom ad slots,
+   favicons), its `generated:head` block is filled from the front-matter,
+   and the essays index cards regenerate.
 3. `npm run sync-static` (nav/footer for the new page, plus the essay's
    sitemap.xml and llms.txt entries) — or just `npm run sync`, which
    runs both.
