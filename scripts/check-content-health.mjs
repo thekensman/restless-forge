@@ -52,6 +52,12 @@
  *      corrected and the social card silently kept pointing into the void —
  *      an essay shell's <head> is generated once and never resynced.
  *
+ *   8. No committed image may carry an EXIF block. The origin essay's
+ *      sand-art.jpg was a phone photograph that arrived tagged with the GPS
+ *      coordinates of where it was taken, and publishing it would have put a
+ *      home address on the site. This is not recoverable after the fact —
+ *      once it ships it is scraped — so it has to be caught before merge.
+ *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
  */
@@ -241,6 +247,56 @@ for (const file of walkHtml(join(root, "site"))) {
         `or drop the loader from this page.`,
       );
     }
+  }
+}
+
+/* ── Rule 8: no committed image may carry an EXIF block ──
+   Scans every image in the repo, not only referenced ones — an unreferenced
+   file still ships, because build.sh copies site/ and each tool's public/
+   wholesale. Detection is a container-format scan (no dependency, and none
+   is warranted): JPEG APP1 segments, PNG eXIf chunks, WebP RIFF EXIF chunks.
+   Presence of the block is the failure; we deliberately do not parse it to
+   check for GPS specifically, because "this one only has DPI tags" is how the
+   habit erodes. */
+function hasExif(buf) {
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8) {
+    // JPEG: walk the segment chain looking for APP1/"Exif\0\0".
+    let i = 2;
+    while (i + 4 <= buf.length && buf[i] === 0xff) {
+      const marker = buf[i + 1];
+      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
+      if (marker === 0xda || marker === 0xd9) break; // scan data / end: no metadata past here
+      const len = buf.readUInt16BE(i + 2);
+      if (marker === 0xe1 && buf.slice(i + 4, i + 8).toString("latin1") === "Exif") return true;
+      i += 2 + len;
+    }
+    return false;
+  }
+  if (buf.slice(0, 8).toString("latin1") === "\x89PNG\r\n\x1a\n") return buf.includes("eXIf");
+  if (buf.slice(0, 4).toString("latin1") === "RIFF" && buf.slice(8, 12).toString("latin1") === "WEBP") {
+    return buf.slice(12).includes("EXIF");
+  }
+  return false;
+}
+
+const IMG_FILE = /\.(png|jpe?g|webp|tiff?)$/i;
+function* walkImages(dir) {
+  if (!existsSync(dir)) return;
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name.startsWith(".") || e.name === "node_modules" || e.name === "dist") continue;
+    const p = join(dir, e.name);
+    if (e.isDirectory()) yield* walkImages(p);
+    else if (IMG_FILE.test(e.name)) yield p;
+  }
+}
+
+for (const img of [...walkImages(join(root, "site")), ...walkImages(join(root, "tools"))]) {
+  if (hasExif(readFileSync(img))) {
+    problems.push(
+      `${relative(root, img)}: carries an EXIF block. Phone photographs embed ` +
+      `GPS coordinates — sand-art.jpg arrived tagged with the location it was ` +
+      `taken in. Re-save it without metadata before committing.`,
+    );
   }
 }
 
