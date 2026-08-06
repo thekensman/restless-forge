@@ -56,7 +56,7 @@ I believe we're in the middle of a second Wild West. The '90s internet democrati
 That's the structural reason Restless Forge can exist. I'm one person. I have a day job. But the gap between what I can imagine and what I can ship has collapsed, and I'm using that gap to build things that are genuinely useful and give them away.
 
 <figure>
-  <img src="/essays/images/sand-art.jpg" width="1397" height="1400"
+  <img src="/essays/images/sand-art.jpg" width="1277" height="1280"
        alt="A circular kinetic sand table lit from the rim, a skull traced into the sand in continuous grooves surrounded by concentric rings, the steel ball parked at the bottom edge."
        loading="lazy" decoding="async">
   <figcaption>Sand art experiments, converted using SandPath.</figcaption>

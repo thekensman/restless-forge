@@ -15,8 +15,14 @@ llms.txt and the essay cards.)
   Lossy compression smears hard edges, which is exactly what UI text is.
   A screenshot that only ever existed as a `.jpg` stays a `.jpg` — re-encoding
   to PNG cannot recover detail already lost, and inflates the file.
-- **Keep each under ~300 KB and ≤1600px wide.** These pages also serve ads;
-  a heavy hero image competes with the thing the reader came for.
+- **Keep each under ~300 KB. Around 1280px wide is the sweet spot.** Figures
+  render at most 640 CSS px wide (`.page figure img` in `site/styles.css`), so
+  1280 is exactly 2x for retina and anything beyond that is bytes no one sees.
+- **Always set `width` and `height` on the `<img>`.** They are what let the
+  browser reserve the right box before the image loads. Without them a lazy
+  image reserves nothing and shoves the rest of the page down when it arrives —
+  the minesweeper shot moved everything below it by 750px. Use the file's real
+  pixel dimensions and let CSS scale it; `height: auto` keeps it responsive.
 - **Strip EXIF from phone photographs before committing.** A camera JPEG
   carries GPS coordinates; `sand-art.jpg` arrived tagged with the location it
   was taken in. Re-saving through any image tool without the EXIF block

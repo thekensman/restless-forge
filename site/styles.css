@@ -237,11 +237,28 @@ img { max-width: 100%; height: auto; }
   text-align: center;
 }
 
+/* Cap the WIDTH, not the height, to limit how much screen one picture takes.
+   Uncapped, a square photo fills the 912px column and renders 914px tall — the
+   sand table shot made a reader scroll through a page of photograph to reach
+   the next sentence. At 640px it lands at 641px tall.
+
+   The two obvious alternatives are both wrong, and quietly:
+     max-height alone           → the browser clamps height without narrowing
+                                  width, so every non-4:3 image is distorted
+                                  (the square sand photo squashed to 912x640).
+     max-height + width: auto   → ratio is correct, but an explicit `width`
+                                  overrides the aspect-ratio box the intrinsic
+                                  width/height attributes provide, so nothing
+                                  is reserved before load and all four images
+                                  shift by ~640px each.
+   max-width does both jobs: ratio preserved, box still reserved, 0px shift.
+   Verified in Chromium with the image requests held open. */
 .page figure img {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   display: block;
   margin: 0 auto;
+  max-width: 640px;
 }
 
 .page figcaption {
