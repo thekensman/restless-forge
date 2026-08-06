@@ -13,6 +13,7 @@
   <url><loc>https://restless-forge.dev/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 
   <!-- Essays -->
+  <url><loc>https://restless-forge.dev/essays/a-floor-of-curiosity</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://restless-forge.dev/essays/how-a-tool-gets-built</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://restless-forge.dev/essays/why-i-build-these-tools</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 

@@ -177,6 +177,31 @@ img { max-width: 100%; height: auto; }
   line-height: 1.7;
 }
 
+/* ── Figures (essay + article images with visible captions) ──
+   Markdown images render as a bare <img>, so prose that needs a caption uses
+   a raw <figure> block. The global `img { max-width: 100% }` reset already
+   prevents overflow; these rules give the image room and style the caption. */
+.page figure {
+  margin: 2.5rem 0;
+  text-align: center;
+}
+
+.page figure img {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: block;
+  margin: 0 auto;
+}
+
+.page figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin-top: 0.75rem;
+  padding: 0 0.5rem;
+}
+
 /* ── Sites I Like (friends/recommendations list) ── */
 .friends-list {
   list-style: none;

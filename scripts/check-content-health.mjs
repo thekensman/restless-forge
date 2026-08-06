@@ -40,6 +40,12 @@
  *      with no loader script, so the queue was pushed and nothing consumed it —
  *      ads silently never rendered. Found by hand; nothing caught it.
  *
+ *   7. A local image a page references must exist on disk. The origin essay
+ *      shipped its prose before its four photographs were in the repo, and
+ *      nothing would have stopped it merging with four broken images on the
+ *      site's most prominent piece of writing. Broken images are invisible in
+ *      review (the HTML looks fine) and obvious to every reader.
+ *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
  */
@@ -94,6 +100,32 @@ const slotWithoutLoader = (rel) =>
   `nothing consumes, so ads never render. Add the loader after ` +
   `<script src="/shared.js"></script>, or remove the slot.`;
 
+/* ── Rule 7: referenced local images must exist ──
+   Only site-root-absolute paths are checked. Tool pages resolve /tools/<id>/…
+   assets through an nginx fallback to the site root, so both candidates are
+   accepted before reporting a miss. Remote URLs and data: URIs are skipped. */
+const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
+
+function missingImages(file, html) {
+  const out = [];
+  const seen = new Set();
+  for (const m of html.matchAll(/(?:src|href)=["'](\/[^"'?#]+)["']/g)) {
+    const url = m[1];
+    if (!IMG_EXT.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    // dist/ layout: site/<path> for site-root assets, and for /tools/<id>/<a>
+    // either the tool's public/ dir or the site-root fallback.
+    const candidates = [join(root, "site", url.slice(1))];
+    const tool = url.match(/^\/tools\/([^/]+)\/(.+)$/);
+    if (tool) {
+      candidates.push(join(root, "tools", tool[1], "frontend", "public", tool[2]));
+      candidates.push(join(root, "site", tool[2]));
+    }
+    if (!candidates.some((p) => existsSync(p))) out.push(url);
+  }
+  return out;
+}
+
 const problems = [];
 const tools = loadTools();
 
@@ -126,6 +158,11 @@ for (const tool of tools) {
 
     // ── Rule 6: a slot without a loader renders nothing ──
     if (hasAds && !hasAdLoader(html)) problems.push(slotWithoutLoader(rel));
+
+    // ── Rule 7: referenced local images must exist ──
+    for (const img of missingImages(file, html)) {
+      problems.push(`${rel}: references ${img}, which does not exist.`);
+    }
 
     if (live) {
       // ── Rule 3: no stray noindex on a launched tool ──
@@ -172,6 +209,10 @@ for (const file of walkHtml(join(root, "site"))) {
   const html = readFileSync(file, "utf8");
 
   if (hasAdSlot(html) && !hasAdLoader(html)) problems.push(slotWithoutLoader(rel));
+
+  for (const img of missingImages(file, html)) {
+    problems.push(`${rel}: references ${img}, which does not exist.`);
+  }
 
   if (hasAdLoader(html)) {
     const words = visibleWords(file);
