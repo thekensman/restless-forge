@@ -121,8 +121,42 @@ if (isFile(sitemap)) {
   }
 }
 
+/* ── Cache-busting: every stable-filename css/js must carry ?v=<hash> ──
+ *
+ * nginx serves css/js as `immutable, max-age=31536000` while HTML is
+ * `no-cache`. That split is only safe if the URL changes when the file does.
+ * /styles.css was referenced bare for months, so returning visitors held a
+ * year-old stylesheet against freshly deployed markup — and `immutable` means
+ * the browser does not even revalidate to find out.
+ *
+ * It surfaced as a phantom: when the rail ads shipped, phones with a cached
+ * pre-rail styles.css had no `.ad-rail { display: none }`, so two 600px ad
+ * containers rendered as ordinary blocks and pushed the article 1200px down
+ * behind a wall of black. Nothing reproduced locally, because a local build
+ * always serves a fresh stylesheet. Only the stale client saw it.
+ *
+ * Vite's own bundles (assets/index-<hash>.js) put the hash in the filename and
+ * need no query string; anything else with a stable name does.
+ */
+const HASHED_FILENAME = /-[A-Za-z0-9_-]{8,}\.(?:js|css)$/;
+
+for (const file of walkHtml(dist)) {
+  const rel = relative(dist, file);
+  const html = readFileSync(file, "utf8");
+  for (const m of html.matchAll(/(?:href|src)=["'](\/[^"']+\.(?:css|js))(\?[^"']*)?["']/g)) {
+    const [, path, query] = m;
+    if (query && query.includes("v=")) continue;
+    if (HASHED_FILENAME.test(path)) continue;
+    problems.push(
+      `${rel} → ${path} is served immutable for a year but has no ?v= hash. ` +
+      `Add a bust_cache call in build.sh, or returning visitors keep a stale ` +
+      `copy against new HTML.`,
+    );
+  }
+}
+
 if (problems.length) {
-  console.error(`\ncheck-links: ${problems.length} dead internal link(s)\n`);
+  console.error(`\ncheck-links: ${problems.length} problem(s)\n`);
   for (const p of problems) console.error(`  ✗ ${p}`);
   console.error(
     "\nResolution mirrors nginx/restless-forge.conf. A link that 404s in " +
