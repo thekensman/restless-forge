@@ -3,7 +3,7 @@ title: A Floor of Curiosity
 description: Restless Forge exists because of two things — frustration with paying rent to process files on hardware you already own, and a childhood spent burning floppy disks in a house full of CRTs.
 date: 2026-08-06
 author: Ken
-image: /images/essays/first-pc-build.jpg
+image: /essays/images/first-pc-build.jpg
 ---
 
 # A Floor of Curiosity
@@ -17,7 +17,7 @@ But here's the part that gets under my skin. Most of these subscriptions are cha
 That's what Restless Forge is pushing against. Every tool on this site runs in your browser. Your files never leave your machine. There's no account to create, no trial to expire, no credit card form between you and the thing you came here to do. If a tool needs server-side processing for something your browser genuinely can't handle (like AI-generated audio), it's clearly labeled and the privacy implications are spelled out on that tool's page. Otherwise, there is no server to send your data to because I never built one.
 
 <figure>
-  <img src="/images/essays/wimtw-screenshot.png"
+  <img src="/essays/images/wimtw-screenshot.png"
        alt="The What Is My Time Worth calculator in a dark interface. A $65,000 salary resolves to a real hourly wage of $17.83 against an advertised $31.25, with panels showing annual commute cost and the hours of life a $100 purchase represents."
        decoding="async">
   <figcaption>What Is My Time Worth — the same salary, honestly counted.</figcaption>
@@ -32,7 +32,7 @@ But past the frustration is curiosity, and that's the part of this story I actua
 My dad ran an educational software company in the '80s called Cross Educational Software. They sold dissection simulations and lab diagrams to schools, back when that meant shipping physical media. I grew up in a house full of massive CRT monitors and Macintosh computers, which also happened to be in a small town in Louisiana. He would pay me 10 cents to do one of two things: burn floppy disks or kill household pests. He also told me there were games inside those Macintosh machines if I could figure out the shell commands to start them.
 
 <figure>
-  <img src="/images/essays/first-pc-build.jpg"
+  <img src="/essays/images/first-pc-build.jpg"
        alt="A teenager in a grey T-shirt and anti-static gloves standing beside an open PC case on a dining table, a monitor and keyboard laid out on a blue cloth mid-build."
        loading="lazy" decoding="async">
   <figcaption>My first PC, following the family tradition of building your own computer upon graduating high school.</figcaption>
@@ -41,7 +41,7 @@ My dad ran an educational software company in the '80s called Cross Educational 
 Between catching bugs outside and burning floppy disks inside, I had a front row seat to the early days of the Internet. I grew up writing stories in Storybook Weaver and grinding skills in Ultima Online. And to this day that landscape is my optimistic dream: a Wild West where kids could interact at the same level as PhDs and, for the first time, information was very nearly free.
 
 <figure>
-  <img src="/images/essays/minesweeper-90s.png"
+  <img src="/essays/images/minesweeper-90s.jpg"
        alt="A late-1990s website for minesweeper.org: a blue sidebar of links, tables of daily high scores, a custom game form, and a banner supporting the HALO Trust's landmine clearance campaign."
        loading="lazy" decoding="async">
   <figcaption>My brother's late 90s site, minesweeper.org.</figcaption>
@@ -56,7 +56,7 @@ I believe we're in the middle of a second Wild West. The '90s internet democrati
 That's the structural reason Restless Forge can exist. I'm one person. I have a day job. But the gap between what I can imagine and what I can ship has collapsed, and I'm using that gap to build things that are genuinely useful and give them away.
 
 <figure>
-  <img src="/images/essays/sand-art.jpg"
+  <img src="/essays/images/sand-art.jpg"
        alt="A circular kinetic sand table lit from the rim, a skull traced into the sand in continuous grooves surrounded by concentric rings, the steel ball parked at the bottom edge."
        loading="lazy" decoding="async">
   <figcaption>Sand art experiments, converted using SandPath.</figcaption>

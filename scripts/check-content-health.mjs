@@ -45,6 +45,12 @@
  *      nothing would have stopped it merging with four broken images on the
  *      site's most prominent piece of writing. Broken images are invisible in
  *      review (the HTML looks fine) and obvious to every reader.
+ *      This covers og:image and JSON-LD image too, which are the opposite
+ *      problem: invisible to the reader AND to review, because nothing on the
+ *      page renders them. When the essay's images landed under a different
+ *      directory than its front-matter named, the visible <figure> tags were
+ *      corrected and the social card silently kept pointing into the void —
+ *      an essay shell's <head> is generated once and never resynced.
  *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
@@ -101,16 +107,28 @@ const slotWithoutLoader = (rel) =>
   `<script src="/shared.js"></script>, or remove the slot.`;
 
 /* ── Rule 7: referenced local images must exist ──
-   Only site-root-absolute paths are checked. Tool pages resolve /tools/<id>/…
-   assets through an nginx fallback to the site root, so both candidates are
-   accepted before reporting a miss. Remote URLs and data: URIs are skipped. */
+   Checked in two forms:
+     a) site-root-absolute paths in src=/href= (what the reader actually sees).
+        Tool pages resolve /tools/<id>/… assets through an nginx fallback to the
+        site root, so both candidates are accepted before reporting a miss.
+     b) absolute https://restless-forge.dev/… URLs anywhere in the page — this
+        is og:image and the JSON-LD Article.image, which are never rendered and
+        so are never noticed when they rot. An essay shell's <head> is written
+        ONCE, at creation, so changing `image:` front-matter afterwards does not
+        update it: the origin essay's images moved and its social card kept
+        pointing at the old path. Nothing looked wrong on the page.
+   Remote URLs on other hosts and data: URIs are skipped. */
 const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
+const SITE = "https://restless-forge.dev";
 
 function missingImages(file, html) {
   const out = [];
   const seen = new Set();
-  for (const m of html.matchAll(/(?:src|href)=["'](\/[^"'?#]+)["']/g)) {
-    const url = m[1];
+  const refs = [
+    ...[...html.matchAll(/(?:src|href)=["'](\/[^"'?#]+)["']/g)].map((m) => m[1]),
+    ...[...html.matchAll(new RegExp(`${SITE}(/[^"'\\s?#]+)`, "g"))].map((m) => m[1]),
+  ];
+  for (const url of refs) {
     if (!IMG_EXT.test(url) || seen.has(url)) continue;
     seen.add(url);
     // dist/ layout: site/<path> for site-root assets, and for /tools/<id>/<a>

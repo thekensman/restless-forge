@@ -1,8 +1,11 @@
 # Essay images
 
-Images referenced from `site/essays/*.md`. `build.sh` copies `site/*` wholesale
-into `dist/`, so anything here ships at `/images/essays/<file>` with no config.
-(`.md` files are stripped from `dist/`, so this README never deploys.)
+Images referenced from `site/essays/*.md`, colocated with the essays that use
+them. `build.sh` copies `site/*` wholesale into `dist/`, so anything here ships
+at `/essays/images/<file>` with no config. (`.md` files are stripped from
+`dist/`, so this README never deploys. The generators enumerate `*.md` inside
+`site/essays/` only, so this subdirectory is invisible to sitemap.xml,
+llms.txt and the essay cards.)
 
 ## Conventions
 
@@ -10,8 +13,14 @@ into `dist/`, so anything here ships at `/images/essays/<file>` with no config.
   Essays get reordered; filenames should not have to change with them.
 - **Photographs → `.jpg`. Screenshots and anything with text → `.png`.**
   Lossy compression smears hard edges, which is exactly what UI text is.
+  A screenshot that only ever existed as a `.jpg` stays a `.jpg` — re-encoding
+  to PNG cannot recover detail already lost, and inflates the file.
 - **Keep each under ~300 KB and ≤1600px wide.** These pages also serve ads;
   a heavy hero image competes with the thing the reader came for.
+- **Strip EXIF from phone photographs before committing.** A camera JPEG
+  carries GPS coordinates; `sand-art.jpg` arrived tagged with the location it
+  was taken in. Re-saving through any image tool without the EXIF block
+  removes it — resizing to the width limit above usually does it for free.
 - **Use a `<figure>` block, not a Markdown image**, when the picture needs a
   visible caption. Markdown renders `![alt](src)` as a bare `<img>` — the alt
   text never appears on screen. Raw HTML passes through the Markdown pipeline
