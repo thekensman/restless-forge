@@ -379,9 +379,13 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
       const top = rel.split("/")[0];
       if (LEGAL_SUB_PAGES.has(top)) continue;
       if (noindex(join(src, rel))) continue;
+      // Extensionless, matching each page's own rel=canonical (and the same
+      // urlPath() rule the site-global pages use). These used to keep `.html`
+      // while the pages declared an extensionless canonical, so the sitemap
+      // and the canonical tag pointed at two different URLs for every article.
       const path = `/tools/${t.id}/` + (rel.endsWith("/index.html")
         ? rel.slice(0, -"index.html".length)
-        : rel);
+        : rel.replace(/\.html$/, ""));
       const rule = top === "articles"
         ? (path.endsWith("/articles/") ? ARTICLES_INDEX_RULE : ARTICLE_RULE)
         : (SUB_PAGE_RULES.get(top) ?? SUB_PAGE_DEFAULT);

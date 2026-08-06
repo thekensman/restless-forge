@@ -10,7 +10,8 @@
     "sync-static": "node scripts/sync-static-html.mjs",
     "sync-content": "node scripts/sync-content.mjs",
     "sync": "npm run sync-content && npm run sync-static",
-    "check-content": "node scripts/check-content-health.mjs"
+    "check-content": "node scripts/check-content-health.mjs",
+    "check-links": "node scripts/check-links.mjs"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

@@ -229,16 +229,36 @@ img { max-width: 100%; height: auto; }
    Markdown images render as a bare <img>, so prose that needs a caption uses
    a raw <figure> block. The global `img { max-width: 100% }` reset already
    prevents overflow; these rules give the image room and style the caption. */
+/* Asymmetric on purpose: the caption belongs to the image above it, so the
+   gap below the figure has to be clearly larger than the gap above the
+   caption, or the caption reads as the opening line of the next paragraph. */
 .page figure {
-  margin: 2.5rem 0;
+  margin: 2.5rem 0 3.5rem;
   text-align: center;
 }
 
+/* Cap the WIDTH, not the height, to limit how much screen one picture takes.
+   Uncapped, a square photo fills the 912px column and renders 914px tall — the
+   sand table shot made a reader scroll through a page of photograph to reach
+   the next sentence. At 640px it lands at 641px tall.
+
+   The two obvious alternatives are both wrong, and quietly:
+     max-height alone           → the browser clamps height without narrowing
+                                  width, so every non-4:3 image is distorted
+                                  (the square sand photo squashed to 912x640).
+     max-height + width: auto   → ratio is correct, but an explicit `width`
+                                  overrides the aspect-ratio box the intrinsic
+                                  width/height attributes provide, so nothing
+                                  is reserved before load and all four images
+                                  shift by ~640px each.
+   max-width does both jobs: ratio preserved, box still reserved, 0px shift.
+   Verified in Chromium with the image requests held open. */
 .page figure img {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   display: block;
   margin: 0 auto;
+  max-width: 640px;
 }
 
 .page figcaption {
@@ -248,6 +268,17 @@ img { max-width: 100%; height: auto; }
   color: var(--text-dim);
   margin-top: 0.75rem;
   padding: 0 0.5rem;
+}
+
+/* ── Unfilled ad units take up no space ──
+   AdSense stamps data-ad-status="unfilled" on an <ins> it had no ad for. The
+   slot's chrome (border, padding, the "Advertisement" label) would otherwise
+   render around nothing — a labelled empty band above the footer, and two
+   empty 160x600 columns beside the text. That is the whole page before an
+   account is approved, and it recurs for real whenever a unit goes unfilled. */
+.ad-slot:has(ins[data-ad-status="unfilled"]),
+.ad-rail:has(ins[data-ad-status="unfilled"]) {
+  display: none;
 }
 
 /* ── Sites I Like (friends/recommendations list) ── */

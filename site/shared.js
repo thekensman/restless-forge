@@ -199,10 +199,82 @@
       var h = document.getElementById(config.idPrefix + '-header');
       if (h) h.outerHTML = header();
       var f = document.getElementById(config.idPrefix + '-footer');
-      if (f) f.outerHTML = footer();
+      if (f) {
+        f.outerHTML = footer();
+        // The tool id is the last segment of its base ('/tools/holopath'), so
+        // this needs nothing added to any tool's config object.
+        window.rfMountRelatedTools(String(config.base || '').split('/').pop());
+      }
     });
 
     return { header: header, footer: footer };
+  };
+
+  /* ── Related tools — "if you enjoyed this, you might like…" ──
+   *
+   * SCAFFOLDING. DELIBERATELY OFF: rfRelatedToolsEnabled is false, so nothing
+   * is rendered, no markup is emitted, and /tools-data.js is not even fetched
+   * on tool pages (they do not load it otherwise). Flipping the flag to true
+   * turns the section on for every tool at once — there is no per-tool markup
+   * to add, because rfMountToolChrome injects it above the footer.
+   *
+   * It is off because it would currently recommend badly. All four live tools
+   * sit in four different categories (Financial, Creative, Maker, Lifestyle),
+   * so "related" would mean "the three unrelated tools that happen to exist" —
+   * worse than showing nothing. Turn it on once a category has more than one
+   * live tool in it; rfRelatedTools already prefers same-category matches and
+   * only falls back to filling from elsewhere.
+   */
+  window.rfRelatedToolsEnabled = false;
+
+  // Same category first, then anything else live, capped at `limit`.
+  window.rfRelatedTools = function (currentId, limit) {
+    var all = window.rfTools || [];
+    var current = null;
+    all.forEach(function (t) { if (t.id === currentId) current = t; });
+    var pool = all.filter(function (t) { return t.status === 'live' && t.id !== currentId; });
+    var sameCat = pool.filter(function (t) { return current && t.category === current.category; });
+    var others = pool.filter(function (t) { return !current || t.category !== current.category; });
+    return sameCat.concat(others).slice(0, limit || 3);
+  };
+
+  // tools-data.js is the single source for the directory; tool pages don't
+  // load it, so fetch it once and only when the section is actually enabled.
+  function withToolsData(cb) {
+    if (window.rfTools) return cb();
+    var s = document.createElement('script');
+    s.src = '/tools-data.js';
+    s.onload = cb;
+    s.onerror = function () { /* no data, no section — fail silent, not broken */ };
+    document.head.appendChild(s);
+  }
+
+  window.rfRelatedToolsHtml = function (items) {
+    return '<h2 class="related-tools__title">If you enjoyed this, you might like</h2>' +
+      '<ul class="related-tools__list">' + items.map(function (t) {
+        return '<li class="related-tools__item">' +
+          '<a class="related-tools__link" href="/tools/' + t.id + '/">' + t.label + '</a>' +
+          '<span class="related-tools__cat">' + t.category + '</span>' +
+          '<span class="related-tools__desc">' + t.desc + '</span>' +
+          '</li>';
+      }).join('') + '</ul>';
+  };
+
+  // Inserts the section directly above the tool's footer. No-op while the
+  // flag is off, and no-op when there is nothing worth recommending.
+  window.rfMountRelatedTools = function (currentId) {
+    if (!window.rfRelatedToolsEnabled) return;
+    withToolsData(function () {
+      var items = window.rfRelatedTools(currentId, 3);
+      if (!items.length) return;
+      var footerEl = document.querySelector('.footer');
+      if (!footerEl || !footerEl.parentNode) return;
+      var section = document.createElement('section');
+      section.className = 'related-tools';
+      section.setAttribute('aria-label', 'Related tools');
+      section.innerHTML = window.rfRelatedToolsHtml(items);
+      footerEl.parentNode.insertBefore(section, footerEl);
+    });
   };
 
   var support = [
