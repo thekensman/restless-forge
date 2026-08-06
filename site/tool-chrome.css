@@ -148,3 +148,76 @@
   color: var(--rf-dim);
   margin-top: 6px;
 }
+
+/* ── Related tools ("if you enjoyed this, you might like…") ──
+   SCAFFOLDING for a section that is currently OFF — window.rfRelatedToolsEnabled
+   in site/shared.js is false, so this markup is never emitted today. Styles live
+   here rather than in the tool that turns it on first, because the section is
+   injected by rfMountToolChrome and therefore appears on every tool at once.
+   Themed through the same --rf-* tokens as the rest of the chrome, so a tool
+   picks up its own colours without adding any CSS. */
+.related-tools {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 8px;
+  border-top: 1px solid var(--rf-border);
+}
+
+.related-tools__title {
+  font-family: var(--rf-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--rf-muted);
+  margin: 0 0 18px;
+  text-align: center;
+}
+
+.related-tools__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.related-tools__item {
+  border: 1px solid var(--rf-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--rf-bg);
+  transition: border-color 0.15s;
+}
+.related-tools__item:hover { border-color: var(--rf-accent); }
+
+.related-tools__link {
+  display: block;
+  font-family: var(--rf-font-mono);
+  font-size: 14px;
+  color: var(--rf-text);
+  text-decoration: none;
+}
+.related-tools__link:hover { color: var(--rf-accent); }
+
+.related-tools__cat {
+  display: block;
+  font-family: var(--rf-font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--rf-accent);
+  margin: 6px 0 8px;
+}
+
+.related-tools__desc {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--rf-dim);
+}
+
+@media (max-width: 640px) {
+  .related-tools { padding: 24px 16px 4px; }
+}

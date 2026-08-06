@@ -86,6 +86,15 @@ Served at `/shared.js` in dev and prod. Single source of truth for:
 - `window.rfNavSep` / `window.rfFooterSep` — `<span class="nav-sep">|</span>` / `<span class="footer-sep">|</span>` separators between tool and RF links
 - `window.rfGlobalNavLinks` / `window.rfGlobalFooterLinks` — the Restless Forge / All Tools (nav) and Privacy / Terms / Restless Forge / All Tools (footer) tails every tool appends after its own links
 - `window.rfMountToolChrome(config)` — the shared tool header/footer engine. Every `tools/<name>/frontend/public/shared.js` calls this once with `{ base, idPrefix, brand, navLinks, footerLinks, copyrightHtml, extraSupportLinks? }` — `navLinks`/`footerLinks` are tool-specific only (the engine appends the global tails), and `extraSupportLinks` lets a tool prepend its own support link (e.g. SandPath's Ko-fi shop) before the shared Substack/Ko-fi/Buy Me a Coffee links. Returns `{ header, footer }` render functions and wires the `<div id="<prefix>-header">`/`<div id="<prefix>-footer">` DOMContentLoaded injection.
+- `window.rfRelatedToolsEnabled` (**currently `false`**) + `rfRelatedTools()` /
+  `rfMountRelatedTools()` — the "if you enjoyed this, you might like…" section
+  above every tool's footer. Scaffolding only: while the flag is false nothing
+  renders and `/tools-data.js` is not even fetched on tool pages. Flipping it
+  to `true` enables it on every tool at once (`rfMountToolChrome` injects it —
+  no per-tool markup). It is off because all four live tools are in four
+  different categories, so "related" would mean three unrelated tools; turn it
+  on once a category holds more than one live tool. Styles: `.related-tools*`
+  in `site/tool-chrome.css`.
 - `window.rfFriendLinks` (`[url, name, desc]`) + `window.rfRenderFriends(id)` — the curated "Sites I Like" recommendations. Single data source; `rfRenderFriends` renders the list onto the `/sites-i-like` page's `<div id="rf-friends">` (pre-rendered statically by `sync-static`, re-run at runtime — same pattern as `rfRenderTools`). Linked from the site footer only (`footerNav`), not the top nav.
 
 Every tool page loads `/shared.js` first, then the tool's own `public/shared.js` (which must call `rfMountToolChrome`, not hand-roll header/footer HTML).
