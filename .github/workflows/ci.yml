@@ -41,6 +41,15 @@ jobs:
       - name: Build site
         run: ./build.sh
 
+      # Every internal link, canonical, og:url and sitemap entry must resolve
+      # against the built tree using nginx's try_files rules. Runs after the
+      # build because resolution depends on dist/, not on the source layout.
+      # Catches the class of bug that only surfaces in Search Console: a
+      # canonical URL pointing at a 404, or links left scoped to a retired
+      # domain. See scripts/check-links.mjs.
+      - name: Check internal links resolve
+        run: npm run check-links
+
       - name: Run all tool test suites
         run: npm test
 
