@@ -229,8 +229,11 @@ img { max-width: 100%; height: auto; }
    Markdown images render as a bare <img>, so prose that needs a caption uses
    a raw <figure> block. The global `img { max-width: 100% }` reset already
    prevents overflow; these rules give the image room and style the caption. */
+/* Asymmetric on purpose: the caption belongs to the image above it, so the
+   gap below the figure has to be clearly larger than the gap above the
+   caption, or the caption reads as the opening line of the next paragraph. */
 .page figure {
-  margin: 2.5rem 0;
+  margin: 2.5rem 0 3.5rem;
   text-align: center;
 }
 
@@ -248,6 +251,17 @@ img { max-width: 100%; height: auto; }
   color: var(--text-dim);
   margin-top: 0.75rem;
   padding: 0 0.5rem;
+}
+
+/* ── Unfilled ad units take up no space ──
+   AdSense stamps data-ad-status="unfilled" on an <ins> it had no ad for. The
+   slot's chrome (border, padding, the "Advertisement" label) would otherwise
+   render around nothing — a labelled empty band above the footer, and two
+   empty 160x600 columns beside the text. That is the whole page before an
+   account is approved, and it recurs for real whenever a unit goes unfilled. */
+.ad-slot:has(ins[data-ad-status="unfilled"]),
+.ad-rail:has(ins[data-ad-status="unfilled"]) {
+  display: none;
 }
 
 /* ── Sites I Like (friends/recommendations list) ── */
