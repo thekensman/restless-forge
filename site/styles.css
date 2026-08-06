@@ -99,6 +99,34 @@ img { max-width: 100%; height: auto; }
   color: var(--accent);
 }
 
+/* ── Site nav on small screens ──
+   Six links in a fixed-height flex row do not fit a 360px phone: the row was
+   315px wide inside a 360px viewport with a brand beside it, so it pushed the
+   page 68px past the viewport and gave every global page a horizontal
+   scrollbar. Scrolling right then showed the empty margin beyond the content
+   column, which is what a phone reader actually noticed.
+
+   Stack instead of collapse: the tool pages use a hamburger because their
+   nav is long and tool-specific, but six short global links fit two rows and
+   a menu you have to open is worse than one you can already see. Height goes
+   auto so the second row is not clipped. */
+@media (max-width: 640px) {
+  .site-nav__inner {
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 1rem;
+  }
+
+  .site-nav__links {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .site-nav__links a { font-size: 0.72rem; }
+}
+
 /* ── Hero / Header ── */
 .hero {
   text-align: center;
@@ -252,13 +280,19 @@ img { max-width: 100%; height: auto; }
                                   is reserved before load and all four images
                                   shift by ~640px each.
    max-width does both jobs: ratio preserved, box still reserved, 0px shift.
-   Verified in Chromium with the image requests held open. */
+   Verified in Chromium with the image requests held open.
+
+   min(100%, 640px), not a bare 640px: this selector is more specific than the
+   global `img { max-width: 100% }` reset, so a bare cap REPLACED that reset
+   and every figure overflowed a 360px phone — a 640px image on a 360px screen
+   gave the whole page a horizontal scrollbar. The cap has to be the smaller of
+   the two, never just the pixel value. */
 .page figure img {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   display: block;
   margin: 0 auto;
-  max-width: 640px;
+  max-width: min(100%, 640px);
 }
 
 .page figcaption {
@@ -279,6 +313,15 @@ img { max-width: 100%; height: auto; }
 .ad-slot:has(ins[data-ad-status="unfilled"]),
 .ad-rail:has(ins[data-ad-status="unfilled"]) {
   display: none;
+}
+
+/* The two rules above only know about OUR containers. Auto Ads injects its own
+   <ins> into wrappers we never wrote, so an unfilled one keeps its reserved
+   height and shows as a blank band. This catches those too. It is a backstop,
+   not a substitute for leaving Auto Ads switched off in the AdSense console —
+   we place ads deliberately, and an injected unit is one we did not choose. */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
 }
 
 /* ── Sites I Like (friends/recommendations list) ── */
