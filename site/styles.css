@@ -177,6 +177,30 @@ img { max-width: 100%; height: auto; }
   line-height: 1.7;
 }
 
+/* ── Ad slot (site-global prose pages) ──
+   One slot, below the content, above the footer. The rule the placement
+   follows: an ad may sit at the end of what you came to read, never between
+   you and it. The separator and label exist so the unit reads as an ad rather
+   than as more of the article — AdSense requires that ads not be confused
+   with content, and it is the honest presentation regardless. */
+.ad-slot {
+  max-width: var(--max-width);
+  margin: 3rem auto 0;
+  padding: 1.5rem 1.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.ad-slot__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
 /* ── Figures (essay + article images with visible captions) ──
    Markdown images render as a bare <img>, so prose that needs a caption uses
    a raw <figure> block. The global `img { max-width: 100% }` reset already
