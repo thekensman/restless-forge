@@ -40,6 +40,24 @@
  *      with no loader script, so the queue was pushed and nothing consumed it —
  *      ads silently never rendered. Found by hand; nothing caught it.
  *
+ *   7. A local image a page references must exist on disk. The origin essay
+ *      shipped its prose before its four photographs were in the repo, and
+ *      nothing would have stopped it merging with four broken images on the
+ *      site's most prominent piece of writing. Broken images are invisible in
+ *      review (the HTML looks fine) and obvious to every reader.
+ *      This covers og:image and JSON-LD image too, which are the opposite
+ *      problem: invisible to the reader AND to review, because nothing on the
+ *      page renders them. When the essay's images landed under a different
+ *      directory than its front-matter named, the visible <figure> tags were
+ *      corrected and the social card silently kept pointing into the void —
+ *      an essay shell's <head> is generated once and never resynced.
+ *
+ *   8. No committed image may carry an EXIF block. The origin essay's
+ *      sand-art.jpg was a phone photograph that arrived tagged with the GPS
+ *      coordinates of where it was taken, and publishing it would have put a
+ *      home address on the site. This is not recoverable after the fact —
+ *      once it ships it is scraped — so it has to be caught before merge.
+ *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
  */
@@ -94,6 +112,44 @@ const slotWithoutLoader = (rel) =>
   `nothing consumes, so ads never render. Add the loader after ` +
   `<script src="/shared.js"></script>, or remove the slot.`;
 
+/* ── Rule 7: referenced local images must exist ──
+   Checked in two forms:
+     a) site-root-absolute paths in src=/href= (what the reader actually sees).
+        Tool pages resolve /tools/<id>/… assets through an nginx fallback to the
+        site root, so both candidates are accepted before reporting a miss.
+     b) absolute https://restless-forge.dev/… URLs anywhere in the page — this
+        is og:image and the JSON-LD Article.image, which are never rendered and
+        so are never noticed when they rot. An essay shell's <head> is written
+        ONCE, at creation, so changing `image:` front-matter afterwards does not
+        update it: the origin essay's images moved and its social card kept
+        pointing at the old path. Nothing looked wrong on the page.
+   Remote URLs on other hosts and data: URIs are skipped. */
+const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
+const SITE = "https://restless-forge.dev";
+
+function missingImages(file, html) {
+  const out = [];
+  const seen = new Set();
+  const refs = [
+    ...[...html.matchAll(/(?:src|href)=["'](\/[^"'?#]+)["']/g)].map((m) => m[1]),
+    ...[...html.matchAll(new RegExp(`${SITE}(/[^"'\\s?#]+)`, "g"))].map((m) => m[1]),
+  ];
+  for (const url of refs) {
+    if (!IMG_EXT.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    // dist/ layout: site/<path> for site-root assets, and for /tools/<id>/<a>
+    // either the tool's public/ dir or the site-root fallback.
+    const candidates = [join(root, "site", url.slice(1))];
+    const tool = url.match(/^\/tools\/([^/]+)\/(.+)$/);
+    if (tool) {
+      candidates.push(join(root, "tools", tool[1], "frontend", "public", tool[2]));
+      candidates.push(join(root, "site", tool[2]));
+    }
+    if (!candidates.some((p) => existsSync(p))) out.push(url);
+  }
+  return out;
+}
+
 const problems = [];
 const tools = loadTools();
 
@@ -126,6 +182,11 @@ for (const tool of tools) {
 
     // ── Rule 6: a slot without a loader renders nothing ──
     if (hasAds && !hasAdLoader(html)) problems.push(slotWithoutLoader(rel));
+
+    // ── Rule 7: referenced local images must exist ──
+    for (const img of missingImages(file, html)) {
+      problems.push(`${rel}: references ${img}, which does not exist.`);
+    }
 
     if (live) {
       // ── Rule 3: no stray noindex on a launched tool ──
@@ -173,6 +234,10 @@ for (const file of walkHtml(join(root, "site"))) {
 
   if (hasAdSlot(html) && !hasAdLoader(html)) problems.push(slotWithoutLoader(rel));
 
+  for (const img of missingImages(file, html)) {
+    problems.push(`${rel}: references ${img}, which does not exist.`);
+  }
+
   if (hasAdLoader(html)) {
     const words = visibleWords(file);
     if (words < MIN_WORDS) {
@@ -182,6 +247,56 @@ for (const file of walkHtml(join(root, "site"))) {
         `or drop the loader from this page.`,
       );
     }
+  }
+}
+
+/* ── Rule 8: no committed image may carry an EXIF block ──
+   Scans every image in the repo, not only referenced ones — an unreferenced
+   file still ships, because build.sh copies site/ and each tool's public/
+   wholesale. Detection is a container-format scan (no dependency, and none
+   is warranted): JPEG APP1 segments, PNG eXIf chunks, WebP RIFF EXIF chunks.
+   Presence of the block is the failure; we deliberately do not parse it to
+   check for GPS specifically, because "this one only has DPI tags" is how the
+   habit erodes. */
+function hasExif(buf) {
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8) {
+    // JPEG: walk the segment chain looking for APP1/"Exif\0\0".
+    let i = 2;
+    while (i + 4 <= buf.length && buf[i] === 0xff) {
+      const marker = buf[i + 1];
+      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
+      if (marker === 0xda || marker === 0xd9) break; // scan data / end: no metadata past here
+      const len = buf.readUInt16BE(i + 2);
+      if (marker === 0xe1 && buf.slice(i + 4, i + 8).toString("latin1") === "Exif") return true;
+      i += 2 + len;
+    }
+    return false;
+  }
+  if (buf.slice(0, 8).toString("latin1") === "\x89PNG\r\n\x1a\n") return buf.includes("eXIf");
+  if (buf.slice(0, 4).toString("latin1") === "RIFF" && buf.slice(8, 12).toString("latin1") === "WEBP") {
+    return buf.slice(12).includes("EXIF");
+  }
+  return false;
+}
+
+const IMG_FILE = /\.(png|jpe?g|webp|tiff?)$/i;
+function* walkImages(dir) {
+  if (!existsSync(dir)) return;
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name.startsWith(".") || e.name === "node_modules" || e.name === "dist") continue;
+    const p = join(dir, e.name);
+    if (e.isDirectory()) yield* walkImages(p);
+    else if (IMG_FILE.test(e.name)) yield p;
+  }
+}
+
+for (const img of [...walkImages(join(root, "site")), ...walkImages(join(root, "tools"))]) {
+  if (hasExif(readFileSync(img))) {
+    problems.push(
+      `${relative(root, img)}: carries an EXIF block. Phone photographs embed ` +
+      `GPS coordinates — sand-art.jpg arrived tagged with the location it was ` +
+      `taken in. Re-save it without metadata before committing.`,
+    );
   }
 }
 

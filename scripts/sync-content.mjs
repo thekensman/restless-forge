@@ -128,21 +128,29 @@ function contentSources() {
 
 /* ── essay shell auto-creation ── */
 const essaysDir = join(root, "site", "essays");
+const SITE = "https://restless-forge.dev";
 
 function createEssayShell(mdPath, meta) {
   const slug = basename(mdPath, ".md");
   for (const k of ["title", "description", "date"]) {
     if (!meta[k]) throw new Error(`${relative(root, mdPath)}: front-matter needs "${k}" to create its page shell`);
   }
+  // Optional `image:` front-matter gives an essay its own social card; without
+  // it every essay shares the generic site-wide one. Absolute URL required by
+  // og:image, so a site-root path is expanded here.
+  const ogImage = meta.image
+    ? (meta.image.startsWith("http") ? meta.image : `${SITE}${meta.image}`)
+    : `${SITE}/og-image.png`;
   const shell = readFileSync(join(root, "scripts", "templates", "essay-shell.html"), "utf8")
     .replaceAll("{{TITLE}}", meta.title)
     .replaceAll("{{DESCRIPTION}}", meta.description)
     .replaceAll("{{SLUG}}", slug)
     .replaceAll("{{DATE}}", meta.date)
-    .replaceAll("{{AUTHOR}}", meta.author || "Ken");
+    .replaceAll("{{AUTHOR}}", meta.author || "Ken")
+    .replaceAll("{{OG_IMAGE}}", ogImage);
   const htmlPath = join(essaysDir, `${slug}.html`);
   writeFileSync(htmlPath, shell);
-  console.log(`created ${relative(root, htmlPath)} (add /essays/${slug} to site/sitemap.xml, then run \`npm run sync-static\`)`);
+  console.log(`created ${relative(root, htmlPath)} — run \`npm run sync-static\` to add it to sitemap.xml and llms.txt`);
 }
 
 /* ── essay index cards from front-matter ── */

@@ -177,6 +177,79 @@ img { max-width: 100%; height: auto; }
   line-height: 1.7;
 }
 
+/* ── Ad slot (site-global prose pages) ──
+   One slot, below the content, above the footer. The rule the placement
+   follows: an ad may sit at the end of what you came to read, never between
+   you and it. The separator and label exist so the unit reads as an ad rather
+   than as more of the article — AdSense requires that ads not be confused
+   with content, and it is the honest presentation regardless. */
+.ad-slot {
+  max-width: var(--max-width);
+  margin: 3rem auto 0;
+  padding: 1.5rem 1.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.ad-slot__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Rail ads (sticky left/right, wide screens only) ──
+   Same contract the tool pages use: 160x600 fixed to the viewport, and
+   `display: none` until there is genuinely dead margin to put them in. The
+   breakpoint is not cosmetic — the content column is var(--max-width) (960px)
+   centered, so at 1540px each margin is 290px and a 160px rail inset 12px
+   still clears the text by ~118px. Below that the rails would crowd or overlap
+   the prose, which is the one thing a reading page cannot trade away.
+   Prose pages only: these belong beside an essay, not beside an index. */
+.ad-rail {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  z-index: 50;
+  display: none;
+}
+
+.ad-rail--left { left: 12px; }
+.ad-rail--right { right: 12px; }
+
+@media (min-width: 1540px) {
+  .ad-rail { display: block; }
+}
+
+/* ── Figures (essay + article images with visible captions) ──
+   Markdown images render as a bare <img>, so prose that needs a caption uses
+   a raw <figure> block. The global `img { max-width: 100% }` reset already
+   prevents overflow; these rules give the image room and style the caption. */
+.page figure {
+  margin: 2.5rem 0;
+  text-align: center;
+}
+
+.page figure img {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: block;
+  margin: 0 auto;
+}
+
+.page figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin-top: 0.75rem;
+  padding: 0 0.5rem;
+}
+
 /* ── Sites I Like (friends/recommendations list) ── */
 .friends-list {
   list-style: none;
