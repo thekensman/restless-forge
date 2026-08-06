@@ -276,8 +276,13 @@ rules): `docs/authoring-content.md`.
 - **Global pages**: static files in `site/` — no compilation.
 - **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`.
 - **Cache-busting**: `build.sh` computes md5 hashes and injects `?v=<hash>` on
-  `/shared.js`, `/tool-chrome.css`, each tool's `shared.js`, and each tool's
-  `pages.css` across every HTML file. Nginx serves these with a 1-year
+  `/styles.css`, `/shared.js`, `/tool-chrome.css`, `/tools-data.js`, each
+  tool's `shared.js`, and each tool's `pages.css` across every HTML file.
+  **Every stable-filename asset must be in that list** — nginx serves css/js
+  `immutable` for a year while HTML is `no-cache`, so an unbusted file is
+  served stale against new markup indefinitely (`docs/frontend-pitfalls.md`
+  §1). Vite's `assets/index-<hash>.js` bundles are exempt: the hash is in the
+  filename. `npm run check-links` fails the build on any unbusted reference. Nginx serves these with a 1-year
   `immutable` cache, so the query-string bust is what invalidates them after
   a deploy. `bust_cache` gracefully skips missing files (e.g. a single-page
   tool that has no `pages.css`).
@@ -364,7 +369,8 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 | `/shared.js` returns the wrong content in dev | `tools/vite-tool-config.ts` — `configureServer` middleware serves it from `site/shared.js` |
 | Built HTML points at `/tools/<name>/shared.js` where it should be `/shared.js` | Sentinel plugins in `tools/vite-tool-config.ts` — verify the SITE_GLOBAL_URLS list includes the URL |
 | Sub-page 404s in dev | Sub-page HTML must live under `src/`, not `public/`. Vite MPA only routes files in `src/` |
-| Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? |
+| Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? nginx serves css/js `immutable` for a year, so an unbusted stable filename is served stale until the browser is forced to refetch (`docs/frontend-pitfalls.md` §1). `npm run check-links` fails on any unbusted reference. |
+| Page scrolls sideways on a phone / images jump on load / ad slot leaves a blank band | `docs/frontend-pitfalls.md` — these have all shipped before, with the cause and the rule that prevents each. |
 | New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |
 | Site down / cert expiring / stale assets in prod | `site-health` issues from `.github/workflows/health-check.yml`; server runbook in `docs/infrastructure.md` (Cloudflare edge, DNS-01 cert renewal, disaster recovery) |
 | `/api/*` down or erroring | `systemctl status restless-forge-api` + `journalctl -u restless-forge-api` on the droplet; backend runbook in `docs/backend.md` (cost caps, circuit breaker, key rotation) |

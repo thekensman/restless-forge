@@ -133,6 +133,22 @@ find "${DIST_DIR}" -name "*.html" -exec sed -i \
   {} \;
 echo "  → /shared.js?v=${site_shared_hash}"
 
+# Cache-bust the global /styles.css across ALL html files in dist.
+# This one was missed for a long time and the failure was ugly: nginx serves
+# css as `immutable, max-age=1y` while HTML is `no-cache`, so returning
+# visitors kept a year-old stylesheet against brand-new markup and the browser
+# would not even revalidate. When the rail ads were added, phones with a
+# cached pre-rail styles.css had no `.ad-rail { display: none }` rule, so two
+# 600px ad containers rendered as ordinary blocks and pushed the article
+# 1200px down the page behind a wall of black.
+if [ -f "${DIST_DIR}/styles.css" ]; then
+  site_styles_hash=$(md5sum "${DIST_DIR}/styles.css" | cut -c1-8)
+  find "${DIST_DIR}" -name "*.html" -exec sed -i \
+    -e "s|\"/styles\.css\"|\"/styles.css?v=${site_styles_hash}\"|g" \
+    {} \;
+  echo "  → /styles.css?v=${site_styles_hash}"
+fi
+
 # Cache-bust the shared /tool-chrome.css across ALL html files in dist
 if [ -f "${DIST_DIR}/tool-chrome.css" ]; then
   site_chrome_hash=$(md5sum "${DIST_DIR}/tool-chrome.css" | cut -c1-8)
