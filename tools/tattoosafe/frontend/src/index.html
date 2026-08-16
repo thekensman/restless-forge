@@ -246,7 +246,38 @@
       and the <a href="/tools/tattoosafe/faq/">FAQ</a> covers what the preview can and can't do.
       Like every <a href="/tools/">Restless Forge tool</a>, everything runs in your browser —
       your design and camera feed never leave your device.</p>
-    </section>
+
+      <h2>What the Camera Preview Is, and Isn't</h2>
+      <p>The camera view composites your design over a live video feed so you can hold your arm,
+      ribs or shoulder in frame and see the piece at the size you selected. It is a static overlay:
+      the design does not track your body, wrap around a limb, or follow you as you move. That is a
+      deliberate limit rather than a missing feature — body-tracking overlays tend to look
+      convincing while quietly distorting scale, which is the one thing this tool exists to get
+      right. Treat it as holding a printed stencil against your skin, and use the proportional
+      silhouette mockup when you want the measurement rather than the impression.</p>
+      <p>Nothing from the camera is recorded or transmitted. The video stream is read by JavaScript
+      in your tab and drawn straight to a canvas; there is no upload step and no server that could
+      receive it.</p>
+
+      <h2>Why Placement Changes the Answer</h2>
+      <p>The same design is a different tattoo on a forearm than on a rib cage. Sixteen placements
+      are modelled, each with its own usable area and difficulty multiplier, because two things
+      vary independently: how much room the area physically offers, and how much longer the work
+      takes there. Ribs, hands, feet and necks are slower to tattoo — thinner skin over bone, more
+      breaks, more repositioning — so an identical piece costs more on ribs than on a thigh, even
+      at the same size and the same artist rate.</p>
+      <p>Size is where most plans go wrong in the other direction. Fine detail has a floor: line
+      weight, needle size and ink spread mean a design with dense linework simply cannot be
+      rendered at 5&nbsp;cm and stay legible in five years. When the calculator flags a design as
+      too small for its placement, that is what it is warning about.</p>
+
+      <h2>Who This Is For</h2>
+      <p>It is for the stage before you book — working out whether the piece you like fits where
+      you want it, and roughly what a shop will quote, so you walk into the consultation with a
+      realistic starting point. It is not a booking system, a design generator, or a substitute for
+      an artist's judgement. A good artist will adjust your design for the body part it is going
+      on, and that conversation goes better when you already know the size you are asking for is
+      physically reasonable.</p>
   </div>
 
   <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">

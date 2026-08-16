@@ -186,31 +186,12 @@
       <div class="upload__badge" id="file-type-badge" hidden></div>
     </section>
 
-    <!-- Noscript fallback for SEO crawlers -->
     <noscript>
-      <section class="noscript-content" aria-label="About SandPath">
-        <h2>SandPath: Free Sand Table Pattern Converter</h2>
-        <p>SandPath converts SVG vector files and raster images (JPG, PNG, WebP, BMP, GIF, TIFF)
-        into .thr (theta-rho) and .gcode files for kinetic sand tables.</p>
-        <h3>Supported Sand Tables</h3>
-        <ul>
-          <li><strong>Oasis Mini</strong> — 6.5" circular table by Grounded (.thr output)</li>
-          <li><strong>Oasis One</strong> — 18.5" circular table by Grounded (.thr output)</li>
-          <li><strong>Sisyphus Mini</strong> — 15.5" circular table (.thr output)</li>
-          <li><strong>Sisyphus Coffee Table</strong> — 24.5" circular table (.thr output)</li>
-          <li><strong>Sisyphus End Table</strong> — 18" circular table (.thr output)</li>
-          <li><strong>ZenXY</strong> — V1 Engineering rectangular table (.gcode output)</li>
-          <li><strong>Custom</strong> — any circular or rectangular sand table with user-defined dimensions</li>
-        </ul>
-        <h3>Image Tracing Modes</h3>
-        <p>When converting raster images, SandPath offers three vectorisation modes:</p>
-        <ul>
-          <li><strong>Outline</strong> — Sobel edge detection, best for photographs and complex artwork</li>
-          <li><strong>Threshold</strong> — black/white cutoff, best for logos and silhouettes</li>
-          <li><strong>Centerline</strong> — skeleton thinning, best for line drawings and sketches</li>
-        </ul>
-        <p>Unlike raster importers that produce horizontal scanlines, SandPath traces actual
-        vector paths for clean, continuous sand art patterns.</p>
+      <section class="noscript-content" aria-label="JavaScript required">
+        <h2>SandPath needs JavaScript</h2>
+        <p>The converter traces and renders patterns entirely in your browser, so it cannot run
+        with JavaScript disabled. What the tool does, which tables it supports, and how the
+        tracing works are all described below this panel.</p>
       </section>
     </noscript>
 
@@ -367,6 +348,64 @@
       <p id="error-msg"></p>
     </div>
   </main>
+
+  <!-- ─── Explanatory content (visible, not noscript-only) ─── -->
+  <section class="content" id="about" aria-label="About SandPath">
+    <h2>What SandPath Does</h2>
+    <p>A kinetic sand table draws with a steel ball dragged under the sand by a magnet. It reads a
+    path — an ordered list of positions the ball should travel through — and traces it continuously.
+    SandPath takes an SVG or an ordinary image and produces that path file: <code>.thr</code>
+    (theta-rho) for circular tables, or <code>.gcode</code> for rectangular ones.</p>
+    <p>Accepted inputs are SVG vector files and raster images in JPG, PNG, WebP, BMP, GIF and TIFF.
+    Everything is traced and previewed in your browser; nothing is uploaded, because there is no
+    server to upload to.</p>
+
+    <h2>Supported Tables</h2>
+    <p>Table choice sets the coordinate system, the output format and the physical bounds the path
+    is fitted to, so picking the right one matters more than it looks:</p>
+    <ul>
+      <li><strong>Oasis Mini</strong> — 6.5&Prime; circular, by Grounded (<code>.thr</code>)</li>
+      <li><strong>Oasis One</strong> — 18.5&Prime; circular, by Grounded (<code>.thr</code>)</li>
+      <li><strong>Sisyphus Mini</strong> — 15.5&Prime; circular (<code>.thr</code>)</li>
+      <li><strong>Sisyphus Coffee Table</strong> — 24.5&Prime; circular (<code>.thr</code>)</li>
+      <li><strong>Sisyphus End Table</strong> — 18&Prime; circular (<code>.thr</code>)</li>
+      <li><strong>ZenXY</strong> — V1 Engineering rectangular (<code>.gcode</code>)</li>
+      <li><strong>Custom</strong> — any circular or rectangular table, with your own dimensions</li>
+    </ul>
+
+    <h2>How Images Become Paths</h2>
+    <p>An SVG already contains paths, so it converts fairly directly. A photograph does not, and
+    the way you get from pixels to a single travelling line is the whole problem. SandPath offers
+    three tracing modes:</p>
+    <ul>
+      <li><strong>Outline</strong> — Sobel edge detection. Best for photographs and dense artwork,
+      where the recognisable information lives in the edges rather than the tones.</li>
+      <li><strong>Threshold</strong> — a black/white cutoff. Best for logos, silhouettes and
+      anything already high-contrast.</li>
+      <li><strong>Centerline</strong> — skeleton thinning, which reduces a stroke to the line
+      running down its middle. Best for sketches and line drawings.</li>
+    </ul>
+    <p>The important difference from a naive raster importer is that SandPath traces vector paths
+    rather than sweeping the image in horizontal rows. Scanline output looks like corduroy in sand:
+    the ball rakes back and forth and the picture only resolves from directly overhead.
+    <a href="/tools/sandpath/articles/why-scanlines-look-wrong-in-sand/">Why that happens is worth
+    understanding before you convert anything →</a></p>
+
+    <h2>What to Expect</h2>
+    <p>Sand is a low-detail medium. A ball roughly a centimetre across, dragging a groove through a
+    tray of sand, cannot reproduce fine texture — and every previous pattern stays visible until it
+    is drawn over. Images with a few strong shapes read well; busy photographs usually do not,
+    whatever tracing mode you choose. The live preview exists so you can find that out before
+    sending a file to the table.</p>
+    <p>Path ordering also matters: the ball leaves a visible line travelling between shapes, so a
+    pattern that jumps around the tray draws its own connective scribble.
+    <a href="/tools/sandpath/articles/travel-lines-and-path-ordering/">Travel lines and path
+    ordering →</a></p>
+    <p><a href="/tools/sandpath/articles/">Articles</a> &nbsp;·&nbsp;
+    <a href="/tools/sandpath/faq/">FAQ</a> &nbsp;·&nbsp;
+    <a href="/tools/sandpath/about/">About SandPath</a> &nbsp;·&nbsp;
+    <a href="/tools/">More Restless Forge tools</a></p>
+  </section>
 
   <!-- ═══════════════════════════════════════════════════
        SINGLE AD SLOT — below all content, above footer

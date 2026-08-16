@@ -178,6 +178,13 @@ if [ "$(grep -rl "${RF_ADSENSE_PUB}" "${DIST_DIR}" --include=ads.txt | wc -l)" -
 fi
 echo "  → ads.txt: ${RF_ADSENSE_PUB}"
 
+# ── Stamp <lastmod> into the deployed sitemap ──
+# Build-time, not in sync-static-html.mjs: site/sitemap.xml is checked in and
+# CI fails on drift, but a git-derived date changes the moment you commit the
+# page it describes. Injecting into dist/ keeps the deployed sitemap accurate
+# without making every content edit a red build. See the script header.
+node "${SCRIPT_DIR}/scripts/inject-sitemap-lastmod.mjs"
+
 # ── Summary ──
 echo ""
 echo "[5/5] Build complete!"

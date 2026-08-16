@@ -556,6 +556,18 @@ select:focus { border-color: var(--cyan); }
   margin-bottom: 16px;
 }
 
+/* The section used to hold a single heading; with several, each one after the
+   first needs room above it or the headings collide with the prose. */
+.content h2 + p { margin-top: 0; }
+.content h2:not(:first-child) { margin-top: 32px; }
+
+.content ul { margin: 0 0 12px 20px; }
+
+/* Links here were rendering as the browser default blue against a dark
+   cyan-on-black theme — nothing had ever styled .content a. */
+.content a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid transparent; }
+.content a:hover { border-bottom-color: var(--cyan); }
+
 .content p, .content li {
   font-size: 0.82rem;
   line-height: 1.8;

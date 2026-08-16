@@ -58,6 +58,15 @@
  *      home address on the site. This is not recoverable after the fact —
  *      once it ships it is scraped — so it has to be caught before merge.
  *
+ *   9. A <a data-rf-link="..."> must ship with text and an href. These anchors
+ *      are single-sourced from site/shared.js and filled at runtime, and the
+ *      email ones were written EMPTY on purpose so the address stayed out of
+ *      static HTML. The cost only shows up with JavaScript off: /privacy
+ *      served three `<a data-rf-link="email"></a>` — an empty, hrefless
+ *      element where the contact address belongs, on the page a reviewer opens
+ *      to find exactly that. `npm run sync-static` now pre-renders them; this
+ *      rule fails the build if a page ever ships one bare again.
+ *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
  */
@@ -247,6 +256,26 @@ for (const file of walkHtml(join(root, "site"))) {
         `or drop the loader from this page.`,
       );
     }
+  }
+}
+
+/* ── Rule 9: prose links must be real links without JavaScript ── */
+function bareProseLinks(html) {
+  const out = [];
+  for (const m of html.matchAll(/<a\s+data-rf-link="([a-zA-Z]+)"([^>]*)>([\s\S]*?)<\/a>/g)) {
+    const [, key, attrs, text] = m;
+    if (!/href="/.test(attrs)) out.push(`${key} (no href)`);
+    else if (text.trim() === "") out.push(`${key} (no text)`);
+  }
+  return out;
+}
+
+for (const file of walkHtml(join(root, "site"))) {
+  for (const bare of bareProseLinks(readFileSync(file, "utf8"))) {
+    problems.push(
+      `${relative(root, file)}: data-rf-link ${bare} — renders as nothing ` +
+      `without JavaScript. Run \`npm run sync-static\` to pre-render it.`,
+    );
   }
 }
 

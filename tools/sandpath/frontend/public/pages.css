@@ -87,3 +87,13 @@ td { color: var(--text); }
   width: 100%;
   padding: 0 1.5rem;
 }
+
+/* Framing prose around a listing, so an index page reads as a curated
+   collection rather than a bare list of links. */
+.page-intro, .page-outro {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.85;
+  margin-bottom: 18px;
+}
+.page-outro:first-of-type { margin-top: 32px; }

@@ -79,6 +79,41 @@ function inject(html, containerId, label, content, file) {
   throw new Error(`${file}: no marker and no empty <div id="${containerId}"> to seed`);
 }
 
+/* ── prose links: fill href (and the email address) for non-JS readers ──
+ *
+ * Pages write <a data-rf-link="substack"> with NO href, and
+ * resolveProseLinks() in site/shared.js fills it on DOMContentLoaded so the
+ * URL lives in exactly one place. Email goes further: the anchor is left
+ * EMPTY and the runtime supplies the address as text, keeping it out of
+ * static HTML.
+ *
+ * That worked until you look at the page without JavaScript, which is what a
+ * crawler and an automated policy check do. /privacy shipped three
+ * `<a data-rf-link="email"></a>` — an empty, hrefless element where the
+ * contact address should be, on the page a reviewer opens to find exactly
+ * that. Same reason the tool grids are pre-rendered here: single-sourced at
+ * runtime, crawlable as static HTML, never a fork.
+ *
+ * Text is only filled for email, and only when the anchor is empty or already
+ * holds an address — so a page may still write custom link text, and a
+ * changed RF_EMAIL still propagates instead of sticking at the old value. */
+const EMAIL_TEXT = /^\s*$|^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/;
+
+function fillProseLinks(html, window) {
+  return html.replace(
+    /<a\s+data-rf-link="([a-zA-Z]+)"([^>]*)>([\s\S]*?)<\/a>/g,
+    (whole, key, attrs, text) => {
+      const url = window.rfLinks[key];
+      if (!url) return whole;
+      const rest = attrs.replace(/\s*href="[^"]*"/, "");
+      const body = key === "email" && EMAIL_TEXT.test(text)
+        ? url.replace("mailto:", "")
+        : text;
+      return `<a data-rf-link="${key}" href="${url}"${rest}>${body}</a>`;
+    },
+  );
+}
+
 /* ── tool lists + copy on global pages (source: tools-data.js) ──
    /about and /terms enumerate the live tools; the FAQ's "What is
    Restless Forge?" answer (visible + JSON-LD) describes them in prose.
@@ -192,6 +227,7 @@ const pages = [...walk(join(root, "site"))]
   .filter((rel) => {
     if (TOOL_LIST_PAGES.includes(rel)) return true;
     const html = readFileSync(site(rel), "utf8");
+    if (html.includes("data-rf-link")) return true;
     return ["rf-tools-landing", "rf-tools-directory", "rf-friends"]
       .some((id) => html.includes(`id="${id}"`));
   })
@@ -220,6 +256,7 @@ for (const rel of pages) {
   if (html.includes('id="rf-friends"')) {
     html = inject(html, "rf-friends", "friends", renderFriends(), rel);
   }
+  html = fillProseLinks(html, window);
   if (rel === "about.html") {
     html = inject(html, null, "tools-about", renderAboutToolList(live), rel);
   }
@@ -344,18 +381,27 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
 
   const entry = (path, [changefreq, priority]) =>
     `  <url><loc>${SITE}${path}</loc><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
-  const noindex = (file) => readFileSync(file, "utf8").includes('content="noindex"');
+  // Prefix match, not an exact string: robots values carry directives
+  // ("noindex, follow"), and an exact test silently fails to see those.
+  const noindex = (file) => /content=["']noindex/.test(readFileSync(file, "utf8"));
 
   const lines = ['<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
 
   lines.push("  <!-- Global pages -->");
-  const globals = [...walk(join(root, "site"))]
+  const globalFiles = [...walk(join(root, "site"))]
     .map((p) => relative(join(root, "site"), p))
     .filter((rel) => !rel.startsWith("essays/") || rel === "essays/index.html")
-    .map(urlPath);
+    .map((rel) => ({ path: urlPath(rel), file: site(rel) }));
+  const globals = globalFiles.map((g) => g.path);
+  // A page still needs a GLOBAL_PAGE_RULES entry even when it is noindexed, so
+  // the "no page forgotten" guarantee holds; the noindex only suppresses the
+  // sitemap line. Otherwise deciding not to index a page would quietly opt it
+  // out of the check that every page is accounted for.
+  const noindexed = new Set(globalFiles.filter((g) => noindex(g.file)).map((g) => g.path));
   for (const [path, rule] of GLOBAL_PAGE_RULES) {
     if (!globals.includes(path)) throw new Error(`sitemap: expected page for ${path} not found under site/`);
+    if (noindexed.has(path)) continue;
     lines.push(entry(path, rule));
   }
   for (const path of globals) {
