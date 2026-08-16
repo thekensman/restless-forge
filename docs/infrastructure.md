@@ -150,6 +150,50 @@ If a specific crawler ever misbehaves (hammering the origin), prefer a
 Cloudflare **rate-limiting rule scoped to that user agent** over
 re-enabling the blanket AI block.
 
+> **Known drift (checked 2026-08-16):** the live `/robots.txt` currently
+> serves a `# BEGIN Cloudflare Managed content` block that `Disallow: /`s
+> ClaudeBot, GPTBot, CCBot, Google-Extended and others, immediately
+> followed by our own `Allow: /` stanzas for the same agents. So item 3
+> above is **not** currently satisfied. It does not affect Google Search
+> or AdSense — neither Googlebot nor Mediapartners-Google is named, and
+> both fall under `User-agent: * / Allow: /` — but it does contradict the
+> AI-crawler policy this section describes, and two conflicting groups for
+> one user agent is a coin-flip on which a given crawler honours.
+
+## Cloudflare rewrites email addresses in the HTML it serves
+
+Scrape Shield's **Email Address Obfuscation** is ON, and it rewrites the
+origin's markup at the edge. An address that leaves the origin as plain
+text arrives at the client like this:
+
+```html
+<a href="/cdn-cgi/l/email-protection#6b000e052b19...">
+  <span class="__cf_email__" data-cfemail="...">[email&#160;protected]</span></a>
+```
+
+with `/cdn-cgi/scripts/.../email-decode.min.js` restoring the real
+address in the browser.
+
+**Why this matters here.** `scripts/sync-static-html.mjs` deliberately
+pre-renders the contact address into static HTML so that readers without
+JavaScript — crawlers, link previews, automated policy checks — can see
+it; `/privacy` previously shipped three empty `<a data-rf-link="email">`
+anchors and that was a real defect. Cloudflare puts the address back
+behind JavaScript, which undoes most of that fix. A non-JS reader now
+sees the literal string `[email protected]` rather than nothing, so this
+is better than the original bug but not what the pre-rendering is for.
+
+To restore it: **Scrape Shield → Email Address Obfuscation → Off.** The
+trade-off is real (obfuscation deters address-harvesting bots) but small
+here — the address is already public in `site/shared.js`, on `/contact`,
+and in every `mailto:` href, so obfuscation buys little and costs the
+no-JS readability.
+
+This is the second setting where the Cloudflare dashboard silently
+changes what the site serves. When something is verifiably correct in
+`dist/` but wrong over HTTPS, check the dashboard before re-debugging the
+build.
+
 ## Disaster recovery
 
 Fast path: restore the latest snapshot/backup in DO, re-point DNS if the
