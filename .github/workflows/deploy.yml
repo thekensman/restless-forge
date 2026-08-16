@@ -53,6 +53,12 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+        # Full history: build.sh derives sitemap <lastmod> from each
+        # page's last commit date. A shallow clone has one commit, so
+        # every URL would report the same date and the script skips
+        # rather than emit that.
+        with:
+          fetch-depth: 0
 
       # Fail fast with a readable message instead of dying cryptically at
       # ssh-keyscan when the secrets aren't visible to this workflow.

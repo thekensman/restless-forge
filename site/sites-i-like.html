@@ -6,6 +6,12 @@
   <title>Sites I Like — Restless Forge</title>
   <meta name="description" content="A small, curated list of sites from friends, family, and people whose work I enjoy. Personal recommendations, not affiliated with Restless Forge.">
   <link rel="canonical" href="https://restless-forge.dev/sites-i-like">
+  <!-- Deliberately out of the index. This page exists for readers who follow
+       the footer link, not for search: it is a short list of personal
+       recommendations, and a page whose whole purpose is a handful of outbound
+       links is thin by definition. Kept linked, kept honest, not indexed.
+       sync-static-html.mjs skips noindexed pages when building sitemap.xml. -->
+  <meta name="robots" content="noindex, follow">
 
   <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -20,7 +26,8 @@
   <meta property="og:url" content="https://restless-forge.dev/sites-i-like">
   <link rel="stylesheet" href="/styles.css">
   <script src="/shared.js"></script>
-  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <!-- No AdSense loader: a noindexed page should not be monetized, the same
+       rule the unlaunched tools follow. -->
 </head>
 <body>
 

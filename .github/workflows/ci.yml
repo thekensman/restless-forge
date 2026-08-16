@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        # Full history: build.sh derives sitemap <lastmod> from each
+        # page's last commit date. A shallow clone has one commit, so
+        # every URL would report the same date and the script skips
+        # rather than emit that.
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
