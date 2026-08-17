@@ -144,10 +144,12 @@
       });
     }
     if (soonCount > 0) {
-      html += '<p class="tool-directory__teaser">' + soonCount +
-        ' more tool' + (soonCount !== 1 ? 's' : '') + ' ' +
-        (soonCount !== 1 ? 'are' : 'is') + ' in the forge — unlisted until ' +
-        'finished, because a link to a half-built thing helps nobody.</p>';
+      // Deliberately no count. Naming a number ("23 more tools are in the
+      // forge") reads as a construction notice and invites the reader to
+      // picture that many unfinished things; the discipline is the point and
+      // it lands without the figure.
+      html += '<p class="tool-directory__teaser">More tools are in the forge, ' +
+        'unlisted until finished — a link to a half-built thing helps nobody.</p>';
     }
     el.innerHTML = html;
 

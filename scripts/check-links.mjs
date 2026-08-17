@@ -121,6 +121,69 @@ if (isFile(sitemap)) {
   }
 }
 
+/* ── A sitemap URL must be the canonical URL of the page it points at ──
+ *
+ * The resolves() check above asks only "does some file serve this path". That
+ * is too weak, and it let a third variant of the canonical bug through.
+ *
+ * HoloPath's four sub-pages were listed in sitemap.xml as
+ * /tools/holopath/about/ (200) while the pages themselves declared
+ * rel=canonical and og:url as /tools/holopath/about — no trailing slash, which
+ * nginx 301s straight back to the slashed form. resolves() passed it, because
+ * /tools/holopath/about does find about/index.html on disk; the redirect only
+ * exists in production, where a file-existence test cannot see it. So Google
+ * was invited to crawl a URL, served 200, and then told by the page that its
+ * real address was somewhere else — which turned out to be a redirect back to
+ * where it started. Contradictory canonicalisation on four pages, the same
+ * family as bugs 1 and 2 above with 301 substituted for 404.
+ *
+ * The invariant that actually matters is the stronger one: the URL we
+ * advertise IS the URL the page claims. Comparing the two strings catches the
+ * trailing-slash mismatch, the extensionless-canonical bug, and any future
+ * drift between the sitemap generator and a hand-written <head>. Noindexed
+ * pages are not in the sitemap and are therefore exempt, which is correct —
+ * they are not advertised to anyone. */
+function fileServing(urlPath) {
+  const rel = decodeURIComponent(urlPath).replace(/^\//, "");
+  const candidates = urlPath.endsWith("/")
+    ? [join(dist, rel, "index.html")]
+    : [join(dist, `${rel}.html`), join(dist, rel, "index.html"), join(dist, rel)];
+  return candidates.find((c) => isFile(c) && c.endsWith(".html")) || null;
+}
+
+if (isFile(sitemap)) {
+  for (const m of readFileSync(sitemap, "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    const loc = m[1];
+    const urlPath = loc.startsWith(SITE) ? loc.slice(SITE.length) || "/" : loc;
+    if (!urlPath.startsWith("/")) continue;
+    const file = fileServing(urlPath);
+    if (!file) continue; // already reported by the resolves() pass above
+    const html = readFileSync(file, "utf8");
+    const tag = html.match(/<link[^>]+rel=["']canonical["'][^>]*>/i);
+    if (!tag) {
+      problems.push(`${relative(dist, file)}: in sitemap.xml but declares no rel=canonical`);
+      continue;
+    }
+    const href = (tag[0].match(/href=["']([^"']+)["']/) || [])[1];
+    if (href !== loc) {
+      problems.push(
+        `${relative(dist, file)}: sitemap says ${loc} but the page's canonical is ${href} ` +
+        `— one of the two is wrong, and Google is told to prefer the canonical`,
+      );
+    }
+    // og:url is a weaker canonicalisation hint than rel=canonical, but it is
+    // one, and checking only the canonical missed WIMTW's main page pointing
+    // og:url at the unslashed URL that 301s. Same string, same rule.
+    const og = html.match(/<meta[^>]+property=["']og:url["'][^>]*>/i);
+    const ogUrl = og && (og[0].match(/content=["']([^"']+)["']/) || [])[1];
+    if (ogUrl && ogUrl !== loc) {
+      problems.push(
+        `${relative(dist, file)}: sitemap says ${loc} but og:url is ${ogUrl}`,
+      );
+    }
+  }
+}
+
 /* ── Cache-busting: every stable-filename css/js must carry ?v=<hash> ──
  *
  * nginx serves css/js as `immutable, max-age=31536000` while HTML is
