@@ -357,3 +357,69 @@ jobs:
             curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r'
             echo "::warning::favicon.ico is not serving the 24h cache header. If the headers above include 'server: cloudflare' or 'cf-cache-status', a CDN is caching the old response — purge it. Otherwise check on the VPS that /etc/nginx/sites-enabled/restless-forge is a symlink to sites-available (ls -l), not a stale copy."
           fi
+
+          # ── Every sitemap URL must be live and must agree with itself ──
+          #
+          # check-links already gates CI, but it judges dist/ by whether a file
+          # exists, hand-modelling nginx's try_files chains. That is structurally
+          # blind to anything nginx decides at request time, and one such thing
+          # cost us four pages: /tools/holopath/about finds about/index.html on
+          # disk and passed for months, while production 301'd it. So the sitemap
+          # advertised /tools/holopath/about/ and the page's own canonical named
+          # /tools/holopath/about — Google was invited to a URL, served 200, told
+          # its real address was elsewhere, and redirected back to where it
+          # started. Combined with the earlier canonical→404 bug, that is two
+          # variants of the same drift, both invisible offline and both surfacing
+          # weeks later as "Crawled — currently not indexed".
+          #
+          # The fix is not a better offline model of nginx — that is the very
+          # fragility that produced the bug. It is one real request per URL
+          # against the real origin, here, where HTTP status is a fact.
+          echo "── sitemap sweep ──"
+          sitemap=$(curl -sf --max-time 30 https://restless-forge.dev/sitemap.xml) || {
+            echo "::error::sitemap sweep: could not fetch sitemap.xml"; exit 1;
+          }
+          locs=$(printf '%s' "$sitemap" | grep -o '<loc>[^<]*</loc>' | sed 's|</\?loc>||g' || true)
+          total=$(printf '%s\n' "$locs" | grep -c . || true)
+          if [ "${total:-0}" -eq 0 ]; then
+            echo "::error::sitemap sweep: sitemap.xml contains no <loc> entries"; exit 1
+          fi
+
+          fails=""
+          for loc in $locs; do
+            body=$(curl -sS --max-time 20 -w '\n__STATUS__%{http_code}' "$loc" 2>/dev/null) || {
+              fails="${fails}  ${loc} — request failed"$'\n'; continue;
+            }
+            status=${body##*__STATUS__}
+            if [ "$status" != "200" ]; then
+              fails="${fails}  ${loc} — HTTP ${status}"$'\n'
+              continue
+            fi
+            # `|| true` on each extraction: a page missing the tag makes grep
+            # exit 1, which would abort the whole step under -e/pipefail.
+            canonical=$(printf '%s' "$body" | grep -o '<link[^>]*rel="canonical"[^>]*>' | head -1 \
+              | grep -o 'href="[^"]*"' | sed 's/href="//;s/"$//' || true)
+            ogurl=$(printf '%s' "$body" | grep -o '<meta[^>]*property="og:url"[^>]*>' | head -1 \
+              | grep -o 'content="[^"]*"' | sed 's/content="//;s/"$//' || true)
+            if [ -z "$canonical" ]; then
+              fails="${fails}  ${loc} — no rel=canonical"$'\n'
+            elif [ "$canonical" != "$loc" ]; then
+              fails="${fails}  ${loc} — canonical says ${canonical}"$'\n'
+            fi
+            if [ -n "$ogurl" ] && [ "$ogurl" != "$loc" ]; then
+              fails="${fails}  ${loc} — og:url says ${ogurl}"$'\n'
+            fi
+          done
+
+          # This one fails rather than warns. The warnings above are the
+          # cache-sensitive checks, where a CDN can legitimately answer stale;
+          # HTML is served no-cache, so what we read here is the live page and a
+          # mismatch is a real defect. The site is already deployed by now, so
+          # failing is an alarm, not a rollback.
+          if [ -n "$fails" ]; then
+            echo "── mismatches ──"
+            printf '%s' "$fails"
+            echo "::error::sitemap sweep failed over ${total} URLs — a sitemap URL is unreachable, or a page's canonical/og:url disagrees with the URL the sitemap advertises. Google prefers the canonical, so a mismatch de-indexes the advertised URL. Details above."
+            exit 1
+          fi
+          echo "sitemap sweep OK — ${total} URLs, all 200, canonical and og:url self-consistent"
