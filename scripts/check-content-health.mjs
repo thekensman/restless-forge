@@ -67,6 +67,12 @@
  *      to find exactly that. `npm run sync-static` now pre-renders them; this
  *      rule fails the build if a page ever ships one bare again.
  *
+ *  10. A generated content block must contain no unrendered Markdown. Prose
+ *      lives in .md, but styled blocks are raw HTML, and Markdown inside a raw
+ *      HTML block is silently NOT processed — `**bold**` ships as asterisks.
+ *      A blank line after the opening tag restores it. That blank line is
+ *      invisible, so the build checks the output instead.
+ *
  * There is deliberately NO article-count rule: plenty of good tools (simple
  * file converters, single-purpose calculators) do not warrant articles.
  */
@@ -254,6 +260,43 @@ for (const file of walkHtml(join(root, "site"))) {
         `${rel}: ${words} words but loads AdSense (floor ${MIN_WORDS}). ` +
         `Site-global pages are what a reviewer lands on first — expand it, ` +
         `or drop the loader from this page.`,
+      );
+    }
+  }
+}
+
+/* ── Rule 10: no unrendered Markdown inside a generated content block ──
+ *
+ * Markdown inside a raw HTML block is NOT processed, and it fails silently.
+ * `<div class="reality">` immediately followed by `**bold**` on the next line
+ * ships the asterisks to the page verbatim — no error, no warning, just wrong
+ * text in front of a reader. The rule that avoids it is a blank line after the
+ * opening tag and before the closing tag, which makes the inner content
+ * ordinary Markdown again (and lets links pick up target/rel from the renderer
+ * in sync-content.mjs). That blank line is invisible and easy to delete months
+ * later, so the build checks the OUTPUT for the tell-tale leftovers instead of
+ * trusting anyone to remember.
+ *
+ * Measured against the corpus when added: 51 generated blocks, 0 false
+ * positives — it fires only on a genuine mistake. */
+const MD_LEAKS = [
+  [/\]\(https?:\/\/[^\s)]+\)/, "an unrendered Markdown link — `](http…)`"],
+  [/\*\*[^*\n]{1,80}\*\*/, "unrendered bold — `**…**`"],
+  [/^[ \t]{0,3}#{2,4}[ \t]+\S/m, "an unrendered heading — `##`"],
+];
+
+for (const file of walkHtml(root)) {
+  if (/\/(node_modules|dist)\//.test(file)) continue;
+  const html = readFileSync(file, "utf8");
+  for (const block of html.matchAll(/<!-- generated:content[\s\S]*?<!-- \/generated:content -->/g)) {
+    for (const [re, label] of MD_LEAKS) {
+      const hit = block[0].match(re);
+      if (!hit) continue;
+      problems.push(
+        `${relative(root, file)}: generated content contains ${label} ` +
+        `(${JSON.stringify(hit[0].slice(0, 60))}). Markdown inside a raw HTML ` +
+        `block is not processed — put a blank line after the opening tag and ` +
+        `before the closing tag, then re-run \`npm run sync-content\`.`,
       );
     }
   }

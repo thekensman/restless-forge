@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  BARE ASSET — the version external communities link to.
+  No navigation, no branding, no links to any site the author owns: it gets
+  posted where anything resembling a traffic funnel has the thread removed, so
+  it has to stand on its own. Deliberately noindex'd — the indexed copy of this
+  text is the site essay, and edits belong in BOTH files (see the sibling essay
+  under site/essays/ and the note in docs/authoring-content.md).
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
+<title>Self-Publishing: Dreaming with Eyes Open</title>
+<meta name="description" content="Five hats, zero budget, one debut short story. What actually happened self-publishing a book with no money to spend on editors, cover designers, or ads.">
+<meta property="og:title" content="Self-Publishing: Dreaming with Eyes Open">
+<meta property="og:description" content="Five hats, zero budget, one debut short story. Real numbers, real dead ends, no sales pitch.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #17140f;
+    --bg-raised: #1e1a14;
+    --line: #33291d;
+    --gold: #c9a15a;
+    --gold-bright: #e0bd7a;
+    --text: #ede7d8;
+    --text-dim: #a89b83;
+    --text-dimmer: #6e6350;
+    --accent-note: #8fae8a;
+    --max: 760px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{ color: var(--gold-bright); text-decoration-color: rgba(201,161,90,0.4); text-underline-offset: 3px; }
+  a:hover{ text-decoration-color: var(--gold-bright); }
+
+  ::selection{ background: rgba(201,161,90,0.3); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,161,90,0.10), transparent);
+  }
+  .hero .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.4rem;
+  }
+  .hero h1{
+    font-family:'DM Serif Display', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+    line-height: 1.15;
+    margin: 0 0 1.1rem;
+    color: var(--text);
+  }
+  .hero p.sub{
+    max-width: 46ch;
+    margin: 0 auto;
+    color: var(--text-dim);
+    font-size: 1.05rem;
+  }
+  .hero .cost-line{
+    margin-top: 2rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-dimmer);
+    letter-spacing: 0.02em;
+  }
+  .hero .cost-line strong{ color: var(--gold-bright); font-weight: 600; }
+
+  /* ---------- Layout shell ---------- */
+  .shell{
+    display:flex;
+    max-width: 1180px;
+    margin: 0 auto;
+    align-items: flex-start;
+  }
+
+  /* ---------- Hat rail (desktop) ---------- */
+  .rail{
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    width: 240px;
+    flex-shrink: 0;
+    padding: 4.5rem 1.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100vh;
+  }
+  .rail-item{
+    display:flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.85rem 0;
+    border-left: 2px solid var(--line);
+    padding-left: 1rem;
+    text-decoration: none;
+    transition: border-color .25s ease, opacity .25s ease;
+    opacity: 0.45;
+  }
+  .rail-item .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dimmer);
+  }
+  .rail-item .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+  .rail-item.active{
+    border-left-color: var(--gold);
+    opacity: 1;
+  }
+  .rail-item.active .num{ color: var(--gold); }
+  .rail-item.active .label{ color: var(--gold-bright); }
+
+  /* ---------- Main column ---------- */
+  main{
+    flex: 1;
+    min-width: 0;
+    padding: 4rem 1.75rem 6rem;
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .lede{
+    font-size: 1.08rem;
+    color: var(--text);
+  }
+  .lede p{ margin: 0 0 1.3rem; }
+
+  section.hat{
+    padding-top: 3.2rem;
+    margin-top: 2.5rem;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 2rem;
+  }
+  section.hat:first-of-type{ border-top: none; margin-top: 1rem; }
+
+  .hat-head{
+    display:flex;
+    align-items:center;
+    gap: 0.9rem;
+    margin-bottom: 1.6rem;
+  }
+  .hat-head .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,161,90,0.35);
+    border-radius: 3px;
+    padding: 0.25rem 0.55rem;
+  }
+  .hat-head .hat-icon{
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--gold);
+    opacity: 0.85;
+  }
+  .hat-head h2{
+    font-family:'DM Serif Display', serif;
+    font-weight: 400;
+    font-size: 1.9rem;
+    margin: 0;
+    color: var(--text);
+  }
+
+  section.hat p{ margin: 0 0 1.15rem; color: var(--text); }
+  section.hat p.dim{ color: var(--text-dim); }
+
+  h3.sub-head{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    color: var(--gold-bright);
+    margin: 2rem 0 0.9rem;
+    text-transform: none;
+  }
+
+  ul, ol{ padding-left: 1.3rem; margin: 0 0 1.2rem; }
+  li{ margin-bottom: 0.5rem; }
+  li::marker{ color: var(--gold); }
+
+  code, .mono{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.92em;
+  }
+
+  /* ---------- Do / Don't ---------- */
+  .dodont{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+  }
+  @media (max-width: 620px){ .dodont{ grid-template-columns: 1fr; } }
+  .dodont > div{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1.1rem 1.2rem;
+  }
+  .dodont .do{ border-left: 3px solid var(--accent-note); }
+  .dodont .dont{ border-left: 3px solid #a8695a; }
+  .dodont h4{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0 0 0.6rem;
+  }
+  .dodont .do h4{ color: var(--accent-note); }
+  .dodont .dont h4{ color: #c98a7b; }
+  .dodont p, .dodont ul{ margin: 0; font-size: 0.95rem; color: var(--text-dim); }
+
+  /* ---------- Reality check callout ---------- */
+  .reality{
+    position: relative;
+    margin: 1.8rem 0;
+    padding: 1.1rem 1.3rem 1.1rem 1.4rem;
+    background: linear-gradient(135deg, rgba(201,161,90,0.07), rgba(201,161,90,0.02));
+    border: 1px solid rgba(201,161,90,0.25);
+    border-radius: 4px;
+    font-size: 0.97rem;
+  }
+  .reality::before{
+    content: "REALITY CHECK";
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .reality p{ margin:0; color: var(--text); }
+
+  /* ---------- Table ---------- */
+  table.royalty{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0 2rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.88rem;
+  }
+  table.royalty th, table.royalty td{
+    text-align: left;
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+  table.royalty th{
+    color: var(--gold);
+    font-weight: 500;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  table.royalty td{ color: var(--text-dim); }
+  table.royalty tr:last-child td{ border-bottom: none; }
+
+  /* ---------- Channel list ---------- */
+  .channel-list{ list-style: none; padding: 0; margin: 1.2rem 0 2rem; }
+  .channel-list li{
+    display:flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .channel-list li::marker{ content: none; }
+  .channel-list .name{ color: var(--text); }
+  .channel-list .verdict{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    text-align: right;
+    /* No nowrap: the r/KindleFreebies verdict is a full sentence, and holding
+       it on one line forced a 931px span — 739px of horizontal scroll at
+       360px. This page is linked from Reddit, where most readers are on a
+       phone, so it is the one place that must not scroll sideways. */
+    min-width: 0;
+  }
+  .verdict.worked{ color: var(--accent-note); }
+  .verdict.no{ color: #c98a7b; }
+  .verdict.mixed{ color: var(--text-dim); }
+
+  /* ---------- Final numbers strip ---------- */
+  .numbers{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+    padding: 1.6rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    text-align:center;
+  }
+  .numbers .stat .val{
+    font-family:'DM Serif Display', serif;
+    font-size: 2.1rem;
+    color: var(--gold-bright);
+    line-height:1;
+  }
+  .numbers .stat .lbl{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    margin-top: 0.5rem;
+  }
+  @media (max-width: 480px){
+    .numbers{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 3rem 1.75rem 5rem;
+    border-top: 1px solid var(--line);
+    color: var(--text-dimmer);
+    font-size: 0.9rem;
+  }
+  footer .sign{
+    font-family:'DM Serif Display', serif;
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  /* ---------- Mobile rail ---------- */
+  @media (max-width: 900px){
+    .rail{ display:none; }
+    main{ padding-top: 3rem; }
+  }
+
+  @media (max-width: 620px){
+    .channel-list li{ flex-direction: column; gap: 0.25rem; }
+    .channel-list .verdict{ text-align: left; }
+  }
+
+  /* progress dot line connecting rail items visually via pseudo -- kept simple/quiet per restraint */
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="kicker">Field Notes</div>
+  <h1>Self-Publishing:<br>Dreaming with Eyes Open</h1>
+  <p class="sub">Five hats, zero budget, one debut short story. What actually happened when I tried to do all of it myself.</p>
+  <div class="cost-line">Total spend: <strong>$0</strong> &nbsp;·&nbsp; Result: <strong>51 sales, 4.7★, 94 KENP</strong></div>
+</div>
+
+<div class="shell">
+
+  <nav class="rail" id="rail">
+    <a href="#writer" class="rail-item" data-target="writer"><span class="num">01</span><span class="label">Writer</span></a>
+    <a href="#editor" class="rail-item" data-target="editor"><span class="num">02</span><span class="label">Editor</span></a>
+    <a href="#designer" class="rail-item" data-target="designer"><span class="num">03</span><span class="label">Designer</span></a>
+    <a href="#publisher" class="rail-item" data-target="publisher"><span class="num">04</span><span class="label">Publisher</span></a>
+    <a href="#marketer" class="rail-item" data-target="marketer"><span class="num">05</span><span class="label">Marketer</span></a>
+  </nav>
+
+  <main>
+
+    <div class="lede">
+      <p>I'm 35 and have wanted to publish my work since I was 17. After a decade of periodic rejections from traditional publishers, I finally self-published my work. During the process I took extensive notes, and I wanted to share my experience and advice here. My ultimate takeaway is that self-publishing can be a dream come true (it was for me) provided you come in with the right dream.</p>
+      <p>In the last 6 months I finally got serious about self-publishing after many years of halfhearted attempts and failures. Every guide I saw recommended several high barriers to entry that were supposedly non-optional: hundreds of dollars for an editor, a thousand on a cover designer, a few hundred on marketing and ads etc.</p>
+      <p>I didn't want to spend that kind of money on a passion project. The lack of capital was part of the charm, honestly. Could I do this myself, for $0? That's the &ldquo;right dream&rdquo; I mentioned.</p>
+      <p>I self-published the e-book. It wasn't a runaway success, but it also wasn't a dud. I documented the process along the way, and this is the same guide I'll use for my next book.</p>
+      <p class="dim">The expensive hiring route gets you a higher-quality result. The professionals in this space do great work (there's a reason they're professionals), and if you have the funds or you're an established author, work with someone you trust. This guide is for a writer without that budget, the one deciding between putting the work out into the world and letting it sit on a hard drive.</p>
+      <p>To launch a book you wear many hats: writer, editor, designer, publisher, and marketer. There's a reason these are normally separate jobs. They're specialized. But you're as deep and talented as the characters you create, and you can learn these specialties too.</p>
+    </div>
+
+    <!-- WRITER -->
+    <section class="hat" id="writer">
+      <div class="hat-head"><svg class="hat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17h19"/><path d="M6.5 17V8a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 17.5 8v9"/><path d="M6.5 13.5h11"/></svg><span class="tag">Hat 01</span><h2>Writer</h2></div>
+      <p>This isn't a writing guide, so I don't have much to say here. Some of you reading this are much better storytellers than I am, and any craft notes I gave would come from my own style and experience, not yours.</p>
+      <p>But there's one area I do want to address directly: AI.</p>
+      <p class="dim">It's 2026, and if you're new to publishing, here's the current climate: AI work has flooded the market, and readers see it constantly. That's bad because there's infinitely more scrutiny and competition than before. But it's also good because all the coal makes true diamonds stand out.</p>
+
+      <div class="dodont">
+        <div class="do">
+          <h4>Do</h4>
+          <p>Use AI for plotting, character questions, accuracy checks. &ldquo;My character has X condition, what's a good job for them?&rdquo; or &ldquo;I want this plot element, how do I resolve it well?&rdquo; Then think critically about the answers, weigh them against what actually makes the story stronger, and cut what doesn't.</p>
+        </div>
+        <div class="dont">
+          <h4>Don't</h4>
+          <p>Let AI write one word of your manuscript. People can tell. Words, phrasing, cadence, AI text has distinctive tells, and readers will be ruthless. The worst case is a permanent mark against your name. A story demands time and focus from a reader, and you need to respect that investment with your own. Remember that your voice is unique and irreplaceable.</p>
+        </div>
+      </div>
+
+      <div class="reality">
+        <p>You'll see later that I did use AI for my book cover. It's a different medium, but I'd bet some readers are still turned off by an AI cover. Still, I've found a reader is far more forgiving of a cover they look at for a few seconds than a book they spend hours getting to know.</p>
+      </div>
+    </section>
+
+    <!-- EDITOR -->
+    <section class="hat" id="editor">
+      <div class="hat-head"><svg class="hat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17h19"/><path d="M6.5 17V8a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 17.5 8v9"/><path d="M6.5 13.5h11"/></svg><span class="tag">Hat 02</span><h2>Editor</h2></div>
+      <p>This section covers two parts of the editing process: formatting and proofreading.</p>
+      <p>First the formatting: Kindle is finicky about this. My first upload was a circus of smooshed lines and inconsistent tabs. I had to go back and fix everything, and here's the Google Docs style that worked:</p>
+
+      <ul class="mono" style="font-size:0.93rem; color:var(--text-dim);">
+        <li>First-line indent: 0.3in, via Format &gt; Align &amp; indent &gt; Indentation options</li>
+        <li>Line spacing: 1.15 or 1.5</li>
+        <li>Space after paragraph: 0</li>
+        <li>First paragraph after a scene break or chapter opening: no indent</li>
+        <li>Scene breaks: single centered asterisk, Normal style</li>
+        <li>Back matter headings (Author's Note, About the Author): Heading 1 (generates Kindle's nav menu)</li>
+        <li>Copyright page: Normal style, never a heading, or it lands in the table of contents</li>
+        <li>Title page: Normal style, centered, sized manually</li>
+      </ul>
+
+      <p>I've also made a <a href="https://docs.google.com/document/d/1ms0IqyljvntfgAS2sjuUi8Hfs9S4kwtLaQ7Gj_ei1YM/edit?usp=sharing" target="_blank" rel="noopener">template for individual sections here</a>.</p>
+
+      <p>Once your story's complete and you've shown it to close family and friends, do an initial proofreading pass yourself. Then it's time to get an external, unbiased eye: beta readers. Some writers do ARCs and paid editors too. Again, no funds in my case.</p>
+
+      <p>I used two subreddits to pull beta readers. They both have different cultures and different expectations.</p>
+
+      <h3 class="sub-head"><a href="https://www.reddit.com/r/DestructiveReaders/" target="_blank" rel="noopener">r/DestructiveReaders</a></h3>
+      <p>This is a gold mine of story advice from focused readers. You contribute by reading others' work and commenting, thoroughly (think 700 to 800 words minimum). Keep a list of links to your critiques; when you post, you attach them to show you've &ldquo;earned&rdquo; the review you're asking for. Critiques can be banked up to three months, so no rush.</p>
+      <p class="dim">Also don't expect a full novel critique here. People visit on lunch breaks, so post a single telling section, under 2,500 words, and ask specific questions: does this character feel real? What do you guess happens next?</p>
+
+      <h3 class="sub-head"><a href="https://www.reddit.com/r/BetaReaders/" target="_blank" rel="noopener">r/BetaReaders</a></h3>
+      <p>This is the Wild West by comparison. You can get a full novel read here, but readers are pickier about what they take on. Post asking for feedback; interested readers comment or DM. Offering a critique in return helps, especially with fellow authors.</p>
+
+      <div class="reality">
+        <p><strong>On scams:</strong> open read-only access to your doc, double-check it's actually read-only. Open comment access only if a reader seems trustworthy and specifically asks, since it enables real line-level critique. Don't respond to anyone who emails you directly without going through your thread first. And, as always, keep a backup of your work.</p>
+      </div>
+
+      <h3 class="sub-head">Sifting through feedback</h3>
+      <p>Once beta readers start weighing in, feedback rapidly becomes unmanageable. The problem isn't bad feedback, it's volume. Read each review and summarize their big notes, then look for trends. How many readers caught the same thing? Do you actually think it'd improve the story? Give this at least two weeks, more for a longer work, and go into rewrites with an open mind.</p>
+
+      <p class="dim"><strong>Export path:</strong> Download as .docx from Google Docs, upload directly to KDP. You don't need Draft2Digital, Atticus, or Vellum for a straightforward manuscript. D2D's free formatter is a fine fallback if KDP's converter mangles something, but for a clean Doc it adds a step without adding value.</p>
+    </section>
+
+    <!-- DESIGNER -->
+    <section class="hat" id="designer">
+      <div class="hat-head"><svg class="hat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17h19"/><path d="M6.5 17V8a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 17.5 8v9"/><path d="M6.5 13.5h11"/></svg><span class="tag">Hat 03</span><h2>Designer</h2></div>
+      <p>I used AI to build my cover. Part of the charm of doing this myself was seeing if I could. Art and design aren't things I'm naturally gifted at. If I were to go back and spent money anywhere, this is where it'd go.</p>
+      <p class="dim">I saw <a href="https://getcovers.com" target="_blank" rel="noopener">getcovers.com</a> recommended in this sub recently and genuinely liked their samples. But for this first book, I wanted to learn the whole thing myself.</p>
+      <p>I spent months on dead ends before landing on a process that worked. I was already paying for Claude and ChatGPT, so it cost nothing extra.</p>
+      <p>The rough process: Claude built a concept (ugly, but good composition and color basis). ChatGPT fleshed it into a usable image. That got me roughly 80% of the way. The last 20% is what ate my time.</p>
+
+      <div class="reality">
+        <p><strong>What worked:</strong> I listed every remaining defect and fed it to Claude, which generated a mask and prompt (effectively “edit only the area of this image covered by the mask. Make these changes and don't edit anything outside the mask”). Then I told ChatGPT to edit only the masked area, nothing outside it. That got me to about 95% of the way there. Finally I finished structural fixes and the title/author text in <strong>Photopea</strong>, a free browser-based Photoshop alternative. Most of you will be better at this step than I was. Just save your work as you go.</p>
+      </div>
+
+      <p class="dim">There are more sophisticated workflows I picked up after asking r/StableDiffusion for feedback that I haven't tried yet. If I were an established author, or had different constraints, I'd go back and spend the $35 at getcovers.com.</p>
+    </section>
+
+    <!-- PUBLISHER -->
+    <section class="hat" id="publisher">
+      <div class="hat-head"><svg class="hat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17h19"/><path d="M6.5 17V8a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 17.5 8v9"/><path d="M6.5 13.5h11"/></svg><span class="tag">Hat 04</span><h2>Publisher</h2></div>
+      <p>You're almost done, but there are a few KDP idiosyncrasies worth knowing before you hit submit.</p>
+
+      <h3 class="sub-head">Royalties</h3>
+      <p class="dim">KDP pays in bands based on price:</p>
+      <table class="royalty">
+        <tr><th>Price range</th><th>Royalty</th><th>Example</th></tr>
+        <tr><td>$0.99 to $2.98</td><td>35%</td><td>$0.35 per sale at $0.99</td></tr>
+        <tr><td>$2.99 to $9.99</td><td>70%</td><td>~$2.09 per sale at $2.99</td></tr>
+        <tr><td>KU page reads</td><td>n/a</td><td>~$0.004 to $0.005 per page</td></tr>
+      </table>
+      <div class="reality">
+        <p>This can seem counterintuitive. $2.99 earns roughly six times more per sale than $0.99. But there's a case for launching at $0.99 anyway: a debut with zero reviews needs downloads more than dollars early on. Raise the price after 15 to 20 reviews.</p>
+      </div>
+
+      <h3 class="sub-head">AI disclosure</h3>
+      <p class="dim">KDP asks about AI-generated content on the content page. If your cover used AI generation, like mine, disclose it. Story text you wrote yourself doesn't require disclosure. Editorial assistance, like plot advice, doesn't either. Be accurate, not evasive.</p>
+
+      <h3 class="sub-head">Keywords &amp; categories</h3>
+      <p class="dim">You get 3 categories and 7 keyword slots. Keywords are search phrases, not single words. &ldquo;Road trip short story&rdquo; and &ldquo;grief and healing fiction&rdquo; are keywords (that I used for my story), &ldquo;fiction&rdquo; is not. Use all seven. For categories, pick narrow over broad: a small category you can chart in beats a huge one where you're invisible.</p>
+
+      <h3 class="sub-head">Before you publish</h3>
+      <p class="dim">Preview before you publish, and actually read the whole thing in the preview pane. The waiting period is 24 to 72 hours before your listing goes live.</p>
+
+      <h3 class="sub-head">Author pages (there are two)</h3>
+      <ul>
+        <li><strong>Amazon Author Central</strong> (author.amazon.com). Create the account, add photo and bio, claim your book. Until claimed, your name on the listing isn't a link.</li>
+        <li><strong>Goodreads</strong>. Search for your book, apply for the Author Program, approval takes a few days. Once approved, claim the book, add your bio. Generally don't respond to reviews.</li>
+      </ul>
+    </section>
+
+    <!-- MARKETER -->
+    <section class="hat" id="marketer">
+      <div class="hat-head"><svg class="hat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17h19"/><path d="M6.5 17V8a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 17.5 8v9"/><path d="M6.5 13.5h11"/></svg><span class="tag">Hat 05</span><h2>Marketer</h2></div>
+      <p>Your listing being live doesn't mean anyone finds it. I've seen a lot of people publish and then walk away from their own book. And I get it. This part feels less like art and more like hustling a street corner with a demo tape, but it's the difference between a growing audience and a book sitting at 0 reviews. Do it for the readers who'd love your work if they ever got the chance to find it.</p>
+
+      <div class="reality">
+        <p>Whatever promotion you plan, plan for it to underperform: low engagement, posts removed, silence. These are facts of life, and to counteract this you must cast a wide net. Free book newsletters are worth submitting to but don't expect much. It's basically a lottery. What actually worked for me was social media and forums.</p>
+      </div>
+
+      <p>My approach: schedule a 5-day free promo about a week after launch, once the initial wave dies down (friends and family, initial announcement posts etc). This is a second wind. Use the promo window to maximize downloads and reviews, which are signals Amazon's algorithm uses to keep promoting you after the window closes.</p>
+
+      <p class="dim">Your sales rank <em>will</em> drop during the promo. That's normal, Amazon moves free books to a separate ranking list. I panicked seeing my numbers in freefall before realizing what was happening.</p>
+
+      <h3 class="sub-head">Forums &amp; channels: what actually happened</h3>
+      <ul class="channel-list">
+        <li><span class="name"><a href="https://www.mobileread.com/forums/forumdisplay.php?f=203" target="_blank" rel="noopener">MobileRead forum</a></span><span class="verdict worked">worked &middot; 800+ views</span></li>
+        <li><span class="name"><a href="https://www.reddit.com/r/FREEBOOKS/" target="_blank" rel="noopener">r/FreeEBOOKS</a></span><span class="verdict worked">worked &middot; ~600 views</span></li>
+        <li><span class="name"><a href="https://www.reddit.com/r/KindleFreebies/" target="_blank" rel="noopener">r/KindleFreebies</a></span><span class="verdict no">did NOT work &middot; silent, no reason given (and looking at the posts there it seems like you need to meet specific criteria)</span></li>
+        <li><span class="name">LinkedIn/Facebook</span><span class="verdict mixed">supportive, existing network, YMMV</span></li>
+        <li><span class="name">Facebook author groups</span><span class="verdict worked">single most successful channel. Confirm self-promo is allowed first.</span></li>
+        <li><span class="name">My newsletter</span><span class="verdict mixed">underperformed &middot; not a writing-centric audience</span></li>
+      </ul>
+
+      <h3 class="sub-head">Showcases I tried, none picked me up</h3>
+      <p class="dim">Freebooksy, Manybooks, One Hundred Free Books, AwesomeGang, Crave Books, Contentmo, Bookpraiser, and Pretty Hot. Maybe your luck will be better. One thing I'll say: don't spend money advertising your first book. Spend on your second, or in my case, probably my third or fourth. Books build off each other, and later books get better ROI from readers who just finished the one before. I do the same thing as a reader.</p>
+
+      <p>Once the free period ends, shift to Kindle Unlimited to keep momentum. I posted to <a href="https://www.reddit.com/r/KindleUnlimited/" target="_blank" rel="noopener">r/KindleUnlimited</a> and a few Facebook KU groups.</p>
+
+      <div class="numbers">
+        <div class="stat"><div class="val">51</div><div class="lbl">Sales</div></div>
+        <div class="stat"><div class="val">4.7★</div><div class="lbl">4 Reviews</div></div>
+        <div class="stat"><div class="val">94</div><div class="lbl">KENP Read</div></div>
+      </div>
+
+      <p>I'm honestly over the moon with the performance, but I'm even happier with the lessons. <b>I will keep writing.</b> And after the struggle, the next book will be stronger.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="sign">Kenneth Cross</div>
+  <p>Written after the launch of <em>Dinosaur Road</em>, my debut short story. Free to use, no signup. If it helped, I'd love to hear about it.</p>
+</footer>
+
+<script>
+  const items = document.querySelectorAll('.rail-item');
+  const sections = document.querySelectorAll('section.hat');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      const id = e.target.id;
+      const link = document.querySelector('.rail-item[data-target="' + id + '"]');
+      if(!link) return;
+      if(e.isIntersecting){
+        items.forEach(i => i.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+  sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>

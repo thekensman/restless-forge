@@ -34,6 +34,40 @@ pattern renders only after `new-tool.sh` substitutes its placeholders.
   styled block (`<div class="formula">…`, CTA buttons). If a block has
   a class, keep it as HTML; everything else should be Markdown.
 
+### Markdown inside a styled block needs blank lines
+
+This is the one rule that fails silently, so it is worth knowing before
+you hit it. Markdown inside a raw HTML block is **not** processed:
+
+```
+<div class="reality">
+**On scams:** open read-only access to your doc.
+</div>
+```
+
+ships the literal asterisks to the page. No error, no warning.
+
+Put a blank line after the opening tag and before the closing tag, and
+everything between is ordinary Markdown again — including links, which
+then pick up `target="_blank" rel="noopener"` for free:
+
+```
+<div class="reality">
+
+**On scams:** see [r/BetaReaders](https://www.reddit.com/r/BetaReaders/).
+
+</div>
+```
+
+Nesting works the same way; give every wrapper that contains prose its
+own blank lines. A block with **no** prose (a grid of figures, say) needs
+none, because there is no Markdown in it to render.
+
+`check-content-health` rule 10 fails the build if a generated block ever
+ships unrendered Markdown, so a lost blank line is caught rather than
+published. Available components are documented in the "Essay components"
+section of `site/styles.css`.
+
 ## Front-matter
 
 Optional `---` block of `key: value` lines at the top:
