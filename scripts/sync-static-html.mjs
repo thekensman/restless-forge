@@ -365,7 +365,7 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
     // guarantee is what stops a page being forgotten. This one is the bare
     // copy of the self-publishing essay, linked from external communities;
     // the essay is the indexed version.
-    ["/guides/self-publishing", ["yearly", "0.1"]],
+    ["/guides/self-publishing-dreaming-with-eyes-open", ["yearly", "0.1"]],
     ["/privacy", ["yearly", "0.3"]],
     ["/terms", ["yearly", "0.3"]],
     ["/faq", ["monthly", "0.6"]],

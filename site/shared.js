@@ -66,7 +66,10 @@
     ['/essays/', 'Essays'],
     ['/about', 'About'],
     ['/contact', 'Contact'],
-    ['/sites-i-like', 'Sites I Like'],
+    // /sites-i-like is deliberately NOT listed. The page still exists and
+    // still works for anyone handed the link, but one recommendation is not a
+    // section, and the single entry it currently holds does not represent the
+    // site. Re-add this line once the list is worth reading.
     ['/privacy', 'Privacy'],
     ['/terms', 'Terms'],
     ['/faq', 'FAQ'],
