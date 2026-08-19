@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>About — Rise &amp; Rhyme</title>
+  <meta name="description" content="About Rise &amp; Rhyme.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/about/">
+  <link rel="icon" type="image/svg+xml" href="/tools/rise-and-rhyme/favicon.svg">
+  <link rel="icon" href="/tools/rise-and-rhyme/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/rise-and-rhyme/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/rise-and-rhyme/site.webmanifest">
+  <meta property="og:title" content="About — Rise &amp; Rhyme">
+  <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/about/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/rise-and-rhyme/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/rise-and-rhyme/shared.js"></script>
+</head>
+<body>
+  <!-- Header auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-header"></div>
+
+  <main>
+    <!-- Prose lives in the sibling index.md (docs/authoring-content.md).
+         Fills on the first `npm run sync-content` after scaffolding. -->
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<h1>About Rise &amp; Rhyme</h1>
+<p>Wake up to a song about your day.</p>
+<h2>What It Does</h2>
+<p>Rise &amp; Rhyme turns tomorrow&#39;s calendar into a custom morning song. The evening
+before your alarm, it reads your Google Calendar&#39;s public iCal feed, writes
+6–10 lines of rhyming lyrics about the day ahead — your meetings, appointments,
+and plans — and picks an upbeat backing track to match the day&#39;s mood. At alarm
+time, the song plays: an instrumental intro, your day sung over the music, and
+a looping outro until you get up.</p>
+<p>There&#39;s no account and no signup. Your calendar URL and preferences live in
+your browser&#39;s localStorage, and the song is generated once per evening so
+your alarm is ready before you wake.</p>
+<h2>How It Works</h2>
+<ol>
+<li>Paste your Google Calendar &quot;secret address in iCal format&quot; and pick an
+alarm time.</li>
+<li>The evening before each alarm day, your browser asks the Restless Forge
+server for a song. The server reads tomorrow&#39;s events from your calendar
+feed and writes lyrics with Claude, Anthropic&#39;s AI model.</li>
+<li>The lyrics come back to your browser, which plays them over a locally
+stored backing track using your browser&#39;s speech synthesis — the audio
+itself never touches a server.</li>
+<li>If generation ever fails, a fallback jingle still wakes you up.</li>
+</ol>
+<p>In this first version the tab needs to stay open overnight — there&#39;s no
+background service or push notification yet.</p>
+<h2>About Your Data</h2>
+<div class="info-box">
+<p><strong>Privacy:</strong> Rise &amp; Rhyme is a cloud-assisted tool. Your
+calendar's iCal URL is sent to the Restless Forge server once per generation,
+and tomorrow's event titles and times are forwarded to the Anthropic Claude
+API to write the lyrics. Nothing is stored beyond short-lived, hashed
+rate-limiting records — see the <a href="/tools/rise-and-rhyme/privacy/">Rise
+&amp; Rhyme privacy page</a> for the full picture. Everything else (alarm,
+audio, preferences) stays in your browser.</p>
+</div><p>See the <a href="/tools/rise-and-rhyme/privacy/">Rise &amp; Rhyme privacy page</a>, the
+site-wide <a href="/privacy">Privacy Policy</a>, and <a href="/terms">Terms of Use</a>.</p>
+<!-- /generated:content -->
+  </main>
+
+  <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-footer"></div>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <meta name="theme-color" content="#0b0d12">
+  <title>Is My Raise Real? — Pay Raise vs Inflation Calculator</title>
+  <meta name="description" content="Your employer gave you a 3% raise. Inflation is 3.4%. You got a pay cut. This calculator shows the real value of your raise after inflation, what you should ask for, and how much purchasing power you've lost since you were hired.">
+  <meta name="keywords" content="pay raise calculator, raise vs inflation, real raise calculator, salary inflation, is my raise good, cost of living adjustment, purchasing power">
+  <link rel="canonical" href="https://restless-forge.dev/tools/is-my-raise-real/">
+  <meta property="og:title" content="Is My Raise Real?">
+  <meta property="og:image" content="https://restless-forge.dev/tools/is-my-raise-real/og-image.png">
+  <meta property="og:url" content="https://restless-forge.dev/tools/is-my-raise-real/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://restless-forge.dev/tools/is-my-raise-real/og-image.png">
+  <meta property="og:description" content="Your 3% raise during 3.4% inflation is a pay cut. Calculate the real value of your raise.">
+  <meta property="og:type" content="website">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Is My Raise Real?",
+    "description": "Pay raise vs inflation calculator showing the real value of salary increases",
+    "url": "https://restless-forge.dev/tools/is-my-raise-real/",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is a 3% raise good?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on inflation. A 3% raise when inflation is 3% means your purchasing power stayed flat — you got a 0% real raise. If inflation is above 3%, your 3% raise is actually a pay cut in real terms. Use our calculator to see the actual value of any raise."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I calculate my real raise after inflation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Subtract the inflation rate from your nominal raise percentage. A 4% raise during 3% inflation gives roughly a 1% real raise. For precise calculations, use the formula: real raise = ((1 + nominal raise) / (1 + inflation rate) - 1) × 100."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What raise should I ask for to keep up with inflation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "At minimum, request a raise equal to the current CPI inflation rate just to maintain your purchasing power. If you want a genuine raise on top of inflation, add your desired real increase to the inflation rate. For example, if inflation is 3.2% and you want a real 2% raise, ask for at least 5.2%."
+        }
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #0b0d12; --bg-raised: #151820; --bg-card: #1a1e28; --bg-input: #0e1018;
+  --border: #252a35; --border-focus: #d4a44e;
+  --text: #d8d4cc; --text-dim: #7a7770; --text-muted: #4a4840;
+  --accent: #d4a44e; --accent-dim: #a88540;
+  --green: #6bbd7a; --red: #d45d5d; --orange: #d4a04e;
+  --font-body: "Lora", Georgia, serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --max-w: 1100px; --radius: 3px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body); background: var(--bg); color: var(--text);
+  line-height: 1.6; min-height: 100vh;
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(212,164,78,0.03) 0%, transparent 60%);
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.header { border-bottom: 1px solid var(--border); padding: 36px 24px 28px; }
+.header__inner { max-width: var(--max-w); margin: 0 auto; }
+.header__brand { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+.header__logo { font-size: 28px; line-height: 1; }
+.header__title {
+  font-family: var(--font-mono); font-size: clamp(20px, 3.5vw, 30px);
+  font-weight: 400; color: var(--text); letter-spacing: -0.3px;
+}
+.header__tagline { font-style: italic; color: var(--text-dim); font-size: 16px; }
+
+.tabs {
+  max-width: var(--max-w); margin: 0 auto; padding: 20px 24px 0;
+  display: flex; gap: 4px; border-bottom: 1px solid var(--border); overflow-x: auto;
+}
+.tab {
+  font-family: var(--font-mono); font-size: 13px; padding: 9px 18px 11px;
+  background: transparent; color: var(--text-dim); border: 1px solid transparent;
+  border-bottom: none; border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
+}
+.tab:hover { color: var(--text); background: var(--bg-raised); }
+.tab--active {
+  color: var(--accent); background: var(--bg-raised); border-color: var(--border);
+  border-bottom: 1px solid var(--bg-raised); margin-bottom: -1px;
+}
+.tab__icon { margin-right: 5px; }
+
+.main { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+.panel { padding: 28px 0; display: none; }
+.panel--active { display: block; }
+.panel__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+@media (max-width: 820px) { .panel__grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+}
+.card__title {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 18px;
+}
+.card__title--spaced { margin-top: 24px; }
+
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 5px; }
+.field__hint { display: block; font-size: 11px; color: var(--text-muted); margin-top: 3px; font-style: italic; }
+.field-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.field-row .field { flex: 1; margin-bottom: 0; }
+
+.input-group {
+  display: flex; align-items: center; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; transition: border-color 0.15s;
+}
+.input-group:focus-within { border-color: var(--border-focus); }
+.input-prefix, .input-suffix {
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); padding: 0 9px; flex-shrink: 0;
+}
+input[type="number"], select {
+  font-family: var(--font-mono); font-size: 14px; color: var(--text);
+  background: transparent; border: none; padding: 9px 11px; width: 100%; outline: none;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+select {
+  cursor: pointer; background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 9px 11px;
+}
+select:focus { border-color: var(--border-focus); outline: none; }
+select option { background: var(--bg-card); color: var(--text); }
+
+.results-column { display: flex; flex-direction: column; gap: 14px; }
+.result-card {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px; text-align: center;
+}
+.result-card--hero { border-color: var(--accent); border-width: 2px; padding: 28px 22px; }
+.result-card--hero .result-card__value { font-size: clamp(32px, 6vw, 52px); }
+.result-card__label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+}
+.result-card__value {
+  font-family: var(--font-mono); font-weight: 500; font-size: 28px; color: var(--text); line-height: 1.2;
+}
+.result-card__note { font-size: 12px; color: var(--text-muted); margin-top: 5px; font-style: italic; }
+.verdict-positive .result-card__value { color: var(--green); }
+.verdict-negative .result-card__value { color: var(--red); }
+.verdict-neutral .result-card__value { color: var(--orange); }
+
+.gap-visual {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px;
+}
+.gap-visual__bar {
+  height: 28px; background: rgba(212,93,93,0.15); border-radius: 3px;
+  overflow: hidden; position: relative;
+}
+.gap-visual__fill {
+  height: 100%; border-radius: 3px; transition: width 0.3s ease; min-width: 2px;
+}
+.gap-visual__fill--gain { background: linear-gradient(90deg, var(--green), #4a9e5a); }
+.gap-visual__fill--loss { background: linear-gradient(90deg, var(--red), #b04040); }
+.gap-visual__labels {
+  display: flex; justify-content: space-between; font-family: var(--font-mono);
+  font-size: 11px; color: var(--text-dim); margin-top: 6px;
+}
+
+.insight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.insight-card {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; text-align: center;
+}
+.insight-card__icon { font-size: 22px; margin-bottom: 6px; }
+.insight-card__value { font-family: var(--font-mono); font-size: 20px; font-weight: 500; color: var(--text); }
+.insight-card__label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+/* Erosion chart */
+.erosion-chart {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px; margin-top: 14px;
+}
+.erosion-chart__title {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.erosion-chart__canvas { width: 100%; height: 240px; }
+.erosion-row {
+  display: flex; justify-content: space-between; padding: 6px 0;
+  border-bottom: 1px solid rgba(37,42,53,0.5); font-family: var(--font-mono); font-size: 12px;
+}
+.erosion-row:last-child { border-bottom: none; }
+.erosion-row span:first-child { color: var(--text-dim); }
+.erosion-row .should-be { color: var(--green); }
+.erosion-row .actual { color: var(--text); }
+.erosion-row .gap { color: var(--red); }
+.erosion-row--header { font-weight: 500; color: var(--text-dim) !important; border-bottom: 1px solid var(--border); }
+.erosion-row--header span { color: var(--text-dim) !important; }
+.erosion-total {
+  margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--accent);
+  display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 14px;
+}
+.erosion-total .gap { color: var(--red); font-weight: 600; }
+
+/* Script box */
+.script-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px; margin-top: 14px; font-size: 14px; line-height: 1.7; color: var(--text);
+}
+.script-box__title {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+}
+
+.about { padding: 40px 0; border-top: 1px solid var(--border); margin-top: 20px; }
+.about__title { font-family: var(--font-mono); font-size: 14px; font-weight: 400; color: var(--accent); margin-bottom: 14px; }
+.about__text { font-size: 14px; color: var(--text-dim); line-height: 1.8; margin-bottom: 12px; }
+.about__text a { color: var(--accent); }
+
+.footer { border-top: 1px solid var(--border); padding: 24px; text-align: center; }
+.footer__links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px; }
+.footer__link { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+.footer__link:hover { color: var(--accent); }
+.footer__link--heart { color: var(--red); }
+.footer__link--heart svg { vertical-align: -2px; margin-right: 3px; }
+.footer__copy { font-size: 11px; color: var(--text-muted); }
+.forge-link { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+.forge-link a { color: var(--accent-dim); }
+  </style>
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/is-my-raise-real/favicon.svg">
+  <link rel="icon" href="/tools/is-my-raise-real/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/is-my-raise-real/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/is-my-raise-real/site.webmanifest">
+  <script src="/shared.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__brand">
+        <span class="header__logo">📉</span>
+        <h1 class="header__title">Is My Raise Real?</h1>
+      </div>
+      <p class="header__tagline">Your employer hopes you can't do this math.</p>
+    </div>
+  </header>
+
+  <main class="main">
+    <nav class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="check" role="tab" aria-selected="true"><span class="tab__icon">🔍</span> Raise Reality Check</button>
+      <button class="tab" data-tab="ask" role="tab" aria-selected="false"><span class="tab__icon">💬</span> What Should I Ask For?</button>
+      <button class="tab" data-tab="erosion" role="tab" aria-selected="false"><span class="tab__icon">📉</span> Salary Erosion</button>
+    </nav>
+
+    <!-- TAB 1: RAISE REALITY CHECK -->
+    <section class="panel panel--active" id="panel-check" role="tabpanel">
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Your Raise</h2>
+          <div class="field">
+            <label for="c-old">Previous salary (annual)</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="c-old" value="65000" min="0" step="1000"></div>
+          </div>
+          <div class="field">
+            <label for="c-new">New salary (annual)</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="c-new" value="67000" min="0" step="1000"></div>
+          </div>
+          <div class="field">
+            <label for="c-year">Year the raise took effect</label>
+            <select id="c-year"></select>
+          </div>
+        </div>
+
+        <div class="results-column" id="check-results">
+          <div class="result-card result-card--hero" id="check-hero">
+            <div class="result-card__label">Your Real Raise</div>
+            <div class="result-card__value" id="res-real-raise">—</div>
+            <div class="result-card__note" id="res-raise-note"></div>
+          </div>
+
+          <div class="gap-visual">
+            <div class="gap-visual__bar">
+              <div class="gap-visual__fill" id="raise-bar"></div>
+            </div>
+            <div class="gap-visual__labels">
+              <span id="raise-label-real">Real: —</span>
+              <span id="raise-label-nominal">Nominal: —</span>
+            </div>
+          </div>
+
+          <div class="insight-row">
+            <div class="insight-card">
+              <div class="insight-card__icon">📊</div>
+              <div class="insight-card__value" id="res-nominal">—</div>
+              <div class="insight-card__label">Nominal raise</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">🏷️</div>
+              <div class="insight-card__value" id="res-inflation">—</div>
+              <div class="insight-card__label">CPI inflation that year</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">💵</div>
+              <div class="insight-card__value" id="res-real-dollars">—</div>
+              <div class="insight-card__label">Real purchasing power change</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: WHAT SHOULD I ASK FOR? -->
+    <section class="panel" id="panel-ask" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Negotiation Prep</h2>
+          <div class="field">
+            <label for="a-salary">Current salary (annual)</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="a-salary" value="67000" min="0" step="1000"></div>
+          </div>
+          <div class="field">
+            <label for="a-target">Desired REAL raise (after inflation)</label>
+            <div class="input-group"><input type="number" id="a-target" value="2" min="0" max="50" step="0.5"><span class="input-suffix">%</span></div>
+            <span class="field__hint">This is the genuine increase in purchasing power you want.</span>
+          </div>
+          <div class="field">
+            <label for="a-inflation">Current/expected inflation rate</label>
+            <select id="a-inflation">
+              <option value="auto" selected>Use latest CPI (auto)</option>
+              <option value="2.0">2.0% (low)</option>
+              <option value="2.5">2.5%</option>
+              <option value="3.0">3.0%</option>
+              <option value="3.5">3.5%</option>
+              <option value="4.0">4.0%</option>
+              <option value="5.0">5.0% (high)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="results-column">
+          <div class="result-card result-card--hero">
+            <div class="result-card__label">Ask For At Least</div>
+            <div class="result-card__value" id="res-ask-pct">—</div>
+            <div class="result-card__note" id="res-ask-note"></div>
+          </div>
+          <div class="result-card">
+            <div class="result-card__label">Target New Salary</div>
+            <div class="result-card__value" id="res-ask-salary">—</div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-card">
+              <div class="insight-card__icon">⚖️</div>
+              <div class="insight-card__value" id="res-ask-minimum">—</div>
+              <div class="insight-card__label">Just to stay flat (match inflation)</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-card__icon">📈</div>
+              <div class="insight-card__value" id="res-ask-delta">—</div>
+              <div class="insight-card__label">Extra annual income vs. flat</div>
+            </div>
+          </div>
+          <div class="script-box">
+            <div class="script-box__title">Talking Points for Your Review</div>
+            <p id="res-script">—</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: SALARY EROSION -->
+    <section class="panel" id="panel-erosion" role="tabpanel" hidden>
+      <div class="panel__grid">
+        <div class="card">
+          <h2 class="card__title">Your History</h2>
+          <div class="field">
+            <label for="e-start-salary">Starting salary</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="e-start-salary" value="50000" min="0" step="1000"></div>
+          </div>
+          <div class="field">
+            <label for="e-start-year">Year you started</label>
+            <select id="e-start-year"></select>
+          </div>
+          <div class="field">
+            <label for="e-current-salary">Current salary</label>
+            <div class="input-group"><span class="input-prefix">$</span><input type="number" id="e-current-salary" value="67000" min="0" step="1000"></div>
+          </div>
+        </div>
+
+        <div class="results-column">
+          <div class="result-card result-card--hero" id="erosion-hero">
+            <div class="result-card__label">Total Purchasing Power Lost</div>
+            <div class="result-card__value" id="res-erosion-total">—</div>
+            <div class="result-card__note" id="res-erosion-note"></div>
+          </div>
+          <div class="result-card">
+            <div class="result-card__label">Your Salary Should Be</div>
+            <div class="result-card__value" id="res-erosion-should">—</div>
+            <div class="result-card__note" id="res-erosion-gap-note"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="erosion-chart">
+        <div class="erosion-chart__title">Year-by-Year Erosion</div>
+        <div id="erosion-table"></div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="about__title">Why This Calculator Exists</h2>
+      <p class="about__text">Most people hear "3% raise" and feel good about it. They shouldn't — not without checking what inflation did that year. A raise that doesn't beat inflation is a pay cut wearing a congratulations card. This tool does the math your employer hopes you won't.</p>
+      <p class="about__text">The Salary Erosion tab is the one that hurts. It shows the cumulative gap between what you earn and what you'd need to have the same buying power as the day you were hired. For many people, that gap is tens of thousands of dollars.</p>
+      <p class="about__text about__text--dim">CPI data from the U.S. Bureau of Labor Statistics. Built by <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a>. Everything runs in your browser. Nothing is sent anywhere.</p>
+      <p class="about__text about__text--dim">If this tool changed how you see your next review, <a data-rf-link="kofi" target="_blank" rel="noopener">a coffee helps keep it free and ad-light</a>.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__links">
+      <a class="footer__link footer__link--heart" data-rf-link="kofi" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Ko-fi
+      </a>
+      <a class="footer__link" data-rf-link="bmc" target="_blank" rel="noopener">Buy Me a Coffee</a>
+      <a class="footer__link" data-rf-link="substack" target="_blank" rel="noopener">Substack</a>
+      <a class="footer__link" data-rf-link="github" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="footer__copy">&copy; 2026 Is My Raise Real? — Your numbers, your browser, your leverage.</p>
+    <p class="forge-link">Part of <a href="https://restless-forge.dev" target="_blank" rel="noopener">Restless Forge</a> — free browser-only tools, no signup. <a href="/tools/what-is-my-time-worth/">Know your real hourly wage &rarr;</a></p>
+  </footer>
+
+<script type="module" src="./app.ts"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theta-Rho vs G-code: Two Ways to Describe a Sand Pattern</title>
+  <meta name="description" content="Circular sand tables speak polar, rectangular ones speak Cartesian. What that means for portability, precision, and why one format survives a table upgrade and the other does not.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/sandpath/articles/theta-rho-vs-gcode/">
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/sandpath/favicon.svg">
+  <link rel="icon" href="/tools/sandpath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/sandpath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/sandpath/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/tools/sandpath/og-image.png">
+  <meta property="og:title" content="Theta-Rho vs G-code: Two Ways to Describe a Sand Pattern">
+  <meta property="og:description" content="Circular sand tables speak polar, rectangular ones speak Cartesian. What that means for portability, precision, and why one format survives a table upgrade and the other does not.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/sandpath/articles/theta-rho-vs-gcode/">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Theta-Rho vs G-code: Two Ways to Describe a Sand Pattern",
+    "description": "Circular sand tables speak polar, rectangular ones speak Cartesian. What that means for portability, precision, and why one format survives a table upgrade and the other does not.",
+    "datePublished": "2026-08-04",
+    "dateModified": "2026-08-04",
+    "author": {"@type": "Person", "name": "Kenneth Cross", "url": "https://restlessforge.substack.com"},
+    "publisher": {"@type": "Organization", "name": "SandPath", "url": "https://restless-forge.dev/tools/sandpath"},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://restless-forge.dev/tools/sandpath/articles/theta-rho-vs-gcode/"}
+  }
+  </script>
+    <link rel="stylesheet" href="/tool-chrome.css">
+    <link rel="stylesheet" href="/tools/sandpath/pages.css">
+  <style>
+    /* ── Article Layout ── */
+    .article{max-width:680px}
+    .breadcrumb{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:28px}
+    .breadcrumb a{color:var(--dim)}
+    .breadcrumb a:hover{color:var(--accent)}
+    .article__tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .article__tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:2px;padding:3px 10px}
+    .article__meta{font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .article__body h2{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin:44px 0 16px;display:flex;align-items:center;gap:10px}
+    .article__body h2::before{content:'';display:inline-block;width:18px;height:1px;background:var(--accent);flex-shrink:0}
+    .article__body p{font-size:15px;color:var(--muted);line-height:1.85;margin-bottom:18px}
+    .article__body p:last-child{margin-bottom:0}
+    .article__body strong{color:var(--text);font-weight:600}
+    .article__body em{font-style:italic}
+    .article__body blockquote{border-left:3px solid var(--accent);padding:14px 20px;margin:28px 0;background:var(--surface);border-radius:0 3px 3px 0}
+    .article__body blockquote p{font-size:15px;font-style:italic;color:var(--text);margin-bottom:0}
+    .article__body ul{font-size:15px;color:var(--muted);line-height:1.85;margin:0 0 18px 22px}
+    .article__body ul li{margin-bottom:8px}
+    .formula{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:3px;padding:18px 22px;margin:24px 0;font-family:var(--font-mono);font-size:13px;color:var(--text);line-height:1.7}
+    .formula span{color:var(--muted);font-size:12px;display:block;margin-top:6px}
+    .cta-inline{margin:44px 0;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:3px;padding:28px 24px}
+    .cta-inline p{font-size:14px;color:var(--muted);margin-bottom:16px;font-style:italic}
+    .cta-inline a.btn{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--bg);background:var(--accent);padding:11px 22px;border-radius:3px;text-decoration:none;transition:opacity 0.15s;margin-right:12px;margin-bottom:8px}
+    .cta-inline a.btn:hover{opacity:0.85;text-decoration:none}
+    .cta-inline a.btn--outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  </style>
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/sandpath/shared.js"></script>
+</head>
+<body>
+  <div id="sp-header"></div>
+
+  <main>
+    <div class="article">
+      <p class="breadcrumb"><a href="/tools/sandpath/articles/">← Articles</a></p>
+
+      <div class="article__tags">
+        <span class="article__tag">File Formats</span>
+        <span class="article__tag">Theta-Rho</span>
+        <span class="article__tag">G-code</span>
+      </div>
+
+      <h1>Theta-Rho vs G-code: Two Ways to Describe a Sand Pattern</h1>
+
+      <div class="article__meta">
+        <span>August 4, 2026</span>
+        <span>By <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a></span>
+        <span>8 min read</span>
+      </div>
+
+      <div class="article__body">
+        <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>Every kinetic sand table needs the same thing from a pattern file: an ordered
+list of positions for the ball. Two formats dominate, and they disagree about
+how to describe a position at all.</p>
+<p>That disagreement is not arbitrary. It follows from how the machines are built,
+and it has real consequences for whether a pattern you made today still works
+after you buy a bigger table.</p>
+<h2>Theta-rho: describing a circle in its own terms</h2>
+<p>Circular tables — the Grounded Oasis models, the Sisyphus range — move a ball on
+a <strong>polar</strong> mechanism. One motor rotates an arm. Another moves a carriage along
+that arm. There is no such thing as &quot;left&quot; in the machine&#39;s own frame of
+reference; there is only <em>rotate</em> and <em>extend</em>.</p>
+<p>Theta-rho matches that exactly. Each line is two numbers:</p>
+<pre><code>0.0000 0.0000
+1.5708 0.5000
+3.1416 1.0000
+</code></pre>
+<p><strong>Theta</strong> is an angle in radians. <strong>Rho</strong> is a radius from 0 at the centre to 1
+at the rim. Those three lines say: start at the centre, quarter-turn while
+extending halfway, another quarter-turn while extending to the edge.</p>
+<p>The crucial detail is that rho is <strong>normalised</strong>. It is not a measurement — it is
+a fraction of whatever radius the table happens to have. That one decision gives
+the format a property G-code cannot have.</p>
+<h2>G-code: describing a rectangle in millimetres</h2>
+<p>Rectangular tables like the ZenXY use two perpendicular linear axes, which is
+mechanically a small CNC machine. So they speak the language CNC machines have
+spoken since the 1950s:</p>
+<pre><code>G21        ; millimetres
+G90        ; absolute positioning
+G0 X10 Y10 ; rapid move — reposition
+G1 X90 Y40 ; linear move — draw
+</code></pre>
+<p>Only a handful of commands matter. <code>G21</code> and <code>G90</code> are declarations that appear
+once. Then it is <code>G0</code> and <code>G1</code> all the way down.</p>
+<p>The <code>G0</code>/<code>G1</code> distinction is worth dwelling on, because on a CNC router it is
+meaningful — <code>G0</code> lifts the tool and moves fast. <strong>On a sand table, nothing
+lifts.</strong> The ball ploughs its groove during a <code>G0</code> exactly as it does during a
+<code>G1</code>. The distinction survives in the file format but the physical difference
+does not, which is why travel moves are visible in the finished pattern.</p>
+<h2>The portability difference</h2>
+<p>This is the practical consequence, and it catches people out.</p>
+<p><strong>Theta-rho files are portable between circular tables.</strong> Because rho is a
+fraction rather than a measurement, the same file draws correctly on a 165 mm
+Oasis Mini and a 622 mm Sisyphus Coffee Table. Upgrade your table and your
+entire pattern library still works.</p>
+<p><strong>G-code files are not portable.</strong> <code>X90 Y40</code> means ninety millimetres and forty
+millimetres. Load a file made for a 500 × 350 bed onto a 400 × 300 table and it
+will drive into the wall. Change bed size, reconvert.</p>
+<p>There is a caveat on the theta-rho side. Portable does not mean <em>identical</em> —
+fine detail that reads clearly at 622 mm can fall below the ball&#39;s resolution at
+165 mm. The geometry survives the move; the legibility might not.</p>
+<h2>Two problems that only exist in polar</h2>
+<p>Converting Cartesian paths to theta-rho involves two subtleties that G-code
+never encounters.</p>
+<p><strong>Angle continuity.</strong> Theta is not confined to one revolution. A table&#39;s arm
+keeps rotating, so a pattern can legitimately wind through several turns. But
+naive Cartesian-to-polar conversion returns an angle in the range −π to π, and a
+path crossing that boundary produces a jump from +3.14 to −3.14. The machine
+faithfully executes that as a full rotation backwards, which is a spectacular
+and very visible defect. SandPath unwraps the angle across the boundary so the
+sequence stays continuous.</p>
+<p><strong>Density at the centre.</strong> Near rho = 0, a large change in theta moves the ball
+almost not at all; near rho = 1 the same change sweeps a long arc. Path detail is
+therefore not uniform across the table in polar coordinates the way it is in
+Cartesian ones — the centre gets crowded, the rim gets sparse.</p>
+<h2>The rim margin</h2>
+<p>All of SandPath&#39;s circular profiles cap rho at <strong>0.95</strong> rather than 1.0.</p>
+<p>That 5% is not conservatism for its own sake. At the very edge of a sand bed the
+sand piles up, and the magnet&#39;s grip on the ball is at its weakest because the
+carriage is fully extended. Patterns that run right to the rim are where balls
+stall and lose the plot. Clipping to 0.95 leaves a working margin.</p>
+<p>Rectangular profiles set the equivalent value to 1.0 because the concept does
+not apply — bounds are the bed dimensions, and clipping happens against those.</p>
+<h2>Which should you care about?</h2>
+<p>Mostly, you should not have to. Choose your table and SandPath emits the right
+format with the right constraints.</p>
+<p>The one moment it matters is when you are buying. If a pattern library you care
+about matters to you, circular tables and theta-rho give you a collection that
+survives an upgrade. That is a genuine, if minor, point in their favour — and
+one nobody mentions in a product listing.</p>
+<p>Ready to convert something? <a href="/tools/sandpath/">Open the converter</a>, or see
+<a href="/tools/sandpath/supported-tables/">which tables are supported</a>.</p>
+<!-- /generated:content -->
+      </div>
+    </div>
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="sp-footer"></div>
+</body>
+</html>

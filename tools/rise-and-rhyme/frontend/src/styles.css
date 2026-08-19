@@ -1,0 +1,199 @@
+/* ═══════════════════════════════════════════════════════
+   Rise and Rhyme — Main app styles (Vite-processed)
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* Tool theme tokens — override the defaults here. */
+  --bg: #0b0d12;
+  --text: #d8d4cc;
+  --text-muted: #7a7770;
+  --text-dim: #4a4840;
+  --accent: #d4a44e;
+  --border: #252a35;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text);
+  --rf-muted: var(--text-muted);
+  --rf-dim: var(--text-dim);
+  --rf-accent: var(--accent);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-mono);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+/* Footer outer container; everything inside comes from tool-chrome.css. */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 24px;
+  text-align: center;
+}
+
+/* ── App UI ── */
+.tagline { color: var(--text-muted); max-width: 640px; margin: 8px 0 20px; }
+
+.notice {
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: rgba(212, 164, 78, 0.08);
+  padding: 14px 16px;
+  font-size: 0.92rem;
+  margin-bottom: 28px;
+  max-width: 720px;
+}
+.notice a { color: var(--accent); }
+
+.setup { max-width: 720px; }
+.setup h2 { margin-bottom: 16px; }
+
+.field { display: block; margin-bottom: 18px; border: 0; }
+.field__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.field__hint { display: block; font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; }
+
+.field__help { margin: -8px 0 18px; font-size: 0.85rem; }
+.field__help summary {
+  cursor: pointer;
+  color: var(--accent);
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+.field__help summary::-webkit-details-marker { display: none; }
+.field__help summary::marker { display: none; }
+.field__help summary::before { content: '▶'; font-size: 8px; transition: transform 0.15s ease; }
+.field__help[open] summary::before { transform: rotate(90deg); }
+.field__help ul { margin: 10px 0 0; padding-left: 20px; color: var(--text-muted); }
+.field__help li { margin-bottom: 6px; }
+.field__help p { margin-top: 10px; color: var(--text-dim); font-size: 0.8rem; }
+
+.field input[type="url"],
+.field input[type="time"],
+.field input[type="number"],
+.field select {
+  width: 100%;
+  padding: 10px 12px;
+  background: #12151d;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.field input:focus, .field select:focus { outline: 1px solid var(--accent); }
+
+.field-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.field-row .field { flex: 1 1 160px; }
+
+fieldset.field { padding: 0; }
+#rar-days label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 12px 0 0;
+  font-size: 0.9rem;
+}
+
+.field--toggle { display: flex; align-items: center; gap: 10px; }
+.field--toggle .field__label { margin-bottom: 0; }
+
+.actions { display: flex; gap: 12px; margin: 22px 0 8px; flex-wrap: wrap; }
+.btn {
+  padding: 10px 22px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { background: var(--accent); color: var(--bg); }
+.btn--primary { background: var(--accent); color: var(--bg); }
+.btn--primary:hover { filter: brightness(1.1); }
+
+.actions--inline { align-items: center; margin: 0 0 18px; }
+.btn--small { padding: 7px 16px; font-size: 0.82rem; }
+
+/* ── Calendar preview ── */
+.preview {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: #10131a;
+  font-size: 0.92rem;
+}
+.preview[hidden] { display: none; }
+.preview__caption {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.preview__list { list-style: none; margin: 0; padding: 0; }
+.preview__event {
+  display: flex;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.preview__event:last-child { border-bottom: 0; }
+.preview__time {
+  flex: 0 0 82px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+.preview__summary { color: var(--text); }
+.preview__empty, .preview__more { color: var(--text-muted); margin-top: 8px; }
+
+.status { min-height: 1.4em; color: var(--text); }
+.status--error { color: #e06c6c; }
+.schedule { font-size: 0.85rem; color: var(--text-dim); }
+
+/* ── Alarm overlay ── */
+.alarm {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 13, 18, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+.alarm[hidden] { display: none; }
+.alarm__inner { max-width: 640px; text-align: center; }
+.alarm__title { font-size: 2rem; color: var(--accent); margin-bottom: 24px; }
+.alarm__lyrics { margin-bottom: 32px; }
+.alarm__line {
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+  transition: color 0.3s;
+}
+.alarm__line--active { color: var(--text); font-weight: 600; }
+.alarm__actions { display: flex; gap: 16px; justify-content: center; }
+

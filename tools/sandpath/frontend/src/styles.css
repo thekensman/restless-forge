@@ -242,6 +242,36 @@ body {
 .seo-content strong { color: var(--sand); font-weight: 500; }
 
 /* ─── NOSCRIPT FALLBACK ────────────────────────────── */
+/* ─── Explanatory content below the converter ───
+   This used to live inside <noscript>, where neither a reader nor a
+   JS-rendering crawler ever saw it: 158 of the page's 443 words were
+   effectively invisible. It is a normal visible section now, and <noscript>
+   holds only the "you need JavaScript" notice it should have held all along. */
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 0;
+  color: var(--text);
+  line-height: 1.75;
+}
+.content h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--text-bright);
+  margin: 2rem 0 0.75rem;
+}
+.content h2:first-child { margin-top: 0; }
+.content p { margin-bottom: 0.9rem; }
+.content ul { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.35rem; }
+.content code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9em;
+  color: var(--sand);
+}
+.content a { color: var(--sand); text-decoration: none; border-bottom: 1px solid transparent; }
+.content a:hover { border-bottom-color: var(--sand); }
+
 .noscript-content {
   background: var(--bg-raised); border-radius: var(--radius-lg);
   padding: 2rem; color: var(--text); line-height: 1.7;

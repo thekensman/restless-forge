@@ -99,6 +99,34 @@ img { max-width: 100%; height: auto; }
   color: var(--accent);
 }
 
+/* ── Site nav on small screens ──
+   Six links in a fixed-height flex row do not fit a 360px phone: the row was
+   315px wide inside a 360px viewport with a brand beside it, so it pushed the
+   page 68px past the viewport and gave every global page a horizontal
+   scrollbar. Scrolling right then showed the empty margin beyond the content
+   column, which is what a phone reader actually noticed.
+
+   Stack instead of collapse: the tool pages use a hamburger because their
+   nav is long and tool-specific, but six short global links fit two rows and
+   a menu you have to open is worse than one you can already see. Height goes
+   auto so the second row is not clipped. */
+@media (max-width: 640px) {
+  .site-nav__inner {
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 1rem;
+  }
+
+  .site-nav__links {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .site-nav__links a { font-size: 0.72rem; }
+}
+
 /* ── Hero / Header ── */
 .hero {
   text-align: center;
@@ -177,6 +205,157 @@ img { max-width: 100%; height: auto; }
   line-height: 1.7;
 }
 
+/* ── Ad slot (site-global prose pages) ──
+   One slot, below the content, above the footer. The rule the placement
+   follows: an ad may sit at the end of what you came to read, never between
+   you and it. The separator and label exist so the unit reads as an ad rather
+   than as more of the article — AdSense requires that ads not be confused
+   with content, and it is the honest presentation regardless. */
+.ad-slot {
+  max-width: var(--max-width);
+  margin: 3rem auto 0;
+  padding: 1.5rem 1.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.ad-slot__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Rail ads (sticky left/right, wide screens only) ──
+   Same contract the tool pages use: 160x600 fixed to the viewport, and
+   `display: none` until there is genuinely dead margin to put them in. The
+   breakpoint is not cosmetic — the content column is var(--max-width) (960px)
+   centered, so at 1540px each margin is 290px and a 160px rail inset 12px
+   still clears the text by ~118px. Below that the rails would crowd or overlap
+   the prose, which is the one thing a reading page cannot trade away.
+   Prose pages only: these belong beside an essay, not beside an index. */
+.ad-rail {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  z-index: 50;
+  display: none;
+}
+
+.ad-rail--left { left: 12px; }
+.ad-rail--right { right: 12px; }
+
+@media (min-width: 1540px) {
+  .ad-rail { display: block; }
+}
+
+/* ── Figures (essay + article images with visible captions) ──
+   Markdown images render as a bare <img>, so prose that needs a caption uses
+   a raw <figure> block. The global `img { max-width: 100% }` reset already
+   prevents overflow; these rules give the image room and style the caption. */
+/* Asymmetric on purpose: the caption belongs to the image above it, so the
+   gap below the figure has to be clearly larger than the gap above the
+   caption, or the caption reads as the opening line of the next paragraph. */
+.page figure {
+  margin: 2.5rem 0 3.5rem;
+  text-align: center;
+}
+
+/* Cap the WIDTH, not the height, to limit how much screen one picture takes.
+   Uncapped, a square photo fills the 912px column and renders 914px tall — the
+   sand table shot made a reader scroll through a page of photograph to reach
+   the next sentence. At 640px it lands at 641px tall.
+
+   The two obvious alternatives are both wrong, and quietly:
+     max-height alone           → the browser clamps height without narrowing
+                                  width, so every non-4:3 image is distorted
+                                  (the square sand photo squashed to 912x640).
+     max-height + width: auto   → ratio is correct, but an explicit `width`
+                                  overrides the aspect-ratio box the intrinsic
+                                  width/height attributes provide, so nothing
+                                  is reserved before load and all four images
+                                  shift by ~640px each.
+   max-width does both jobs: ratio preserved, box still reserved, 0px shift.
+   Verified in Chromium with the image requests held open.
+
+   min(100%, 640px), not a bare 640px: this selector is more specific than the
+   global `img { max-width: 100% }` reset, so a bare cap REPLACED that reset
+   and every figure overflowed a 360px phone — a 640px image on a 360px screen
+   gave the whole page a horizontal scrollbar. The cap has to be the smaller of
+   the two, never just the pixel value. */
+.page figure img {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: block;
+  margin: 0 auto;
+  max-width: min(100%, 640px);
+}
+
+.page figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin-top: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+/* ── Unfilled ad units take up no space ──
+   AdSense stamps data-ad-status="unfilled" on an <ins> it had no ad for. The
+   slot's chrome (border, padding, the "Advertisement" label) would otherwise
+   render around nothing — a labelled empty band above the footer, and two
+   empty 160x600 columns beside the text. That is the whole page before an
+   account is approved, and it recurs for real whenever a unit goes unfilled. */
+.ad-slot:has(ins[data-ad-status="unfilled"]),
+.ad-rail:has(ins[data-ad-status="unfilled"]) {
+  display: none;
+}
+
+/* The two rules above only know about OUR containers. Auto Ads injects its own
+   <ins> into wrappers we never wrote, so an unfilled one keeps its reserved
+   height and shows as a blank band. This catches those too. It is a backstop,
+   not a substitute for leaving Auto Ads switched off in the AdSense console —
+   we place ads deliberately, and an injected unit is one we did not choose. */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+
+/* ── Sites I Like (friends/recommendations list) ── */
+.friends-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.friends-list__item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.friends-list__item:last-child { border-bottom: none; }
+
+.friends-list__link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.friends-list__link:hover { text-decoration: underline; }
+
+.friends-list__desc {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
 /* ── Tool Cards ── */
 .tools-grid {
   display: grid;
@@ -236,6 +415,24 @@ img { max-width: 100%; height: auto; }
 .tool-card__link:hover {
   background: var(--accent);
   color: var(--bg);
+}
+
+/* Cloud-assisted tier: tools that use server-side processing carry a badge
+   so the browser-only default stays visibly the norm. */
+.tool-card--cloud {
+  position: relative;
+  border-color: var(--accent-cloud, #50b8d0);
+}
+
+.tool-card__badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-cloud, #50b8d0);
 }
 
 /* ── Essay Cards ── */
@@ -396,4 +593,25 @@ img { max-width: 100%; height: auto; }
   .hero { padding: 3rem 1rem 2rem; }
   .tools-grid { grid-template-columns: 1fr; }
   .support-links { flex-direction: column; align-items: center; }
+}
+
+/* ─── Tool directory (data-driven) ─── */
+.tool-search {
+  width: 100%; max-width: 420px; display: block; margin: 0 0 1.5rem;
+  font-family: inherit; font-size: 0.95rem; padding: 0.6rem 0.9rem;
+  background: var(--bg-raised, #151820); color: inherit;
+  border: 1px solid var(--border, #252a35); border-radius: 6px; outline: none;
+}
+.tool-search:focus { border-color: var(--accent, #d4a44e); }
+.tool-directory__category {
+  margin: 2rem 0 0.75rem; font-size: 0.85rem; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--accent, #d4a44e);
+}
+.tool-directory__teaser {
+  margin-top: 2rem; font-style: italic; color: var(--text-dim, #7a7770);
+}
+/* Markdown-generated article rules (essays): style the semantic <hr> the
+   content pipeline emits, instead of inline styles in prose. */
+.page article hr {
+  border: none; border-top: 1px solid var(--border, #252a35); margin: 3rem 0;
 }

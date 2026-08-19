@@ -13,16 +13,18 @@ scripts/new-tool.sh tattoo-safe "TattooSafe" ts 5175 "🛡️"
 ```
 
 This copies `tools/template/frontend/` to `tools/<tool-name>/frontend/`,
-replaces every placeholder, and runs `npm install`. It prints the remaining
-manual wiring at the end:
+replaces every placeholder, and runs `npm install`. build.sh, the root
+dev/test scripts, and the root vite proxy discover the new tool
+automatically — the only manual steps are:
 
-1. **build.sh** — add the tool to the build + cache-bust section.
-2. **Root `package.json`** — add the tool to the `concurrently` list in the
-   `dev` script and to the root `test` script; optionally add a `dev:<prefix>`
-   alias.
-3. **Root `vite.config.ts`** — add the proxy entry.
-4. **site/index.html + site/tools/index.html** — add a tool card.
-5. **site/sitemap.xml** — add the tool URLs.
+1. **site/tools-data.js** — add the tool entry with `status: "soon"`;
+   flip to `"live"` to publish (label, category, and description live
+   ONLY there — both hub pages render from it).
+2. **Remove `noindex`** — the template ships every HTML page with
+   `<meta name="robots" content="noindex">` so unfinished tools that are
+   deployed but unlisted don't get crawled as thin content. Delete that
+   line from every page under `src/` when the tool launches.
+3. **site/sitemap.xml** — add the tool URLs when it goes public.
 
 After the edits, `npm run dev` from repo root will start your new tool on
 the port you chose, proxied at `http://localhost:8080/tools/<tool-name>/`.
@@ -141,40 +143,18 @@ Every sub-page HTML file must contain:
 The absolute URLs are preserved through Vite's build via the sentinel
 `transformIndexHtml` plugins in `tools/vite-tool-config.ts`.
 
-### 5. Wire the tool into the monorepo
+### 5. Monorepo wiring — automatic
 
-**`build.sh`** — add two lines:
-
-```bash
-echo "[N/7] Building <Tool Label>..."
-build_vite_tool "<Tool Label>" "<tool-name>"
-
-# ...and in the cache-bust section:
-bust_cache "${DIST_DIR}/tools/<tool-name>" "/tools/<tool-name>"
-```
-
-**Root `package.json`** — add to `dev` and `test`:
-
-```json
-"dev": "concurrently ... \"npm run dev --prefix tools/<tool-name>/frontend\"",
-"test": "... && npm test --prefix tools/<tool-name>/frontend",
-"dev:<prefix>": "npm run dev --prefix tools/<tool-name>/frontend"
-```
-
-**Root `vite.config.ts`** — add a proxy entry:
-
-```ts
-"/tools/<tool-name>": {
-  target: "http://localhost:<port>",
-  changeOrigin: true,
-  ws: true,
-},
-```
+`build.sh`, root `npm run dev` / `npm test`, and the root vite proxy all
+discover tools from `tools/*/frontend/` via `scripts/tools.mjs` (each
+tool's port + base path are read from its own `vite.config.ts`). There is
+nothing to edit at the repo root when adding or removing a tool.
 
 ### 6. Add to the site
 
-- Tool cards in `site/index.html` and `site/tools/index.html`.
-- URLs in `site/sitemap.xml`.
+- Add the tool entry to `site/tools-data.js` (the single source of truth
+  for label/category/description/status — hub pages render from it).
+- URLs in `site/sitemap.xml` when it goes public.
 
 ---
 

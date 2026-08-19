@@ -1,0 +1,22 @@
+{
+  "name": "ForgeInvoice",
+  "short_name": "ForgeInvoice",
+  "description": "Professional invoices with live preview and PDF download. Saved in your browser, never on a server.",
+  "start_url": "/tools/forgeinvoice/",
+  "scope": "/tools/forgeinvoice/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/forgeinvoice/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/forgeinvoice/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

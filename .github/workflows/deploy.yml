@@ -1,0 +1,425 @@
+name: Deploy
+
+# Deploys dist/ to the production VPS on every push to main.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST     VPS hostname or IP (e.g. sandpath-01 public IP)
+#   DEPLOY_USER     SSH user with write access to the web root
+#   DEPLOY_SSH_KEY  Private key (PEM) for that user — generate a dedicated
+#                   keypair: `ssh-keygen -t ed25519 -f deploy_key -N ""`,
+#                   append deploy_key.pub to ~/.ssh/authorized_keys on the
+#                   VPS, paste deploy_key here.
+#   DEPLOY_PATH     Web root, e.g. /var/www/restless-forge
+#   ANTHROPIC_API_KEY  Claude API key for the backend service. Written to
+#                   /etc/restless-forge/api.env on the FIRST deploy only —
+#                   the file is never overwritten, so key rotation and other
+#                   ops edits happen on the server, not in this workflow.
+#
+# Optional secrets (monitoring — see docs/backend.md § Monitoring the bill):
+#   RF_METRICS_TOKEN   Shared secret that unlocks the spend figures on
+#                   /health. Set the SAME value here and in api.env; the
+#                   health-check workflow reads it to alert on the Anthropic
+#                   bill. Unset = uptime monitoring only, no spend alerts.
+#   ALERT_WEBHOOK_URL  Chat webhook the API posts to in real time when the
+#                   daily spend cap is neared/hit or the circuit breaker opens.
+# Both are seeded into api.env on a first deploy only; on a droplet that is
+# already running, add them to /etc/restless-forge/api.env by hand and restart.
+#
+# Deploys static files, the backend API (backend/ → /opt/restless-forge,
+# outside the web root, with venv refresh + systemd restart), AND the main
+# nginx vhost. Static files are served
+# immediately with no reload; the nginx config is copied to
+# /etc/nginx/sites-available/restless-forge (the live vhost name — no
+# .conf suffix), validated with `nginx -t`, and only then reloaded. If
+# validation fails the previous config is restored and the workflow fails.
+# Requires DEPLOY_USER to be root (or able to write /etc/nginx and reload
+# nginx without a password prompt). The redirect vhosts
+# (nginx/*-redirect.conf) are not deployed automatically — they change
+# rarely and their live filenames vary; install those by hand.
+
+on:
+  push:
+    branches: [main]
+  # Manual runs from the Actions tab (e.g. re-deploy without a new commit).
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        # Full history: build.sh derives sitemap <lastmod> from each
+        # page's last commit date. A shallow clone has one commit, so
+        # every URL would report the same date and the script skips
+        # rather than emit that.
+        with:
+          fetch-depth: 0
+
+      # Fail fast with a readable message instead of dying cryptically at
+      # ssh-keyscan when the secrets aren't visible to this workflow.
+      # Secrets must be REPOSITORY secrets, or environment secrets on an
+      # environment named exactly `production` (this job pins that name).
+      - name: Check deploy secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.DEPLOY_HOST }}" ]    && missing="$missing DEPLOY_HOST"
+          [ -z "${{ secrets.DEPLOY_USER }}" ]    && missing="$missing DEPLOY_USER"
+          [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ] && missing="$missing DEPLOY_SSH_KEY"
+          [ -z "${{ secrets.DEPLOY_PATH }}" ]    && missing="$missing DEPLOY_PATH"
+          [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ] && missing="$missing ANTHROPIC_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Deploy secrets not visible to this workflow:$missing"
+            echo "::error::Add them under Settings → Secrets and variables → Actions as Repository secrets, or as Environment secrets on an environment named 'production'."
+            exit 1
+          fi
+          echo "All deploy secrets present."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build site
+        run: ./build.sh
+
+      - name: Run all tool test suites
+        run: npm test
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Run backend test suite
+        run: |
+          pip install -r backend/requirements.txt
+          python -m pytest backend/tests -q
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      # Verbose pre-flight so auth failures explain themselves instead of
+      # ending in a bare "Permission denied" from rsync. Prints the public
+      # fingerprint of the key the runner is offering (compare it against
+      # `ssh-keygen -lf ~/.ssh/authorized_keys` output on the server) and a
+      # -vv connection trace showing which auth methods the server allows.
+      # Reminder: for the root user, sshd reads /root/.ssh/authorized_keys —
+      # NOT /home/root/.ssh/authorized_keys.
+      - name: SSH diagnostics
+        run: |
+          echo "── DEPLOY_SSH_KEY sanity ──"
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /tmp/pubkey.out 2> /tmp/keyerr.out; then
+            echo "::error::DEPLOY_SSH_KEY does not parse as a private key (wrong file pasted, truncated, or passphrase-protected)."
+            cat /tmp/keyerr.out
+            exit 1
+          fi
+          echo "Private key parses OK. Fingerprint the server must have in authorized_keys:"
+          ssh-keygen -lf /tmp/pubkey.out
+          echo ""
+          echo "── connection attempt (verbose; debug2 noise filtered) ──"
+          set +e
+          ssh -vv -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'echo "CONNECTED as $(whoami)"; ls -ld "${{ secrets.DEPLOY_PATH }}"' 2>&1 | grep -vE "^debug2:"
+          rc=$?
+          set -e
+          if [ $rc -ne 0 ]; then
+            echo "::error::SSH authentication failed (see trace above: 'Offering public key' shows what we sent; 'Authentications that can continue' shows what the server will accept)."
+            exit $rc
+          fi
+
+      - name: Rsync dist to web root
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            dist/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+
+      # Backend API: code to /opt/restless-forge/backend (OUTSIDE the web
+      # root, so the dist rsync's --delete never touches it and nginx never
+      # serves .py files), venv refresh, env-file bootstrap (first deploy
+      # only — never overwritten), systemd unit install, restart, and a
+      # local health check that fails the workflow loudly if the service
+      # doesn't come up. The static site is unaffected by a backend failure.
+      - name: Deploy backend API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RF_METRICS_TOKEN: ${{ secrets.RF_METRICS_TOKEN }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        run: |
+          # rsync only creates the final path component itself, not missing
+          # parents — on a droplet where /opt/restless-forge has never been
+          # created, the mkdir inside rsync fails with "No such file or
+          # directory". Create the full path first so this works on both a
+          # fresh box and every deploy after.
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'mkdir -p /opt/restless-forge/backend'
+
+          rsync -az --delete \
+            --exclude '.venv' --exclude '__pycache__' --exclude '*.pyc' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            backend/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/restless-forge/backend/"
+
+          # Env file shipped separately and installed only if missing, so
+          # the key never appears on a remote command line and server-side
+          # ops edits (key rotation, cap changes) survive every deploy.
+          #
+          # Reminder: this only seeds a box that has NO api.env yet. On an
+          # already-deployed droplet, adding RF_METRICS_TOKEN / ALERT_WEBHOOK_URL
+          # is a manual edit — see docs/backend.md § Monitoring the bill.
+          umask 077
+          {
+            printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY"
+            if [ -n "$RF_METRICS_TOKEN" ]; then
+              printf 'RF_METRICS_TOKEN=%s\n' "$RF_METRICS_TOKEN"
+            fi
+            if [ -n "$ALERT_WEBHOOK_URL" ]; then
+              printf 'ALERT_WEBHOOK_URL=%s\n' "$ALERT_WEBHOOK_URL"
+            fi
+          } > /tmp/rf-api-incoming.env
+          scp -i ~/.ssh/deploy_key /tmp/rf-api-incoming.env \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/rf-api-incoming.env"
+          rm -f /tmp/rf-api-incoming.env
+
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" bash -s <<'REMOTE'
+          set -euo pipefail
+
+          # Python + venv (Ubuntu 24.04 ships python3, but venv is a package)
+          if ! python3 -m venv --help >/dev/null 2>&1; then
+            apt-get update -qq && apt-get install -y -qq python3-venv
+          fi
+          if [ ! -x /opt/restless-forge/venv/bin/pip ]; then
+            python3 -m venv /opt/restless-forge/venv
+          fi
+          /opt/restless-forge/venv/bin/pip install --quiet -r /opt/restless-forge/backend/requirements.txt
+
+          # Secrets/env: first deploy only — NEVER overwrite an existing file.
+          mkdir -p /etc/restless-forge
+          if [ -f /etc/restless-forge/api.env ]; then
+            rm -f /tmp/rf-api-incoming.env
+            echo "api.env already present — left untouched"
+          else
+            mv /tmp/rf-api-incoming.env /etc/restless-forge/api.env
+            chown root:www-data /etc/restless-forge/api.env
+            chmod 640 /etc/restless-forge/api.env
+            echo "api.env installed"
+          fi
+
+          # SQLite state dir (survives deploys; outside the rsync targets)
+          mkdir -p /var/lib/restless-forge
+          chown www-data:www-data /var/lib/restless-forge
+
+          # systemd unit: skip if unchanged, else install + daemon-reload
+          UNIT_SRC=/opt/restless-forge/backend/restless-forge-api.service
+          UNIT_DST=/etc/systemd/system/restless-forge-api.service
+          if [ ! -f "$UNIT_DST" ] || ! cmp -s "$UNIT_SRC" "$UNIT_DST"; then
+            cp "$UNIT_SRC" "$UNIT_DST"
+            systemctl daemon-reload
+            echo "systemd unit installed/updated"
+          fi
+          # Exactly one start action — `enable --now` plus a following
+          # `restart` used to both try to bind :8000 at once, crash-looping
+          # the unit on "address already in use" until systemd's automatic
+          # retry recovered a few seconds later, past the health-check
+          # window below. Enable (without starting) once, then always use
+          # `restart`, which starts a not-yet-running unit just as well.
+          systemctl enable restless-forge-api >/dev/null 2>&1 || true
+
+          # Nothing else on this box should ever hold 127.0.0.1:8000. If a
+          # past crash left an orphaned process squatting on it (systemd's
+          # cgroup-kill can miss a detached child), every restart fails
+          # immediately with "address already in use" and — since
+          # RestartSec=5 never trips the default burst limiter — keeps
+          # crash-looping forever instead of giving up. Clear the port and
+          # the unit's failure state unconditionally before restarting, so
+          # a stuck deploy is self-healing instead of requiring a manual
+          # SSH intervention.
+          if command -v fuser >/dev/null 2>&1; then
+            fuser -k 8000/tcp 2>/dev/null || true
+          else
+            pid=$(ss -ltnpH 'sport = :8000' 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -1) || true
+            [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null || true
+          fi
+          sleep 1
+          systemctl reset-failed restless-forge-api 2>/dev/null || true
+          systemctl restart restless-forge-api
+
+          # Local health check — fail loudly if the service didn't come up.
+          ok=""
+          for i in 1 2 3 4 5; do
+            sleep 2
+            if curl -sf http://127.0.0.1:8000/api/v1/rise-and-rhyme/health >/dev/null; then
+              ok=1; break
+            fi
+          done
+          if [ -z "$ok" ]; then
+            echo "::error::backend health check FAILED after restart — static site is unaffected, but /api is down"
+            echo "── what's actually bound to :8000 ──"
+            ss -ltnp 'sport = :8000' || true
+            systemctl --no-pager -l status restless-forge-api || true
+            journalctl -u restless-forge-api -n 40 --no-pager || true
+            exit 1
+          fi
+          echo "backend healthy"
+          REMOTE
+
+      # Ship the main vhost config with the same safety net an operator
+      # would use by hand: skip if unchanged, back up, `nginx -t`, reload
+      # only on a clean test, restore the backup on failure.
+      - name: Deploy nginx config
+        run: |
+          scp -i ~/.ssh/deploy_key nginx/restless-forge.conf \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/rf-nginx-incoming.conf"
+          ssh -i ~/.ssh/deploy_key \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" bash -s <<'REMOTE'
+          set -euo pipefail
+          TARGET=/etc/nginx/sites-available/restless-forge
+          INCOMING=/tmp/rf-nginx-incoming.conf
+          if [ -f "$TARGET" ] && cmp -s "$INCOMING" "$TARGET"; then
+            echo "nginx config unchanged — skipping reload"
+            rm -f "$INCOMING"
+            exit 0
+          fi
+          BACKUP=""
+          if [ -f "$TARGET" ]; then
+            BACKUP=/tmp/rf-nginx-backup.$(date +%s).conf
+            cp -a "$TARGET" "$BACKUP"
+            echo "backed up current config to $BACKUP"
+          fi
+          mv "$INCOMING" "$TARGET"
+          if nginx -t; then
+            systemctl reload nginx
+            echo "nginx config deployed and reloaded"
+          else
+            echo "nginx -t FAILED — restoring previous config"
+            if [ -n "$BACKUP" ]; then
+              mv "$BACKUP" "$TARGET"
+              nginx -t && systemctl reload nginx || true
+            fi
+            exit 1
+          fi
+          REMOTE
+
+      - name: Verify deploy
+        run: |
+          curl -sf -o /dev/null https://restless-forge.dev/ && echo "homepage OK"
+
+          # ── Backend API through nginx + Cloudflare ──
+          if curl -sf https://restless-forge.dev/api/v1/rise-and-rhyme/health | grep -q '"status"'; then
+            echo "api health OK"
+          else
+            echo "::error::/api/v1/rise-and-rhyme/health is not reachable through the public URL (backend or nginx /api/ location problem)"
+            exit 1
+          fi
+
+          # ── Content freshness: served bytes must equal what we shipped ──
+          # Catches every stale-cache layer at once (CDN, proxy, stale web
+          # root) because it compares hashes, not just status codes.
+          for f in favicon.ico favicon.svg og-image.png; do
+            local_hash=$(md5sum "dist/$f" | cut -d' ' -f1)
+            served_hash=$(curl -sf "https://restless-forge.dev/$f" | md5sum | cut -d' ' -f1)
+            if [ "$local_hash" = "$served_hash" ]; then
+              echo "$f content matches build ($local_hash)"
+            else
+              echo "::warning::$f served from the public URL differs from the build (built $local_hash, served $served_hash) — a CDN/proxy between users and nginx is answering with a cached copy. If the domain is behind Cloudflare (orange cloud), purge the cache or set a cache rule to respect origin headers."
+            fi
+          done
+
+          # ── Brand-asset cache header (24h, not 1y immutable) ──
+          # Retry briefly: `systemctl reload nginx` is graceful, so the first
+          # request after the reload can still land on an old worker.
+          ok=""
+          for i in 1 2 3; do
+            cc=$(curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r' | grep -i '^cache-control:' || true)
+            case "$cc" in
+              *max-age=86400*) ok=1; break ;;
+            esac
+            sleep 4
+          done
+          echo "favicon.ico $cc"
+          if [ -n "$ok" ]; then
+            echo "brand-asset cache header OK"
+          else
+            echo "── full response headers for diagnosis ──"
+            curl -sfI https://restless-forge.dev/favicon.ico | tr -d '\r'
+            echo "::warning::favicon.ico is not serving the 24h cache header. If the headers above include 'server: cloudflare' or 'cf-cache-status', a CDN is caching the old response — purge it. Otherwise check on the VPS that /etc/nginx/sites-enabled/restless-forge is a symlink to sites-available (ls -l), not a stale copy."
+          fi
+
+          # ── Every sitemap URL must be live and must agree with itself ──
+          #
+          # check-links already gates CI, but it judges dist/ by whether a file
+          # exists, hand-modelling nginx's try_files chains. That is structurally
+          # blind to anything nginx decides at request time, and one such thing
+          # cost us four pages: /tools/holopath/about finds about/index.html on
+          # disk and passed for months, while production 301'd it. So the sitemap
+          # advertised /tools/holopath/about/ and the page's own canonical named
+          # /tools/holopath/about — Google was invited to a URL, served 200, told
+          # its real address was elsewhere, and redirected back to where it
+          # started. Combined with the earlier canonical→404 bug, that is two
+          # variants of the same drift, both invisible offline and both surfacing
+          # weeks later as "Crawled — currently not indexed".
+          #
+          # The fix is not a better offline model of nginx — that is the very
+          # fragility that produced the bug. It is one real request per URL
+          # against the real origin, here, where HTTP status is a fact.
+          echo "── sitemap sweep ──"
+          sitemap=$(curl -sf --max-time 30 https://restless-forge.dev/sitemap.xml) || {
+            echo "::error::sitemap sweep: could not fetch sitemap.xml"; exit 1;
+          }
+          locs=$(printf '%s' "$sitemap" | grep -o '<loc>[^<]*</loc>' | sed 's|</\?loc>||g' || true)
+          total=$(printf '%s\n' "$locs" | grep -c . || true)
+          if [ "${total:-0}" -eq 0 ]; then
+            echo "::error::sitemap sweep: sitemap.xml contains no <loc> entries"; exit 1
+          fi
+
+          fails=""
+          for loc in $locs; do
+            body=$(curl -sS --max-time 20 -w '\n__STATUS__%{http_code}' "$loc" 2>/dev/null) || {
+              fails="${fails}  ${loc} — request failed"$'\n'; continue;
+            }
+            status=${body##*__STATUS__}
+            if [ "$status" != "200" ]; then
+              fails="${fails}  ${loc} — HTTP ${status}"$'\n'
+              continue
+            fi
+            # `|| true` on each extraction: a page missing the tag makes grep
+            # exit 1, which would abort the whole step under -e/pipefail.
+            canonical=$(printf '%s' "$body" | grep -o '<link[^>]*rel="canonical"[^>]*>' | head -1 \
+              | grep -o 'href="[^"]*"' | sed 's/href="//;s/"$//' || true)
+            ogurl=$(printf '%s' "$body" | grep -o '<meta[^>]*property="og:url"[^>]*>' | head -1 \
+              | grep -o 'content="[^"]*"' | sed 's/content="//;s/"$//' || true)
+            if [ -z "$canonical" ]; then
+              fails="${fails}  ${loc} — no rel=canonical"$'\n'
+            elif [ "$canonical" != "$loc" ]; then
+              fails="${fails}  ${loc} — canonical says ${canonical}"$'\n'
+            fi
+            if [ -n "$ogurl" ] && [ "$ogurl" != "$loc" ]; then
+              fails="${fails}  ${loc} — og:url says ${ogurl}"$'\n'
+            fi
+          done
+
+          # This one fails rather than warns. The warnings above are the
+          # cache-sensitive checks, where a CDN can legitimately answer stale;
+          # HTML is served no-cache, so what we read here is the live page and a
+          # mismatch is a real defect. The site is already deployed by now, so
+          # failing is an alarm, not a rollback.
+          if [ -n "$fails" ]; then
+            echo "── mismatches ──"
+            printf '%s' "$fails"
+            echo "::error::sitemap sweep failed over ${total} URLs — a sitemap URL is unreachable, or a page's canonical/og:url disagrees with the URL the sitemap advertises. Google prefers the canonical, so a mismatch de-indexes the advertised URL. Details above."
+            exit 1
+          fi
+          echo "sitemap sweep OK — ${total} URLs, all 200, canonical and og:url self-consistent"

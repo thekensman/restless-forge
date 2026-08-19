@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d14">
+  <title>Pricing Calculator — TattooSafe</title>
+  <meta name="description" content="Free tattoo pricing estimator based on size, style, placement, and artist experience.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/tattoosafe/pricing/">
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/tattoosafe/favicon.svg">
+  <link rel="icon" href="/tools/tattoosafe/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/tattoosafe/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/tattoosafe/site.webmanifest">
+  <meta property="og:title" content="Pricing Calculator — TattooSafe">
+  <meta property="og:url" content="https://restless-forge.dev/tools/tattoosafe/pricing/">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/tattoosafe/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/tattoosafe/shared.js"></script>
+</head>
+<body>
+  <div id="ts-header"></div>
+  <main>
+    <h1>Tattoo Pricing Calculator</h1>
+    <p class="page-sub">Estimate your tattoo cost based on dimensions, style, placement, and artist experience level.</p>
+
+      <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>Almost nobody quotes a tattoo by the piece. Artists quote by the hour, and the
+number of hours comes from size, style, and where on your body the work goes.
+Once you know how those three inputs turn into time, a quote stops feeling
+arbitrary and you can tell a fair one from a bad one.</p>
+<p>This page documents exactly what TattooSafe&#39;s estimator does, including the
+numbers it uses, so you can check its reasoning rather than trust it.</p>
+<h2>The chain: area to time to money</h2>
+<p>Everything starts with <strong>area</strong>, not with the longest dimension. A tattoo twice
+as wide and twice as tall is four times the work, which is why &quot;just make it a
+bit bigger&quot; changes a quote so much more than people expect.</p>
+<p>Area in square inches is multiplied by a <strong>time-per-square-inch</strong> rate for the
+style, then by a <strong>placement multiplier</strong>, giving needle time. Setup time and
+breaks are added. Finally, hours are multiplied by the artist&#39;s hourly rate.</p>
+<h2>Style: the largest single multiplier</h2>
+<table>
+<thead>
+<tr>
+<th>Style</th>
+<th>Minutes per sq in</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Simple line work — outlines, script, minimal shading</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Moderate detail — shading, dotwork, small fills, traditional</td>
+<td>15</td>
+</tr>
+<tr>
+<td>Full colour — colour fills, blending, neo-traditional</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Photorealistic / portrait — hyper-detail, cover-ups</td>
+<td>40</td>
+</tr>
+</tbody></table>
+<p>The spread from simple line work to photorealism is <strong>five times</strong>. This single
+choice moves a quote more than anything else, which is why an artist&#39;s first
+question is usually about style rather than size.</p>
+<p>The reason is packing density. Line work lays down one pass. Colour and realism
+require repeated passes over the same skin — building tone, blending edges,
+letting areas rest — so each square inch is worked several times over.</p>
+<h2>Placement: difficulty, not just pain</h2>
+<p>Placement carries a multiplier from 1.0 to 1.4:</p>
+<table>
+<thead>
+<tr>
+<th>Multiplier</th>
+<th>Placements</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.0</td>
+<td>Upper arm, inner/outer forearm, thigh, upper back</td>
+</tr>
+<tr>
+<td>1.05</td>
+<td>Shoulder, calf, lower back</td>
+</tr>
+<tr>
+<td>1.1–1.15</td>
+<td>Chest, wrist</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>Ankle, back of neck</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>Behind ear</td>
+</tr>
+<tr>
+<td>1.35</td>
+<td>Ribs, sternum</td>
+</tr>
+<tr>
+<td>1.4</td>
+<td>Back of hand</td>
+</tr>
+</tbody></table>
+<p>These track working difficulty, which correlates with pain but is not the same
+thing. Ribs and sternum are slow because the surface curves in two directions
+over bone that moves with every breath. Hands are the highest multiplier because
+the skin is thin, mobile, and full of tendons. A flat, fleshy, stationary
+surface like an outer thigh is simply faster to work on.</p>
+<p>Pain matters for a different reason: it determines how long you can sit. A
+high-pain placement means more breaks, and breaks are billed time.</p>
+<h2>Artist rate</h2>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Hourly</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Apprentice (learning)</td>
+<td>$80–120</td>
+</tr>
+<tr>
+<td>Experienced (3–8 yrs)</td>
+<td>$120–200</td>
+</tr>
+<tr>
+<td>Specialist / award-winning</td>
+<td>$200–350</td>
+</tr>
+<tr>
+<td>Celebrity / high-demand</td>
+<td>$350–500+</td>
+</tr>
+</tbody></table>
+<p>Rate is not a proxy for quality alone — it reflects demand and waiting list as
+much as skill. A specialist may also be faster, so a higher hourly rate does not
+always mean a proportionally higher total.</p>
+<h2>Sessions, setup, and breaks</h2>
+<p>Estimated time is not just needle time:</p>
+<ul>
+<li><strong>Setup</strong> adds a flat 30 minutes: stencil placement, positioning, equipment.</li>
+<li><strong>Breaks</strong> add roughly 5 minutes per hour.</li>
+<li><strong>Sessions cap at 6 hours.</strong> Past that, work is split — skin swells, and both
+of you get tired in ways that show in the result.</li>
+</ul>
+<p>Multi-session work usually costs slightly more in total than the same hours in
+one sitting, because each session carries its own setup and its own healing gap.</p>
+<h2>Shop minimums</h2>
+<p>Most shops have a minimum charge, typically <strong>$50–150</strong>, regardless of how small
+the piece is. A one-inch symbol that takes twelve minutes still costs the
+minimum. This covers a fresh needle, fresh ink caps, sterilised equipment, and
+the booking slot — real costs that do not scale down.</p>
+<p>If your estimate lands below the minimum, expect to pay the minimum.</p>
+<h2>What the estimate does not include</h2>
+<ul>
+<li><strong>Design time.</strong> Custom drawing is often billed separately or as a deposit.</li>
+<li><strong>Touch-ups.</strong> Many artists include one free; some do not.</li>
+<li><strong>Tip.</strong> Customary in many places, typically 15–20%.</li>
+<li><strong>Regional variation.</strong> Rates in a major city can be double a small town&#39;s.</li>
+<li><strong>Cover-ups and reworks.</strong> These are consistently underestimated — working
+over existing ink is slower than working on clean skin.</li>
+</ul>
+<h2>Using an estimate well</h2>
+<p>Treat the number as a range to sanity-check a quote, not as a price to negotiate
+toward. If a quote comes in far above the estimate, the useful question is not
+&quot;why so expensive&quot; but &quot;what about this piece takes longer than I&#39;m picturing&quot; —
+the answer is usually complexity or placement, and it is usually correct.</p>
+<p>If a quote comes in far <em>below</em>, be careful. Underpricing tends to mean an
+apprentice, a rushed session, or a shop cutting corners somewhere you cannot
+see.</p>
+<p>Ready to estimate? Open the <a href="/tools/tattoosafe/">TattooSafe preview tool</a> for
+the full experience including camera preview and size checking against 16 body
+placements.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="ts-footer"></div>
+</body>
+</html>

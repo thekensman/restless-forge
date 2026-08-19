@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>Why Your Resume Should Be Plain Text First</title>
+  <meta name="description" content="An applicant tracking system reads text, not layout. What survives parsing, what does not, and why the pretty version is the second draft.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeresume/articles/why-plain-text-comes-first/">
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeresume/favicon.svg">
+  <link rel="icon" href="/tools/forgeresume/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeresume/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeresume/site.webmanifest">
+  <meta property="og:title" content="Why Your Resume Should Be Plain Text First">
+  <meta property="og:description" content="An applicant tracking system reads text, not layout. What survives parsing, what does not, and why the pretty version is the second draft.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeresume/articles/why-plain-text-comes-first/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeresume/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/forgeresume/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeresume/shared.js"></script>
+</head>
+<body>
+  <div id="fr-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/forgeresume/articles/">← Articles</a></p>
+    <h1>Why Your Resume Should Be Plain Text First</h1>
+    <p class="page-sub">An applicant tracking system reads text, not layout. What survives parsing, what does not, and why the pretty version is the second draft.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>A resume is two documents wearing one name. There is the thing a person looks
+at — layout, hierarchy, typography — and the thing a machine extracts, which is
+a flat stream of text with all of that thrown away.</p>
+<p>Design for the second one first. The first one is easier to fix afterwards.</p>
+<h2>What parsing actually does</h2>
+<p>When a resume reaches an applicant tracking system, something extracts text from
+the PDF and tries to identify sections: contact details, experience, education,
+skills. The extractor sees glyphs positioned on a page. It does not see your
+intent.</p>
+<p>That gap is where resumes get mangled, and the failure mode is quiet — you will
+never be told your resume parsed badly. You will just not hear back.</p>
+<h2>What survives, and what does not</h2>
+<p><strong>Survives reliably:</strong> a single column of text, standard section headings,
+ordinary dates, plain bullet points, common fonts.</p>
+<p><strong>Frequently destroyed:</strong></p>
+<ul>
+<li><strong>Multi-column layouts.</strong> A two-column design can extract as either column
+interleaved line by line, producing text that reads like two documents
+shuffled together. This is the single most damaging layout choice.</li>
+<li><strong>Text in headers and footers.</strong> Some extractors skip them entirely. Putting
+your phone number in the header is a real way to become uncontactable.</li>
+<li><strong>Text inside images or icons.</strong> Invisible. A skills section built from
+graphical rating bars conveys nothing at all.</li>
+<li><strong>Tables.</strong> Sometimes fine, sometimes flattened into cell contents in an
+unpredictable order.</li>
+<li><strong>Creative section headings.</strong> &quot;Where I&#39;ve Been&quot; instead of &quot;Experience&quot; means
+the parser cannot classify the section. It may still capture the text, but
+loses the structure.</li>
+</ul>
+<h2>Why ForgeResume builds text first</h2>
+<p>The tool produces a plain-text representation of your resume before it produces
+a PDF, and the ATS score runs against that text rather than against the rendered
+document.</p>
+<p>That ordering is deliberate. Scoring the visual output would be scoring the
+wrong artifact — what a screening system sees is the text stream, so that is
+what should be measured. It also means the score does not change when you change
+the styling, which is correct: styling does not change your keywords.</p>
+<p>You can read the plain-text version. It is worth doing once, because it is
+approximately what a machine sees, and it is often less complete than people
+expect.</p>
+<h2>Practical rules</h2>
+<p><strong>One column.</strong> Whatever it costs you visually, it is worth it. Multi-column
+resumes look designed and parse badly, and the parse happens first.</p>
+<p><strong>Boring headings.</strong> Experience. Education. Skills. Projects. This is a place
+where distinctiveness has no upside.</p>
+<p><strong>Contact details in the body</strong>, at the top, as ordinary text — not in the page
+header.</p>
+<p><strong>Dates in a consistent, obvious format.</strong> <code>Jan 2023 – Mar 2025</code> throughout.
+Mixing formats makes date-range extraction unreliable, and date ranges are how
+systems compute your years of experience.</p>
+<p><strong>No text in graphics.</strong> If a skill rating is a bar chart, the skill does not
+exist as far as parsing is concerned.</p>
+<p><strong>Standard fonts, embedded.</strong> Exotic fonts can extract as garbage or as nothing.</p>
+<p><strong>PDF, unless told otherwise.</strong> It preserves layout and parses acceptably when
+built properly. Send <code>.docx</code> when a posting explicitly asks for it — some older
+systems genuinely handle it better.</p>
+<h2>The part where this advice has limits</h2>
+<p>Plenty of people get hired with two-column resumes and unusual headings, because
+plenty of hiring processes involve a human opening a file. In design fields, a
+visually flat resume can actively work against you.</p>
+<p>The honest framing is risk, not rule. Single-column, plainly-labelled resumes
+have a much lower chance of failing badly at the parsing step. If you know your
+resume is going straight to a person — a referral, a small company, a direct
+email — that risk is close to zero and you can optimise for the reader instead.</p>
+<p>When you do not know, and often you do not, the boring version is the safer bet.</p>
+<h2>The order that works</h2>
+<ol>
+<li>Get the content right — what you did, what changed because you did it.</li>
+<li>Check it as plain text. Read what a machine would read.</li>
+<li>Run the <a href="/tools/forgeresume/articles/what-an-ats-score-actually-measures/">ATS keyword
+check</a>
+against the specific posting and fix genuine omissions.</li>
+<li><em>Then</em> make it look good, within the constraints above.</li>
+</ol>
+<p>Most people do this in reverse, spend their effort on step four, and never
+discover that step two was broken.</p>
+<p>Ready to try it? <a href="/tools/forgeresume/">Open ForgeResume</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="fr-footer"></div>
+</body>
+</html>

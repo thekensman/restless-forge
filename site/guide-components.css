@@ -1,0 +1,233 @@
+/* guide-components.css — the styled blocks shared by a standalone guide page
+   and the site essay that borrows its body.
+   ==================================================================
+
+   WHY THIS FILE EXISTS
+
+   A guide can ship twice: as a bare, self-contained HTML page for external
+   communities, and as a normal essay wearing the site chrome. The prose is
+   single-sourced (the essay's front-matter borrows the standalone page's
+   <main> — see sync-content.mjs). These are the styles that both need.
+
+   HOW IT LAYERS — read before changing a selector
+
+   The standalone page keeps its own hardcoded copy of these rules in an inline
+   <style>, so it still renders if this file never arrives. This file is the
+   authoritative version and wins whenever it loads. Two properties make that
+   work with no build step and no reliance on load order:
+
+   1. SPECIFICITY. Every selector here is `main .thing` (0,1,1) against the
+      standalone page's bare `.thing` (0,1,0). Higher specificity wins wherever
+      it appears in the cascade, so this file does not care whether its <link>
+      comes before or after the inline <style>. Do not "simplify" these to bare
+      class selectors — that silently hands control back to the inline copy.
+      `main` also matches both hosts: <main class="page"> in the essay shell,
+      <main> in the standalone page.
+
+   2. CHAINED VARIABLE FALLBACKS. `var(--border, var(--line, #33291d))` reads
+      as: the site's token if present, else the standalone page's own token,
+      else a literal. The two define different palettes on purpose — the site
+      is cool and dark, the guide warmer — so one rule renders correctly in
+      both places and neither has to know about the other.
+
+   Adding a component: put it here first, then mirror it into the standalone
+   page's inline <style> using that page's own variable names. */
+
+/* ── Lede ── */
+main .lede {
+  font-size: 1.08rem;
+  color: var(--text, #ede7d8);
+}
+main .lede p { margin: 0 0 1.3rem; }
+main p.dim { color: var(--text-dim, #a89b83); }
+
+/* ── Numbered sections ── */
+main section.hat {
+  padding-top: 3.2rem;
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--border, var(--line, #33291d));
+  scroll-margin-top: 2rem;
+}
+main section.hat:first-of-type { border-top: none; margin-top: 1rem; }
+main section.hat p { margin: 0 0 1.15rem; color: var(--text, #ede7d8); }
+
+main .hat-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.6rem;
+  flex-wrap: wrap;
+}
+main .hat-head .tag {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent, var(--gold, #c9a15a));
+  border: 1px solid var(--border, rgba(201, 161, 90, 0.35));
+  border-radius: 3px;
+  padding: 0.25rem 0.55rem;
+}
+main .hat-head .hat-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--accent, var(--gold, #c9a15a));
+  opacity: 0.85;
+}
+main .hat-head h2 {
+  font-size: 1.9rem;
+  margin: 0;
+  color: var(--text-bright, var(--text, #ede7d8));
+}
+
+main h3.sub-head {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: var(--accent, var(--gold-bright, #e0bd7a));
+  margin: 2rem 0 0.9rem;
+  text-transform: none;
+}
+
+main .mono, main code {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.92em;
+}
+
+/* ── Do / Don't ── */
+main .dodont {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (max-width: 620px) { main .dodont { grid-template-columns: 1fr; } }
+main .dodont > div {
+  background: var(--bg-card, var(--bg-raised, #1e1a14));
+  border: 1px solid var(--border, var(--line, #33291d));
+  border-radius: var(--radius, 6px);
+  padding: 1.1rem 1.2rem;
+}
+main .dodont .do   { border-left: 3px solid var(--green, var(--accent-note, #8fae8a)); }
+main .dodont .dont { border-left: 3px solid var(--red, #a8695a); }
+main .dodont h4 {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 0.6rem;
+}
+main .dodont .do h4   { color: var(--green, var(--accent-note, #8fae8a)); }
+main .dodont .dont h4 { color: var(--red, #c98a7b); }
+main .dodont p, main .dodont ul {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-dim, #a89b83);
+}
+
+/* ── Reality-check callout ── */
+main .reality {
+  position: relative;
+  margin: 1.8rem 0;
+  padding: 1.1rem 1.3rem 1.1rem 1.4rem;
+  background: linear-gradient(135deg, rgba(201, 161, 90, 0.07), rgba(201, 161, 90, 0.02));
+  border: 1px solid rgba(201, 161, 90, 0.25);
+  border-radius: 4px;
+  font-size: 0.97rem;
+}
+main .reality::before {
+  content: "REALITY CHECK";
+  display: block;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--accent, var(--gold, #c9a15a));
+  margin-bottom: 0.5rem;
+}
+main .reality p { margin: 0; color: var(--text, #ede7d8); }
+
+/* ── Data table. overflow-x on a wrapper, never the page. ── */
+main table.royalty {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.88rem;
+}
+main table.royalty th,
+main table.royalty td {
+  text-align: left;
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid var(--border, var(--line, #33291d));
+}
+main table.royalty th {
+  color: var(--accent, var(--gold, #c9a15a));
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+main table.royalty td { color: var(--text-dim, #a89b83); }
+main table.royalty tr:last-child td { border-bottom: none; }
+
+/* ── Channel list: one row per outcome ── */
+main .channel-list { list-style: none; padding: 0; margin: 1.2rem 0 2rem; }
+main .channel-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border, var(--line, #33291d));
+}
+main .channel-list li::marker { content: none; }
+main .channel-list .name { color: var(--text, #ede7d8); }
+/* No nowrap: one verdict is a full sentence, and holding it on a single line
+   forced a 931px span — 739px of horizontal scroll at 360px. */
+main .channel-list .verdict {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-align: right;
+  min-width: 0;
+}
+main .verdict.worked { color: var(--green, var(--accent-note, #8fae8a)); }
+main .verdict.no     { color: var(--red, #c98a7b); }
+main .verdict.mixed  { color: var(--text-dim, #a89b83); }
+@media (max-width: 620px) {
+  main .channel-list li { flex-direction: column; gap: 0.25rem; }
+  main .channel-list .verdict { text-align: left; }
+}
+
+/* ── Headline figures. minmax(0,1fr) so three columns cannot force the page
+   sideways before the single-column breakpoint takes over. ── */
+main .numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1.6rem;
+  background: var(--bg-card, var(--bg-raised, #1e1a14));
+  border: 1px solid var(--border, var(--line, #33291d));
+  border-radius: var(--radius, 6px);
+  text-align: center;
+}
+@media (max-width: 480px) { main .numbers { grid-template-columns: 1fr; } }
+main .numbers .stat .val {
+  font-size: 2.1rem;
+  color: var(--accent, var(--gold-bright, #e0bd7a));
+  line-height: 1;
+}
+main .numbers .stat .lbl {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  /* Rarer token FIRST: the guide page defines both --text-dimmer and
+     --text-dim, so putting --text-dim first silently promoted this label a
+     shade brighter than the local rule intended. The site defines only
+     --text-dim, and picks that up through the fallback. */
+  color: var(--text-dimmer, var(--text-dim, #6e6350));
+  margin-top: 0.5rem;
+}

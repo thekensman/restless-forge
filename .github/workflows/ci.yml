@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        # Full history: build.sh derives sitemap <lastmod> from each
+        # page's last commit date. A shallow clone has one commit, so
+        # every URL would report the same date and the script skips
+        # rather than emit that.
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install root dependencies
+        run: npm ci
+
+      # Generated HTML must be in sync with its sources of truth:
+      #   sync-content — Markdown prose → generated:content blocks + essay cards
+      #   sync-static  — nav/footer/tool grids, sitemap.xml, llms.txt, and
+      #                  the about/terms/FAQ tool copy from shared.js + tools-data.js
+      # Regenerate and fail on drift so neither the prose nor the crawlable
+      # chrome can be hand-edited or go stale.
+      - name: Check generated HTML is in sync
+        run: |
+          npm run sync
+          git diff --exit-code site/ tools/
+
+      # Guards the rules an AdSense rejection taught us: live tools don't ship
+      # their own legal pages, ad-bearing prose sub-pages clear a word floor,
+      # live tools carry no stray noindex, and unlaunched tools stay noindexed
+      # and ad-free. See scripts/check-content-health.mjs for the reasoning.
+      - name: Check content health
+        run: npm run check-content
+
+      # build.sh runs `npm ci` + typecheck + vite build per tool,
+      # then assembles dist/ exactly as production expects.
+      - name: Build site
+        run: ./build.sh
+
+      # Every internal link, canonical, og:url and sitemap entry must resolve
+      # against the built tree using nginx's try_files rules. Runs after the
+      # build because resolution depends on dist/, not on the source layout.
+      # Catches the class of bug that only surfaces in Search Console: a
+      # canonical URL pointing at a 404, or links left scoped to a retired
+      # domain. See scripts/check-links.mjs.
+      - name: Check internal links resolve
+        run: npm run check-links
+
+      - name: Run all tool test suites
+        run: npm test
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # Python backend (backend/) — runs in parallel with the Node build.
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run backend test suite
+        run: python -m pytest backend/tests -q

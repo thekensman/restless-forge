@@ -3,6 +3,7 @@ node_modules/
 __pycache__/
 *.pyc
 venv/
+.venv/
 
 # Build output
 dist/
@@ -24,3 +25,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local backend state (RF_DB_PATH default)
+backend/.data/

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="10.6" fill="#0b0d12"/>
+  <!-- Gold hourglass: dark-gold caps + light-gold sand bulbs -->
+  <rect x="15" y="12" width="34" height="6" rx="1.5" fill="#d4a44e"/>
+  <rect x="15" y="46" width="34" height="6" rx="1.5" fill="#d4a44e"/>
+  <path d="M18 18 H46 L32 32 Z" fill="#f0d28c"/>
+  <path d="M32 32 L46 46 H18 Z" fill="#f0d28c"/>
+</svg>

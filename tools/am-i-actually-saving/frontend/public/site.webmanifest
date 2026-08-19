@@ -1,0 +1,22 @@
+{
+  "name": "Am I Actually Saving?",
+  "short_name": "Am I Actually",
+  "description": "The false-economy detector: driving across town for cheap gas, bulk-store math, DIY vs buy.",
+  "start_url": "/tools/am-i-actually-saving/",
+  "scope": "/tools/am-i-actually-saving/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/am-i-actually-saving/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/am-i-actually-saving/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

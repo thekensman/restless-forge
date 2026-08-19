@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>What Payment Terms Actually Commit You To</title>
+  <meta name="description" content="Net 30 is not a suggestion and it is not thirty business days. What the common terms mean, and how the due date is computed.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeinvoice/articles/payment-terms-and-due-dates/">
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeinvoice/favicon.svg">
+  <link rel="icon" href="/tools/forgeinvoice/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeinvoice/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeinvoice/site.webmanifest">
+  <meta property="og:title" content="What Payment Terms Actually Commit You To">
+  <meta property="og:description" content="Net 30 is not a suggestion and it is not thirty business days. What the common terms mean, and how the due date is computed.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeinvoice/articles/payment-terms-and-due-dates/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeinvoice/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/forgeinvoice/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeinvoice/shared.js"></script>
+</head>
+<body>
+  <div id="fi-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/forgeinvoice/articles/">← Articles</a></p>
+    <h1>What Payment Terms Actually Commit You To</h1>
+    <p class="page-sub">Net 30 is not a suggestion and it is not thirty business days. What the common terms mean, and how the due date is computed.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>&quot;Net 30&quot; appears on an enormous number of invoices, and a surprising share of
+the people writing it could not say precisely what it obligates. It is worth
+thirty seconds of clarity, because the terms line is the part of an invoice that
+determines when you actually get paid.</p>
+<h2>What the terms mean</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Payment due</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Due on receipt</td>
+<td>Immediately</td>
+</tr>
+<tr>
+<td>Net 15</td>
+<td>15 days after the invoice date</td>
+</tr>
+<tr>
+<td>Net 30</td>
+<td>30 days after the invoice date</td>
+</tr>
+<tr>
+<td>Net 60</td>
+<td>60 days after the invoice date</td>
+</tr>
+<tr>
+<td>Net 90</td>
+<td>90 days after the invoice date</td>
+</tr>
+</tbody></table>
+<p>Two details that trip people up.</p>
+<p><strong>They are calendar days, not business days.</strong> Net 30 issued on the 1st is due on
+the 31st, weekends and holidays included. If the 31st is a Sunday, it is still
+due on the Sunday — practically it lands Monday, but the term itself does not
+grant that extension.</p>
+<p><strong>They count from the invoice date, not the delivery date.</strong> Finish work on the
+3rd, invoice on the 17th, and a Net 30 clock starts on the 17th. This is why
+invoicing promptly matters more than it feels like it should: two weeks of delay
+in sending is two weeks added to getting paid, invisibly.</p>
+<h2>&quot;Due on receipt&quot; is a request</h2>
+<p>It sounds like the strongest term and functions as the vaguest. It has no date
+attached, so there is nothing concrete to be late against. A client&#39;s accounts
+payable system, which runs on scheduled payment batches, will typically assign
+its own terms anyway.</p>
+<p>If you want to be paid quickly, a short dated term — Net 7 or Net 15 — is more
+effective than &quot;on receipt&quot;, because it produces a specific day that can be
+missed.</p>
+<h2>Choosing terms honestly</h2>
+<p><strong>Net 30 is the default expectation</strong> for business clients in most industries.
+Shorter is normal for individuals and small businesses; longer is common when
+dealing with large organisations, sometimes as their non-negotiable standard.</p>
+<p><strong>Longer terms are a loan.</strong> Net 90 means financing that client&#39;s operations for
+three months at your expense. That may be a reasonable price for the work, but
+it should be a decision rather than something you accepted because it was on
+their portal.</p>
+<p><strong>Shorter terms need to be set before the work.</strong> Putting Net 7 on an invoice to
+a client who has processed everything at Net 30 for two years will not change
+when you get paid; it will just make the invoice look wrong to their system.</p>
+<h2>How the due date is computed</h2>
+<p>ForgeInvoice takes the invoice date, adds the term&#39;s day count, and produces the
+due date. Two small implementation notes with real consequences:</p>
+<p>The date is parsed at midnight local time rather than as a bare date string.
+Parsing <code>2026-08-04</code> directly in JavaScript treats it as UTC midnight, which for
+anyone west of Greenwich renders as the 3rd. Anchoring it to local midnight
+avoids invoices that appear to be dated a day earlier than you entered.</p>
+<p>Adding days uses date arithmetic rather than a fixed number of milliseconds, so
+month lengths and daylight-saving transitions are handled by the calendar rather
+than by assuming every day is exactly 86,400 seconds. Net 30 from the 31st of
+January lands on the 2nd of March in a non-leap year, which is correct and is
+not what naive millisecond arithmetic produces around a DST boundary.</p>
+<h2>Sequential invoice numbers</h2>
+<p>Invoice numbers increment by finding the trailing digits and adding one, while
+preserving the prefix and the zero-padding. <code>INV-001</code> becomes <code>INV-002</code>;
+<code>2026-014</code> becomes <code>2026-015</code>.</p>
+<p>The padding preservation is the part that matters over time. Naive incrementing
+turns <code>INV-009</code> into <code>INV-10</code>, which sorts wrongly in every file browser and
+spreadsheet you will ever open. Keeping the width means your invoices stay in
+order for as long as the padding lasts.</p>
+<p>Sequential numbering is not just tidiness — most tax authorities expect invoice
+numbers to be sequential and gapless, precisely so that missing invoices are
+visible.</p>
+<h2>Getting paid, beyond the terms line</h2>
+<p>The terms are necessary and not sufficient. What actually moves payment dates
+earlier:</p>
+<ul>
+<li><strong>Invoice immediately.</strong> The clock starts when you send.</li>
+<li><strong>Send to the right person.</strong> Accounts payable, not your day-to-day contact,
+unless they have told you otherwise.</li>
+<li><strong>Put the PO number on it</strong> if the client uses them. An invoice without one
+can sit in a queue indefinitely without anyone considering it late.</li>
+<li><strong>Make the total unambiguous.</strong> This is where the <a href="/tools/forgeinvoice/articles/where-invoice-rounding-goes-wrong/">rounding
+work</a> pays
+off — an invoice whose lines visibly sum to its total does not generate a
+query, and a query resets your payment timeline.</li>
+</ul>
+<p>Ready to try it? <a href="/tools/forgeinvoice/">Open ForgeInvoice</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="fi-footer"></div>
+</body>
+</html>

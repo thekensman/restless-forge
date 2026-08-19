@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
   <title>About — __TOOL_LABEL__</title>
   <meta name="description" content="About __TOOL_LABEL__.">
   <link rel="canonical" href="https://restless-forge.dev/tools/__TOOL_NAME__/about/">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="/tools/__TOOL_NAME__/favicon.svg">
+  <link rel="icon" href="/tools/__TOOL_NAME__/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/__TOOL_NAME__/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/__TOOL_NAME__/site.webmanifest">
   <meta property="og:title" content="About — __TOOL_LABEL__">
   <meta property="og:url" content="https://restless-forge.dev/tools/__TOOL_NAME__/about/">
   <meta property="og:type" content="website">
+  <meta property="og:image" content="https://restless-forge.dev/tools/__TOOL_NAME__/og-image.png">
 
   <!-- Shared tool chrome (header/footer styles) -->
   <link rel="stylesheet" href="/tool-chrome.css">
@@ -26,17 +30,10 @@
   <div id="__TOOL_PREFIX__-header"></div>
 
   <main>
-    <h1>About __TOOL_LABEL__</h1>
-    <p class="page-sub">TODO: subtitle</p>
-
-    <h2>What It Does</h2>
-    <p>TODO</p>
-
-    <h2>About Your Data</h2>
-    <div class="info-box">
-      <p><strong>Privacy:</strong> Nothing you enter is sent to a server. All processing happens in your browser.</p>
-    </div>
-    <p>See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Use</a>.</p>
+    <!-- Prose lives in the sibling index.md (docs/authoring-content.md).
+         Fills on the first `npm run sync-content` after scaffolding. -->
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+    <!-- /generated:content -->
   </main>
 
   <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->

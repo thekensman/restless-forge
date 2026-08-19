@@ -1,0 +1,22 @@
+{
+  "name": "PrintPlate",
+  "short_name": "PrintPlate",
+  "description": "3D print troubleshooting: symptom to root cause to fix.",
+  "start_url": "/tools/printplate/",
+  "scope": "/tools/printplate/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/printplate/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/printplate/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

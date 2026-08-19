@@ -1,0 +1,22 @@
+{
+  "name": "CNCFeed",
+  "short_name": "CNCFeed",
+  "description": "Feeds and speeds calculator for CNC milling by material, tool, and machine rigidity.",
+  "start_url": "/tools/cncfeed/",
+  "scope": "/tools/cncfeed/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/cncfeed/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/cncfeed/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

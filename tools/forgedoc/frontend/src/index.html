@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>ForgeDoc — Restless Forge</title>
+  <meta name="description" content="Merge, split, rotate, watermark, and build PDFs from images — free, unlimited, and entirely in your browser. No uploads, no account, no watermarks.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgedoc/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ForgeDoc">
+  <meta property="og:description" content="Merge, split, rotate, watermark, and build PDFs from images — free, unlimited, and entirely in your browser. No uploads, no account, no watermarks.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgedoc/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgedoc/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/forgedoc/favicon.svg">
+  <link rel="icon" href="/tools/forgedoc/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgedoc/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgedoc/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ForgeDoc",
+    "url": "https://restless-forge.dev/tools/forgedoc",
+    "description": "Merge, split, rotate, watermark, and build PDFs from images — free, unlimited, and entirely in your browser. No uploads, no account, no watermarks.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgedoc/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="fd-header"></div>
+
+  <main>
+    <section class="tool-intro">
+      <h1>ForgeDoc: Free browser-only PDF toolkit</h1>
+      <p>
+        Merge, split, rotate, watermark, and build PDFs from images —
+        entirely in your browser. Your files never leave your device:
+        no uploads, no accounts, no task limits, no watermarks (except
+        the ones you add on purpose).
+      </p>
+    </section>
+
+    <nav class="op-tabs" role="tablist" aria-label="PDF operations">
+      <button class="op-tab is-active" data-op="merge" role="tab" aria-selected="true">Merge</button>
+      <button class="op-tab" data-op="split" role="tab" aria-selected="false">Split / Extract</button>
+      <button class="op-tab" data-op="images" role="tab" aria-selected="false">Images &rarr; PDF</button>
+      <button class="op-tab" data-op="rotate" role="tab" aria-selected="false">Rotate</button>
+      <button class="op-tab" data-op="watermark" role="tab" aria-selected="false">Watermark</button>
+    </nav>
+
+    <section class="op-panel" id="panel-merge" role="tabpanel">
+      <p class="op-help">Pick two or more PDFs. They merge in the order selected.</p>
+      <input type="file" id="merge-files" accept="application/pdf" multiple>
+      <ul class="file-list" id="merge-list"></ul>
+      <button class="op-run" id="merge-run">Merge PDFs</button>
+    </section>
+
+    <section class="op-panel" id="panel-split" role="tabpanel" hidden>
+      <p class="op-help">Pick one PDF, then choose pages like <code>1-3, 7, 10-15</code>.</p>
+      <input type="file" id="split-file" accept="application/pdf">
+      <p class="op-meta" id="split-meta"></p>
+      <label class="field"><span class="field__label">Pages</span>
+        <input type="text" id="split-ranges" placeholder="1-3, 7">
+      </label>
+      <label class="op-check"><input type="checkbox" id="split-single"> One PDF per page</label>
+      <button class="op-run" id="split-run">Extract pages</button>
+    </section>
+
+    <section class="op-panel" id="panel-images" role="tabpanel" hidden>
+      <p class="op-help">Pick JPG/PNG images. One page per image, in order.</p>
+      <input type="file" id="images-files" accept="image/jpeg,image/png" multiple>
+      <ul class="file-list" id="images-list"></ul>
+      <label class="field"><span class="field__label">Page size</span>
+        <select id="images-size">
+          <option value="fit">Fit to each image</option>
+          <option value="a4">A4</option>
+          <option value="letter">Letter</option>
+        </select>
+      </label>
+      <button class="op-run" id="images-run">Build PDF</button>
+    </section>
+
+    <section class="op-panel" id="panel-rotate" role="tabpanel" hidden>
+      <p class="op-help">Pick one PDF, choose pages and an angle.</p>
+      <input type="file" id="rotate-file" accept="application/pdf">
+      <p class="op-meta" id="rotate-meta"></p>
+      <label class="field"><span class="field__label">Pages (blank = all)</span>
+        <input type="text" id="rotate-ranges" placeholder="all">
+      </label>
+      <label class="field"><span class="field__label">Angle</span>
+        <select id="rotate-deg">
+          <option value="90">90&deg; clockwise</option>
+          <option value="180">180&deg;</option>
+          <option value="270">270&deg; (90&deg; counter-clockwise)</option>
+        </select>
+      </label>
+      <button class="op-run" id="rotate-run">Rotate</button>
+    </section>
+
+    <section class="op-panel" id="panel-watermark" role="tabpanel" hidden>
+      <p class="op-help">Stamp text across every page.</p>
+      <input type="file" id="wm-file" accept="application/pdf">
+      <label class="field"><span class="field__label">Watermark text</span>
+        <input type="text" id="wm-text" placeholder="CONFIDENTIAL">
+      </label>
+      <label class="field"><span class="field__label">Position</span>
+        <select id="wm-pos">
+          <option value="diagonal">Diagonal</option>
+          <option value="header">Header</option>
+          <option value="footer">Footer</option>
+        </select>
+      </label>
+      <label class="field"><span class="field__label">Opacity</span>
+        <input type="range" id="wm-opacity" min="5" max="100" value="25">
+      </label>
+      <button class="op-run" id="wm-run">Apply watermark</button>
+    </section>
+
+    <p class="op-status" id="op-status" role="status" aria-live="polite"></p>
+    <div class="op-downloads" id="op-downloads"></div>
+
+    <p class="scope-note">
+      Everything runs locally via <a href="https://pdf-lib.js.org/" target="_blank" rel="noopener">pdf-lib</a>.
+      Compression and PDF&rarr;image export are coming in v2.
+    </p>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="fd-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

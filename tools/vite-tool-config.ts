@@ -27,13 +27,40 @@ export interface ToolConfigOptions {
   port: number;
   /** Absolute path to the tool's frontend/ directory (pass `__dirname`) */
   dir: string;
+  /**
+   * Optional dev-server proxy entries, merged into server.proxy. Used by
+   * cloud-assisted tools to reach the local backend when running the tool's
+   * own dev server (the root :8080 proxy has its own /api entry). Keep
+   * targets free of the literal strings `port:` / `base:` — scripts/tools.mjs
+   * regex-scans this file's callers for those keys.
+   */
+  proxy?: Record<string, string | { target: string; changeOrigin?: boolean }>;
 }
 
-export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
-  const srcDir = resolve(dir, "src");
-  // site/shared.js + tool-chrome.css live three levels up from tools/<name>/frontend/
-  const siteSharedJs    = resolve(dir, "../../../site/shared.js");
-  const siteToolChrome  = resolve(dir, "../../../site/tool-chrome.css");
+export function defineToolConfig({ base, port, dir, proxy }: ToolConfigOptions) {
+  const srcDir       = resolve(dir, "src");
+  const publicDir    = resolve(dir, "public");
+  // site/ lives three levels up from tools/<name>/frontend/
+  const siteRoot       = resolve(dir, "../../../site");
+  const siteSharedJs   = resolve(siteRoot, "shared.js");
+  const siteToolChrome = resolve(siteRoot, "tool-chrome.css");
+
+  // Tool-scoped assets that fall back to site/ when the tool doesn't ship
+  // its own copy. Mirrors the nginx regex location in restless-forge.conf.
+  const FALLBACK_ASSETS = [
+    "favicon.svg",
+    "favicon.ico",
+    "apple-touch-icon.png",
+    "site.webmanifest",
+    "og-image.png",
+  ];
+  const contentTypeFor = (name: string): string => {
+    if (name.endsWith(".svg"))         return "image/svg+xml";
+    if (name.endsWith(".ico"))         return "image/x-icon";
+    if (name.endsWith(".png"))         return "image/png";
+    if (name.endsWith(".webmanifest")) return "application/manifest+json";
+    return "application/octet-stream";
+  };
 
   // URLs that are SITE-global, not tool-scoped. Vite's default HTML asset
   // handling rewrites every absolute `/foo` href/src to `${base}/foo` during
@@ -60,7 +87,7 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
       // with no TS modules — they are copied as-is by build.sh after the build.
       rollupOptions: { input: resolve(srcDir, "index.html") },
     },
-    server: { port },
+    server: { port, ...(proxy ? { proxy } : {}) },
     plugins: [
       {
         // Before Vite's HTML processor rebases absolute URLs, swap site-global
@@ -80,14 +107,25 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
       {
         // After Vite is done, replace the sentinel with the original absolute
         // URL so the browser fetches the shared file from the domain root.
+        //
+        // The sentinel comes back in two forms:
+        //   build: `__RF_SITE__/shared.js` (untouched — not root-relative)
+        //   dev:   `${base}/__RF_SITE__/shared.js` (dev's HTML transform
+        //          resolves it as a RELATIVE url and prefixes the base)
+        // Dev also base-prefixes the already-absolute tool-scoped URLs
+        // (`/tools/<name>/x` → `${base}/tools/<name>/x`), which build never
+        // does — collapse that double prefix here or dev pages lose their
+        // header/footer/favicons while prod looks fine.
         name: "site-global-urls-post",
         transformIndexHtml: {
           order: "post",
           handler(html) {
             let out = html;
             for (const url of SITE_GLOBAL_URLS) {
-              out = out.split(`"${sentinel(url)}"`).join(`"${url}"`);
+              out = out.split(`"${base}/${sentinel(url)}"`).join(`"${url}"`); // dev form
+              out = out.split(`"${sentinel(url)}"`).join(`"${url}"`);         // build form
             }
+            out = out.split(`"${base}${base}/`).join(`"${base}/`);            // dev double-prefix
             return out;
           },
         },
@@ -107,6 +145,23 @@ export function defineToolConfig({ base, port, dir }: ToolConfigOptions) {
           server.middlewares.use("/tool-chrome.css", (_req, res) => {
             res.setHeader("Content-Type", "text/css");
             res.end(readFileSync(siteToolChrome, "utf-8"));
+          });
+
+          // Per-tool asset fallback to site/. Tools may omit any of the
+          // FALLBACK_ASSETS files; this middleware serves the site-wide
+          // version when the tool's own public/ doesn't have it. Mirrors
+          // the nginx regex location in restless-forge.conf so dev and
+          // prod behave identically.
+          server.middlewares.use((req, res, next) => {
+            const url = (req.url ?? "").split("?")[0];
+            const m = url.match(new RegExp(`^${base}/([^/]+)$`));
+            if (!m || !FALLBACK_ASSETS.includes(m[1])) return next();
+            const toolFile = resolve(publicDir, m[1]);
+            if (existsSync(toolFile)) return next();   // let Vite serve it
+            const siteFile = resolve(siteRoot, m[1]);
+            if (!existsSync(siteFile)) return next();  // 404 from Vite
+            res.setHeader("Content-Type", contentTypeFor(m[1]));
+            res.end(readFileSync(siteFile));
           });
 
           // Serve sub-page HTML raw from src/ without Vite's HTML transform.

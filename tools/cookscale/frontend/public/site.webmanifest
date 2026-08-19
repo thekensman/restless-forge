@@ -1,0 +1,22 @@
+{
+  "name": "CookScale",
+  "short_name": "CookScale",
+  "description": "Recipe unit conversion with real ingredient densities, pan-size scaling, and bake-time adjustment.",
+  "start_url": "/tools/cookscale/",
+  "scope": "/tools/cookscale/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/cookscale/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/cookscale/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

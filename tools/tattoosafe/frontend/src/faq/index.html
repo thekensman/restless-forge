@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d14">
+  <title>FAQ — TattooSafe</title>
+  <meta name="description" content="Frequently asked questions about TattooSafe.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/tattoosafe/faq/">
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/tattoosafe/favicon.svg">
+  <link rel="icon" href="/tools/tattoosafe/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/tattoosafe/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/tattoosafe/site.webmanifest">
+  <meta property="og:title" content="FAQ — TattooSafe">
+  <meta property="og:url" content="https://restless-forge.dev/tools/tattoosafe/faq/">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="/tools/tattoosafe/pages.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/tattoosafe/shared.js"></script>
+</head>
+<body>
+  <div id="ts-header"></div>
+  <main>
+    <h1>Frequently Asked Questions</h1>
+    <p class="page-sub">Common questions about the AR preview, pricing calculator, and privacy.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<h2>How does the AR preview work?</h2>
+<p>Upload your design, activate your camera, and the image is composited onto the
+live video feed with Canvas. Drag to position, pinch to resize, and use the
+rotation slider to angle it.</p>
+<p>There is deliberately no body tracking or AI. You line the design up against
+your own reflection and screenshot it. That sounds like a limitation, and in one
+sense it is — but manual positioning is more precise than automatic placement
+for the thing you actually care about, which is whether <em>this</em> design at <em>this</em>
+size sits right on <em>your</em> arm.</p>
+<h2>Does TattooSafe store my photos or camera feed?</h2>
+<p>No. Everything happens in your browser. The camera feed is processed frame by
+frame and never recorded or transmitted. Uploaded images live in browser memory
+and are discarded when you close the tab.</p>
+<p>There is no upload endpoint to send them to — the tool has no backend for image
+handling at all. You can verify this by loading the page, disconnecting from the
+network, and using it normally.</p>
+<h2>How accurate is the pricing calculator?</h2>
+<p>It is a sanity check, not a quote.</p>
+<p>The estimates come from aggregated US market data and a documented model: area
+times a per-square-inch rate for the style, adjusted by placement difficulty,
+plus setup and breaks, times an hourly rate. Every constant is published on the
+<a href="/tools/tattoosafe/pricing/">pricing page</a>.</p>
+<p>What it cannot know is your specific artist&#39;s rate, your region, whether the
+design needs custom drawing time, or whether you are covering existing ink. Use
+it to tell a reasonable quote from an unreasonable one, then get a real quote at
+consultation.</p>
+<h2>Why is my quote higher than the estimate?</h2>
+<p>Usually one of three things. <strong>Complexity</strong> — the difference between simple line
+work and photorealism is five times the time per square inch, and artists
+classify more work as &quot;detailed&quot; than clients expect. <strong>Cover-ups</strong> — working
+over existing ink is consistently slower than clean skin. <strong>Shop minimum</strong> —
+small pieces cost the minimum regardless of how quick they are.</p>
+<p>A quote well above the estimate is usually correct and worth understanding
+rather than arguing with. A quote well below it is worth being cautious about.</p>
+<h2>What body placements are supported?</h2>
+<p>Sixteen: inner and outer forearm, upper arm, shoulder, wrist, chest, upper back,
+ribs, sternum, lower back, thigh, calf, ankle, back of neck, behind the ear, and
+back of the hand.</p>
+<p>Each has its own usable area, scaled to the height you enter, so the fit check
+reflects your proportions rather than a generic model&#39;s.</p>
+<h2>Does the preview wrap around my arm automatically?</h2>
+<p>No, and it is worth being clear about that. There is no limb detection.</p>
+<p>There is an optional <strong>curve around a limb</strong> toggle that bends the design around
+a cylinder whose curvature you set by hand. It approximates how a design sits on
+a rounded surface, but you are choosing the curvature, not having it measured.</p>
+<h2>My design has a white box around it — can I remove it?</h2>
+<p>Usually. <strong>Remove flat background</strong> is on by default and flood-fills a solid,
+uniform backdrop to transparent, so logos, line art, and clean-cut designs land
+on skin without a box under them. It also handles a matte frame around artwork,
+like the white margin of a product photo.</p>
+<p>If the backdrop was dark, the light linework left behind is inverted
+automatically so it previews as ink instead of vanishing against skin.</p>
+<p>It intentionally leaves photographic backgrounds alone — busy scenes, gradient
+skies — because cleanly separating those needs AI segmentation this tool does
+not include, and a too-aggressive algorithm eating part of your design is worse
+than a faint edge. For best results, upload artwork on a plain solid background.</p>
+<h2>Why does my design look like a sticker?</h2>
+<p>Because it is a flat image composited onto a lit, curved, moving body. No
+overlay that is not doing full 3D surface reconstruction will read as real ink.</p>
+<p>Judge scale and placement from the preview, not realism. That is what it is for.</p>
+<h2>Can I show the preview to my artist?</h2>
+<p>Yes, and it is genuinely useful. Screenshot either view. The silhouette view is
+the better one to bring — it carries precise centimetre dimensions your artist
+can work from, rather than a photo whose scale they would have to guess at.</p>
+<h2>Can I use it on my phone?</h2>
+<p>Yes. It works in any modern mobile browser, and touch gestures — drag,
+pinch-to-zoom — are supported. Phones are arguably the better experience, since
+the rear camera makes it easy to frame the body part you are considering.</p>
+<h2>Is TattooSafe free?</h2>
+<p>Completely. No account, no subscription, no paid tier holding features back.
+The site carries advertising to cover hosting, and that is the entire business
+model.</p>
+<p>Ready to try it? Open the <a href="/tools/tattoosafe/">preview tool</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="ts-footer"></div>
+</body>
+</html>

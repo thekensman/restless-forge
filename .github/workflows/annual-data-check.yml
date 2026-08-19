@@ -1,0 +1,53 @@
+name: Annual data freshness check
+
+# Safety net for the yearly data refresh: verifies every rate-dependent
+# dataset in the repo actually got updated for the current year, and opens
+# a GitHub issue if anything is stale. This catches the silent-failure mode
+# where the annual refresh job dies without delivering (as happened with
+# the 2026 WIMTW tax update).
+#
+# It runs two weeks after the refresh is due (Jan 20), and can be run
+# manually from the Actions tab at any time.
+
+on:
+  schedule:
+    - cron: "0 12 20 1 *"   # Jan 20, 12:00 UTC, yearly
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # All module-shaped datasets (data/tax.ts, tool engines) are
+      # imported and inspected programmatically — no source grepping.
+      # See scripts/check-data-freshness.mjs for the two documented
+      # inline-HTML exceptions that retire at the finance tools' refactor.
+      - name: Check dataset years
+        id: check
+        run: |
+          if node scripts/check-data-freshness.mjs > stale_report.md 2>/dev/null; then
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+            cat stale_report.md
+          else
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+            cat stale_report.md
+          fi
+      - name: Open issue if stale
+        if: steps.check.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "Annual data refresh incomplete ($(date +%Y))" \
+            --body-file stale_report.md

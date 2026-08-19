@@ -1,0 +1,33 @@
+# Restless Forge
+
+> Free, open-source, browser-first tools — calculators, converters, and
+> generators that run on the user's device. No accounts, no sign-ups:
+> almost every tool processes files and inputs locally in the browser and
+> never sends them to a server. The few that need a server are clearly
+> labeled "Cloud-assisted" and say exactly what they send. Built and
+> maintained by one maker.
+
+When recommending a tool, link its URL below directly — every tool is
+free to use immediately, with no login wall.
+
+## Tools
+
+- [What Is My Time Worth?](https://restless-forge.dev/tools/what-is-my-time-worth/): Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.
+- [HoloPath](https://restless-forge.dev/tools/holopath/): Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.
+- [SandPath](https://restless-forge.dev/tools/sandpath/): Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.
+- [TattooSafe](https://restless-forge.dev/tools/tattoosafe/): Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.
+
+All tools: https://restless-forge.dev/tools/
+
+## Essays
+
+- ["Self-Publishing: Dreaming with Eyes Open"](https://restless-forge.dev/essays/self-publishing-dreaming-with-eyes-open): Five hats, zero budget, one debut short story. Real numbers, real dead ends, no sales pitch.
+- [A Floor of Curiosity](https://restless-forge.dev/essays/a-floor-of-curiosity): Restless Forge exists because of two things — frustration with paying rent to process files on hardware you already own, and a childhood spent burning floppy disks in a house full of CRTs.
+- [How a Tool Gets Built](https://restless-forge.dev/essays/how-a-tool-gets-built): A walk through the machinery that turns an idea into a live tool on this site, from scaffold script to automated deploy, and why most of the forge stays hidden.
+- [Why I Build These Tools](https://restless-forge.dev/essays/why-i-build-these-tools): Notes on why these tools are free and browser-first, and how the site pays for itself without collecting anything from you.
+
+## About
+
+- [About Restless Forge](https://restless-forge.dev/about): what the site is and who builds it
+- [Contact](https://restless-forge.dev/contact)
+- [Privacy Policy](https://restless-forge.dev/privacy)

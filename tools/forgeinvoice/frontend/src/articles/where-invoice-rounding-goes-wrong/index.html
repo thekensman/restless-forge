@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>Where Invoice Rounding Goes Wrong</title>
+  <meta name="description" content="Rounding at the wrong step produces invoices that are off by a cent, and clients who notice. The order of operations that keeps the arithmetic defensible.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeinvoice/articles/where-invoice-rounding-goes-wrong/">
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeinvoice/favicon.svg">
+  <link rel="icon" href="/tools/forgeinvoice/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeinvoice/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeinvoice/site.webmanifest">
+  <meta property="og:title" content="Where Invoice Rounding Goes Wrong">
+  <meta property="og:description" content="Rounding at the wrong step produces invoices that are off by a cent, and clients who notice. The order of operations that keeps the arithmetic defensible.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeinvoice/articles/where-invoice-rounding-goes-wrong/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeinvoice/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/forgeinvoice/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeinvoice/shared.js"></script>
+</head>
+<body>
+  <div id="fi-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/forgeinvoice/articles/">← Articles</a></p>
+    <h1>Where Invoice Rounding Goes Wrong</h1>
+    <p class="page-sub">Rounding at the wrong step produces invoices that are off by a cent, and clients who notice. The order of operations that keeps the arithmetic defensible.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>An invoice that is off by one cent is a small problem with an outsized cost. The
+client notices, their bookkeeper queries it, and you spend twenty minutes
+explaining floating-point arithmetic to someone who reasonably expected the
+number to just be right.</p>
+<p>Almost every version of this bug comes from rounding at the wrong moment.</p>
+<h2>The floating-point part</h2>
+<p>Computers store <code>0.1</code> and <code>0.2</code> as binary fractions that cannot represent those
+decimals exactly. The classic demonstration:</p>
+<pre><code>0.1 + 0.2 === 0.30000000000000004
+</code></pre>
+<p>For an invoice this shows up the moment quantities and prices are anything other
+than round numbers. Three items at $19.99 is $59.97 in your head and
+<code>59.969999999999999</code> to the machine. Display that raw and it looks broken;
+display it rounded and the underlying value is still slightly off, ready to
+compound at the next step.</p>
+<h2>Rounding late is the trap</h2>
+<p>The instinct is to keep full precision through the whole calculation and round
+once at the end. That feels more accurate. It produces invoices nobody can
+verify.</p>
+<p>Consider three line items, each 3 units at $9.995:</p>
+<ul>
+<li>Round only at the end: each line displays as <code>$29.99</code> (rounded for display),
+the sum shown is <code>$89.96</code> — because the true total is 89.955, which rounds up.</li>
+<li>Add the displayed lines: 29.99 × 3 = <code>$89.97</code>.</li>
+</ul>
+<p>Your invoice now shows three lines that visibly add to 89.97 next to a total
+saying 89.96. Both numbers are defensible. Neither is checkable by a human, and
+the human is the one paying you.</p>
+<h2>Rounding at every step</h2>
+<p>ForgeInvoice rounds to two decimals at <strong>each</strong> stage rather than once at the
+end:</p>
+<ol>
+<li><strong>Line amount</strong> — quantity × unit price, rounded.</li>
+<li><strong>Subtotal</strong> — sum of the already-rounded line amounts, rounded.</li>
+<li><strong>Discount</strong> — computed from the subtotal, rounded, and capped so it can
+never exceed the subtotal.</li>
+<li><strong>Taxable</strong> — subtotal minus discount, rounded.</li>
+<li><strong>Tax</strong> — taxable × rate, rounded.</li>
+<li><strong>Total</strong> — taxable plus tax, rounded.</li>
+</ol>
+<p>The result is an invoice where every number a reader can see adds up to every
+other number they can see. That property matters more than being a fraction of a
+cent closer to a theoretical ideal, because an invoice is a document people
+check by hand.</p>
+<h2>Discount before tax, not after</h2>
+<p>The order of steps 3–5 is a real decision, not an implementation detail.</p>
+<p>Applying the discount <strong>before</strong> tax means tax is charged on what the customer
+actually pays. Applying it after means charging tax on the pre-discount amount
+and then discounting the total — which collects more tax than was actually due
+on the transaction.</p>
+<p>Discount-before-tax is the standard treatment in most jurisdictions and the more
+defensible one. It is also the one that matches what a customer expects when
+they see a discount line above a tax line.</p>
+<h2>The cap that prevents nonsense</h2>
+<p>Discounts are clamped so they cannot exceed the subtotal. Without that,
+entering a $500 fixed discount on a $300 invoice yields a negative taxable
+amount, negative tax, and a negative total — an invoice that owes the client
+money.</p>
+<p>That is a data-entry mistake rather than a calculation one, but the calculator
+should not faithfully compute an absurd result from it.</p>
+<h2>Percentages versus fixed amounts</h2>
+<p>Percentage discounts are computed against the subtotal, so they scale as line
+items change. Fixed discounts do not.</p>
+<p>The practical difference shows up when you edit an invoice after building it.
+Add a line item to an invoice with a 10% discount and the discount grows with
+it. Add one to an invoice with a $50 fixed discount and the effective percentage
+quietly shrinks. Neither is wrong; they just behave differently under edits, and
+it is worth knowing which you chose.</p>
+<h2>What this does not cover</h2>
+<p><strong>Multiple tax rates.</strong> ForgeInvoice applies one rate to the whole invoice.
+Jurisdictions where different line items attract different rates need
+per-line-item tax, which this does not do.</p>
+<p><strong>Tax-inclusive pricing.</strong> Some regions quote prices with tax already included
+and back it out for the invoice. This calculates tax on top of the entered
+prices.</p>
+<p><strong>Currency conversion.</strong> Pick a currency and everything is in it. There is no
+exchange-rate handling.</p>
+<p>If your situation needs any of those, use proper accounting software. This is
+built for the freelancer sending a handful of straightforward invoices a month,
+and it tries to be exactly right for that case rather than approximately right
+for every case.</p>
+<p>Ready to try it? <a href="/tools/forgeinvoice/">Open ForgeInvoice</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="fi-footer"></div>
+</body>
+</html>

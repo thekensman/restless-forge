@@ -1,0 +1,22 @@
+{
+  "name": "PetDose",
+  "short_name": "PetDose",
+  "description": "Pet medication reference ranges with safety warnings.",
+  "start_url": "/tools/petdose/",
+  "scope": "/tools/petdose/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/petdose/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/petdose/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

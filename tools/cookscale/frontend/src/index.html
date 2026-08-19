@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <meta name="theme-color" content="#0d0d14">
+  <title>CookScale — Recipe unit converter & pan size scaler</title>
+  <meta name="description" content="Free recipe scaling tool with unit conversion and pan size adjustment.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/cookscale/">
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/cookscale/favicon.svg">
+  <link rel="icon" href="/tools/cookscale/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/cookscale/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/cookscale/site.webmanifest">
+  <meta property="og:title" content="CookScale — Recipe unit converter & pan size scaler">
+  <meta property="og:description" content="Free recipe scaling tool with unit conversion and pan size adjustment.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/cookscale/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/cookscale/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"CookScale","description":"Free recipe scaling tool with unit conversion and pan size adjustment.","url":"https://restless-forge.dev/tools/cookscale","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="/shared.js"></script>
+  <script src="/tools/cookscale/shared.js"></script>
+</head>
+<body>
+  <div id="cs-header"></div>
+  <div class="tool-intro">
+    <h1>CookScale: Recipe unit converter & pan size scaler</h1>
+    <p>A cup of flour is 120 grams. A cup of honey is 340. Recipes that pretend volume is weight are lying to you — CookScale converts between the two with real ingredient densities, scales any recipe to the pan you actually own, and adjusts the bake time. Everything runs in your browser — no signup, no data stored.</p>
+  </div>
+  <div class="tool-content">
+    <!-- ─── Ingredient converter ─── -->
+    <section class="settings" aria-label="Ingredient converter">
+      <h2 class="settings__title">Ingredient Converter</h2>
+      <div class="field">
+        <label class="field__label" for="cv-amount">Amount</label>
+        <div class="field__row">
+          <input class="field__input" type="number" id="cv-amount" value="1" min="0" step="0.25">
+          <select class="field__select" id="cv-from"></select>
+          <span class="field__arrow">→</span>
+          <select class="field__select" id="cv-to"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field__label" for="cv-ingredient">Ingredient <span class="field__optional">(needed for cups ↔ grams)</span></label>
+        <select class="field__select" id="cv-ingredient"></select>
+      </div>
+      <div class="output-area" id="cv-result" aria-live="polite">—</div>
+    </section>
+
+    <!-- ─── Pan scaler ─── -->
+    <section class="settings" aria-label="Pan scaler">
+      <h2 class="settings__title">Pan Scaler</h2>
+      <div class="field">
+        <label class="field__label" for="pan-from">Recipe&rsquo;s pan</label>
+        <select class="field__select" id="pan-from"></select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="pan-to">Your pan</label>
+        <select class="field__select" id="pan-to"></select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="bake-mins">Original bake time <span class="field__optional">(minutes, optional)</span></label>
+        <input class="field__input" type="number" id="bake-mins" value="35" min="0" step="1">
+      </div>
+      <div class="output-area" id="pan-result" aria-live="polite">—</div>
+    </section>
+
+    <!-- ─── Oven temperature ─── -->
+    <section class="settings" aria-label="Oven temperature">
+      <h2 class="settings__title">Oven Temperature</h2>
+      <div class="field">
+        <div class="field__row">
+          <input class="field__input" type="number" id="temp-f" value="350" step="5"> <span class="field__unit-label">°F</span>
+          <span class="field__arrow">⇄</span>
+          <input class="field__input" type="number" id="temp-c" value="177" step="5"> <span class="field__unit-label">°C</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
+  </div>
+  <div id="cs-footer"></div>
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

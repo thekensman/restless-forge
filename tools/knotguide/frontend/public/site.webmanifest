@@ -1,0 +1,22 @@
+{
+  "name": "KnotGuide",
+  "short_name": "KnotGuide",
+  "description": "The right knot for the job, with step-by-step guidance.",
+  "start_url": "/tools/knotguide/",
+  "scope": "/tools/knotguide/",
+  "display": "standalone",
+  "background_color": "#0d0d14",
+  "theme_color": "#0d0d14",
+  "icons": [
+    {
+      "src": "/tools/knotguide/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/knotguide/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

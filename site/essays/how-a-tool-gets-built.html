@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- generated:head — do not edit; edit how-a-tool-gets-built.md and run `npm run sync-content` -->
+  <title>How a Tool Gets Built — Restless Forge</title>
+  <meta name="description" content="A walk through the machinery that turns an idea into a live tool on this site, from scaffold script to automated deploy, and why most of the forge stays hidden.">
+  <link rel="canonical" href="https://restless-forge.dev/essays/how-a-tool-gets-built">
+
+  <meta property="og:title" content="How a Tool Gets Built">
+  <meta property="og:description" content="A walk through the machinery that turns an idea into a live tool on this site, from scaffold script to automated deploy, and why most of the forge stays hidden.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://restless-forge.dev/essays/how-a-tool-gets-built">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How a Tool Gets Built",
+    "description": "A walk through the machinery that turns an idea into a live tool on this site, from scaffold script to automated deploy, and why most of the forge stays hidden.",
+    "author": { "@type": "Person", "name": "Ken", "url": "https://restless-forge.dev/about" },
+    "publisher": { "@type": "Organization", "name": "Restless Forge", "url": "https://restless-forge.dev" },
+    "datePublished": "2026-07-18",
+    "image": "https://restless-forge.dev/og-image.png",
+    "url": "https://restless-forge.dev/essays/how-a-tool-gets-built"
+  }
+  </script>
+<!-- /generated:head -->
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/guide-components.css">
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+</head>
+<body>
+
+  <div id="rf-nav"></div>
+
+  <!-- Rail ads: hidden below 1540px, see .ad-rail in styles.css -->
+  <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-slot="8568993100"
+         data-ad-format="vertical"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+  <aside class="ad-rail ad-rail--right" aria-label="Advertisement">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-slot="2979965943"
+         data-ad-format="vertical"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+
+  <main class="page">
+    <article>
+      <!-- generated:content — do not edit; edit how-a-tool-gets-built.md and run `npm run sync-content` -->
+<h1>How a Tool Gets Built</h1>
+<p class="content-byline" style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">
+  Published July 2026 &middot; By Ken
+</p>
+<p>Restless Forge currently hosts a handful of live tools and more than twenty in progress behind the scenes. That only works as a one-person operation because the path from idea to live-in-the-directory is the same every time. This is a walk through that machinery, for anyone curious how a small workshop keeps shipping browser-first software without drowning in maintenance.</p>
+<h2>Everything in one repository</h2>
+<p>The landing site, every tool, the build scripts, and the server configuration all live in a single monorepo. Each tool is a self-contained folder, <code>tools/&lt;name&gt;/frontend/</code>, with its own dependencies and its own dev server; the tests live there too. The global pages, this essay included, are plain static HTML with no build step at all.</p>
+<p>The property that matters most is that the platform <em>discovers</em> tools instead of being told about them. The build script, the dev proxy, and the test runner all scan <code>tools/*/frontend/</code> and pick up whatever they find, reading each tool&#39;s port and URL base from the tool&#39;s own config. Adding tool number twenty-seven doesn&#39;t mean editing five lists. The platform notices it exists.</p>
+<h2>Born from a template</h2>
+<p>No tool starts from a blank folder. A scaffold script copies a maintained template, substitutes the new tool&#39;s name, dev port, and emoji, and installs dependencies. Thirty seconds later there is a running skeleton with the site&#39;s header and footer in place, a passing smoke test, and the metadata plumbing (favicons, social previews and so on) already wired.</p>
+<p>The template encodes the rule that defines the whole site: client-side by default. Every tool is TypeScript compiled to static files, doing its work with browser APIs. Canvas handles the image work; a Web Worker takes over when a loop gets heavy. When a feature honestly can&#39;t be done client-side, it either doesn&#39;t ship or the tool moves to the site&#39;s one small API service and wears a &quot;Cloud-assisted&quot; badge that says so up front. The payoff still runs in both directions: for the browser-only majority your files never leave your device, and my operational surface stays a static file server plus one small service, which is about as calm as web operations get.</p>
+<h2>Shared chrome</h2>
+<p>Every tool renders the same header and footer from one shared script and styles them with one shared stylesheet. Each tool then defines a handful of CSS custom properties (background, text, accent, and so on) that theme the chrome to match its own character. <a href="/tools/holopath/">HoloPath</a> feels nothing like <a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a>, yet the layout bones are literally the same code. A fix in the shared layer lands in every tool at once, and no markup gets copy-pasted between them.</p>
+<h2>Logic you can test without a browser</h2>
+<p>Inside each tool the code splits in two. Anything that can be pure (unit conversion, pricing math, crop geometry, path generation) lives in an engine module with no DOM dependencies, and the app file wires that engine to inputs and canvases. The engine is where the unit tests live; the repo currently runs hundreds of them, across all the tool suites, on every change. When a field test turns up a bug (field tests always turn up bugs), the fix usually lands in a pure function next to a new test that would have caught it.</p>
+<h2>Push, verify, deploy</h2>
+<p>Work happens on branches, and every pull request runs the full build plus every tool&#39;s test suite in CI. Merging to <code>main</code> triggers the deploy: each tool compiles, everything assembles into one folder with cache-busting hashes on the shared assets, the result syncs to the server, and nginx reloads behind a validation check that rolls back automatically if the config is bad. A scheduled health check hits the live site every half hour and opens an issue when a page or a certificate looks wrong.</p>
+<p>There is automation for content, too. Some tools carry data that changes yearly, tax brackets and mileage rates for instance, and a scheduled job refreshes that data each January and opens a pull request with its sources cited. A separate freshness check backstops the job in case it ever fails silently.</p>
+<h2>Hidden until ready</h2>
+<p>Most of the forge is dark, and visitors never see that part. A new tool deploys to production long before it launches: reachable by direct URL for field testing on real phones, but marked <code>noindex</code> so search engines ignore it, absent from the <a href="/tools/">directory</a>, and left out of the sitemap. It stays that way through however many rounds of testing it takes. The camera-preview tool went through several field-test cycles before its rough edges were either fixed or honestly labeled.</p>
+<p>Launching is the boring part, on purpose. Flip one status flag in the directory data, remove the <code>noindex</code> tags, add the pages to the sitemap and the ad units to the pages, then redeploy. A written checklist keeps it honest, the same steps in the same order every time.</p>
+<h2>Why bother</h2>
+<p>Process is what makes free sustainable. An hour not spent nursing bespoke infrastructure is an hour spent on a tool, and a convention means a bug gets fixed once instead of twenty-six times. Keeping the machinery calm is what leaves room for the restlessness. As for why the site works this way at all, the no-backend rule and the deal with ads that funds everything, that story has its own essay: <a href="/essays/why-i-build-these-tools">Why I Build These Tools</a>.</p>
+<hr>
+<h3>Tools mentioned in this essay</h3>
+<ul>
+<li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> - real hourly wage calculator</li>
+<li><a href="/tools/holopath/">HoloPath</a> - hologram GIF generator</li>
+<li><a href="/tools/sandpath/">SandPath</a> - sand table pattern converter</li>
+</ul>
+<h3>Related</h3>
+<ul>
+<li><a href="/essays/why-i-build-these-tools">Why I Build These Tools</a> - the philosophy behind the workshop</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/thekensman/">The code on GitHub</a></li>
+</ul>
+<!-- /generated:content -->
+    </article>
+  </main>
+
+  <aside class="ad-slot" aria-label="Advertisement">
+    <span class="ad-slot__label">Advertisement</span>
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+  <div id="rf-footer"></div>
+
+</body>
+</html>

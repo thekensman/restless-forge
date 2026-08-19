@@ -1,0 +1,125 @@
+/* TattooSafe — Main Tool Styles (Vite-processed) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+:root {
+  --bg: #0d0d14; --bg-raised: #141420; --bg-card: #1a1a2a;
+  --accent: #a882ff; --accent-light: #c9b0ff; --accent-dim: #6b4fb3;
+  --text: #c4c0d4; --text-muted: #706b82; --text-bright: #e8e4f0;
+  --border: #252535; --error: #c44a5a; --success: #5aab6a;
+  --radius: 12px; --radius-lg: 20px;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Aliases for site/tool-chrome.css (shared header/footer across tools). */
+  --rf-bg: var(--bg);
+  --rf-text: var(--text-bright);
+  --rf-muted: var(--text);
+  --rf-dim: var(--text-muted);
+  --rf-accent: var(--accent);
+  --rf-border: var(--border);
+  --rf-font-mono: var(--font-body);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+a { color: var(--accent); } a:hover { color: var(--accent-light); }
+.tool-content { max-width: 640px; margin: 0 auto; padding: 1rem 1.5rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+.tool-intro { max-width: 640px; margin: 0 auto; padding: 1.5rem; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; text-align: center; }
+.tool-intro h1 { font-family: var(--font-display); font-size: 1.5rem; color: var(--text-bright); font-weight: 400; margin-bottom: 0.75rem; }
+.upload { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%; }
+.upload__circle { width: 200px; height: 200px; border-radius: 50%; border: 2px dashed rgba(168,130,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.3s, background 0.3s; }
+.upload__circle:hover, .upload__circle--active { border-color: var(--accent); background: rgba(168,130,255,0.05); }
+.upload__inner { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; }
+.upload__icon { width: 42px; height: 42px; color: var(--accent-dim); }
+.upload__label { font-size: 0.88rem; color: var(--text); }
+.upload__hint { font-size: 0.72rem; color: var(--text-muted); }
+.upload__file-name { font-size: 0.82rem; color: var(--accent); font-style: italic; min-height: 1.2em; }
+.settings { width: 100%; background: var(--bg-raised); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid rgba(168,130,255,0.06); }
+.settings__title { font-family: var(--font-display); font-size: 1.1rem; color: var(--text-bright); font-weight: 400; }
+.settings__divider { height: 1px; background: rgba(168,130,255,0.08); }
+.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.field__label { font-size: 0.85rem; color: var(--text); font-weight: 500; }
+.field__desc { font-size: 0.78rem; color: var(--text-muted); }
+.field__row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.field__input, .field__select { background: var(--bg-card); border: 1px solid rgba(168,130,255,0.12); border-radius: 6px; padding: 0.45rem 0.6rem; color: var(--text-bright); font-family: var(--font-body); font-size: 0.88rem; outline: none; }
+.field__input:focus, .field__select:focus { border-color: var(--accent); }
+.field__input--short { width: 80px; }
+.field__select--unit { width: 75px; }
+.field__unit-label { font-size: 0.82rem; color: var(--text-muted); }
+.field__x { color: var(--text-muted); }
+.field__range { width: 100%; accent-color: var(--accent); }
+.field__range-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); }
+.field__input-group { display: flex; align-items: center; gap: 0.3rem; }
+.size-slider { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; }
+.size-slider__label { font-size: 0.75rem; color: var(--text-muted); width: 1em; text-align: center; }
+.field__check { display: flex; align-items: baseline; gap: 0.45rem; margin-top: 0.6rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; }
+.field__check input { accent-color: var(--accent); }
+.field__check-hint { font-size: 0.75rem; color: var(--text-muted); }
+.fit-indicator { font-size: 0.82rem; font-weight: 500; }
+.fit-indicator--ok { color: var(--success); }
+.fit-indicator--warn { color: var(--error); }
+.preview { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.preview__title { font-family: var(--font-display); font-size: 1.1rem; color: var(--text-bright); font-weight: 400; }
+.preview__frame { width: 100%; max-width: 240px; }
+.preview__frame svg { display: block; width: 100%; height: auto; }
+.error-toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--error); color: #fff; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.88rem; z-index: 1000; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (max-width: 480px) { .upload__circle { width: 170px; height: 170px; } .settings { padding: 1.25rem; } .field__input--short { width: 65px; } }
+
+/* ─── AR Camera Preview ─── */
+.ar { width: 100%; max-width: 640px; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin: 0 auto; }
+.ar__desc { font-size: 0.85rem; color: var(--text-muted); text-align: center; max-width: 460px; }
+.ar__canvas {
+  width: 100%; aspect-ratio: 4 / 3; border-radius: var(--radius);
+  background: var(--bg-raised); border: 1px solid var(--border);
+  touch-action: none; display: none;
+}
+.ar--active .ar__canvas { display: block; }
+.ar--active .ar__note { display: none; }
+.ar__hint { font-size: 0.78rem; color: var(--accent-light); text-align: center; min-height: 1.1em; }
+.ar__note { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+.ar__buttons { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.btn {
+  font-family: var(--font-body); font-size: 0.9rem; font-weight: 500;
+  padding: 0.6rem 1.4rem; border-radius: var(--radius); cursor: pointer;
+  background: var(--bg-card); color: var(--text-bright); border: 1px solid var(--border);
+  transition: border-color 0.2s, background 0.2s;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent-dim); }
+.btn--primary { background: var(--accent-dim); border-color: var(--accent-dim); color: #fff; }
+.btn--primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Live price estimate ─── */
+.price-estimate {
+  margin-top: 0.5rem; padding: 1rem 1.2rem; border-radius: var(--radius);
+  background: var(--bg-card, #1a1a2a); border: 1px solid var(--accent-dim);
+}
+.price-estimate__range { font-size: 1.5rem; font-weight: 600; color: var(--accent-light); }
+.price-estimate__detail { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem; }
+.price-estimate__link { font-size: 0.78rem; margin-top: 0.5rem; }
+.price-estimate__link a { color: var(--accent); text-decoration: none; }
+.price-estimate__link a:hover { text-decoration: underline; }
+
+/* ─── AR wrap toggle ─── */
+.ar__wrap-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;
+}
+.ar__wrap-toggle input { accent-color: var(--accent); }
+
+.ar__curve { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); }
+.ar__curve input[type="range"] { accent-color: var(--accent); width: 120px; }
+
+/* ─── SEO / explainer content ─── */
+.seo-content { width: 100%; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+.seo-content h2 { font-family: var(--font-display); font-size: 1.15rem; color: var(--text-bright); font-weight: 400; margin: 1.4rem 0 0.5rem; }
+.seo-content h2:first-child { margin-top: 0; }
+
+/* ─── Ad Slot ─── */
+.ad-slot--bottom {
+  display: block;
+  margin: 2rem auto 0;
+  max-width: 740px;
+  width: 100%;
+  padding: 0 1.5rem;
+}

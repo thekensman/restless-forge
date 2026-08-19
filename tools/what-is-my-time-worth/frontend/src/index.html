@@ -9,18 +9,17 @@
   <meta name="keywords" content="real hourly wage calculator, what is my time worth, your money or your life calculator, time value calculator, should I hire or DIY, is it worth my time">
   <link rel="canonical" href="https://restless-forge.dev/tools/what-is-my-time-worth/">
 
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="16x16"  href="/favicon-16.png">
-  <link rel="icon" type="image/png" sizes="32x32"  href="/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="48x48"  href="/favicon-48.png">
-  <link rel="apple-touch-icon" sizes="180x180"     href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/what-is-my-time-worth/favicon.svg">
+  <link rel="icon" href="/tools/what-is-my-time-worth/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/what-is-my-time-worth/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/what-is-my-time-worth/site.webmanifest">
 
   <!-- Open Graph -->
   <meta property="og:title"       content="What Is My Time Worth?">
   <meta property="og:description" content="You think you earn $31/hour. After commute, taxes, and decompression, it's $19. Calculate yours.">
   <meta property="og:type"        content="website">
-  <meta property="og:url"         content="https://restless-forge.dev/tools/what-is-my-time-worth">
+  <meta property="og:url"         content="https://restless-forge.dev/tools/what-is-my-time-worth/">
   <meta property="og:image"       content="https://restless-forge.dev/tools/what-is-my-time-worth/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -98,11 +97,10 @@
   <link rel="stylesheet" href="/tool-chrome.css">
   <link rel="stylesheet" href="./styles.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
   <script src="/tools/what-is-my-time-worth/shared.js"></script>
 
-  <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
-</head>
+  <!-- AdSense --></head>
 <body>
   <noscript><p style="padding:2rem;text-align:center;color:#d8d4cc;font-family:Georgia,serif;">This calculator requires JavaScript to function. Please enable JavaScript in your browser settings.</p></noscript>
 
@@ -110,22 +108,20 @@
   <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-5516736042033534"
          data-ad-slot="8568993100"
          data-ad-format="auto"
          data-full-width-responsive="false"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>window.rfMountAdsenseSlots();</script>
   </aside>
 
   <!-- ═══ RIGHT RAIL AD (wide screens only) ═══ -->
   <aside class="ad-rail ad-rail--right" aria-label="Advertisement">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-5516736042033534"
          data-ad-slot="2979965943"
          data-ad-format="auto"
          data-full-width-responsive="false"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>window.rfMountAdsenseSlots();</script>
   </aside>
 
   <div id="wimtw-header"></div>
@@ -329,7 +325,7 @@
               <span id="bd-gross">—</span>
             </div>
             <div class="breakdown__row breakdown__row--sub">
-              <span>Federal income tax <span class="tooltip" data-tip="Estimated using 2024/2025 IRS brackets and your filing status. Standard deduction applied.">ⓘ</span></span>
+              <span>Federal income tax <span class="tooltip" data-tip="Estimated using 2026 IRS brackets and your filing status. Standard deduction applied.">ⓘ</span></span>
               <span id="bd-fed">—</span>
             </div>
             <div class="breakdown__row breakdown__row--sub">
@@ -405,7 +401,7 @@
           </details>
 
           <div class="tax-warning">
-            <strong>⚠ Tax estimates are approximations</strong> using 2024/2025 federal brackets and simplified flat-rate state taxes. FICA is 7.65% (employee share). Consult a CPA for your specific situation.
+            <strong>⚠ Tax estimates are approximations</strong> using 2026 federal brackets and simplified flat-rate state taxes. FICA is 7.65% (employee share). Consult a CPA for your specific situation.
           </div>
         </div>
       </div>
@@ -703,7 +699,7 @@
     <section class="about">
       <h2 class="about__title">Why This Calculator Exists</h2>
       <p class="about__text">Most people have never calculated what an hour of their life is actually worth. Not their salary divided by 2,080 — their real take-home pay, minus every hidden cost of working, divided by every hour their job consumes. Commute time. Getting-ready time. Decompression time. Work lunches. Professional clothes. Once you know this number, every spending decision changes. A $40 dinner isn't $40 — it's X hours of your life energy.</p>
-      <p class="about__text">Methodology inspired by <em>Your Money or Your Life</em> by Vicki Robin &amp; Joe Dominguez. Built by <a href="https://restlessforge.substack.com" target="_blank" rel="noopener">Kenneth Cross</a> — writer, developer, and parent in the Chicago suburbs who calculated his own real hourly wage and immediately regretted how much time he'd spent at Chuck E. Cheese. <a href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">Support this project on Ko-fi</a>.</p>
+      <p class="about__text">Methodology inspired by <em>Your Money or Your Life</em> by Vicki Robin &amp; Joe Dominguez. Built by <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a> — writer, developer, and parent in the Chicago suburbs who calculated his own real hourly wage and immediately regretted how much time he'd spent at Chuck E. Cheese. <a data-rf-link="kofi" target="_blank" rel="noopener">Support this project on Ko-fi</a>.</p>
       <p class="about__text about__text--dim">Everything runs in your browser. Nothing is sent anywhere. No signup required. Tax estimates are approximations — consult a CPA for your specific situation. 🔒 <strong>Your financial data never leaves your device.</strong></p>
       <p class="about__text about__text--dim">This real hourly wage calculator accounts for federal and state income taxes, FICA (Social Security and Medicare), daily commute costs and time, work clothing, work meals, childcare, decompression time, and unpaid overtime. The "Is It Worth My Time?" decision calculator helps you decide when to hire a professional versus doing it yourself — factoring in not just cost but how much you enjoy or dread the task. The job comparison tool reveals when a lower-salary remote position actually pays more per hour of life energy than a higher-salary office job.</p>
       <p class="about__text about__text--dim">
@@ -716,7 +712,7 @@
       </p>
 
       <div class="support-nudge">
-        <p>If this tool changed how you think about a purchase or decision, <a href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">a coffee helps keep it free and ad-light</a>.</p>
+        <p>If this tool changed how you think about a purchase or decision, <a data-rf-link="kofi" target="_blank" rel="noopener">a coffee helps keep it free and ad-light</a>.</p>
       </div>
     </section>
   </main>
@@ -725,11 +721,10 @@
   <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-5516736042033534"
          data-ad-slot="7057676288"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>window.rfMountAdsenseSlots();</script>
   </aside>
 
   <div id="wimtw-footer"></div>

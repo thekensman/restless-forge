@@ -1,0 +1,22 @@
+{
+  "name": "ForgeImage",
+  "short_name": "ForgeImage",
+  "description": "Resize, crop, convert, compress, and social-media sizes. All in your browser, no uploads.",
+  "start_url": "/tools/forgeimage/",
+  "scope": "/tools/forgeimage/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/forgeimage/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/forgeimage/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

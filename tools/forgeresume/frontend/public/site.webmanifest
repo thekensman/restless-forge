@@ -1,0 +1,22 @@
+{
+  "name": "ForgeResume",
+  "short_name": "ForgeResume",
+  "description": "ATS-friendly resumes with a built-in keyword check. No account, no dark patterns, no subscription.",
+  "start_url": "/tools/forgeresume/",
+  "scope": "/tools/forgeresume/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/tools/forgeresume/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tools/forgeresume/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>FAQ — Rise &amp; Rhyme</title>
+  <meta name="description" content="Frequently asked questions about Rise &amp; Rhyme.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/faq/">
+  <link rel="icon" type="image/svg+xml" href="/tools/rise-and-rhyme/favicon.svg">
+  <link rel="icon" href="/tools/rise-and-rhyme/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/rise-and-rhyme/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/rise-and-rhyme/site.webmanifest">
+  <meta property="og:title" content="FAQ — Rise &amp; Rhyme">
+  <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/faq/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/rise-and-rhyme/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/rise-and-rhyme/shared.js"></script>
+</head>
+<body>
+  <!-- Header auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-header"></div>
+
+  <main>
+    <!-- Prose lives in the sibling index.md (docs/authoring-content.md).
+         Fills on the first `npm run sync-content` after scaffolding. -->
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<h1>Rise &amp; Rhyme FAQ</h1>
+<p>Answers to common questions about the AI morning song alarm.</p>
+<h2>Where do I find my calendar&#39;s iCal URL?</h2>
+<p>In Google Calendar on the web: Settings → click your calendar under &quot;Settings
+for my calendars&quot; → &quot;Integrate calendar&quot; → copy the <strong>Secret address in iCal
+format</strong>. It&#39;s a long <code>https://calendar.google.com/calendar/ical/…/basic.ics</code>
+URL. Treat it like a password — anyone with the URL can read that calendar.</p>
+<p>Don&#39;t use &quot;Public URL to this calendar&quot; or the embed code from that same panel:
+those are links to a calendar <em>web page</em>, and Rise &amp; Rhyme needs the feed. The
+address you want ends in <code>.ics</code>. Outlook, iCloud, Yahoo, and Proton Calendar
+feeds work too — look for &quot;publish&quot;, &quot;share&quot;, or &quot;subscribe&quot; in their settings.</p>
+<h2>Do I need an account?</h2>
+<p>No. There&#39;s no signup and no login. Your iCal URL and alarm preferences are
+stored in your browser&#39;s localStorage, on your device.</p>
+<h2>Does my calendar data get uploaded?</h2>
+<p>The iCal URL is sent to the Restless Forge server when a song is generated (the
+evening before your alarm) and when you press &quot;Check my calendar&quot;. The server
+fetches the feed and extracts tomorrow&#39;s event titles and times. When a song is
+being written, those are sent on to the Anthropic Claude API for the lyrics; a
+calendar check stops before that and contacts no one else. Event details are
+not stored either way — see the
+<a href="/tools/rise-and-rhyme/privacy/">privacy page</a> for exactly what&#39;s kept.</p>
+<h2>How do I check my calendar is set up right?</h2>
+<p>Press <strong>Check my calendar</strong> in the setup panel. It lists the events tomorrow&#39;s
+song will cover and shows the timezone it detected, so you can confirm both
+before a song is ever written. It doesn&#39;t call the AI, doesn&#39;t cost anything,
+and doesn&#39;t use up your one song for the day — check as often as you like.</p>
+<p>If the times look shifted, your browser is reporting a different timezone than
+you expect; the song uses the same one shown there.</p>
+<h2>Why does the tab need to stay open?</h2>
+<p>This first version schedules everything with in-page timers, so the browser
+tab must stay open (and your device awake) for the alarm to fire. A version
+that works through push notifications is on the roadmap.</p>
+<h2>What happens if the song can&#39;t be generated?</h2>
+<p>You still get woken up. If the server is unreachable, busy, or rate-limited,
+the alarm plays a built-in fallback jingle with a spoken wake-up line instead
+of a custom song.</p>
+<h2>Why is there a daily limit?</h2>
+<p>Each song costs real money to generate (the lyrics are written by the Claude
+API). The server allows one song per calendar every 12 hours and caps total
+daily generations, which keeps the tool free for everyone.</p>
+<h2>Can I choose the music style?</h2>
+<p>Yes — pick a style in the settings (bright electronic, acoustic, funk, jazz,
+indie pop, chiptune, or fanfare), or leave it on &quot;Surprise me&quot; and the mood
+of your day picks the track.</p>
+<h2>Is the source code available?</h2>
+<p>Yes. Code is on <a target="_blank" rel="noopener" href="https://github.com/thekensman/restless-forge">GitHub</a>.</p>
+<!-- /generated:content -->
+  </main>
+
+  <!-- Footer auto-injected by DOMContentLoaded in public/shared.js -->
+  <div id="rar-footer"></div>
+</body>
+</html>

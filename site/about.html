@@ -7,14 +7,19 @@
   <meta name="description" content="Who Ken is, why he builds tools, and what drives Restless Forge. A one-person workshop for useful, honest, open-source software.">
   <link rel="canonical" href="https://restless-forge.dev/about">
 
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
+
   <meta property="og:title" content="About Restless Forge">
   <meta property="og:description" content="Who Ken is, why he builds tools, and what drives Restless Forge.">
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://restless-forge.dev/about">
-
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/styles.css">
+  <meta property="og:url" content="https://restless-forge.dev/about">  <link rel="stylesheet" href="/styles.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
 </head>
 <body>
 
@@ -51,16 +56,61 @@
       ZenXY tables.
     </p>
 
+    <h2>How This Pays For Itself</h2>
+    <p>
+      Advertising, and nothing else. There is no premium tier being held back,
+      no data being sold, and no affiliate arrangement behind any
+      recommendation on this site. Stating that plainly seems better than
+      pretending there is no business model at all.
+    </p>
+    <p>
+      The reason that works is that these tools are genuinely cheap to run.
+      They execute in your browser, so serving one more person costs me
+      essentially nothing — there is no per-user compute bill that would need
+      recovering through a subscription. A static site and a small server is
+      the entire infrastructure. When a tool genuinely cannot work that way,
+      it gets a <strong>☁ Cloud-assisted</strong> badge and its own page
+      explaining exactly what leaves your browser, so the question "does this
+      send my data somewhere?" is answerable at a glance instead of by reading
+      source code.
+    </p>
+    <p>
+      What that buys you is the absence of the thing this site was built
+      against: being charged monthly to process files on hardware you already
+      own. That argument is made at length in
+      <a href="/essays/a-floor-of-curiosity">A Floor of Curiosity</a>.
+    </p>
+
+    <h2>What Gets Built, and What Doesn't</h2>
+    <p>
+      Four tools are finished. Considerably more are not, and they stay
+      unlisted until they are — a directory full of half-working links is
+      worse than a short directory. Some of them will never ship, because the
+      test for shipping is whether I would use the thing myself, and a fair
+      number of ideas fail it once they exist.
+    </p>
+    <p>
+      A tool earns a place here when it solves a problem completely enough to
+      stop thinking about, and when it can do that without a server. Those two
+      constraints rule out a great deal, which is the point:
+      <a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a> walks
+      through the machinery from scaffold to deploy, including the parts that
+      exist mainly to stop me shipping something careless.
+    </p>
+
     <h2>Philosophy</h2>
     <p>
       Every tool on Restless Forge follows a few principles:
     </p>
     <ul>
       <li><strong>Free and open source.</strong> The code is on
-        <a href="https://github.com/thekensman/" target="_blank" rel="noopener">GitHub</a>.
+        <a data-rf-link="github" href="https://github.com/thekensman/" target="_blank" rel="noopener">GitHub</a>.
         Always.</li>
       <li><strong>Privacy-first.</strong> Calculations happen in your browser.
-        No data is sent to servers. No cookies, no tracking.</li>
+        Your inputs and files never leave your device — none of it is sent
+        to our servers, and Restless Forge itself sets no cookies. (Ads are
+        served by Google AdSense, which may use cookies — see the
+        <a href="/privacy">Privacy Policy</a>.)</li>
       <li><strong>No gatekeeping.</strong> No accounts, no paywalls, no
         "sign up to unlock." If you need the tool, use it.</li>
       <li><strong>Honest and useful.</strong> I'd rather build something small
@@ -69,21 +119,25 @@
 
     <h2>The Tools</h2>
     <ul>
+<!-- generated:tools-about — do not edit; run `npm run sync-static` -->
       <li><a href="/tools/what-is-my-time-worth/"><strong>What Is My Time Worth?</strong></a>
-        — Real hourly wage calculator, DIY-vs-hire decision engine, and job comparison tool.</li>
+        — A real hourly wage calculator and DIY-vs-hire decision engine.</li>
       <li><a href="/tools/holopath/"><strong>HoloPath</strong></a>
-        — Hologram GIF generator with 5 presets, 13 effect stages, and 5 output layouts.</li>
+        — A hologram GIF generator that processes images, GIFs, and videos in the browser.</li>
       <li><a href="/tools/sandpath/"><strong>SandPath</strong></a>
-        — Image and SVG to sand table pattern converter (.thr / .gcode).</li>
+        — A converter that turns images and SVGs into sand table patterns (.thr / .gcode).</li>
+      <li><a href="/tools/tattoosafe/"><strong>TattooSafe</strong></a>
+        — A tattoo sizing, camera try-on, and pricing preview tool.</li>
+<!-- /generated:tools-about -->
     </ul>
 
     <h2>Connect</h2>
     <p>
       I write about tools, time, and side projects on
-      <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener">Substack</a>.
+      <a data-rf-link="substack" href="https://restlessforge.substack.com" target="_blank" rel="noopener">Substack</a>.
       If something I've built has been useful, you can support the workshop through
-      <a href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">Ko-fi</a>
-      or <a href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">Buy Me a Coffee</a>.
+      <a data-rf-link="kofi" href="https://ko-fi.com/restless-forge" target="_blank" rel="noopener">Ko-fi</a>
+      or <a data-rf-link="bmc" href="https://buymeacoffee.com/restlessforge" target="_blank" rel="noopener">Buy Me a Coffee</a>.
     </p>
   </main>
 

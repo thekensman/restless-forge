@@ -21,13 +21,11 @@
   <meta name="twitter:description" content="Turn any image into an animated hologram GIF with one click.">
   <meta name="twitter:image" content="https://restless-forge.dev/tools/holopath/og-image.png">
 
-  <!-- Favicons -->
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <!-- Favicons (canonical block — tool-scoped, same on every HoloPath page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/holopath/favicon.svg">
+  <link rel="icon" href="/tools/holopath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/holopath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/holopath/site.webmanifest">
 
   <!-- JSON-LD: WebApplication -->
   <script type="application/ld+json">
@@ -74,12 +72,10 @@
   <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 
   <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534"
-     crossorigin="anonymous"></script>
-
   <link rel="stylesheet" href="/tool-chrome.css">
   <link rel="stylesheet" href="./styles.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
   <script src="/tools/holopath/shared.js"></script>
 </head>
 <body>
@@ -96,20 +92,18 @@
   <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
     <ins class="adsbygoogle"
          style="display:block;width:160px;height:600px"
-         data-ad-client="ca-pub-5516736042033534"
          data-ad-slot="8568993100"
          data-ad-format="vertical"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>window.rfMountAdsenseSlots();</script>
   </aside>
 
   <!-- ═══ Right Rail Ad ═══ -->
   <aside class="ad-rail ad-rail--right" aria-label="Advertisement">
     <ins class="adsbygoogle"
          style="display:block;width:160px;height:600px"
-         data-ad-client="ca-pub-5516736042033534"
          data-ad-slot="2979965943"
          data-ad-format="vertical"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>window.rfMountAdsenseSlots();</script>
   </aside>
 
   <!-- ─── App ─── -->
@@ -283,22 +277,40 @@
     </div>
   </main>
 
-  <!-- ─── SEO Content (condensed — full content on subpages) ─── -->
+  <!-- ─── Explanatory content (full detail on the subpages) ─── -->
   <section class="content" id="about">
-    <h2>About HoloPath</h2>
-    <p>HoloPath is a free hologram GIF generator that transforms any image, animated GIF, or short video into a stunning holographic animation. Choose from five presets — Classic, Cyberpunk, Ghost, Glitch, and Matrix — and five output layouts for pyramid projectors, LED hologram fans, Pepper's Ghost displays, or direct use. All processing happens entirely in your browser — your files are never uploaded to a server. <a href="/about">Learn more →</a></p>
-    <p>Supports JPG, PNG, WebP, BMP, animated GIF, and video formats including MP4, WebM, and MOV — all up to 15 MB. Real-time animated preview with instant parameter adjustment. <a href="/how-it-works">See how it works →</a></p>
+    <h2>What HoloPath Does</h2>
+    <p>HoloPath turns an image, an animated GIF, or a short video into a holographic animation, then lays that animation out in the shape your display hardware expects. It exists because the hologram videos people were making for pyramid projectors were almost all built in expensive 3D software, and there was no simple way to take a photo you already had and project it.</p>
+    <p>Accepted inputs are JPG, PNG, WebP and BMP for stills, animated GIF, and MP4, WebM or MOV for video, up to 15&nbsp;MB. Video frames are extracted at 10&nbsp;fps and capped at 900 frames, which is a browser-memory limit rather than an arbitrary one — a few thousand full-resolution frames will exhaust a tab.</p>
+
+    <h2>The Five Output Layouts</h2>
+    <p>The layout is the part most hologram filters get wrong. An effect that looks holographic on a phone screen is useless if it isn't arranged correctly for the hardware reflecting it:</p>
+    <ul>
+      <li><strong>Pyramid 360°</strong> — the four-sided arrangement for the small acrylic pyramids that sit on a phone screen.</li>
+      <li><strong>Pyramid 270°</strong> — three-sided, for commercial showcase units meant to be viewed from the front and sides only.</li>
+      <li><strong>Hologram Fan</strong> — a circular crop for LED persistence-of-vision fans, which spin a blade of lights fast enough to paint an image in the air.</li>
+      <li><strong>Pepper's Ghost</strong> — positioned for an angled sheet of glass or acrylic, the Victorian stage illusion that every modern "hologram" concert still uses.</li>
+      <li><strong>Single Image</strong> — no layout transform, for sharing the effect on its own.</li>
+    </ul>
+
+    <h2>How the Effect Is Produced</h2>
+    <p>Every frame runs through a thirteen-stage pipeline built on Canvas pixel manipulation: wobble, luminance extraction, edge detection, scan lines, chromatic aberration, glow, glitch, noise and the rest. Five presets — Classic, Cyberpunk, Ghost, Glitch and Matrix — are tuned starting points, and every individual parameter stays adjustable, with the preview re-rendering as you change it.</p>
+    <p>A still image has only one frame, so the animation comes from varying the effect parameters across the output frames instead: the scan line travels, the flicker phase advances, the glitch offsets move. A single photograph ends up looking like a live projection. An animated GIF keeps its own motion, with each source frame passed through the pipeline independently. <a href="/tools/holopath/how-it-works/">The full pipeline is documented stage by stage →</a></p>
+
+    <h2>What It Doesn't Do</h2>
+    <p>This is a 2D effect renderer, not a 3D reconstruction. It does not build a model of your subject or generate views from angles the source never contained — a pyramid layout shows the same treated image on each face, which is exactly how the projectors are designed to work. It also won't rescue a low-resolution source: scan lines and edge detection reveal compression artefacts rather than hide them.</p>
+    <p>Everything runs in your browser. Your files are never uploaded, because there is no server to upload them to — the pipeline is JavaScript executing in your own tab, which is also why large videos are limited by your device's memory rather than by a plan tier.</p>
+    <p><a href="/tools/holopath/articles/">Articles</a> &nbsp;·&nbsp; <a href="/tools/holopath/faq/">FAQ</a> &nbsp;·&nbsp; <a href="/tools/holopath/about/">About HoloPath</a> &nbsp;·&nbsp; <a href="/tools/">More Restless Forge tools</a></p>
   </section>
 
   <!-- ═══ AD SLOT ═══ -->
   <aside class="ad-slot ad-slot--bottom">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-5516736042033534"
          data-ad-slot="7057676288"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>window.rfMountAdsenseSlots();</script>
   </aside>
 
   <div id="hp-footer"></div>

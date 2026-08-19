@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d14">
+  <title>TattooSafe — AR Tattoo Preview &amp; Pricing Calculator</title>
+  <meta name="description" content="Free AR tattoo preview tool. Use your camera to see how a tattoo design looks on your body in real time. Includes sizing calculator with 16 body placements and pricing estimator based on size, style, and placement.">
+  <meta name="keywords" content="tattoo preview AR, tattoo size calculator, tattoo price estimator, tattoo placement preview, how big will my tattoo be, tattoo cost calculator, tattoo mockup camera, tattoo proportion calculator">
+  <link rel="canonical" href="https://restless-forge.dev/tools/tattoosafe/">
+
+  <!-- Favicons -->
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/tattoosafe/favicon.svg">
+  <link rel="icon" href="/tools/tattoosafe/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/tattoosafe/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/tattoosafe/site.webmanifest">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="TattooSafe — AR Tattoo Preview &amp; Pricing Calculator">
+  <meta property="og:description" content="Free tattoo AR preview and pricing tool. See your design on your body in real time using your camera.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/tattoosafe/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/tattoosafe/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://restless-forge.dev/tools/tattoosafe/og-image.png">
+
+  <!-- Structured data: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "TattooSafe",
+    "description": "Free AR tattoo preview and pricing calculator. Upload a design, use your camera to see it on your body in real time, and get pricing estimates.",
+    "url": "https://restless-forge.dev/tools/tattoosafe",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+  <!-- Structured data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type":"Question","name":"How does TattooSafe's AR preview work?","acceptedAnswer":{"@type":"Answer","text":"Upload your tattoo design, then activate your device camera. TattooSafe overlays your design on the live camera feed so you can see exactly how it looks on your body. Drag to position, pinch to resize, and use the rotation slider to angle the design."}},
+      {"@type":"Question","name":"How much does a tattoo cost?","acceptedAnswer":{"@type":"Answer","text":"Pricing depends on size, complexity, body placement, and artist experience. A small simple piece (3×3 cm) typically costs $50–$150, while a large full-colour back piece can cost $2,000–$5,000+. Use TattooSafe's pricing calculator for a personalized estimate."}},
+      {"@type":"Question","name":"Is TattooSafe free?","acceptedAnswer":{"@type":"Answer","text":"Yes, completely free. All processing happens in your browser — no images are uploaded. No account required."}},
+      {"@type":"Question","name":"Can I show the preview to my tattoo artist?","acceptedAnswer":{"@type":"Answer","text":"Absolutely. Take a screenshot from the AR preview and bring it to your consultation. The silhouette view includes precise centimetre dimensions your artist can reference."}}
+    ]
+  }
+  </script>
+
+  <!-- AdSense -->
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (absolute URLs — served from public/, not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/tattoosafe/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="ts-header"></div>
+
+  <div class="tool-intro">
+    <h1>Free AR Tattoo Preview &amp; Pricing Calculator</h1>
+    <p>See how a tattoo design looks on your body using your camera. Upload any image, activate the
+    camera, and drag your design into position. Then estimate cost based on size, style, and placement.
+    Everything runs in your browser — no uploads, no accounts.</p>
+  </div>
+
+  <div class="tool-content">
+    <!-- ─── Upload ─── -->
+    <section class="upload" aria-label="Design upload">
+      <h2 class="sr-only">Upload your design</h2>
+      <div class="upload__circle" id="drop-zone" role="button" tabindex="0" aria-label="Drop a design here or click to browse">
+        <div class="upload__inner">
+          <svg class="upload__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M24 32V16m0 0l-7 7m7-7l7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="6" y="6" width="36" height="36" rx="8" stroke-linecap="round"/>
+          </svg>
+          <p class="upload__label">Drop your design here</p>
+          <p class="upload__hint">JPG, PNG, WebP, BMP, GIF</p>
+          <input type="file" id="file-input"
+                 accept=".jpg,.jpeg,.png,.webp,.bmp,.gif,image/jpeg,image/png,image/webp,image/bmp,image/gif"
+                 hidden aria-label="Choose tattoo design image">
+        </div>
+      </div>
+      <p class="upload__file-name" id="file-name" aria-live="polite"></p>
+    </section>
+
+    <!-- ─── Settings ─── -->
+    <section class="settings" aria-label="Placement settings">
+      <h2 class="settings__title">Placement Settings</h2>
+
+      <div class="field">
+        <label class="field__label" for="unit-select">Units</label>
+        <select class="field__select" id="unit-select">
+          <option value="metric" selected>Metric (cm)</option>
+          <option value="imperial">Imperial (inches)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="body-part-select">Body Part</label>
+        <select class="field__select" id="body-part-select"></select>
+        <p class="field__desc" id="body-part-desc"></p>
+        <p class="field__desc" id="max-dimensions" style="color:var(--accent-dim)"></p>
+        <p class="fit-indicator" id="fit-indicator"></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="height-input">Your Height</label>
+        <div class="field__row" id="height-metric">
+          <input class="field__input field__input--short" type="number" id="height-input" value="170" min="100" max="250" step="1">
+          <span class="field__unit-label">cm</span>
+        </div>
+        <div class="field__row" id="height-imperial" style="display:none">
+          <input class="field__input field__input--short" type="number" id="height-ft" value="5" min="3" max="8" step="1">
+          <span class="field__unit-label">ft</span>
+          <input class="field__input field__input--short" type="number" id="height-in" value="7" min="0" max="11" step="1">
+          <span class="field__unit-label">in</span>
+        </div>
+      </div>
+
+      <div class="settings__divider"></div>
+
+      <div class="field">
+        <label class="field__label">Tattoo Size</label>
+        <div class="field__row">
+          <div class="field__input-group">
+            <input class="field__input field__input--short" type="number" id="tattoo-width" value="8" min="0.5" max="100" step="0.5" aria-label="Tattoo width">
+            <span class="field__unit-label" id="width-unit-label">cm</span>
+          </div>
+          <span class="field__x">&times;</span>
+          <div class="field__input-group">
+            <input class="field__input field__input--short" type="number" id="tattoo-height" value="12" min="0.5" max="100" step="0.5" aria-label="Tattoo height">
+            <span class="field__unit-label" id="height-unit-label">cm</span>
+          </div>
+        </div>
+        <div class="size-slider">
+          <span class="size-slider__label">W</span>
+          <input class="field__range" type="range" id="tattoo-width-range" min="0.5" max="60" step="0.5" value="8" aria-label="Tattoo width slider">
+        </div>
+        <div class="size-slider">
+          <span class="size-slider__label">H</span>
+          <input class="field__range" type="range" id="tattoo-height-range" min="0.5" max="60" step="0.5" value="12" aria-label="Tattoo height slider">
+        </div>
+        <label class="field__check">
+          <input type="checkbox" id="aspect-lock">
+          Lock aspect ratio <span class="field__check-hint">(uses your design&rsquo;s proportions once one is uploaded)</span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="rotation-range">Rotation: <span id="rotation-value">0</span>&deg;</label>
+        <input class="field__range" type="range" id="rotation-range" min="-180" max="180" value="0" step="5">
+        <div class="field__range-labels"><span>-180&deg;</span><span>0&deg;</span><span>180&deg;</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="opacity-range">Opacity: <span id="opacity-value">85</span>%</label>
+        <input class="field__range" type="range" id="opacity-range" min="20" max="100" value="85" step="5">
+        <div class="field__range-labels"><span>Faded</span><span>Solid</span></div>
+      </div>
+
+      <div class="settings__divider"></div>
+
+      <div class="field">
+        <label class="field__label" for="complexity-select">Style / Complexity</label>
+        <select class="field__select" id="complexity-select"></select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="artist-select">Artist Tier</label>
+        <select class="field__select" id="artist-select"></select>
+      </div>
+
+      <div class="price-estimate" id="price-estimate" aria-live="polite">
+        <p class="price-estimate__range" id="price-range">—</p>
+        <p class="price-estimate__detail" id="price-detail"></p>
+        <p class="price-estimate__link"><a href="/tools/tattoosafe/pricing/">How this estimate works →</a></p>
+      </div>
+    </section>
+
+    <!-- ─── Silhouette Preview ─── -->
+    <section class="preview" aria-label="Silhouette preview">
+      <h2 class="preview__title">Preview</h2>
+      <div class="preview__frame" id="silhouette-preview"></div>
+    </section>
+
+    <!-- ─── AR Camera Preview ─── -->
+    <section class="ar" id="ar-section" aria-label="Camera preview">
+      <h2 class="preview__title">Camera Preview</h2>
+      <p class="ar__desc">See the design on your body with your camera. The feed never leaves your
+      device &mdash; nothing is recorded or uploaded.</p>
+      <canvas class="ar__canvas" id="ar-canvas" width="640" height="480"></canvas>
+      <p class="ar__hint" id="ar-hint" aria-live="polite"></p>
+      <div class="ar__buttons">
+        <button class="btn btn--primary" id="ar-start" disabled>Start Camera</button>
+        <button class="btn" id="ar-stop" hidden>Stop Camera</button>
+        <button class="btn" id="ar-screenshot" hidden>Save Screenshot</button>
+        <label class="ar__wrap-toggle" id="ar-wrap-label" hidden>
+          <input type="checkbox" id="ar-wrap"> Curve around a limb
+        </label>
+        <label class="ar__curve" id="ar-curve-label" hidden>
+          Curvature
+          <input type="range" id="ar-curve" min="0" max="100" value="40" aria-label="Wrap curvature">
+        </label>
+        <label class="ar__wrap-toggle" id="ar-removebg-label" hidden><input type="checkbox" id="ar-removebg" checked> Remove flat background</label>
+      </div>
+      <p class="ar__note">Upload a design above to enable the camera preview. The overlay is a
+      static try-on aid — position it against your reflection; it doesn't track your body.</p>
+    </section>
+
+    <!-- ─── Error ─── -->
+    <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
+
+    <!-- ─── SEO / explainer content ─── -->
+    <section class="seo-content" aria-label="About sizing and pricing">
+      <h2>Why Tattoo Size Is the Decision That Matters Most</h2>
+      <p>Most tattoo regret isn't about the design — it's about scale and placement. A piece that
+      looks perfect on a phone screen can read completely differently at 8&nbsp;cm on a wrist or
+      30&nbsp;cm across a back. TattooSafe exists to close that gap before any ink is involved:
+      enter your height and a body placement, and the proportional mockup shows your design at
+      true relative scale on a body like yours, flagging when it physically won't fit the area.
+      The camera preview then lets you hold the design against your actual skin — a static,
+      honestly-labeled try-on aid, not AI body tracking.</p>
+      <h2>How the Price Estimate Works</h2>
+      <p>The estimate combines four real cost drivers: the tattoo's area, the style's needle-time
+      per square inch (fine line work is far faster than photorealism), a placement difficulty
+      multiplier (ribs and hands take longer than a forearm), and the hourly-rate band for your
+      chosen artist tier. It also accounts for session overhead — setup, breaks, and the shop
+      minimum — and splits long work into realistic multi-session plans. It's a planning range,
+      not a quote: your artist prices the actual work. The
+      <a href="/tools/tattoosafe/pricing/">pricing page</a> breaks down the full methodology,
+      and the <a href="/tools/tattoosafe/faq/">FAQ</a> covers what the preview can and can't do.
+      Like every <a href="/tools/">Restless Forge tool</a>, everything runs in your browser —
+      your design and camera feed never leave your device.</p>
+
+      <h2>What the Camera Preview Is, and Isn't</h2>
+      <p>The camera view composites your design over a live video feed so you can hold your arm,
+      ribs or shoulder in frame and see the piece at the size you selected. It is a static overlay:
+      the design does not track your body, wrap around a limb, or follow you as you move. That is a
+      deliberate limit rather than a missing feature — body-tracking overlays tend to look
+      convincing while quietly distorting scale, which is the one thing this tool exists to get
+      right. Treat it as holding a printed stencil against your skin, and use the proportional
+      silhouette mockup when you want the measurement rather than the impression.</p>
+      <p>Nothing from the camera is recorded or transmitted. The video stream is read by JavaScript
+      in your tab and drawn straight to a canvas; there is no upload step and no server that could
+      receive it.</p>
+
+      <h2>Why Placement Changes the Answer</h2>
+      <p>The same design is a different tattoo on a forearm than on a rib cage. Sixteen placements
+      are modelled, each with its own usable area and difficulty multiplier, because two things
+      vary independently: how much room the area physically offers, and how much longer the work
+      takes there. Ribs, hands, feet and necks are slower to tattoo — thinner skin over bone, more
+      breaks, more repositioning — so an identical piece costs more on ribs than on a thigh, even
+      at the same size and the same artist rate.</p>
+      <p>Size is where most plans go wrong in the other direction. Fine detail has a floor: line
+      weight, needle size and ink spread mean a design with dense linework simply cannot be
+      rendered at 5&nbsp;cm and stay legible in five years. When the calculator flags a design as
+      too small for its placement, that is what it is warning about.</p>
+
+      <h2>Who This Is For</h2>
+      <p>It is for the stage before you book — working out whether the piece you like fits where
+      you want it, and roughly what a shop will quote, so you walk into the consultation with a
+      realistic starting point. It is not a booking system, a design generator, or a substitute for
+      an artist's judgement. A good artist will adjust your design for the body part it is going
+      on, and that conversation goes better when you already know the size you are asking for is
+      physically reasonable.</p>
+  </div>
+
+  <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="ts-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

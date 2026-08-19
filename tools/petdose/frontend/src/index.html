@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <meta name="theme-color" content="#0d0d14">
+  <title>PetDose — Pet medication dosage calculator</title>
+  <meta name="description" content="Free pet medication dosage calculator with safety warnings.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/petdose/">
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/petdose/favicon.svg">
+  <link rel="icon" href="/tools/petdose/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/petdose/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/petdose/site.webmanifest">
+  <meta property="og:title" content="PetDose — Pet medication dosage calculator">
+  <meta property="og:description" content="Free pet medication dosage calculator with safety warnings.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/petdose/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/petdose/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"PetDose","description":"Free pet medication dosage calculator with safety warnings.","url":"https://restless-forge.dev/tools/petdose","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="/shared.js"></script>
+  <script src="/tools/petdose/shared.js"></script>
+</head>
+<body>
+  <div id="pd-header"></div>
+  <div class="tool-intro">
+    <h1>PetDose: Pet medication dosage calculator</h1>
+    <p>Free pet medication dosage calculator with safety warnings. Everything runs in your browser — no uploads, no accounts, no data stored.</p>
+  </div>
+  <!-- ═══ Safety disclaimer modal (dismissable, reshown each session) ═══ -->
+  <div class="safety-modal" id="safety-modal" role="alertdialog" aria-modal="true"
+       aria-labelledby="safety-title" aria-describedby="safety-text">
+    <div class="safety-modal__card">
+      <h2 class="safety-modal__title" id="safety-title">⚠ Before you use PetDose</h2>
+      <p class="safety-modal__text" id="safety-text">
+        PetDose shows <strong>general reference ranges</strong> compiled from published
+        veterinary sources. It is <strong>not veterinary advice</strong>. Safe dosing
+        depends on your pet's breed, age, weight, health conditions, pregnancy status,
+        and other medications — never give a medication, change a dose, or use a
+        prescription drug without your veterinarian's direction.
+      </p>
+      <p class="safety-modal__text">
+        If your pet swallowed something toxic or is in distress, contact your vet or the
+        ASPCA Animal Poison Control Center at <strong>(888)&nbsp;426-4435</strong> now.
+      </p>
+      <button class="safety-modal__btn" id="safety-dismiss">I understand — show reference ranges</button>
+    </div>
+  </div>
+
+  <div class="tool-content">
+    <!-- ─── Dose calculator ─── -->
+    <section class="settings" aria-label="Dose calculator">
+      <h2 class="settings__title">Dose Calculator</h2>
+
+      <div class="field">
+        <label class="field__label" for="species-select">Pet</label>
+        <select class="field__select" id="species-select">
+          <option value="dog" selected>Dog</option>
+          <option value="cat">Cat</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="weight-input">Weight</label>
+        <div class="field__row">
+          <input class="field__input" type="number" id="weight-input" value="10" min="0.5" max="200" step="0.1">
+          <select class="field__select field__select--unit" id="weight-unit">
+            <option value="lbs" selected>lbs</option>
+            <option value="kg">kg</option>
+          </select>
+        </div>
+        <p class="field__hint" id="weight-note" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="med-select">Medication</label>
+        <select class="field__select" id="med-select"></select>
+      </div>
+    </section>
+
+    <!-- ─── Results ─── -->
+    <section class="settings" aria-label="Dose result">
+      <h2 class="settings__title">Reference Range</h2>
+      <div class="output-area" id="output-area" aria-live="polite">Select a medication to see its reference range.</div>
+      <p class="dose-disclaimer" id="dose-disclaimer">
+        Reference only — confirm every dose with your veterinarian before giving it.
+      </p>
+    </section>
+
+    <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
+  </div>
+  <div id="pd-footer"></div>
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

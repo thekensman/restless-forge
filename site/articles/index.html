@@ -7,14 +7,19 @@
   <meta name="description" content="Longer-form writing from Restless Forge, hosted on Substack. Essays about tools, time, side projects, and the maker philosophy.">
   <link rel="canonical" href="https://restless-forge.dev/articles/">
 
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
+
   <meta property="og:title" content="Articles & Essays — Restless Forge">
   <meta property="og:description" content="Longer-form writing about tools, time, and side projects.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://restless-forge.dev/articles/">
-
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/styles.css">
+  <meta property="og:url" content="https://restless-forge.dev/articles/">  <link rel="stylesheet" href="/styles.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
 </head>
 <body>
 
@@ -23,44 +28,112 @@
   <main class="page">
     <h1>Articles &amp; Writing</h1>
     <p>
-      Long-form thinking about tools, time, and side projects. Most of my
-      writing lives on Substack. Subscribe to get new essays in your inbox.
+      Writing that comes out of building the tools. Each of these started as
+      something I had to work out to make a tool behave correctly, and turned
+      out to be worth explaining on its own — how a sand table's coordinate
+      system actually works, what your salary looks like after every honest
+      deduction, how a tattoo studio really arrives at a number.
+    </p>
+    <p>
+      They are grouped by the tool they came from. Nothing here is a summary of
+      what other sites already say; if a piece exists it is because there was
+      something specific to get right.
     </p>
 
-    <div style="margin: 2rem 0; text-align: center;">
-      <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener"
+    <h2>What Is My Time Worth?</h2>
+    <p>
+      The arithmetic behind your real hourly wage, and the judgment calls the
+      calculator makes on your behalf.
+      <a href="/tools/what-is-my-time-worth/articles/">All WIMTW articles &rarr;</a>
+    </p>
+    <ul>
+      <li><a href="/tools/what-is-my-time-worth/articles/what-your-real-hourly-wage-subtracts/">What Your Real Hourly Wage Actually Subtracts</a>
+        — why salary ÷ 2,080 is wrong in both directions at once.</li>
+      <li><a href="/tools/what-is-my-time-worth/articles/comparing-job-offers-across-states/">Comparing Two Job Offers When the States Have Different Taxes</a>
+        — when a $10,000 raise is a pay cut.</li>
+      <li><a href="/tools/what-is-my-time-worth/articles/the-enjoyment-multiplier/">The Enjoyment Multiplier</a>
+        — why the DIY-vs-hire model needs a fudge factor, stated openly.</li>
+      <li><a href="/tools/what-is-my-time-worth/articles/life-energy-and-ymoyl/">What Is Life Energy?</a>
+        — the <em>Your Money or Your Life</em> idea the whole tool rests on.</li>
+    </ul>
+
+    <h2>SandPath</h2>
+    <p>
+      Kinetic sand tables, file formats, and why the obvious way to convert an
+      image is the way that fails.
+      <a href="/tools/sandpath/articles/">All SandPath articles &rarr;</a>
+    </p>
+    <ul>
+      <li><a href="/tools/sandpath/articles/theta-rho-vs-gcode/">Theta-Rho vs G-code</a>
+        — polar and Cartesian, and which format survives a table upgrade.</li>
+      <li><a href="/tools/sandpath/articles/why-scanlines-look-wrong-in-sand/">Why Scanlines Look Wrong in Sand</a>
+        — edge detection, marching squares, and skeletonisation.</li>
+      <li><a href="/tools/sandpath/articles/travel-lines-and-path-ordering/">Travel Lines: The Problem You Cannot Fully Solve</a>
+        — the travelling salesman problem in a sand tray.</li>
+    </ul>
+
+    <h2>TattooSafe</h2>
+    <p>
+      What a tattoo costs, how big it should be, and why both are harder to
+      answer than they look.
+      <a href="/tools/tattoosafe/articles/">All TattooSafe articles &rarr;</a>
+    </p>
+    <ul>
+      <li><a href="/tools/tattoosafe/articles/how-tattoo-studios-price-work/">How Tattoo Studios Actually Price Work</a>
+        — area, style, placement, rate, in that order.</li>
+      <li><a href="/tools/tattoosafe/articles/sizing-a-tattoo-to-a-body-part/">Sizing a Tattoo to a Body Part</a>
+        — why screens mislead, and what actually limits size.</li>
+    </ul>
+
+    <h2>HoloPath</h2>
+    <p>
+      The largest collection here — sixteen articles on holographic displays,
+      from Pepper's Ghost to LED fans to colour theory for holographic art.
+      <a href="/tools/holopath/articles/">All HoloPath articles &rarr;</a>
+    </p>
+
+    <h2>Essays</h2>
+    <p>
+      Longer pieces about the project itself rather than any one tool — why
+      these get built, and what happens between an idea and a shipped thing.
+      <a href="/essays/">Browse essays &rarr;</a>
+    </p>
+
+    <h2>Why These Exist at All</h2>
+    <p>
+      Almost every article here started as a bug or a wrong answer. The sand
+      table piece exists because early conversions came out looking like
+      corduroy, and working out why meant understanding what a ball dragging
+      through sand can and cannot represent. The tax comparison piece exists
+      because two job offers with a $10,000 gap turned out to favour the lower
+      one once the state lines were accounted for. In both cases the tool
+      needed the answer before the article could be written.
+    </p>
+    <p>
+      That ordering matters, and it is the main thing separating these from
+      the enormous volume of writing that exists purely to rank. A piece here
+      is downstream of code that had to work. Where an article states a number
+      — a needle-time rate, a travel-line penalty, a bracket threshold — that
+      number is the one the tool uses, not a figure gathered to fill a
+      paragraph.
+    </p>
+    <p>
+      The practical consequence is that there are not many of them, and they
+      appear irregularly. A tool that raised no interesting questions gets no
+      article, which is why some tools here have five and others have none.
+      That is the intended state rather than a backlog.
+    </p>
+
+    <h2>On Substack</h2>
+    <p>
+      Occasional longer-form writing goes out by email. No schedule, no filler.
+    </p>
+    <div style="margin: 1.5rem 0;">
+      <a data-rf-link="substack" href="https://restlessforge.substack.com" target="_blank" rel="noopener"
          class="tool-card__link" style="font-size: 1rem; padding: 0.75rem 2rem;">
         Subscribe on Substack &rarr;
       </a>
     </div>
-
-    <h2>On Restless Forge</h2>
-    <p>
-      Original essays hosted here on restless-forge.dev:
-    </p>
-    <ul>
-      <li><a href="/essays/">Browse essays &rarr;</a></li>
-    </ul>
-
-    <h2>On Substack</h2>
-    <p>
-      Articles, tutorials, and deeper dives published on Substack:
-    </p>
-
-    <div id="substack-articles">
-      <p style="color: var(--text-dim); font-style: italic;">
-        Visit <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener">substack.com/@restlessforge</a>
-        for the latest articles.
-      </p>
-    </div>
-
-    <h2>Tool-Specific Articles</h2>
-    <p>
-      In-depth articles about holographic displays and techniques:
-    </p>
-    <ul>
-      <li><a href="/tools/holopath/articles/">HoloPath Articles</a> — History of holograms, pyramid projectors, LED fans, colour theory, and more.</li>
-    </ul>
   </main>
 
   <div id="rf-footer"></div>

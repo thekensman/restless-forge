@@ -4,17 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Restless Forge Tools — Free Web Tools for Makers</title>
-  <meta name="description" content="A curated collection of free web-based tools: real hourly wage calculator, hologram GIF generator, and sand table pattern converter. No sign-ups, no tracking.">
+  <meta name="description" content="A curated collection of free web-based tools: real hourly wage calculator, AR tattoo preview and pricing, hologram GIF generator, and sand table pattern converter. No sign-ups; everything runs in your browser.">
   <link rel="canonical" href="https://restless-forge.dev/tools/">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
 
   <meta property="og:title" content="Restless Forge Tools">
   <meta property="og:description" content="Free web-based tools for freelancers, makers, and curious builders.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://restless-forge.dev/tools/">
-
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/styles.css">
+  <meta property="og:url" content="https://restless-forge.dev/tools/">  <link rel="stylesheet" href="/styles.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
 </head>
 <body>
 
@@ -23,52 +28,66 @@
   <main class="page">
     <h1>Tools for Makers</h1>
     <p>
-      Every tool here solves a real problem. They're free, open-source, and
-      privacy-first — your data stays in your browser. No accounts, no tracking,
-      no subscriptions.
+      Every tool here solves a problem someone actually had, usually me. They
+      are free, open-source, and run in your browser — no accounts, no
+      subscriptions, and nothing to install.
     </p>
 
-    <h2>Financial</h2>
-    <div class="tools-grid">
-      <div class="tool-card">
-        <div class="tool-card__category">Financial</div>
-        <h3 class="tool-card__title">What Is My Time Worth?</h3>
-        <p class="tool-card__desc">
-          Calculate your real hourly wage after commute, taxes, work clothes,
-          and decompression time. Then use the decision engine to know when
-          to DIY and when to hire. Compare two jobs side-by-side.
-        </p>
-        <a href="/tools/what-is-my-time-worth/" class="tool-card__link">Launch Calculator</a>
-      </div>
-    </div>
+    <h2>What the categories mean</h2>
+    <p>
+      <strong>Financial</strong> tools deal with money and time: what your hour
+      is really worth after tax and commute, whether a job offer is better than
+      it looks, when doing a thing yourself beats paying someone.
+      <strong>Creative</strong> tools make or transform artwork.
+      <strong>Maker</strong> tools drive physical hardware — sand tables, CNC
+      machines, printers — and mostly involve turning a picture into
+      coordinates a machine understands. <strong>Lifestyle</strong> tools cover
+      decisions that are neither purely financial nor purely creative, like
+      sizing a tattoo. <strong>Utility</strong> is everything that resists a
+      tidier label.
+    </p>
 
-    <h2>Creative</h2>
-    <div class="tools-grid">
-      <div class="tool-card">
-        <div class="tool-card__category">Creative</div>
-        <h3 class="tool-card__title">HoloPath</h3>
-        <p class="tool-card__desc">
-          Upload any image, GIF, or video and transform it into a holographic
-          animated GIF. 13-stage rendering pipeline with 5 presets. Supports
-          pyramid projectors, LED fans, and Pepper's Ghost displays.
-        </p>
-        <a href="/tools/holopath/" class="tool-card__link">Launch Generator</a>
-      </div>
-    </div>
+    <h2>What they all have in common</h2>
+    <p>
+      <strong>Nothing is uploaded.</strong> Files you open and numbers you type
+      are processed by JavaScript in your own tab. For most tools here there is
+      no server involved at all, which makes the privacy claim structural
+      rather than a promise.
+    </p>
+    <p>
+      <strong>No accounts, ever.</strong> Nothing is gated behind a sign-up,
+      and there is no saved-state-in-the-cloud feature that would require one.
+      Where a tool remembers your settings, it remembers them locally.
+    </p>
+    <p>
+      <strong>The whole tool is the free tier.</strong> There is no upgrade
+      path, because there is no paid version. Hosting is covered by
+      advertising.
+    </p>
 
-    <h2>Utility</h2>
-    <div class="tools-grid">
-      <div class="tool-card">
-        <div class="tool-card__category">Utility</div>
-        <h3 class="tool-card__title">SandPath</h3>
-        <p class="tool-card__desc">
-          Convert images and SVG files into .thr and .gcode patterns for
-          kinetic sand tables. Supports Oasis Mini, Oasis One, Sisyphus,
-          and ZenXY with automatic image tracing and live SVG preview.
-        </p>
-        <a href="/tools/sandpath/" class="tool-card__link">Launch Converter</a>
-      </div>
-    </div>
+    <h2>The ☁ cloud-assisted badge</h2>
+    <p>
+      A few tools cannot run entirely in the browser — generating text with a
+      language model, for instance, requires a key that cannot safely be shipped
+      to visitors. Those tools carry a <strong>☁ Cloud-assisted</strong> badge
+      on their card, and each one has its own privacy page describing exactly
+      what gets sent, what is stored, and in what form. The badge is there so
+      the distinction is visible before you use the tool rather than buried
+      afterwards. Everything without a badge stays on your device.
+    </p>
+
+    <h2>Pick one</h2>
+    <p>
+      Each card below links straight into the tool — there is no landing page
+      to get past. Most have their own FAQ and articles explaining how they
+      work and where their limits are.
+    </p>
+
+    <div id="rf-tools-directory"><!-- generated:tools-directory — do not edit; run `npm run sync-static` -->
+<h2 class="tool-directory__category" data-category="Creative">Creative</h2><div class="tools-grid" data-category="Creative"><div class="tool-card"><div class="tool-card__category">Creative</div><h3 class="tool-card__title">HoloPath</h3><p class="tool-card__desc">Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.</p><a href="/tools/holopath/" class="tool-card__link">Launch Generator</a></div></div><h2 class="tool-directory__category" data-category="Financial">Financial</h2><div class="tools-grid" data-category="Financial"><div class="tool-card"><div class="tool-card__category">Financial</div><h3 class="tool-card__title">What Is My Time Worth?</h3><p class="tool-card__desc">Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.</p><a href="/tools/what-is-my-time-worth/" class="tool-card__link">Launch Calculator</a></div></div><h2 class="tool-directory__category" data-category="Lifestyle">Lifestyle</h2><div class="tools-grid" data-category="Lifestyle"><div class="tool-card"><div class="tool-card__category">Lifestyle</div><h3 class="tool-card__title">TattooSafe</h3><p class="tool-card__desc">Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.</p><a href="/tools/tattoosafe/" class="tool-card__link">Launch Preview</a></div></div><h2 class="tool-directory__category" data-category="Maker">Maker</h2><div class="tools-grid" data-category="Maker"><div class="tool-card"><div class="tool-card__category">Maker</div><h3 class="tool-card__title">SandPath</h3><p class="tool-card__desc">Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.</p><a href="/tools/sandpath/" class="tool-card__link">Launch Converter</a></div></div><p class="tool-directory__teaser">More tools are in the forge, unlisted until finished — a link to a half-built thing helps nobody.</p>
+<!-- /generated:tools-directory --></div>
+    <script src="/tools-data.js"></script>
+    <script>rfRenderTools("rf-tools-directory", { mode: "directory" });</script>
   </main>
 
   <div id="rf-footer"></div>

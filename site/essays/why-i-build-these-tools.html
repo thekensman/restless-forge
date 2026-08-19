@@ -3,66 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- generated:head — do not edit; edit why-i-build-these-tools.md and run `npm run sync-content` -->
   <title>Why I Build These Tools — Restless Forge</title>
-  <meta name="description" content="The philosophy behind Restless Forge. Why I build free, open-source tools and why useful software shouldn't be locked behind sign-up walls.">
+  <meta name="description" content="Notes on why these tools are free and browser-first, and how the site pays for itself without collecting anything from you.">
   <link rel="canonical" href="https://restless-forge.dev/essays/why-i-build-these-tools">
 
   <meta property="og:title" content="Why I Build These Tools">
-  <meta property="og:description" content="The philosophy behind Restless Forge. Why I build free tools and share them openly.">
+  <meta property="og:description" content="Notes on why these tools are free and browser-first, and how the site pays for itself without collecting anything from you.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://restless-forge.dev/essays/why-i-build-these-tools">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Why I Build These Tools",
+    "description": "Notes on why these tools are free and browser-first, and how the site pays for itself without collecting anything from you.",
     "author": { "@type": "Person", "name": "Ken", "url": "https://restless-forge.dev/about" },
     "publisher": { "@type": "Organization", "name": "Restless Forge", "url": "https://restless-forge.dev" },
+    "datePublished": "2026-07-18",
+    "image": "https://restless-forge.dev/og-image.png",
     "url": "https://restless-forge.dev/essays/why-i-build-these-tools"
   }
   </script>
+<!-- /generated:head -->
 
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5516736042033534" crossorigin="anonymous"></script>
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/guide-components.css">
   <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
 </head>
 <body>
 
   <div id="rf-nav"></div>
 
+  <!-- Rail ads: hidden below 1540px, see .ad-rail in styles.css -->
+  <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-slot="8568993100"
+         data-ad-format="vertical"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+  <aside class="ad-rail ad-rail--right" aria-label="Advertisement">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-slot="2979965943"
+         data-ad-format="vertical"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+
+
   <main class="page">
     <article>
-      <h1>Why I Build These Tools</h1>
-      <p style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">
-        ~1,200 words &middot; By Ken
-      </p>
-
-      <!-- ═══ PLACEHOLDER ═══
-           Replace this section with the actual essay content.
-           Minimum 800 words. Should link contextually to all three tools.
-           Topics to cover:
-           - Your philosophy and approach to building
-           - Why free and open-source matters to you
-           - The story behind each tool
-           - What "restless" means in your context
-           - Why you chose to consolidate under one domain
-      ═══ -->
-
-      <p><em>This essay is coming soon. Check back or subscribe to
-      <a href="https://substack.com/@restlessforge" target="_blank" rel="noopener">Substack</a>
-      to be notified when it's published.</em></p>
-
-      <hr style="border: none; border-top: 1px solid var(--border); margin: 3rem 0;">
-
-      <h3>Tools mentioned in this essay</h3>
-      <ul>
-        <li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> — Real hourly wage calculator</li>
-        <li><a href="/tools/holopath/">HoloPath</a> — Hologram GIF generator</li>
-        <li><a href="/tools/sandpath/">SandPath</a> — Sand table pattern converter</li>
-      </ul>
+      <!-- generated:content — do not edit; edit why-i-build-these-tools.md and run `npm run sync-content` -->
+<h1>Why I Build These Tools</h1>
+<p class="content-byline" style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">
+  Published July 2026 &middot; By Ken
+</p>
+<h2>Where this started</h2>
+<p>Restless Forge didn&#39;t begin as a plan. It began as three unrelated problems that each bugged me enough to write code. The first was a question: what is an hour of my time actually worth, once taxes and the commute are counted? The second was a craft project. I wanted to make those hologram-pyramid GIFs without uploading my photos to a stranger&#39;s server. The third was a sand table that needed paths to draw, while everything I had was pixels. Each problem turned into a small tool, and each tool ended up on its own little domain with its own hosting bill and its own certificate to babysit.</p>
+<p>At some point the obvious question arrived: why was I running three tiny websites when what I actually had was one workshop? So everything moved under one roof at <strong>restless-forge.dev</strong>, and the workshop got a name that fits how it operates. Restless, because there is always another half-formed tool on the bench. Forge, because the work here is hammered out by hand and shaped by use.</p>
+<h2>Your files stay on your device</h2>
+<p>Nearly every tool on this site runs entirely in your browser. When you drop an image into <a href="/tools/sandpath/">SandPath</a> or type a salary into <a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a>, the processing happens on your device and the data never leaves it. For a long time there was no server waiting on the other end at all — I never built one. A small number of newer tools genuinely need one, and those wear a &quot;Cloud-assisted&quot; badge in the directory so the exception is visible before you click, with the tool&#39;s own privacy page spelling out exactly what is sent, to whom, and what is kept.</p>
+<p>The rule, updated but not softened: a tool is client-side unless it honestly can&#39;t be. Some things genuinely want heavy computation or a model on the other end, and when a feature can&#39;t be done in the browser I would rather ship a clearly-labeled cloud-assisted tool — or a plain manual control — than fake the capability by sending your data somewhere behind the scenes. What the rule buys is worth more than the features it costs: you don&#39;t have to trust me. The code is on <a target="_blank" rel="noopener" href="https://github.com/thekensman/">GitHub</a>, and your browser&#39;s network tab tells the same story.</p>
+<h2>How the ads work</h2>
+<p>Free tools still cost money. A server has to hand out the static files, domains and certificates renew, and the building itself eats evenings and weekends. Ads cover those bills, along with voluntary support through Ko-fi, Buy Me a Coffee, and the Substack.</p>
+<p>The deal, stated as plainly as I can manage. The tools are free, with no accounts and no premium tier; nothing is held hostage to an email address. The ads are served by Google AdSense, which may set its own cookies, and the <a href="/privacy">Privacy Policy</a> says so out loud instead of burying it. Your files and inputs never reach a server, so there is nothing of yours for me to hand an advertiser even if I wanted to. And the ads keep out of the work itself: they don&#39;t imitate download buttons, and they don&#39;t wedge themselves into the middle of a running conversion. If one ever does, that&#39;s a bug. <a href="/contact">Tell me</a> and I&#39;ll fix it.</p>
+<p>I think of it like a workshop with a small sign out front. The sign pays the rent. If the sign ever blocks the doorway, the workshop has failed at its job.</p>
+<h2>Small and finished</h2>
+<p>Every tool here starts with a problem I personally have. Not a market analysis, a Tuesday-evening annoyance. The wage calculator exists because &quot;what is your time worth&quot; turns out to be a slippery question once taxes and commutes get involved. SandPath exists because my sand table wanted paths and my images were pixels. I&#39;m always the first user, and I have no patience for my own bad UX.</p>
+<p>I would rather ship something small that does one job well than something sprawling that does ten jobs badly. A small tool can genuinely be finished. And when a tool can&#39;t do something, it should say so. The camera preview in one of the newer tools doesn&#39;t pretend to track your body with AI it doesn&#39;t have; it gives you a manual slider and a label that says exactly what it is. I count that label as a feature.</p>
+<p>As for the restless half: more than twenty tools sit behind the scenes in various states of completion, each waiting until it&#39;s actually good before it earns a spot in the <a href="/tools/">directory</a>. Some will make it; others will get melted down for parts. A workshop where nothing is being made is just a museum.</p>
+<h2>What you can hold me to</h2>
+<p>The tools stay free and never ask for an account. Whatever you put into them is processed on your device, and the code is public, so you can verify that claim instead of trusting it. The privacy policy describes what actually happens, and the label on each tool admits what it can&#39;t do. If the site ever drifts from any of that, the <a href="/contact">contact page</a> works, and I read it.</p>
+<p>If you&#39;re curious how an idea actually becomes a directory entry here, the scaffolding and conventions and pipeline, I wrote that up separately: <a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a>.</p>
+<hr>
+<h3>Tools mentioned in this essay</h3>
+<ul>
+<li><a href="/tools/what-is-my-time-worth/">What Is My Time Worth?</a> - real hourly wage calculator</li>
+<li><a href="/tools/holopath/">HoloPath</a> - hologram GIF generator</li>
+<li><a href="/tools/sandpath/">SandPath</a> - sand table pattern converter</li>
+</ul>
+<h3>Related</h3>
+<ul>
+<li><a href="/essays/how-a-tool-gets-built">How a Tool Gets Built</a> - the technical pipeline behind every Restless Forge tool</li>
+<li><a href="/about">About Restless Forge</a></li>
+</ul>
+<!-- /generated:content -->
     </article>
   </main>
+
+  <aside class="ad-slot" aria-label="Advertisement">
+    <span class="ad-slot__label">Advertisement</span>
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
 
   <div id="rf-footer"></div>
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>Why Your Song Is Written the Night Before</title>
+  <meta name="description" content="Generating a wake-up song at 6:30am means waiting on an API while your alarm rings. Generating it at 9pm means it is simply there. The scheduling that follows from that.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/rise-and-rhyme/articles/why-the-song-is-written-the-night-before/">
+  <link rel="icon" type="image/svg+xml" href="/tools/rise-and-rhyme/favicon.svg">
+  <link rel="icon" href="/tools/rise-and-rhyme/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/rise-and-rhyme/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/rise-and-rhyme/site.webmanifest">
+  <meta property="og:title" content="Why Your Song Is Written the Night Before">
+  <meta property="og:description" content="Generating a wake-up song at 6:30am means waiting on an API while your alarm rings. Generating it at 9pm means it is simply there. The scheduling that follows from that.">
+  <meta property="og:url" content="https://restless-forge.dev/tools/rise-and-rhyme/articles/why-the-song-is-written-the-night-before/">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://restless-forge.dev/tools/rise-and-rhyme/og-image.png">
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Sub-page styles (in public/ — served verbatim, not Vite-processed) -->
+  <link rel="stylesheet" href="/tools/rise-and-rhyme/pages.css">
+
+  <!-- Shared scripts (absolute URLs — not bundled by Vite) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/rise-and-rhyme/shared.js"></script>
+</head>
+<body>
+  <div id="rr-header"></div>
+  <main>
+    <p class="breadcrumb"><a href="/tools/rise-and-rhyme/articles/">← Articles</a></p>
+    <h1>Why Your Song Is Written the Night Before</h1>
+    <p class="page-sub">Generating a wake-up song at 6:30am means waiting on an API while your alarm rings. Generating it at 9pm means it is simply there. The scheduling that follows from that.</p>
+
+    <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
+<p>The obvious design for a wake-up song that mentions your day is to generate it
+when the alarm goes off. It is also the wrong one, and understanding why leads
+to most of the interesting parts of how Rise &amp; Rhyme is scheduled.</p>
+<h2>The case against generating at wake-up</h2>
+<p>Generating a song means calling a language model, which takes seconds — sometimes
+many of them. At 6:30am that translates to an alarm that rings and then makes
+you wait, which defeats the purpose of an alarm.</p>
+<p>Worse, it introduces failure at the least forgiving moment. If the network is
+down, the API is slow, or your phone dropped its connection overnight, you get
+nothing when you actually needed waking up.</p>
+<p>So generation happens the evening before, at a time you choose. By the time the
+alarm fires, the song is already sitting in your browser. Waking up involves no
+network at all.</p>
+<h2>Generation on day D covers the alarm on day D+1</h2>
+<p>That is the whole rule, and everything else follows from it.</p>
+<p>The scheduler looks forward from now, day by day, for a day whose <em>following</em>
+day has an alarm enabled. When it finds one, the generation slot is that
+evening&#39;s chosen time, and the song it produces is for the next morning.</p>
+<p>This handles the case people forget: a Monday–Friday alarm schedule needs a
+<em>Sunday</em> evening generation. Sunday is not an alarm day, but Monday is, so
+Sunday evening is a generation night. Reasoning about &quot;which nights do I
+generate&quot; directly gets this wrong surprisingly often; deriving it from &quot;which
+mornings does the alarm ring&quot; gets it right for free.</p>
+<p>The search window is eight days, which covers any weekly pattern including one
+with a single enabled day.</p>
+<h2>The off-by-two bug worth documenting</h2>
+<p>There is a distinction in the code that exists because getting it wrong produced
+a genuinely confusing symptom, and it is a nice illustration of a subtle
+scheduling trap.</p>
+<p>The preview needs to answer: <em>which day is the next song about?</em> The tempting
+implementation is to ask the next generation slot what day it targets.</p>
+<p>That breaks the moment tonight&#39;s generation time passes. Say generation is set
+for 22:00. At 22:19, tonight&#39;s slot is in the past, so &quot;the next generation
+slot&quot; is <em>tomorrow</em> night — which targets the day after tomorrow. The preview
+then cheerfully showed a day two days out, while the song sitting in your
+browser was for tomorrow morning.</p>
+<p>The fix is to ask a different question. The song is <em>for</em> an alarm, so the day
+it covers is the day of the next alarm — not the target of the next generation.
+That answer is correct before the generation time, after it, and at 3am, when
+the song already written is for later that same morning rather than tomorrow.</p>
+<p>The general lesson: when two clocks are involved, derive from the one the user
+cares about. Nobody cares when the API call happens. They care when the alarm
+rings.</p>
+<h2>Everything is local time</h2>
+<p>Alarms are a local-time concept. Nobody sets a 7am alarm meaning 7am UTC.</p>
+<p>So dates are computed as local calendar dates rather than by slicing an ISO
+string, which would silently shift the day for anyone west of Greenwich. Day
+arithmetic uses date methods rather than adding 86,400,000 milliseconds, so
+daylight-saving transitions are handled by the calendar. On the night the clocks
+change, one day is 23 or 25 hours long, and millisecond arithmetic lands an hour
+off — enough to move a 23:30 generation slot across midnight and onto the wrong
+day.</p>
+<p>The timezone is also sent to the backend, so the calendar events pulled for
+&quot;tomorrow&quot; are tomorrow where you are.</p>
+<h2>The grace window</h2>
+<p>Browser tabs get throttled. Backgrounded tabs get suspended. A laptop closed at
+21:45 with generation set for 22:00 is not running any timers at 22:00.</p>
+<p>So due-ness is a window rather than an instant: an occurrence counts as due if
+its time has passed and it passed within the last 30 minutes. A tab that wakes
+up at 22:12 still acts on the 22:00 slot instead of silently skipping the night.</p>
+<p>Paired with that is a per-occurrence marker key — the local date plus the
+hour and minute — recorded once an occurrence has been handled. The window makes
+a late tab still fire; the marker makes sure it fires exactly once. Without the
+marker, a tab waking repeatedly inside the window would generate several times;
+without the window, a sleeping laptop means no song.</p>
+<h2>What this means in practice</h2>
+<ul>
+<li><strong>Set generation for an evening time you are usually online.</strong> It needs the
+browser open to make the call. 9pm beats 3am.</li>
+<li><strong>Songs are ready before you sleep, not when you wake.</strong> Whatever is in the
+browser at alarm time is what plays.</li>
+<li><strong>Changing tomorrow&#39;s calendar after generation does not change the song.</strong>
+It was written from the calendar as it stood.</li>
+<li><strong>The alarm itself is fully offline.</strong> Once the song exists, waking up needs
+nothing from the network.</li>
+</ul>
+<p>Ready to try it? <a href="/tools/rise-and-rhyme/">Open Rise &amp; Rhyme</a>.</p>
+<!-- /generated:content -->
+  </main>
+  <div id="rr-footer"></div>
+</body>
+</html>

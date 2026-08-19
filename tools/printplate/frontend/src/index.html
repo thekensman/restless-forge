@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <meta name="theme-color" content="#0d0d14">
+  <title>PrintPlate — 3D printer bed adhesion troubleshooter</title>
+  <meta name="description" content="Free 3D printer bed adhesion troubleshooter with ranked fixes.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/printplate/">
+  <!-- Favicons (canonical block — tool-scoped; site-root fallback serves defaults) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/printplate/favicon.svg">
+  <link rel="icon" href="/tools/printplate/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/printplate/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/printplate/site.webmanifest">
+  <meta property="og:title" content="PrintPlate — 3D printer bed adhesion troubleshooter">
+  <meta property="og:description" content="Free 3D printer bed adhesion troubleshooter with ranked fixes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/printplate/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/printplate/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"PrintPlate","description":"Free 3D printer bed adhesion troubleshooter with ranked fixes.","url":"https://restless-forge.dev/tools/printplate","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Kenneth Cross"}}
+  </script>
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="/shared.js"></script>
+  <script src="/tools/printplate/shared.js"></script>
+</head>
+<body>
+  <div id="ppl-header"></div>
+  <div class="tool-intro">
+    <h1>PrintPlate: 3D printer bed adhesion troubleshooter</h1>
+    <p>Free 3D printer bed adhesion troubleshooter with ranked fixes. Everything runs in your browser — no uploads, no accounts, no data stored.</p>
+  </div>
+  <div class="tool-content">
+    <section class="upload" aria-label="File upload">
+      <h2 class="sr-only">Upload your file</h2>
+      <div class="upload__circle" id="drop-zone" role="button" tabindex="0" aria-label="Drop a file here or click to browse">
+        <div class="upload__inner">
+          <svg class="upload__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M24 32V16m0 0l-7 7m7-7l7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="6" y="6" width="36" height="36" rx="8" stroke-linecap="round"/>
+          </svg>
+          <p class="upload__label">Drop your file here</p>
+          <p class="upload__hint">or click to browse</p>
+          <input type="file" id="file-input" hidden>
+        </div>
+      </div>
+      <p class="upload__file-name" id="file-name" aria-live="polite"></p>
+    </section>
+    <section class="settings" aria-label="Settings">
+      <h2 class="settings__title">Settings</h2>
+      <div class="output-area" id="output-area">PrintPlate ready — upload a file or adjust settings to begin.</div>
+    </section>
+    <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
+  </div>
+  <div id="ppl-footer"></div>
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

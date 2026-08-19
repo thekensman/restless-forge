@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex"> <!-- unlaunched: remove at launch -->
+  <title>ForgeImage — Restless Forge</title>
+  <meta name="description" content="Resize, crop, brush out details, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
+  <link rel="canonical" href="https://restless-forge.dev/tools/forgeimage/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ForgeImage">
+  <meta property="og:description" content="Resize, crop, brush out details, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/tools/forgeimage/">
+  <meta property="og:image" content="https://restless-forge.dev/tools/forgeimage/og-image.png">
+
+  <!-- Favicons (canonical block — tool-scoped, same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/forgeimage/favicon.svg">
+  <link rel="icon" href="/tools/forgeimage/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/forgeimage/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/forgeimage/site.webmanifest">
+
+  <!-- JSON-LD structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ForgeImage",
+    "url": "https://restless-forge.dev/tools/forgeimage",
+    "description": "Resize, crop, brush out details, convert, compress, and generate social-media sizes for images entirely in your browser. No uploads, no account, no watermark.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Kenneth Cross" }
+  }
+  </script>
+
+
+  <!-- Shared tool chrome (header/footer styles) -->
+  <link rel="stylesheet" href="/tool-chrome.css">
+  <!-- Tool styles (in src/ — Vite-processed) -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <!-- Shared scripts (served from /site and /tools/<name>/public, NOT bundled) -->
+  <script src="/shared.js"></script>
+  <script src="/tools/forgeimage/shared.js"></script>
+</head>
+<body>
+
+  <!-- Header injected by DOMContentLoaded in public/shared.js -->
+  <div id="fimg-header"></div>
+
+  <main>
+    <section class="tool-intro">
+      <h1>ForgeImage: Resize, crop, brush, convert &amp; compress — in your browser</h1>
+      <p>
+        The six image operations you actually open an editor for — including a
+        brush to redact addresses, names, or faces — with no uploads, no
+        account, and no watermark. Files are processed on your device with the
+        Canvas API and never leave it.
+      </p>
+    </section>
+
+    <label class="field field--file"><span class="field__label">Image</span>
+      <input type="file" id="img-file" accept="image/*">
+      <span class="op-meta" id="img-meta"></span>
+    </label>
+
+    <div class="stage-wrap">
+      <canvas id="stage" class="stage" width="10" height="10"></canvas>
+      <p class="stage__empty" id="stage-empty">Pick an image to see a live preview here.</p>
+      <p class="stage__caption" id="stage-caption"></p>
+    </div>
+
+    <nav class="op-tabs" role="tablist" aria-label="Image operations">
+      <button class="op-tab is-active" data-op="resize" role="tab" aria-selected="true">Resize</button>
+      <button class="op-tab" data-op="crop" role="tab" aria-selected="false">Crop</button>
+      <button class="op-tab" data-op="brush" role="tab" aria-selected="false">Brush</button>
+      <button class="op-tab" data-op="convert" role="tab" aria-selected="false">Convert</button>
+      <button class="op-tab" data-op="compress" role="tab" aria-selected="false">Compress</button>
+      <button class="op-tab" data-op="social" role="tab" aria-selected="false">Social sizes</button>
+    </nav>
+
+    <section class="op-panel" id="panel-resize" role="tabpanel">
+      <div class="slider-field">
+        <span class="field__label">Width <b id="rs-width-out">—</b> px</span>
+        <div class="slider-pair">
+          <input type="range" id="rs-width-slider" min="1" max="100" value="100">
+          <input type="number" id="rs-width" min="1">
+        </div>
+      </div>
+      <div class="slider-field">
+        <span class="field__label">Height <b id="rs-height-out">—</b> px</span>
+        <div class="slider-pair">
+          <input type="range" id="rs-height-slider" min="1" max="100" value="100">
+          <input type="number" id="rs-height" min="1">
+        </div>
+      </div>
+      <label class="op-check"><input type="checkbox" id="rs-lock" checked> Lock aspect ratio</label>
+      <button class="op-run" id="rs-run">Download resized</button>
+    </section>
+
+    <section class="op-panel" id="panel-crop" role="tabpanel" hidden>
+      <p class="op-help">Drag the box on the preview above — corners resize, the middle moves it.</p>
+      <label class="field"><span class="field__label">Constrain aspect</span>
+        <select id="cr-aspect"></select>
+      </label>
+      <p class="op-meta" id="cr-meta"></p>
+      <button class="op-run" id="cr-run">Download crop</button>
+    </section>
+
+    <section class="op-panel" id="panel-brush" role="tabpanel" hidden>
+      <p class="op-help">Paint directly on the preview above — cover an address, redact a name,
+      black out a face. Edits carry into every other tab (resize, convert, compress…).</p>
+      <div class="slider-field">
+        <span class="field__label">Brush size <b id="br-size-out">—</b> px</span>
+        <div class="slider-pair">
+          <input type="range" id="br-size-slider" min="1" max="200" value="24" aria-label="Brush size">
+          <input type="number" id="br-size" min="1" value="24" aria-label="Brush size in pixels">
+        </div>
+      </div>
+      <label class="field field--color"><span class="field__label">Colour</span>
+        <input type="color" id="br-color" value="#000000">
+      </label>
+      <div class="brush-actions">
+        <button class="op-mini" id="br-undo" disabled>↩ Undo stroke</button>
+        <button class="op-mini" id="br-clear" disabled>Clear all</button>
+      </div>
+      <button class="op-run" id="br-run">Download edited image</button>
+    </section>
+
+    <section class="op-panel" id="panel-convert" role="tabpanel" hidden>
+      <label class="field"><span class="field__label">Format</span>
+        <select id="cv-format"></select>
+      </label>
+      <label class="field"><span class="field__label">Quality</span>
+        <input type="range" id="cv-quality" min="10" max="100" value="85">
+      </label>
+      <button class="op-run" id="cv-run">Convert</button>
+    </section>
+
+    <section class="op-panel" id="panel-compress" role="tabpanel" hidden>
+      <label class="field"><span class="field__label">Target size (KB)</span>
+        <input type="number" id="cp-target" min="10" value="500">
+      </label>
+      <p class="op-help">Finds the highest JPEG quality that fits under the target.</p>
+      <button class="op-run" id="cp-run">Compress</button>
+    </section>
+
+    <section class="op-panel" id="panel-social" role="tabpanel" hidden>
+      <p class="op-help">Generates every size below from one image (center-cropped, never distorted).</p>
+      <ul class="file-list" id="social-list"></ul>
+      <button class="op-run" id="social-run">Generate all sizes</button>
+    </section>
+
+    <p class="op-status" id="op-status" role="status" aria-live="polite"></p>
+    <div class="op-downloads" id="op-downloads"></div>
+  </main>
+
+  <!-- Footer injected by DOMContentLoaded in public/shared.js -->
+  <div id="fimg-footer"></div>
+
+  <!-- Main app TypeScript entry — Vite bundles this -->
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

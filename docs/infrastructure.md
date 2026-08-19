@@ -1,0 +1,242 @@
+# Infrastructure Runbook
+
+Everything about the server side of restless-forge.dev. The guiding
+principle: **the repo is the backup.** The droplet holds almost no unique
+state, so recovery is "make a new box and press deploy", not archaeology.
+
+## Inventory
+
+| Thing | Value |
+|---|---|
+| Droplet | `sandpath-01` — 1 GB RAM / 25 GB disk, SFO2, Ubuntu 24.04 LTS |
+| Serves | nginx (static files) + one app process: `restless-forge-api` (FastAPI/uvicorn on loopback :8000, proxied at `/api/` — see `docs/backend.md`) |
+| Web root | `/var/www/restless-forge` (rsynced by the Deploy workflow) |
+| Live vhost | `/etc/nginx/sites-available/restless-forge` (**no `.conf` suffix**), symlinked from `sites-enabled/` — deployed automatically by the Deploy workflow with `nginx -t` + rollback |
+| DNS / edge | Cloudflare in front of the droplet (orange-cloud proxy) |
+| Certs | Let's Encrypt via certbot, **DNS-01 validation through the Cloudflare plugin** (see below) |
+| Legacy domains | holopath.art, sandpath.art, whatismytimeworth.app — 301-redirect vhosts, installed by hand; left to expire naturally with their Namecheap registrations. Do not renew, monitor, or extend them. |
+
+## What state lives where
+
+- **In the repo (recoverable by deploy):** all site content, tool builds,
+  the backend service code + its systemd unit, the main nginx vhost,
+  CI/CD, this runbook. The deploy also recreates the backend venv
+  (`/opt/restless-forge/venv`) and bootstraps `/etc/restless-forge/api.env`
+  on a fresh box.
+- **On the droplet only (must exist for the site to work):**
+  - Let's Encrypt certs + `/etc/letsencrypt/cloudflare.ini` (API token)
+  - `/etc/nginx/sites-enabled/restless-forge` symlink
+  - deploy public key in `/root/.ssh/authorized_keys`
+    (sshd reads `/root/.ssh/...`, **not** `/home/root/...`)
+  - Cloudflare-only firewall rules + `/etc/cron.daily/ip_refresh` (below)
+  - legacy redirect vhosts
+  - `/etc/restless-forge/api.env` — backend secrets/knobs. Bootstrapped by
+    the FIRST deploy from the `ANTHROPIC_API_KEY` secret, then owned by
+    the server: later deploys never overwrite it, so key rotation and cap
+    changes are edits here + `systemctl restart restless-forge-api`.
+  - `/var/lib/restless-forge/` — backend SQLite state (rate limits, spend
+    log). Losing it resets rate limiting — annoying, not fatal.
+- **In GitHub secrets:** `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`,
+  `DEPLOY_PATH`, `ANTHROPIC_API_KEY` (first-deploy bootstrap only).
+
+## Monitoring
+
+- `.github/workflows/health-check.yml` runs every 30 minutes: homepage
+  content, a tool page, the vhost cache-header fingerprint, and TLS cert
+  expiry (alerts at <14 days). Failures open/update a GitHub issue labeled
+  `site-health` — GitHub emails you.
+- DigitalOcean side (do once, in the dashboard): enable **alert policies**
+  (CPU >80%, disk >80%, droplet down → email) and **weekly automated
+  backups** (~$1.20/mo) so there's always a recent snapshot you didn't
+  have to remember to take.
+
+## Certificate renewal (Cloudflare DNS-01) — how it works, how to test it
+
+Because the firewall only admits Cloudflare IPs on 80/443 (below), plain
+HTTP-01 validation can break; certs are issued/renewed with **DNS-01 via
+the certbot Cloudflare plugin** instead. One-time setup that must exist on
+the box:
+
+```bash
+sudo apt install python3-certbot-dns-cloudflare
+# Cloudflare dashboard → My Profile → API Tokens → Create Token
+#   template "Edit zone DNS", scoped to the restless-forge.dev zone
+sudo tee /etc/letsencrypt/cloudflare.ini > /dev/null <<EOF
+dns_cloudflare_api_token = <token>
+EOF
+sudo chmod 600 /etc/letsencrypt/cloudflare.ini
+
+sudo certbot certonly --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  --dns-cloudflare-propagation-seconds 60 \
+  -d restless-forge.dev -d www.restless-forge.dev
+sudo systemctl reload nginx
+```
+
+> **Token-scoping gotcha:** the original token from the sandpath.art era
+> was scoped to *that zone only*. A zone-scoped token silently fails for
+> restless-forge.dev — re-issue the token scoped to the restless-forge.dev
+> zone (or all zones) when migrating.
+
+**Stress test (run these now, and after any server change):**
+
+```bash
+sudo certbot renew --dry-run          # full renewal rehearsal against staging
+systemctl list-timers | grep certbot  # certbot.timer must be active
+sudo grep authenticator /etc/letsencrypt/renewal/restless-forge.dev.conf
+                                      # must say dns-cloudflare, not standalone/webroot
+sudo openssl x509 -noout -dates -in /etc/letsencrypt/live/restless-forge.dev/cert.pem
+```
+
+If the dry run passes and the timer is active, renewal is autonomous. The
+health-check workflow is the safety net: it alerts at 14 days remaining,
+which is 2 renewal attempts' worth of margin (certbot renews at 30 days).
+
+**Where the schedule lives:** apt-installed certbot runs from the systemd
+timer `certbot.timer` (twice daily at 00:00/12:00 plus a randomized delay
+of up to 12 h; each run renews only certs within 30 days of expiry, so
+most runs are no-ops).
+
+```bash
+systemctl list-timers certbot.timer   # NEXT and LAST run times
+systemctl cat certbot.timer           # the schedule definition itself
+journalctl -u certbot.service -n 50   # log of recent renewal attempts
+```
+
+## Cloudflare edge
+
+- The droplet firewalls 80/443 to **Cloudflare IPs only** (ipset `cf4`/`cf6`
+  + iptables ACCEPT/DROP), refreshed daily by `/etc/cron.daily/ip_refresh`
+  which re-pulls https://www.cloudflare.com/ips-v4 and ips-v6. If Cloudflare
+  is ever removed from DNS, these rules must go too or the site goes dark.
+- **Cache behavior:** Cloudflare caches by extension and honors origin
+  headers. After changing brand assets (favicon/og-image), the 24h origin
+  cache means propagation within a day; to force it, purge those URLs in
+  the dashboard. (This was the "favicon still shows HoloPath" incident —
+  the deploy verify step now hash-compares served bytes to catch it.)
+- SSH (22) is deliberately NOT behind Cloudflare — keep it firewalled to
+  your own IP or protected by key-only auth (below).
+
+## AI crawler access (deliberately OPEN)
+
+Policy decision (2026-07): AI assistants recommending the tools is a
+traffic channel we want, so AI crawlers/fetchers are **welcomed**, not
+blocked. `site/robots.txt` carries explicit `Allow` stanzas for the
+assistant fetchers (ChatGPT-User, Claude-User, Perplexity-User), AI
+search indexers (OAI-SearchBot, Claude-SearchBot, PerplexityBot), and
+training crawlers (GPTBot, ClaudeBot, Google-Extended, …), and
+`/llms.txt` (generated by `npm run sync-static` from tools-data.js +
+essay front-matter) gives assistants a machine-readable index of the
+live tools.
+
+**None of that works unless Cloudflare lets the bots through.** The
+dashboard is the actual gatekeeper — verify all three:
+
+1. **Security → Bots**: "AI Scrapers and Crawlers" blocking must be
+   **OFF** (it's ON by default on many zones). If **Bot Fight Mode** is
+   on, turn it off — it challenges legitimate bots indiscriminately.
+2. **Security → Events**: filter for user agents `ClaudeBot`,
+   `Claude-User`, `GPTBot`, `ChatGPT-User`, `PerplexityBot` — before
+   the change you'll likely see Block/Challenge actions; after, they
+   should show Allow (or stop appearing as security events).
+3. **Managed robots.txt / Content Signals** (Cloudflare feature that
+   injects AI-blocking directives over the origin robots.txt): must be
+   **disabled**, or it silently overrides `site/robots.txt`.
+
+To verify end-to-end after the toggles: ask Claude or ChatGPT to fetch
+`https://restless-forge.dev/llms.txt` and summarize it.
+
+If a specific crawler ever misbehaves (hammering the origin), prefer a
+Cloudflare **rate-limiting rule scoped to that user agent** over
+re-enabling the blanket AI block.
+
+> **Known drift (checked 2026-08-16):** the live `/robots.txt` currently
+> serves a `# BEGIN Cloudflare Managed content` block that `Disallow: /`s
+> ClaudeBot, GPTBot, CCBot, Google-Extended and others, immediately
+> followed by our own `Allow: /` stanzas for the same agents. So item 3
+> above is **not** currently satisfied. It does not affect Google Search
+> or AdSense — neither Googlebot nor Mediapartners-Google is named, and
+> both fall under `User-agent: * / Allow: /` — but it does contradict the
+> AI-crawler policy this section describes, and two conflicting groups for
+> one user agent is a coin-flip on which a given crawler honours.
+
+## Cloudflare rewrites email addresses in the HTML it serves
+
+Scrape Shield's **Email Address Obfuscation** is ON, and it rewrites the
+origin's markup at the edge. An address that leaves the origin as plain
+text arrives at the client like this:
+
+```html
+<a href="/cdn-cgi/l/email-protection#6b000e052b19...">
+  <span class="__cf_email__" data-cfemail="...">[email&#160;protected]</span></a>
+```
+
+with `/cdn-cgi/scripts/.../email-decode.min.js` restoring the real
+address in the browser.
+
+**Why this matters here.** `scripts/sync-static-html.mjs` deliberately
+pre-renders the contact address into static HTML so that readers without
+JavaScript — crawlers, link previews, automated policy checks — can see
+it; `/privacy` previously shipped three empty `<a data-rf-link="email">`
+anchors and that was a real defect. Cloudflare puts the address back
+behind JavaScript, which undoes most of that fix. A non-JS reader now
+sees the literal string `[email protected]` rather than nothing, so this
+is better than the original bug but not what the pre-rendering is for.
+
+To restore it: **Scrape Shield → Email Address Obfuscation → Off.** The
+trade-off is real (obfuscation deters address-harvesting bots) but small
+here — the address is already public in `site/shared.js`, on `/contact`,
+and in every `mailto:` href, so obfuscation buys little and costs the
+no-JS readability.
+
+This is the second setting where the Cloudflare dashboard silently
+changes what the site serves. When something is verifiably correct in
+`dist/` but wrong over HTTPS, check the dashboard before re-debugging the
+build.
+
+## Disaster recovery
+
+Fast path: restore the latest snapshot/backup in DO, re-point DNS if the
+IP changed, done.
+
+From scratch (~30 min, needs: repo, Cloudflare login, DO login):
+
+1. Create droplet (Ubuntu LTS), note IP; update the Cloudflare A/AAAA
+   records for restless-forge.dev (keep proxy on).
+2. `apt update && apt install -y nginx certbot python3-certbot-dns-cloudflare`
+3. Append the deploy public key to `/root/.ssh/authorized_keys`.
+4. Recreate `/etc/letsencrypt/cloudflare.ini` (token from Cloudflare) and
+   issue the cert — commands in the section above.
+5. `ln -s /etc/nginx/sites-available/restless-forge /etc/nginx/sites-enabled/`
+   (the file itself arrives with the first deploy; `rm /etc/nginx/sites-enabled/default`).
+6. Update the `DEPLOY_HOST` secret if the IP changed; run **Deploy** from
+   the Actions tab (workflow_dispatch). It ships `dist/` + the backend
+   (installs python3-venv if missing, recreates the venv, systemd unit,
+   and `api.env` from the `ANTHROPIC_API_KEY` secret) + the vhost, tests,
+   reloads, and verifies.
+7. Re-apply the hardening checklist and the Cloudflare ipset firewall
+   (commands above / below).
+
+## Server hardening checklist (one-time, manual)
+
+```bash
+apt install -y unattended-upgrades fail2ban ufw
+dpkg-reconfigure -plow unattended-upgrades   # enable automatic security updates
+ufw allow OpenSSH && ufw allow 80,443/tcp && ufw enable
+systemctl enable --now fail2ban              # default sshd jail is enough
+# key-only SSH:
+sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+systemctl reload ssh
+```
+
+## Deliberate non-additions
+
+- **One minimal backend, no DB servers or containers** — tools are
+  client-side by design. The single exception is `restless-forge-api`
+  (FastAPI + a SQLite file, deployed by the same workflow, `docs/backend.md`)
+  for the few clearly-labeled cloud-assisted tools. Anything that would
+  need more server-side surface than that doesn't ship.
+- **No load balancer or second droplet** — static content, modest traffic,
+  and a 30-minute from-scratch recovery make redundancy premature.
+- **No config management (Ansible etc.)** — the entire server-side surface
+  is this one page.
