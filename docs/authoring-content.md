@@ -110,7 +110,7 @@ title: "Self-Publishing: Dreaming with Eyes Open"
 description: …
 date: 2026-08-17
 author: Kenneth Cross
-source: ../guides/self-publishing.html
+source: ../guides/self-publishing-dreaming-with-eyes-open.html
 ---
 
 Any Markdown here is appended after the borrowed content.
