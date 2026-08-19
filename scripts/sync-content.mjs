@@ -297,7 +297,15 @@ for (const mdPath of contentSources()) {
   }
 
   const before = readFileSync(htmlPath, "utf8");
-  let after = injectBlock(before, "content", basename(mdPath), html, relative(root, htmlPath));
+  // Name the file the prose actually lives in. With `source:` set that is NOT
+  // the .md — it holds front-matter and little else — and a marker saying
+  // "edit <slug>.md" sends the next reader to a file with no prose in it. That
+  // misdirection is exactly how this generated copy gets mistaken for a
+  // hand-maintained duplicate.
+  const proseSource = meta.source
+    ? `${meta.source} (via source: in ${basename(mdPath)})`
+    : basename(mdPath);
+  let after = injectBlock(before, "content", proseSource, html, relative(root, htmlPath));
   // Essay heads are front-matter-derived and resync every run; other pages own
   // their head by hand, so there is nothing to regenerate for them.
   if (isEssay) {
