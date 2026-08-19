@@ -1,6 +1,6 @@
 ---
 title: "Self-Publishing: Dreaming with Eyes Open"
-description: Five hats, zero budget, one debut short story. What actually happened self-publishing a book with no money to spend on editors, cover designers, or ads.
+description: Five hats, zero budget, one debut short story. Real numbers, real dead ends, no sales pitch.
 date: 2026-08-17
 author: Kenneth Cross
 source: ../guides/self-publishing.html
