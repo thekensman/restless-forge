@@ -158,6 +158,18 @@ if [ -f "${DIST_DIR}/tool-chrome.css" ]; then
   echo "  → /tool-chrome.css?v=${site_chrome_hash}"
 fi
 
+# Cache-bust the shared /guide-components.css across ALL html files in dist.
+# Linked by the essay shells AND by the standalone guide page, which keeps its
+# own inline copy as a fallback — so a stale cached version here would silently
+# render against markup it no longer matches.
+if [ -f "${DIST_DIR}/guide-components.css" ]; then
+  guide_css_hash=$(md5sum "${DIST_DIR}/guide-components.css" | cut -c1-8)
+  find "${DIST_DIR}" -name "*.html" -exec sed -i \
+    -e "s|\"/guide-components\.css\"|\"/guide-components.css?v=${guide_css_hash}\"|g" \
+    {} \;
+  echo "  → /guide-components.css?v=${guide_css_hash}"
+fi
+
 # ── Substitute the AdSense publisher ID into ads.txt ──
 # Source ads.txt files carry the __RF_ADSENSE_PUB__ placeholder instead of
 # the literal ID (see RF_ADSENSE_PUB above). Substitute it in, then fail the

@@ -360,6 +360,12 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
     ["/about", ["monthly", "0.6"]],
     ["/contact", ["yearly", "0.5"]],
     ["/sites-i-like", ["monthly", "0.4"]],
+    // Noindexed, so the rule below drops it from the sitemap — but it still
+    // needs an entry here, because a page with none fails the build and that
+    // guarantee is what stops a page being forgotten. This one is the bare
+    // copy of the self-publishing essay, linked from external communities;
+    // the essay is the indexed version.
+    ["/guides/self-publishing", ["yearly", "0.1"]],
     ["/privacy", ["yearly", "0.3"]],
     ["/terms", ["yearly", "0.3"]],
     ["/faq", ["monthly", "0.6"]],

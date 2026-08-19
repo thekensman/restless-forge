@@ -13,6 +13,10 @@
   var RF_BMC      = 'https://buymeacoffee.com/restlessforge';
   var RF_SUBSTACK = 'https://restlessforge.substack.com';
   var RF_GITHUB   = 'https://github.com/thekensman/';
+  // Amazon author page. Listed in the SITE footer only, not the per-tool
+  // support UIs: a book link under "Support this free tool" on HoloPath is
+  // off-message, while under "Support Restless Forge" it reads correctly.
+  var RF_AMAZON   = 'https://www.amazon.com/stores/Kenneth-Cross/author/B0HC145NDQ';
 
   // ── Contact info ──
   // The email address and repo URLs live here and ONLY here: pages reference
@@ -39,6 +43,7 @@
     wimtwIssues: 'https://github.com/thekensman/what-is-my-time-worth/issues',
     holopathRepo: 'https://github.com/thekensman/holopath',
     sandpathRepo: 'https://github.com/thekensman/sandpath',
+    amazonAuthor: RF_AMAZON,
   };
 
   function active(href) {
@@ -282,6 +287,7 @@
     [RF_BMC, 'Buy Me a Coffee'],
     [RF_SUBSTACK, 'Subscribe on Substack'],
     [RF_GITHUB, 'GitHub'],
+    [RF_AMAZON, 'Books on Amazon'],
   ];
 
   // Personal recommendations — friends & family sites, not RF's own work.
