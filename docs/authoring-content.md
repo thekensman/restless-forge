@@ -93,6 +93,76 @@ author: Ken
   was filled in once at shell creation and never revisited, so an essay
   whose `image:` changed kept advertising the old path to every social
   scraper while the page itself looked perfect.
+
+## `source:` — borrowing a body from a standalone page
+
+Some pieces ship twice: a bare, self-contained HTML page for external
+communities (no chrome, nothing linking back, so a moderator does not read
+it as a funnel) and a normal essay wearing the site chrome. The text must
+not live in both files.
+
+Point the essay at the standalone page and everything between its `<main>`
+tags becomes the essay body:
+
+```
+---
+title: "Self-Publishing: Dreaming with Eyes Open"
+description: …
+date: 2026-08-17
+author: Kenneth Cross
+source: ../guides/self-publishing.html
+---
+
+Any Markdown here is appended after the borrowed content.
+```
+
+- The path is relative to the `.md`.
+- Only `<main>` is taken. A hero, a sticky rail, a footer or a script
+  outside it are excluded automatically — the essay has real site
+  navigation and wants none of them.
+- The `<h1>` comes from `title:`, not from the source's hero, so the
+  heading, `<title>`, canonical and JSON-LD cannot disagree.
+- **Markdown left in the body is appended.** That is where closing links
+  belong (contact, a shop, a "there is a bare copy at …" pointer) — the
+  things that must NOT appear in the copy posted externally.
+- **Keep the `.md`.** Deleting it looks harmless because the page keeps
+  working, but three systems key on "an essay is a `.md` in
+  `site/essays/`": content injection, the essay-card generator, and
+  `sync-static-html`'s sitemap and llms.txt lists. The last two fail
+  silently — the essay simply stops being listed anywhere.
+- Extraction refuses to guess: a missing file, zero `<main>`, more than
+  one, or an empty one each fail the build by name.
+
+After this, `npm run sync` plus the CI drift gate is the enforcement.
+Editing the standalone page without syncing fails the build, so the two
+copies cannot drift apart.
+
+### Styling a page that ships twice
+
+`site/guide-components.css` holds the styled blocks both versions need. The
+standalone page links it **and** keeps its own full copy in an inline
+`<style>`, so it still renders if the shared file never arrives.
+
+Two rules keep that layering working — break either and the shared sheet
+silently loses to the inline copy:
+
+1. **Selectors are `main .thing`** (specificity 0,1,1) against the inline
+   copy's bare `.thing` (0,1,0). The shared sheet therefore wins wherever
+   it sits in the cascade, so link order does not matter. `main` matches
+   both hosts: `<main class="page">` in the essay shell, `<main>` in the
+   standalone page. Never scope these to `.page article` — that is 0,2,1
+   and hands control back to the inline copy on the standalone page.
+2. **Values are chained variable fallbacks**:
+   `var(--border, var(--line, #33291d))` — the site's token if present,
+   else the standalone page's own, else a literal. **Put the rarer token
+   first.** `.numbers .lbl` originally read
+   `var(--text-dim, var(--text-dimmer, …))`, and because the guide defines
+   both, the label rendered a shade brighter than its own rule intended.
+
+Adding a component: define it in `guide-components.css`, then mirror it
+into the standalone page's inline `<style>` using that page's variable
+names. Verify by loading the standalone page with the shared sheet blocked
+and confirming nothing moves.
 - Tool articles usually need no front-matter (their shells already
   carry the metadata, and their index pages are hand-curated).
 

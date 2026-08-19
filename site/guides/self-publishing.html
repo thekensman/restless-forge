@@ -374,6 +374,10 @@
 
   /* progress dot line connecting rail items visually via pseudo -- kept simple/quiet per restraint */
 </style>
+<!-- Shared component styles. The <style> above is a complete local fallback:
+     if this file never loads, the page still renders. Its selectors are
+     main-scoped, so it wins whenever it does load, whatever the order. -->
+<link rel="stylesheet" href="/guide-components.css">
 </head>
 <body>
 

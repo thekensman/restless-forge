@@ -72,10 +72,66 @@ function fmtDate(iso) {
   return d.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
 }
 
+/* ── `source:` — borrow the body from a standalone HTML page ──
+ *
+ * Some pieces exist twice on purpose: a bare, self-contained HTML page for
+ * external communities (no chrome, nothing linking back, so a moderator does
+ * not read it as a funnel) and a normal essay carrying the site chrome. The
+ * text must not live in both files — that is a silent drift waiting to happen,
+ * since nothing checks two files for agreeing.
+ *
+ * So the standalone page owns the prose, and the essay's front-matter points
+ * at it with `source:`. Everything between its <main> tags becomes the essay
+ * body; the hero, any sticky rail, the footer and scripts sit outside <main>
+ * and are excluded for free, which is what we want — the essay has real site
+ * navigation and needs none of them.
+ *
+ * The .md still exists and still carries front-matter, because three separate
+ * systems key on "an essay is a .md in site/essays/": this script's content
+ * injection, its essay-card generator, and sync-static-html's sitemap and
+ * llms.txt lists. The last two fail SILENTLY if the file goes — the page keeps
+ * working and just stops being listed anywhere.
+ *
+ * Any Markdown left in the body is appended after the borrowed content. That
+ * is how the essay carries closing links (contact, Amazon) which must never
+ * appear in the copy posted externally. */
+function extractMain(sourcePath, mdRel) {
+  if (!existsSync(sourcePath)) {
+    throw new Error(
+      `${mdRel}: source: points at ${sourcePath}, which does not exist`,
+    );
+  }
+  const src = readFileSync(sourcePath, "utf8");
+  const opens = (src.match(/<main[\s>]/g) || []).length;
+  if (opens !== 1) {
+    throw new Error(
+      `${mdRel}: source ${basename(sourcePath)} has ${opens} <main> elements — ` +
+      `exactly one is required, since it marks the body to borrow`,
+    );
+  }
+  const m = src.match(/<main[^>]*>([\s\S]*?)<\/main>/);
+  if (!m || !m[1].trim()) {
+    throw new Error(
+      `${mdRel}: source ${basename(sourcePath)} has an empty or unclosed <main>`,
+    );
+  }
+  return m[1].trim();
+}
+
 /* Render a content .md file to the HTML that goes between the markers. */
 function renderContent(mdPath) {
   const { meta, body } = parseFrontMatter(readFileSync(mdPath, "utf8"));
-  let html = marked.parse(body).trim();
+  let html;
+  if (meta.source) {
+    // The h1 is synthesised from front-matter rather than lifted out of the
+    // source's hero, so the heading, <title>, canonical and JSON-LD cannot
+    // drift apart. The byline logic below keys on </h1> and works unchanged.
+    const borrowed = extractMain(join(dirname(mdPath), meta.source), relative(root, mdPath));
+    const tail = body.trim() ? marked.parse(body).trim() : "";
+    html = `<h1>${meta.title || ""}</h1>\n${borrowed}${tail ? `\n${tail}` : ""}`;
+  } else {
+    html = marked.parse(body).trim();
+  }
   if (meta.date || meta.author) {
     const parts = [];
     if (meta.date) parts.push(`Published ${fmtDate(meta.date)}`);
