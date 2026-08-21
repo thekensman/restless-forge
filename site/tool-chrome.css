@@ -221,3 +221,36 @@
 @media (max-width: 640px) {
   .related-tools { padding: 24px 16px 4px; }
 }
+
+/* ── Ad slots: reserve no space until an ad is actually in one ──────────
+   Lives here rather than in each tool's stylesheet because every tool page,
+   main and article sub-page alike, already links this file — the alternative
+   was the same rule copied into eight stylesheets, which would drift.
+
+   The tools reserve room for an ad whether or not one arrives. HoloPath's
+   main page sets min-height: 90px, and WIMTW and SandPath reserve ~16px of
+   padding, so each renders a blank band whenever the slot is empty. That is
+   every page while AdSense approval is pending, and it recurs for real
+   whenever a unit goes unfilled.
+
+   Keyed on the ABSENCE of data-ad-status="filled", not on "unfilled": AdSense
+   sets "unfilled" when it processes a slot and has nothing to serve, but when
+   the script never runs at all there is no attribute to match. An unapproved
+   account, a blocked script and an ad blocker all land in that gap.
+
+   Two deliberate limits, both about not breaking real ad serving:
+     - Vertical only. Horizontal padding is untouched so the <ins> keeps
+       exactly the width it has today; AdSense measures the container at
+       request time, and it must be the same width before and after filling.
+     - Never display:none. A hidden container has no measurable width, and a
+       responsive unit asked to fill a zero-width box does not fill.
+
+   Specificity is (0,2,1) — :not() and :has() each take their argument's — so
+   this beats the tools' own (0,1,0) rules regardless of stylesheet order. */
+.ad-slot:not(:has(ins[data-ad-status="filled"])) {
+  min-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
