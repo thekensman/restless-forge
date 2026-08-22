@@ -60,8 +60,22 @@ function parseFrontMatter(src) {
   const end = src.indexOf("\n---", 4);
   if (end === -1) return { meta, body: src };
   for (const line of src.slice(4, end).split("\n")) {
+    // The key stops at the first colon (`[\w-]*` cannot match a space), so a
+    // title like "Self-Publishing: Dreaming with Eyes Open" keeps every later
+    // colon in its value and needs no quoting.
     const m = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/);
-    if (m) meta[m[1]] = m[2].trim();
+    if (!m) continue;
+    let value = m[2].trim();
+    // This is not YAML, and quoting a colon-bearing value is exactly what YAML
+    // habits produce. Without this the quote characters became part of the
+    // title and shipped to the browser tab, the search result, the share card,
+    // the JSON-LD headline and the essay index card — none of which anyone
+    // looks at while writing, so it went unnoticed. Only a matched pair is
+    // stripped; a value containing an internal quote is left alone.
+    if (value.length > 1 && (value[0] === '"' || value[0] === "'") && value.at(-1) === value[0]) {
+      value = value.slice(1, -1);
+    }
+    meta[m[1]] = value;
   }
   return { meta, body: src.slice(src.indexOf("\n", end + 1) + 1) };
 }

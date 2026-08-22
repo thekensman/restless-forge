@@ -211,15 +211,44 @@ img { max-width: 100%; height: auto; }
    you and it. The separator and label exist so the unit reads as an ad rather
    than as more of the article — AdSense requires that ads not be confused
    with content, and it is the honest presentation regardless. */
+/* ── Ad slot: chrome only once an ad is actually in it ──
+   The divider, the top spacing and the "Advertisement" label are opt-IN, shown
+   only when AdSense reports data-ad-status="filled". Anything else — unfilled,
+   an account not yet approved, a blocked script, an ad blocker — leaves an
+   empty container that occupies no visible space.
+
+   The earlier approach keyed on data-ad-status="unfilled" (rule further down),
+   which covers only one of those cases. AdSense sets that attribute when it
+   processes a slot and has nothing to serve; when the script never runs at all
+   there is no attribute to match, so the chrome rendered around nothing. That
+   is a labelled empty band above the footer on every page, and it is exactly
+   what the whole site looks like while approval is pending.
+
+   Horizontal padding stays constant across both states on purpose: the <ins>
+   must present the same width before and after filling, or AdSense measures
+   one width, serves an ad for it, and the container then narrows underneath.
+   Only vertical chrome is toggled. The container is never display:none either
+   — a hidden slot has no measurable width, and a responsive unit asked to fill
+   a zero-width box does not fill at all. */
+/* width:100% is load-bearing, not belt-and-braces. body is a column flex
+   container, so .ad-slot is a flex item, and `margin: 0 auto` on a flex item
+   absorbs the free space and cancels the default stretch — leaving the slot
+   shrink-to-fit. It was sizing itself to the width of the word "Advertisement"
+   (~178px), which is why the divider above the label rendered as a short
+   centred line rather than spanning the column. A responsive unit measuring
+   that container has almost no width to fill and would not serve a sensible ad
+   even once the account is approved. The tool stylesheets already set this;
+   this one did not. */
 .ad-slot {
+  width: 100%;
   max-width: var(--max-width);
-  margin: 3rem auto 0;
-  padding: 1.5rem 1.5rem 0;
-  border-top: 1px solid var(--border);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  border-top: none;
 }
 
 .ad-slot__label {
-  display: block;
+  display: none;
   font-family: var(--font-mono);
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -227,6 +256,19 @@ img { max-width: 100%; height: auto; }
   color: var(--text-dim);
   text-align: center;
   margin-bottom: 0.75rem;
+}
+
+/* Both overrides below, together, are the only thing that makes the slot
+   visible. Keep them after the base rules above so the order reads the way the
+   cascade resolves. */
+.ad-slot:has(ins[data-ad-status="filled"]) {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.ad-slot:has(ins[data-ad-status="filled"]) .ad-slot__label {
+  display: block;
 }
 
 /* ── Rail ads (sticky left/right, wide screens only) ──
