@@ -195,6 +195,13 @@ The nginx rules and guards above; per-tool `sitemap.xml`/`robots.txt` deleted
 from all 15 tools that had them; JSON-LD tool URLs slashed in every tool and in the
 template; the one non-canonical internal link fixed.
 
+For discovery (the 1.7% above), the three indexed tool pages now link in
+context to their articles: five HoloPath articles, all four What Is My Time
+Worth articles, and SandPath's one unlinked article, each on a phrase the
+page already contained. And every author credit and JSON-LD `Person` is now
+one identity, Kenneth Cross with `/about` as the profile page
+(`docs/authoring-content.md`, "One author identity").
+
 ### After deploying
 
 1. Spot-check production (the deploy workflow does this too):
