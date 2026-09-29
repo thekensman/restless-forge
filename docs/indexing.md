@@ -158,6 +158,37 @@ URLs as canonical, and still declined to index them. That is an
 indexing-selection decision about the content, and fixing URLs will not
 reverse it by itself.
 
+### Follow-up evidence, 2026-09-28
+
+- **Crawl stats (90 days to 2026-09-26).** Host status "No problems" for both
+  `restless-forge.dev` (1,794 requests) and `www` (2). Responses 95.3% 200,
+  3.0% 301, 1.5% 304, 0.3% 404, no 5xx and no 429, typical response times
+  100 to 250 ms. So access and server capacity are fine. The telling split is
+  purpose: **98.3% refresh, 1.7% discovery**, on roughly 20 requests a day
+  (including page resources). Google re-fetches what it already knows and
+  spends almost nothing on new URLs, which is the "Discovered" bucket exactly.
+  The levers are fewer junk URLs to refresh (the redirects) and links to new
+  URLs from the pages Google refreshes most.
+- **Redirect error (1):** `/tools/holopath/about`, last crawled 2026-08-16. On
+  that date it 301'd to `/tools/holopath/about/`, whose canonical pointed back
+  at `/tools/holopath/about`: a canonical/redirect loop, fixed the same day
+  (c69c27d). The record is stale until Google recrawls it.
+- **Page with redirect (3):** `/tools/holopath` (crawled 2026-09-18),
+  `/tools/what-is-my-time-worth` (2026-09-20) and `http://restless-forge.dev/`.
+  All three are correct single 301s. The two unslashed tool URLs are what the
+  JSON-LD `url` on those two pages emitted, and both pages are indexed and
+  refreshed often, so Google kept re-reading and re-crawling them. The JSON-LD
+  fix removes the source.
+- **Sitemaps:** both `http://` and `https://…/sitemap.xml` are submitted (both
+  2026-08-19, both Success, 58 URLs). The http entry is why URL Inspection names
+  `http://restless-forge.dev/sitemap.xml` as a referrer. "No referring sitemaps
+  detected" appears on inspections of crawls dated 2026-08-16 or earlier, which
+  predate the current submissions; it describes the last crawl, not the
+  sitemap's health.
+- **The report data stops at 2026-09-20.** Every coverage chart in the
+  2026-09-28 exports ends on that date, so they say nothing about the week
+  after it. None of the fixes above had shipped by then either.
+
 ### What changed
 
 The nginx rules and guards above; per-tool `sitemap.xml`/`robots.txt` deleted
@@ -181,15 +212,16 @@ template; the one non-canonical internal link fixed.
 2. In Search Console, URL-inspect a handful of representative URLs, not all of
    them: two legacy `.html` URLs (expect "Page with redirect" after recrawl),
    and two or three current URLs from "Discovered" (Request Indexing on those
-   few only). Then "Validate fix" on the 404 and "Crawled" reports.
-3. In the Sitemaps report, make sure exactly one sitemap is submitted,
-   `https://restless-forge.dev/sitemap.xml`, with status Success and about 58
-   discovered URLs. Remove any `http://…/sitemap.xml` or `/tools/<id>/sitemap.xml`
-   entry. Several URL Inspections name `http://restless-forge.dev/sitemap.xml`
-   (http, not https) as the referring page while also saying "No referring
-   sitemaps detected", which is what Google shows when the sitemap it read is
-   not the one registered in the property.
-4. Leave it three to six weeks. Expect "Page with redirect" to jump from 3 to
+   few only). Then "Validate fix" on "Redirect error"; the 404, Crawled and
+   Discovered validations have been running since 2026-08-26.
+3. In the Sitemaps report, keep exactly one sitemap,
+   `https://restless-forge.dev/sitemap.xml`, and remove the `http://` entry.
+   Both read fine today; the http one only redirects to the same file.
+4. Measure against the sitemap, not "All known pages": pick the submitted
+   https sitemap in the Page indexing report's dropdown. "All known pages"
+   will list the legacy URLs forever (as redirects and 404s, which is correct),
+   so its not-indexed total never approaches zero and is the wrong scoreboard.
+5. Leave it three to six weeks. Expect "Page with redirect" to jump from 3 to
    around 30: that is the legacy URLs being consolidated, the intended result.
    What counts as progress: legacy URLs leave "Crawled" and "Not found" for
    "Page with redirect", and "Discovered" starts converting to "Crawled". Only

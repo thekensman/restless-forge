@@ -109,6 +109,7 @@ const GONE = [
 
 /* ── Host and protocol variants → https apex ── */
 const HOSTS = [
+  ["http://restless-forge.dev/", `${SITE}/`],
   ["http://restless-forge.dev/about", `${SITE}/about`],
   ["https://www.restless-forge.dev/about", `${SITE}/about`],
   ["http://www.restless-forge.dev/tools/holopath/?ref=x", `${SITE}/tools/holopath/?ref=x`],

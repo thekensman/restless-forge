@@ -429,8 +429,9 @@ jobs:
       # scripts/check-urls.mjs proves this for nginx/restless-forge.conf before
       # merge, against every URL. This proves it for production, through
       # Cloudflare, after the reload: one representative per legacy family
-      # (docs/indexing.md) plus the pairs from the 2026-09 indexing
-      # investigation. Until 2026-09 every .html URL here answered 200 with a
+      # (docs/indexing.md), the pairs from the 2026-09 indexing investigation,
+      # and the four URLs Search Console filed under "Page with redirect" and
+      # "Redirect error" on 2026-09-28. Until 2026-09 every .html URL here answered 200 with a
       # second copy of the page, and Google chose the .html copy as canonical.
       #
       # Path-level failures are errors: that behaviour is entirely this repo's
@@ -451,6 +452,9 @@ jobs:
           $S/index.html|$S/
           $S/tools/holopath/about/index.html|$S/tools/holopath/about/
           $S/tools/sandpath|$S/tools/sandpath/
+          $S/tools/holopath|$S/tools/holopath/
+          $S/tools/what-is-my-time-worth|$S/tools/what-is-my-time-worth/
+          $S/tools/holopath/about|$S/tools/holopath/about/
           $S/articles/creating-hologram-art|$S/tools/holopath/articles/creating-hologram-art
           $S/tools/holopath/about.html|$S/tools/holopath/about/
           $S/tools/holopath/contact.html|$S/contact
@@ -460,6 +464,7 @@ jobs:
           $S/tools/holopath/sitemap.xml|404
           "
           hosts="
+          http://restless-forge.dev/|$S/
           http://restless-forge.dev/about|$S/about
           https://www.restless-forge.dev/about|$S/about
           http://www.restless-forge.dev/|$S/
