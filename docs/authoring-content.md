@@ -77,11 +77,12 @@ Optional `---` block of `key: value` lines at the top:
 title: Why I Build These Tools
 description: One-sentence summary (also the index-card excerpt).
 date: 2026-07-18
-author: Ken
+author: Kenneth Cross
 ---
 ```
 
-- `date`/`author` render a byline under the first heading.
+- `date`/`author` render a byline under the first heading. `author`
+  defaults to Kenneth Cross; see "One author identity" below.
 - `title`/`description`/`date` are required on an essay, and drive its
   `generated:head` block plus the essays index cards.
 - `image` (optional, essays) sets that essay's social card — `og:image`
@@ -93,6 +94,28 @@ author: Ken
   was filled in once at shell creation and never revisited, so an essay
   whose `image:` changed kept advertising the old path to every social
   scraper while the page itself looked perfect.
+
+## One author identity
+
+Every author credit on the site is **Kenneth Cross**: essay bylines, the
+about/contact/homepage credits, and every JSON-LD `Person` (`author`,
+`creator`), which is always exactly:
+
+```json
+{ "@type": "Person", "name": "Kenneth Cross",
+  "url": "https://restless-forge.dev/about",
+  "sameAs": ["https://restlessforge.substack.com"] }
+```
+
+`/about` is the profile page (it carries a `ProfilePage` block for the same
+person) and Substack is the same person elsewhere. Pages used to say "Ken"
+in some places and "Kenneth Cross" in others, linking to /about, to
+Substack, or nowhere, which reads to Google as several people. Essay heads
+get the object from `scripts/sync-content.mjs`; hand-written heads (tool
+pages, tool articles, the new-tool template) must copy it. `npm run
+check-links` fails on any other shape, and on JSON-LD that is not valid
+JSON, which Google drops without a word. First-person prose can still say
+Ken; credits and structured data cannot.
 
 ## `source:` — borrowing a body from a standalone page
 

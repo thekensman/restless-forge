@@ -2,7 +2,7 @@
 title: A Floor of Curiosity
 description: Restless Forge exists because of two things — frustration with paying rent to process files on hardware you already own, and a childhood spent burning floppy disks in a house full of CRTs.
 date: 2026-08-06
-author: Ken
+author: Kenneth Cross
 image: /essays/images/first-pc-build.jpg
 ---
 

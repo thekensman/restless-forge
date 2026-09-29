@@ -215,6 +215,20 @@ const attr = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const jstr = (s) => JSON.stringify(String(s)).replace(/</g, "\\u003c");
 
+/* One author identity across the site (docs/authoring-content.md): the name,
+   the on-site profile it points at, and the off-site profile it is the same
+   person as. The Substack URL comes from site/shared.js, the source every
+   runtime link to it already uses. Pages once said "Ken" in some places and
+   "Kenneth Cross" in others, linking to /about or to Substack, which reads as
+   different people. check-links fails on a Person that drifts from this. */
+const SITE_AUTHOR = "Kenneth Cross";
+const SUBSTACK = (readFileSync(join(root, "site", "shared.js"), "utf8")
+  .match(/RF_SUBSTACK\s*=\s*'([^']+)'/) || [])[1];
+if (!SUBSTACK) throw new Error("site/shared.js: RF_SUBSTACK not found (needed for the author's JSON-LD sameAs)");
+const personJsonLd = (name) => name === SITE_AUTHOR
+  ? `{ "@type": "Person", "name": ${jstr(name)}, "url": "${SITE}/about", "sameAs": [${jstr(SUBSTACK)}] }`
+  : `{ "@type": "Person", "name": ${jstr(name)} }`;
+
 /* Every head tag derived from front-matter, regenerated on each run.
  *
  * This is a marker block rather than a one-time template substitution because
@@ -236,7 +250,7 @@ function essayHead(slug, meta, mdPath) {
     ? (meta.image.startsWith("http") ? meta.image : `${SITE}${meta.image}`)
     : `${SITE}/og-image.png`;
   const url = `${SITE}/essays/${slug}`;
-  const author = meta.author || "Ken";
+  const author = meta.author || SITE_AUTHOR;
   return `  <title>${attr(meta.title)} — Restless Forge</title>
   <meta name="description" content="${attr(meta.description)}">
   <link rel="canonical" href="${url}">
@@ -253,7 +267,7 @@ function essayHead(slug, meta, mdPath) {
     "@type": "Article",
     "headline": ${jstr(meta.title)},
     "description": ${jstr(meta.description)},
-    "author": { "@type": "Person", "name": ${jstr(author)}, "url": "${SITE}/about" },
+    "author": ${personJsonLd(author)},
     "publisher": { "@type": "Organization", "name": "Restless Forge", "url": "${SITE}" },
     "datePublished": "${attr(meta.date)}",
     "image": "${ogImage}",

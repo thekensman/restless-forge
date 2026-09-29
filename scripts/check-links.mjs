@@ -144,6 +144,43 @@ for (const file of walkHtml(dist)) {
   }
 }
 
+/* ── Structured data parses, and the author is one person ──
+ *
+ * Google drops a JSON-LD block that is not valid JSON without saying so, so a
+ * stray comma silently deletes a page's structured data. And the author used
+ * to appear as "Ken" linking to /about on some pages and "Kenneth Cross"
+ * linking to Substack (or nowhere) on others, which reads as different people.
+ * One identity now: name, the on-site profile at /about, and Substack as
+ * sameAs. The Substack URL comes from site/shared.js, where every runtime link
+ * to it is defined. Generated essay heads get the same object from
+ * scripts/sync-content.mjs. */
+const SITE_AUTHOR = "Kenneth Cross";
+const SUBSTACK = (readFileSync(join(root, "site", "shared.js"), "utf8").match(/RF_SUBSTACK\s*=\s*'([^']+)'/) || [])[1];
+for (const file of walkHtml(dist)) {
+  const rel = relative(dist, file);
+  for (const block of readFileSync(file, "utf8").matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+    let data;
+    try { data = JSON.parse(block[1]); } catch (err) {
+      problems.push(`${rel}: JSON-LD block is not valid JSON (${err.message}); Google ignores the whole block`);
+      continue;
+    }
+    (function visit(node) {
+      if (Array.isArray(node)) return node.forEach(visit);
+      if (!node || typeof node !== "object") return;
+      if (node["@type"] === "Person" && /^Ken(?:neth)?\b/.test(node.name || "")) {
+        const sameAs = [node.sameAs ?? []].flat();
+        if (node.name !== SITE_AUTHOR || node.url !== `${SITE}/about` || !sameAs.includes(SUBSTACK)) {
+          problems.push(
+            `${rel}: author is ${JSON.stringify(node)}; use {"@type": "Person", "name": "${SITE_AUTHOR}", ` +
+            `"url": "${SITE}/about", "sameAs": ["${SUBSTACK}"]}`,
+          );
+        }
+      }
+      Object.values(node).forEach(visit);
+    })(data);
+  }
+}
+
 /* ── One sitemap and one robots.txt, both at the root ──
  * Every tool used to ship its own public/sitemap.xml and robots.txt from its
  * standalone-domain days. robots.txt only counts at the host root, but the

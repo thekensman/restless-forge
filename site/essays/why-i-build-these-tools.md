@@ -2,7 +2,7 @@
 title: Why I Build These Tools
 description: Notes on why these tools are free and browser-first, and how the site pays for itself without collecting anything from you.
 date: 2026-07-18
-author: Ken
+author: Kenneth Cross
 ---
 
 # Why I Build These Tools
