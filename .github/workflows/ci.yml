@@ -56,6 +56,20 @@ jobs:
       - name: Check internal links resolve
         run: npm run check-links
 
+      # The same built tree, served by the REAL nginx/restless-forge.conf on
+      # localhost: every page answers at exactly one URL, every .html and
+      # legacy URL 301s there in one hop, deleted pages stay 404, host variants
+      # go to the https apex, and no emitted link lands on a redirect. This is
+      # what Search Console sees, checked before merge instead of weeks after.
+      # See scripts/check-urls.mjs and docs/indexing.md.
+      - name: Check URL behaviour under nginx
+        run: |
+          if ! command -v nginx >/dev/null 2>&1 && [ ! -x /usr/sbin/nginx ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends nginx-light
+          fi
+          npm run check-urls
+
       - name: Run all tool test suites
         run: npm test
 

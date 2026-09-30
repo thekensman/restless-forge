@@ -2,7 +2,7 @@
 title: How a Tool Gets Built
 description: A walk through the machinery that turns an idea into a live tool on this site, from scaffold script to automated deploy, and why most of the forge stays hidden.
 date: 2026-07-18
-author: Ken
+author: Kenneth Cross
 ---
 
 # How a Tool Gets Built

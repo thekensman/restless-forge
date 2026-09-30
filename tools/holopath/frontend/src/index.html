@@ -33,13 +33,13 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "HoloPath",
-    "url": "https://restless-forge.dev/tools/holopath",
+    "url": "https://restless-forge.dev/tools/holopath/",
     "description": "Free online hologram GIF generator. Upload any image or GIF and transform it into animated holographic art.",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "browserRequirements": "Requires JavaScript. All processing runs client-side.",
-    "author": { "@type": "Person", "name": "Ken", "url": "https://restless-forge.dev/about" }
+    "author": { "@type": "Person", "name": "Kenneth Cross", "url": "https://restless-forge.dev/about", "sameAs": ["https://restlessforge.substack.com"] }
   }
   </script>
 
@@ -286,19 +286,19 @@
     <h2>The Five Output Layouts</h2>
     <p>The layout is the part most hologram filters get wrong. An effect that looks holographic on a phone screen is useless if it isn't arranged correctly for the hardware reflecting it:</p>
     <ul>
-      <li><strong>Pyramid 360°</strong> — the four-sided arrangement for the small acrylic pyramids that sit on a phone screen.</li>
+      <li><strong>Pyramid 360°</strong> — the four-sided arrangement for the <a href="/tools/holopath/articles/how-hologram-pyramids-work">small acrylic pyramids</a> that sit on a phone screen.</li>
       <li><strong>Pyramid 270°</strong> — three-sided, for commercial showcase units meant to be viewed from the front and sides only.</li>
-      <li><strong>Hologram Fan</strong> — a circular crop for LED persistence-of-vision fans, which spin a blade of lights fast enough to paint an image in the air.</li>
-      <li><strong>Pepper's Ghost</strong> — positioned for an angled sheet of glass or acrylic, the Victorian stage illusion that every modern "hologram" concert still uses.</li>
+      <li><strong>Hologram Fan</strong> — a circular crop for <a href="/tools/holopath/articles/led-hologram-fans">LED persistence-of-vision fans</a>, which spin a blade of lights fast enough to paint an image in the air.</li>
+      <li><strong>Pepper's Ghost</strong> — positioned for an angled sheet of glass or acrylic, the <a href="/tools/holopath/articles/peppers-ghost-illusion">Victorian stage illusion</a> that every modern "hologram" concert still uses.</li>
       <li><strong>Single Image</strong> — no layout transform, for sharing the effect on its own.</li>
     </ul>
 
     <h2>How the Effect Is Produced</h2>
-    <p>Every frame runs through a thirteen-stage pipeline built on Canvas pixel manipulation: wobble, luminance extraction, edge detection, scan lines, chromatic aberration, glow, glitch, noise and the rest. Five presets — Classic, Cyberpunk, Ghost, Glitch and Matrix — are tuned starting points, and every individual parameter stays adjustable, with the preview re-rendering as you change it.</p>
+    <p>Every frame runs through a thirteen-stage pipeline built on Canvas pixel manipulation: wobble, luminance extraction, edge detection, <a href="/tools/holopath/articles/hologram-effects-explained">scan lines, chromatic aberration, glow</a>, glitch, noise and the rest. Five presets — Classic, Cyberpunk, Ghost, Glitch and Matrix — are tuned starting points, and every individual parameter stays adjustable, with the preview re-rendering as you change it.</p>
     <p>A still image has only one frame, so the animation comes from varying the effect parameters across the output frames instead: the scan line travels, the flicker phase advances, the glitch offsets move. A single photograph ends up looking like a live projection. An animated GIF keeps its own motion, with each source frame passed through the pipeline independently. <a href="/tools/holopath/how-it-works/">The full pipeline is documented stage by stage →</a></p>
 
     <h2>What It Doesn't Do</h2>
-    <p>This is a 2D effect renderer, not a 3D reconstruction. It does not build a model of your subject or generate views from angles the source never contained — a pyramid layout shows the same treated image on each face, which is exactly how the projectors are designed to work. It also won't rescue a low-resolution source: scan lines and edge detection reveal compression artefacts rather than hide them.</p>
+    <p>This is a 2D effect renderer, not a 3D reconstruction. It does not build a model of your subject or generate views from angles the source never contained — a pyramid layout shows the same treated image on each face, which is exactly how the projectors are designed to work. It also won't rescue a <a href="/tools/holopath/articles/best-images-for-holograms">low-resolution source</a>: scan lines and edge detection reveal compression artefacts rather than hide them.</p>
     <p>Everything runs in your browser. Your files are never uploaded, because there is no server to upload them to — the pipeline is JavaScript executing in your own tab, which is also why large videos are limited by your device's memory rather than by a plan tier.</p>
     <p><a href="/tools/holopath/articles/">Articles</a> &nbsp;·&nbsp; <a href="/tools/holopath/faq/">FAQ</a> &nbsp;·&nbsp; <a href="/tools/holopath/about/">About HoloPath</a> &nbsp;·&nbsp; <a href="/tools/">More Restless Forge tools</a></p>
   </section>

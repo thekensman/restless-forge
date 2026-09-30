@@ -189,6 +189,8 @@ npm install          # (first time only)
 npm run dev          # starts site proxy :8080 + all tool dev servers
 npm test             # runs every tool's vitest suite
 npm run build        # ./build.sh — compiles all tools into dist/
+npm run check-urls   # after a build: serves dist/ with the real nginx vhost and
+                     # checks every page has one URL (needs nginx + openssl)
 ```
 
 ### Single tool in isolation
@@ -301,6 +303,13 @@ rules): `docs/authoring-content.md`.
 | `/articles/` | `site/articles/index.html` |
 | `/api/*` | FastAPI service on 127.0.0.1:8000 (nginx `^~ /api/` proxy; `backend/`) |
 
+Every page has exactly **one** URL, set by its file (`about.html` → `/about`,
+`about/index.html` → `/about/`). Its `.html` spelling, a directory page
+without its slash, retired URLs, and `http://`/`www.` all 301 there in one
+hop; a URL with nothing behind it is a plain 404. Canonical, `og:url`,
+JSON-LD, sitemap and every internal link use that one URL. Policy, the
+retired-URL table, and how to add to it: `docs/indexing.md`.
+
 ## Code Conventions
 
 - TypeScript strict mode. No runtime npm dependencies unless a tool
@@ -372,6 +381,7 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 | Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? nginx serves css/js `immutable` for a year, so an unbusted stable filename is served stale until the browser is forced to refetch (`docs/frontend-pitfalls.md` §1). `npm run check-links` fails on any unbusted reference. |
 | Page scrolls sideways on a phone / images jump on load / ad slot leaves a blank band | `docs/frontend-pitfalls.md` — these have all shipped before, with the cause and the rule that prevents each. |
 | New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |
+| Search Console lists `.html` or other legacy URLs, "Duplicate" / "Google chose different canonical", or a moved page 404s | `docs/indexing.md`. `npm run build && npm run check-urls` runs the real vhost against the build and names every URL that does not answer once, at its canonical address. |
 | Site down / cert expiring / stale assets in prod | `site-health` issues from `.github/workflows/health-check.yml`; server runbook in `docs/infrastructure.md` (Cloudflare edge, DNS-01 cert renewal, disaster recovery) |
 | `/api/*` down or erroring | `systemctl status restless-forge-api` + `journalctl -u restless-forge-api` on the droplet; backend runbook in `docs/backend.md` (cost caps, circuit breaker, key rotation) |
 
@@ -388,6 +398,14 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
   `public/shared.js` or `window.rfDonateHtml` will be undefined.
 - **Old domain redirects**: keep SSL certs renewed for holopath.art,
   sandpath.art, whatismytimeworth.app as long as 301 redirects are active.
+- **Moving, renaming or deleting a page**: the old URL does not quietly
+  keep working. Give it a 301 in the `$rf_legacy_target` table only if a page
+  with the same content replaces it; otherwise let it 404
+  (`docs/indexing.md`). Never link a `.html` URL or a directory page without
+  its trailing slash: both are redirects, and `check-links` fails on them.
+- **No per-tool `sitemap.xml` or `robots.txt`**: the root ones are generated
+  and are the only ones that count. Tools used to ship stale copies that
+  re-advertised retired URLs; `check-links` now fails on any.
 - **Essays are real content**: `site/essays/` holds published essays
   (global philosophy / meta-project pieces only — tool-specific articles
   live with their tool). Never re-add "coming soon" stub pages; thin

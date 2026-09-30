@@ -423,3 +423,88 @@ jobs:
             exit 1
           fi
           echo "sitemap sweep OK — ${total} URLs, all 200, canonical and og:url self-consistent"
+
+      # ── Retired URLs answer with ONE 301 to the canonical URL ──
+      #
+      # scripts/check-urls.mjs proves this for nginx/restless-forge.conf before
+      # merge, against every URL. This proves it for production, through
+      # Cloudflare, after the reload: one representative per legacy family
+      # (docs/indexing.md), the pairs from the 2026-09 indexing investigation,
+      # and the four URLs Search Console filed under "Page with redirect" and
+      # "Redirect error" on 2026-09-28. Until 2026-09 every .html URL here answered 200 with a
+      # second copy of the page, and Google chose the .html copy as canonical.
+      #
+      # Path-level failures are errors: that behaviour is entirely this repo's
+      # nginx config. Host variants (www, http) also pass through Cloudflare and
+      # DNS settings that live outside the repo, so those only warn.
+      - name: Verify legacy URLs redirect
+        run: |
+          S=https://restless-forge.dev
+          # from|expected ("404" = must stay gone)
+          paths="
+          $S/tools/holopath/articles/how-hologram-pyramids-work.html|$S/tools/holopath/articles/how-hologram-pyramids-work
+          $S/tools/holopath/articles/diy-hologram-pyramid.html|$S/tools/holopath/articles/diy-hologram-pyramid
+          $S/tools/holopath/articles/best-hologram-projectors.html|$S/tools/holopath/articles/best-hologram-projectors
+          $S/tools/holopath/articles/optimizing-hologram-output.html|$S/tools/holopath/articles/optimizing-hologram-output
+          $S/tools/holopath/articles/peppers-ghost-illusion.html|$S/tools/holopath/articles/peppers-ghost-illusion
+          $S/about.html|$S/about
+          $S/essays/why-i-build-these-tools.html|$S/essays/why-i-build-these-tools
+          $S/index.html|$S/
+          $S/tools/holopath/about/index.html|$S/tools/holopath/about/
+          $S/tools/sandpath|$S/tools/sandpath/
+          $S/tools/holopath|$S/tools/holopath/
+          $S/tools/what-is-my-time-worth|$S/tools/what-is-my-time-worth/
+          $S/tools/holopath/about|$S/tools/holopath/about/
+          $S/articles/creating-hologram-art|$S/tools/holopath/articles/creating-hologram-art
+          $S/tools/holopath/about.html|$S/tools/holopath/about/
+          $S/tools/holopath/contact.html|$S/contact
+          $S/tools/what-is-my-time-worth/privacy/|$S/privacy
+          $S/tools/what-is-my-time-worth/blog/life-energy-and-ymoyl/|$S/tools/what-is-my-time-worth/articles/life-energy-and-ymoyl/
+          $S/essays/the-time-value-philosophy|404
+          $S/tools/holopath/sitemap.xml|404
+          "
+          hosts="
+          http://restless-forge.dev/|$S/
+          http://restless-forge.dev/about|$S/about
+          https://www.restless-forge.dev/about|$S/about
+          http://www.restless-forge.dev/|$S/
+          "
+
+          check() {  # check <from> <expected> → prints a problem line, or nothing
+            code_loc=$(curl -s -o /dev/null --max-time 20 -w '%{http_code} %{redirect_url}' "$1") || { echo "$1 : request failed"; return; }
+            code=${code_loc%% *}; loc=${code_loc#* }
+            if [ "$2" = 404 ]; then
+              [ "$code" = 404 ] || echo "$1 : HTTP $code${loc:+ $loc}, want 404 (no replacement exists)"
+              return
+            fi
+            if [ "$code" != 301 ] || [ "$loc" != "$2" ]; then
+              echo "$1 : HTTP $code ${loc:-(no Location)}, want 301 $2"; return
+            fi
+            final=$(curl -s -o /dev/null --max-time 20 -w '%{http_code}' "$2") || final=failed
+            [ "$final" = 200 ] || echo "$1 : 301 $2, which answers $final (want 200 in one hop)"
+          }
+
+          # `systemctl reload nginx` is graceful: the first requests after it
+          # can still reach an old worker running the previous config. Retry.
+          for attempt in 1 2 3; do
+            fails=""
+            for pair in $paths; do fails="$fails$(check "${pair%%|*}" "${pair#*|}")"$'\n'; done
+            fails=$(printf '%s' "$fails" | sed '/^$/d')
+            [ -z "$fails" ] && break
+            sleep 5
+          done
+          host_fails=""
+          for pair in $hosts; do host_fails="$host_fails$(check "${pair%%|*}" "${pair#*|}")"$'\n'; done
+          host_fails=$(printf '%s' "$host_fails" | sed '/^$/d')
+
+          if [ -n "$host_fails" ]; then
+            printf '%s\n' "$host_fails"
+            echo "::warning::A www/http variant does not 301 to https://restless-forge.dev in one hop. nginx does this itself, so check Cloudflare: Always Use HTTPS, any Redirect/Page Rule on www, and the www DNS record."
+          fi
+          if [ -n "$fails" ]; then
+            echo "── legacy URL problems ──"
+            printf '%s\n' "$fails"
+            echo "::error::Legacy URL sweep failed: a retired URL is not a single 301 to its canonical URL (or a deleted page came back). This is nginx/restless-forge.conf's job; see docs/indexing.md."
+            exit 1
+          fi
+          echo "legacy URL sweep OK ($(printf '%s\n' $paths | grep -c .) URLs)"

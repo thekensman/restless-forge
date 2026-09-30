@@ -35,6 +35,11 @@ the hash in the filename and are exempt.
 
 **Guard.** `scripts/check-links.mjs` fails when a same-origin `.css`/`.js`
 reference in built HTML has neither `?v=` nor a hashed filename.
+`scripts/check-urls.mjs` fails when any page is served without `no-cache`.
+That half was quietly false for a long time: only nginx's `\.html$` location
+set it, and extensionless pages (`/about`, essays, HoloPath articles) are
+served by `try_files $uri.html` from the prefix locations, so they went out
+with no `Cache-Control` at all until September 2026.
 
 ---
 
