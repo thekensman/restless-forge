@@ -237,13 +237,15 @@ one identity, Kenneth Cross with `/about` as the profile page
 
 ## October 2026 indexing experiment
 
-Started 2026-10-12. With the URL graph clean since the 2026-09-30 deploy, the
-question is what Google now does with the pages it has been passing over. Two
-tests run side by side and are read separately.
+Planned 2026-10-12; requests from 2026-10-13 (the exact date is recorded under
+Baseline). With the URL graph clean since the 2026-09-30 deploy, the question is
+what Google now does with the pages it has been passing over. Two tests run side
+by side and are read separately.
 
-- **Six indexing requests,** made on 2026-10-12. A request almost always gets
-  the page fetched, so this shows what Google decides about a page after a
-  fresh look.
+- **Six indexing requests,** three of them paired with one outside link each.
+  A request almost always gets the page fetched, so the request-only pages show
+  what Google decides after a fresh look, and the linked ones show whether a
+  signal from outside the site changes that decision.
 - **The 2026-09-30 links.** Ten articles gained a contextual link from an
   indexed tool page (a4e06d2). None is requested, and eight sibling articles
   without such a link serve as controls. This shows whether a link from an
@@ -281,6 +283,23 @@ result impossible to attribute.
   matches are `/essays/self-publishing-dreaming-with-eyes-open` for the essays
   and the eight HoloPath controls below for the two articles.
 
+The six split into two arms, one page of each kind on each side where the
+kinds allow:
+
+| Request plus one outside link | Request only |
+|---|---|
+| `/essays/a-floor-of-curiosity` | `/essays/how-a-tool-gets-built` |
+| `/tools/holopath/articles/gif-vs-video-hologram` | `/tools/holopath/articles/best-hologram-projectors` |
+| `/tools/tattoosafe/` | `/essays/why-i-build-these-tools` |
+
+An outside link counts only if it is genuine: a Substack post or a community
+answer that cites the page because it helps the reader there, not a bare drop.
+One link per page, all live within 48 hours of the requests, each recorded
+under Baseline with its URL and date. None may point at the 2026-09-30
+treatment or control articles. Whether Substack marks outbound links
+`nofollow` is unverified; Google treats that as a hint, so the link still
+counts as a signal but possibly a weaker one.
+
 ### The 2026-09-30 links
 
 | Group | Pages |
@@ -310,6 +329,8 @@ comes after that.
   `best-hologram-projectors` is the least likely to be indexed.
 - On 2026-10-26 the treatment looks like the controls, with few or none
   crawled.
+- The linked arm ends up with more pages indexed than the request-only arm.
+  Low confidence: three pages a side can show a direction, not prove one.
 
 ### Reading the result
 
@@ -317,21 +338,23 @@ comes after that.
 |---|---|---|
 | The six are indexed after the fresh crawl | Google needed a new look at the cleaned-up site | Request the strongest remaining pages, a few a day |
 | The six are crawled and still not indexed | The limit is Google's judgment of these pages and the site | Test one of the hypotheses below, alone |
+| Linked arm indexed, request-only arm not | Outside signals are the lever | Earn real links for the strongest pages, one at a time |
+| Neither arm indexed | Outside links alone don't tip it | Test content next, starting with `best-hologram-projectors` |
 | Treatment crawled, controls not, precondition met | Links from indexed pages work here, slowly | Link the remaining articles from their tool pages |
 | Both groups crawled | Site-wide reprocessing | Credit neither |
 | Treatment flat | Internal links don't get pages crawled here | Stop proposing more of them as the fix |
 
-Two hypotheses are recorded and deliberately left untested this round:
+The hypotheses behind the arms:
 
-- **Content.** `best-hologram-projectors` promises product recommendations in
-  its title and names no products. Rewriting it now would mix a content change
-  into the request result.
-- **Outside signals.** The four indexed pages are `/` and the three tools that
-  inherited 301s from their old domains. `/tools/tattoosafe/` has comparable
-  static text (815 words, against 695 to 991 on the indexed tool pages) and the
-  same homepage link, and it is not indexed. Four pages is a small sample, but
-  it is the strongest pattern in the data, and it points at links from other
-  sites as the next lever.
+- **Outside signals (tested by the linked arm).** The four indexed pages are
+  `/` and the three tools that inherited 301s from their old domains.
+  `/tools/tattoosafe/` has comparable static text (815 words, against 695 to
+  991 on the indexed tool pages) and the same homepage link, and it is not
+  indexed. Four pages is a small sample, but it is the strongest pattern in the
+  data.
+- **Content (recorded, not tested).** `best-hologram-projectors` promises
+  product recommendations in its title and names no products. Rewriting it now
+  would mix a content change into the request result.
 
 ### Freeze
 
@@ -349,7 +372,7 @@ Backend work and unlaunched tools are unaffected.
 
 | Date | Check |
 |---|---|
-| 2026-10-12 | Baseline: export every bucket and the indexed list, note the sitemap's "Last read", inspect the four indexed pages. Then Live Test and Request Indexing on the six only. |
+| Request day | Baseline: export every bucket and the indexed list, note the sitemap's "Last read", inspect the four indexed pages. Then Live Test and Request Indexing on the six only. Outside links for the linked arm within 48 hours. |
 | 2026-10-19 | URL Inspection on the six: last crawl, status, Google-selected canonical |
 | 2026-10-26 | Exports and inspections as on 2026-10-12, plus the six |
 | 2026-11-09 | Exports again: a requested page can be indexed and later dropped |
@@ -386,4 +409,5 @@ Redirect error). Sitemap-only figures come from the exports.
   the page.
 
 The per-URL starting state of both comparison groups comes from the
-2026-10-12 exports and is added here when they are in hand.
+request-day exports and is added here when they are in hand, with the request
+date and each outside link's URL and date.
