@@ -1,62 +1,110 @@
-# Creating Hologram Art: A Beginner's Complete Guide
+---
+date: 2026-03-15
+updated: 2026-10-13
+author: Kenneth Cross
+---
+# Making a Hologram with HoloPath, Step by Step
 
-Anyone can create a compelling hologram GIF. The process does not require expensive software, artistic training, or technical expertise — just a decent source image, a clear idea of what you want to convey, and a few minutes with HoloPath's generator. This guide walks you through every step, from choosing a subject to displaying your finished work.
+This is the whole process, from picking a source to a file playing under a
+pyramid, with the decisions that matter at each step and the numbers behind
+them. Everything runs in your browser; nothing is uploaded.
 
-## Step 1: Choosing the Right Subject
+## 1. Pick and prepare a source
 
-Not all images make equally good holograms. The floating, glowing quality of a pyramid projection or LED fan display depends on a subject that reads clearly against black. Some categories of subjects work exceptionally well.
+HoloPath accepts JPG, PNG, WebP and BMP images, animated GIFs, and MP4, WebM,
+MOV, M4V or OGG video, up to 15 MB. Only the brightness of your source survives
+the conversion, so the best subjects are bright, shaded and sitting on pure
+black: a side-lit face, a skull, a rendered object, a logo.
 
-### Subjects That Excel as Holograms
+Cut the subject out and fill the background with black before uploading. A
+background that is merely dark becomes a haze of coloured light.
+[Which images work, and why](/tools/holopath/articles/best-images-for-holograms)
+goes deeper.
 
--   **Skulls and bones:** The strong structural contrast of bone against dark space is almost purpose-built for holographic display. The detail of teeth, eye sockets, and surface texture all catch reflected light beautifully.
--   **Faces and portraits:** A face with good side-lighting against a black background creates a dramatic floating portrait effect. Avoid flat, evenly lit faces — shadows and highlights make the form read better in projection.
--   **Geometric and crystalline forms:** Spheres, cubes, polyhedra, and crystal shapes have clear edges and catch light predictably. They work beautifully with high-glow settings and chromatic aberration.
--   **Animals with strong silhouettes:** Eagles, wolves, big cats, and other animals with bold, recognizable shapes project with excellent clarity. Fine detail in fur or feathers works best with moderate effect intensity.
--   **Sci-fi and technology objects:** Spacecraft, mechanical structures, robots, and tech iconography translate naturally into the holographic aesthetic, and can carry heavier effect processing than organic subjects.
--   **Logos and symbols:** Brand marks, emblems, and symbolic imagery project with extreme clarity and can be heavily stylized without losing legibility.
+## 2. Start from a preset
 
-### Subjects to Approach Carefully
+The five presets set every effect at once:
 
-Complex, busy scenes with many elements at similar brightness levels tend to become muddy. Landscapes, crowd photographs, and images with complex textured backgrounds require significant preparation work before they produce good holograms. Text-heavy images often lose legibility at small sizes. Portraits with soft, low-key lighting may lose too much shadow detail to the black background.
+- **Classic**: cyan, moderate everything. The safest start.
+- **Matrix**: green, dense scan lines, steady.
+- **Ghost**: blue, outlines and heavy flicker. Good for faces and flat subjects.
+- **Cyberpunk**: magenta, with the strongest scan lines, glow and glitch.
+- **Glitch**: rainbow, with heavy row displacement. The hardest to keep smooth
+  in a GIF, because its colours change through the loop.
 
-## Step 2: Preparing Your Source Image
+The preview starts animating as soon as the file loads, and every change shows
+immediately.
 
-The most important preparation step is background removal. Your subject needs to be isolated against a pure black background. Even a very good hologram effect will look flat and unconvincing if the subject blends into a non-black background.
+## 3. Adjust the settings that matter most
 
-Use any background-removal tool you have access to — dedicated apps, the background removal feature built into recent versions of most major image editors, or free web tools. The quality of the edge mask matters: clean, crisp edges produce sharper hologram silhouettes than feathered or rough masks.
+Most of the sliders are seasoning. These decide whether the result works:
 
-After background removal, check the overall contrast of your subject. If it looks flat or low-contrast, boost the levels or curves slightly: you want bright highlights and clear shadows with a good tonal range. The HoloPath generator applies its own contrast and brightness processing, but it works better with a well-prepared starting image.
+**Glow and Brightness** together decide how much of your subject turns into
+flat colour. Glow pushes everything above half brightness toward pure colour,
+and Brightness, applied last, multiplies the lot. If highlights lose their
+detail, lower one of them. Brightness is neutral at 33%, not 50%.
 
-Target a square image of at least 600×600 pixels, with your subject centered and filling roughly 70–80% of the frame. Leave some space around the edges — subjects that bleed off the edge lose visual information during the pyramid reflection.
+**Noise** decides the file size more than anything else. It adds grain that GIF
+compression cannot shrink: on a test subject, the default pyramid GIF was 8.3 MB
+with the Classic preset's 25% noise and 3.7 MB with none.
 
-## Step 3: Selecting a Preset in HoloPath
+**Edge Detect** rescues subjects that come out as a blob of colour by redrawing
+the image from its outlines.
 
-HoloPath's presets are starting points tuned for different aesthetic goals. Load your image, then try a few presets in the preview before committing to one. The preview updates in real-time, so exploration is fast and low-cost.
+[What each setting does to a pixel](/tools/holopath/articles/hologram-effects-explained)
+has the numbers for all of them.
 
-As a general orientation: presets labeled with terms like "clean" or "classic" use lighter effects appropriate for organic subjects like faces. Presets with names suggesting intensity or tech aesthetics apply heavier scan lines, stronger chromatic aberration, and brighter glows — these work better on mechanical or geometric subjects. If you are creating holographic content for a specific brand or aesthetic, look for presets whose color tint matches your palette — cyan and blue-green are classic holographic colors, but amber, red, and violet presets are available for different moods.
+## 4. Choose the layout for your hardware
 
-## Step 4: Fine-Tuning the Effect Sliders
+| Display | Layout | What HoloPath does |
+|---|---|---|
+| Plastic pyramid on a phone or tablet | Pyramid 360° | Four mirrored copies, each pointing at an edge of the screen |
+| Three-sided showcase | Pyramid 270° | Three mirrored copies, 120° apart |
+| LED hologram fan | Hologram Fan | Subject centred, everything outside a circle blacked out |
+| Glass at 45° over a screen | Pepper's Ghost | One mirrored copy, low in a 16:9 frame |
+| Anything else | Single Image | The effects alone, no layout |
 
-After choosing a preset, the individual sliders let you adjust the effect to your exact taste. Work through them one at a time rather than adjusting several at once — it is easier to understand the contribution of each slider when you change only one at a time.
+The reflective layouts are mirrored on purpose. A reflection swaps left and
+right, so the screen has to show the mirror image for text and logos to read
+correctly in the glass. How each display works:
+[pyramids](/tools/holopath/articles/how-hologram-pyramids-work),
+[LED fans](/tools/holopath/articles/led-hologram-fans) and
+[Pepper's Ghost](/tools/holopath/articles/peppers-ghost-illusion).
 
-Start with brightness. The preview shows how the output will look in a flat screen context, but remember that pyramid projection reduces effective brightness by the reflection loss of the plastic faces. If you plan to display on a pyramid, set brightness slightly higher than looks correct on screen. For LED fan displays, the fan's own brightness setting dominates, so default is usually fine.
+## 5. Set resolution, frames and speed
 
-Next, set scan line intensity. A light scan line texture (10–20%) adds holographic character without obscuring detail. Increase if you want a more strongly retro or technical aesthetic. Decrease toward zero for clean, modern hologram aesthetics.
+**Resolution** caps the width your source is processed at; it never enlarges a
+source. The layouts then draw on a canvas twice that width, up to 800 pixels.
+For a pyramid, 400 is enough: each copy can be at most 331 pixels wide on the
+800-pixel canvas, so higher settings only take longer. For the fan, whose
+subject can reach 600 pixels, 640 or 800 does show. Choosing 256 halves the
+canvas to 512 pixels and cut the test file from 8.3 MB to 3.5 MB.
 
-Then adjust glow. Glow creates the bloom effect that makes a hologram look luminous rather than merely colored. For bold subjects against black, moderate glow (25–40%) produces excellent results. For finer subjects, keep glow lower to preserve edge definition.
+**Frames** is how many frames the effects animate over: 8 to 120, default 24.
+A still image moves only because the effects cycle once per loop, so more
+frames means smoother motion and, in a GIF, a proportionally larger file: 48
+frames made 16.7 MB. Animated GIFs and videos use all of their own frames
+unless you switch to a custom count.
 
-Finally, chromatic aberration. This is the most aggressive single effect. Even small amounts (5–10%) add character. Large amounts (30%+) are for deliberate glitch or cyberpunk aesthetics. Use sparingly on any subject where fine detail matters.
+**Speed** sets the pace, from 20 to 200 ms per frame, default 80. Twenty-four
+frames at 80 ms is a loop of about two seconds. Animated GIFs and videos can
+keep their original timing with "Use source timing".
 
-## Step 5: Choosing Your Output Layout
+## 6. Generate and save
 
-HoloPath offers different output layouts depending on your display hardware. The four-panel pyramid layout arranges four copies of your image in the standard cross formation for pyramid projectors. Single-panel output is suitable for LED fan displays, digital frames, or sharing as a standalone image. Choose the layout that matches where you plan to display the finished GIF.
+Generate renders every frame and encodes the file; the result replaces the
+preview, with its size shown. A GIF plays anywhere and loops on its own. A
+video is far smaller, 0.12 MB for the same test, but needs a player set to
+repeat. [GIF or video](/tools/holopath/articles/gif-vs-video-hologram) compares
+the two.
 
-## Step 6: Displaying and Sharing Your Work
+## 7. Play it on the display
 
-For pyramid display, save the GIF to your phone and play it full-screen with screen brightness at maximum. Dim or darken the room for the best effect. Position the pyramid carefully centered over the screen.
-
-For sharing on social platforms, the four-panel layout GIF can be shared directly — viewers without a pyramid still see the holographic effect styling, and the symmetrical four-panel layout has its own visual appeal. For WhatsApp and messaging apps, keep file size under 2 MB for reliable delivery. Instagram and similar platforms accept standard GIF files via third-party posting tools.
-
-For websites and blogs, the GIF can be embedded as a standard image tag. Consider adding a brief note explaining that the image is designed for pyramid projector display — many viewers will be inspired to try it themselves.
+For a pyramid on a phone, open the file full screen with the screen at maximum
+brightness, turn off auto-brightness and darken the room. The pyramid's small
+end goes on the centre of the screen. Each copy's base points at the centre,
+so the floating image stands upright inside the pyramid. If you are building
+the pyramid yourself, [this guide](/tools/holopath/articles/diy-hologram-pyramid)
+sizes it to HoloPath's layout.
 
 <p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Try HoloPath Free →</a></p>

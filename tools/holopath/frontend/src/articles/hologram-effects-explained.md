@@ -1,43 +1,154 @@
-# Understanding Holographic Effects: Scan Lines, Glow, and Chromatic Aberration Explained
+---
+date: 2026-03-15
+updated: 2026-10-13
+author: Kenneth Cross
+---
+# Holographic Effects Explained: What Each HoloPath Setting Does to a Pixel
 
-Holographic imagery has a recognisable visual vocabulary — a set of layered effects that, in combination, signal "advanced technology" or "digital projection" to a viewer. None of these effects are arbitrary. Each one has a real origin in physics, display technology, or the history of imaging science, and understanding where they come from makes them much more effective to use. Here is the story behind every major effect, and how HoloPath's sliders let you dial each one in.
+Every frame HoloPath renders passes through the same thirteen steps, in the same
+order, inside your browser. The sliders are not independent switches. Each one
+changes a number that a later step builds on, which is why two settings can
+seem to fight each other, and why the same slider value looks different on
+different images. This is the pipeline as the code runs it, with the numbers
+behind each control.
 
-## Scan Lines
+## First, colour is thrown away
 
-The scan line effect — horizontal dark bands at regular intervals across the image — is a direct visual inheritance from cathode ray tube (CRT) television. CRT screens painted images by sweeping an electron beam across the screen one horizontal line at a time. The beam could only illuminate one line at a given moment, so the rest of the screen was briefly dark between each sweep. At normal viewing distances, your eye averaged across these lines and saw a continuous image, but up close the line structure was clearly visible.
+Early in the pipeline the frame is reduced to brightness alone, using the
+standard television weighting: 29.9% of the red channel, 58.7% of the green and
+11.4% of the blue. Everything after that works on this single brightness value,
+and the hue you pick paints it back in.
 
-When viewers see scan lines on a digital hologram, they read it as a projected or transmitted image rather than a physical object. The effect communicates "this is a signal being displayed" — exactly the right message for a holographic projection. Tightly spaced scan lines (many thin lines) look more like a high-resolution monitor feed; widely spaced lines create a coarser, more retro or degraded feel. In HoloPath's scan line slider, lower values produce fine lines and a subtle effect; higher values produce thick, bold banding reminiscent of old video equipment or a display with failing electronics.
+So the colours in your source never reach the output. A red apple and a green
+apple of the same brightness come out identical, and a pure blue subject, which
+carries only 11% of the weight, comes out dark.
 
-## Glow and Bloom
+The same step is why the background has to be black. The output colour is
+brightness multiplied by the hue, so black stays black and anything lighter
+becomes coloured light. A white background turns into a solid block of cyan.
 
-In physical optics, bright light sources scatter photons into adjacent areas through the atmosphere, through the vitreous humour of the eye, and through the optical systems of cameras and projectors. This scattered light creates a soft luminous halo around any bright region — what photographers call bloom and post-production artists call glow.
+## Float / Wobble
 
-In displays, bloom also occurs when bright pixels cause their LCD backlights to spill into neighbouring zones, or when bright areas of a projection diffuse through the projection screen material. The glow effect convincingly suggests that the holographic image is self-luminous — that it is emitting real light from inside rather than being drawn on a flat surface. A holographic figure with strong glow appears to have physical presence and warmth. HoloPath's glow slider blurs and brightens the image edges, most noticeably around high-contrast boundaries between bright subject areas and the dark background.
+Before anything else, the whole frame drifts by a few pixels: up to 3 sideways
+and about 3.5 up and down, on a path that repeats every loop. This is the
+reason a still photo comes out moving. The edge the frame drifts away from
+fills with black.
 
-## Chromatic Aberration
+## Edge Detect
 
-Every lens refracts different wavelengths of light at slightly different angles — a property called dispersion. Cheap or uncorrected lenses fail to focus all colours at exactly the same point, resulting in visible colour fringing around high-contrast edges. Red light focuses slightly differently from blue, and the mismatch produces ghost images in each primary colour offset by a small distance. This is chromatic aberration, and it is a well-known lens defect.
+Edge Detect compares each pixel's brightness with the pixel to its left and the
+one above it, and adds up the differences. At 0% the image is untouched. At
+100% only the outlines remain, which suits flat, evenly lit subjects that would
+otherwise become a uniform blob of colour. In between, the slider blends the
+outline into the original brightness.
 
-In holographic visual design, chromatic aberration works as a powerful realism cue for projected imagery. It suggests that the hologram has passed through optical elements — projector lenses, waveguides, transmission media — and picked up the colour fringing those components would introduce. The effect is also deeply familiar from low-budget video and early digital cameras, associating the image with authentic recording technology rather than clean CGI. HoloPath's chromatic aberration slider shifts the red and blue channels horizontally relative to the green channel; a small shift is subtle and naturalistic, a large shift creates a pronounced fractured-colour look associated with glitchy or distressed holograms.
+## Hue
 
-## Glitch Effects
-
-Digital glitch aesthetics emerged from the databending and circuit-bending art movements of the early 2000s, in which artists deliberately corrupted digital files or manipulated hardware to produce visual errors. Glitch art celebrates the raw signal beneath the polished surface — shifted rows of pixels, unexpected colour inversions, data block displacement. Rosa Menkman's theoretical work on glitch aesthetics positioned these errors not as failures but as moments of honesty about the underlying processes of digital systems.
-
-For holographic imagery, glitch effects communicate instability and transmission — the suggestion that the hologram is streaming from somewhere else and the signal is imperfect. They add dramatic tension and reinforce the idea that the image has been transmitted rather than rendered locally. HoloPath applies glitch as periodic horizontal displacement of image rows, mimicking the line-sync errors that occur in corrupted video signals.
-
-## Noise and Static
-
-Analogue television static is caused by thermal noise in the receiver's electronics and by ambient electromagnetic radiation being picked up by the antenna. The random grain this produces became, across decades of viewing, the visual signature of a signal on the edge of reception — present but fragile. Psychologically, noise communicates distance, degradation, and transmission from a remote or uncertain source.
-
-Adding noise to a holographic image exploits this association powerfully. It suggests the hologram is being received from far away or is at the limit of the projector's capability. It also breaks up the crisp digital perfection of a clean composited image in ways that feel more organic. HoloPath's noise slider adds luminance grain across the image; at low settings it resembles film grain, at higher settings it approaches the dense static of a barely-received analogue broadcast.
-
-## Grid Overlay
-
-The grid is a direct visual quotation from science fiction. From the wireframe landscapes of Tron to the blue grid floors of holographic briefing rooms in countless films, the grid communicates "this is a constructed digital space." It draws on the conceptual heritage of graph paper and architectural drawing — the grid as the underlying coordinate system of a virtual world. Many real holographic and volumetric display prototypes do show grid artefacts from their optical structures, lending the aesthetic some physical basis. HoloPath's grid overlay adds a fine or coarse square grid at reduced opacity across the entire image.
+Cyan Hologram, Green Matrix, Magenta Neon and Blue Phantom are each one fixed
+colour. Rainbow Cycle turns the whole frame through the colour wheel once per
+loop: at any moment every pixel shares one hue, and the hue changes over time.
+Rainbow is the setting that strains a GIF's palette most, for the reasons in
+[why hologram GIFs band](/tools/holopath/articles/why-hologram-gifs-band).
 
 ## Flicker
 
-Any light source driven by alternating current flickers at the AC frequency — 50 Hz in Europe, 60 Hz in North America. Early gas discharge lamps and fluorescent tubes were noticeably susceptible to this. Holographic display prototypes using acousto-optic modulators and pulsed lasers produce brightness variations tied to their modulation rates. Even the human visual system has a detectable flicker threshold; strobing below about 60 Hz is perceptible as unsteadiness. Flicker tells the viewer that the light source is not a stable solid-state display but something more energetic, less controlled, and therefore more extraordinary. HoloPath's flicker effect modulates image brightness in a slow, irregular rhythm, reinforcing the sense of a live projected energy field rather than a static recording.
+Flicker dims the entire frame on a cycle that runs four times per loop, with a
+little randomness in its timing. At 100% the dimmest moment is 30% darker than
+the brightest. It only ever dims.
+
+## Color Shift
+
+Color Shift nudges red, green and blue by different amounts on a cycle that
+repeats once per loop, so the tint breathes. Red and green rise while blue
+falls, then the reverse. It is a slow drift of the whole frame, and even at
+100% the change is modest.
+
+## Glow Intensity
+
+Glow is the most misunderstood control. It does not blur anything. It takes
+every pixel brighter than half brightness and pushes it further toward the
+full hue colour, where it sits. On a dark subject it does almost nothing. On a
+bright one it flattens the highlights into solid colour, because those pixels
+reach the most the output can show.
+
+With the Classic preset's glow and brightness, roughly the top 30% of the
+brightness range comes out as flat, pure colour. If your subject's highlights
+lose their detail, turn Glow or Brightness down before touching anything else.
+
+## Glitch
+
+Glitch decides, row by row, whether to slide that row sideways. At 100% about
+15% of the rows in a frame move, each by up to 15% of the image width, and
+whatever slides off one edge reappears at the other. The choice looks random
+but is fixed for each frame, so the same settings always produce the same
+glitches.
+
+## Scan Lines
+
+Scan lines are single rows of darker pixels at a regular spacing, and the
+slider sets the spacing and the darkness together:
+
+| Slider | Every | Darkened by |
+|---|---|---|
+| 10% | 6th row | 6% |
+| 60% | 4th row | 36% |
+| 100% | 2nd row | 60% |
+
+They scroll down by half the image height over each loop. Higher values mean
+more lines and darker lines, never thicker ones.
+
+## Noise / Static
+
+Noise adds a random amount to every pixel, the same amount to red, green and
+blue, so it reads as grey grain. At 25% the grain moves a pixel by up to 10
+levels out of 255; at 100%, by up to 40. It changes every frame, and it is
+expensive: random grain is the one thing GIF compression cannot shrink. On a
+test subject, taking the Classic preset's Noise from 25% to 0 shrank the
+default pyramid GIF from 8.3 MB to 3.7 MB.
+
+## Chromatic Aberration
+
+This is a checkbox, and its strength comes from the Glitch slider. Each pixel
+takes 40% of its red from a few pixels to one side and 40% of its blue from the
+same distance on the other side, which fringes every edge with colour. The
+distance is 2 pixels with Glitch at zero and rises to 6 at full Glitch.
+
+## Grid Overlay
+
+A faint grid, one line every 20 pixels, drawn in the hue colour at 6%
+strength. The horizontal lines scroll with the loop; the vertical ones stay
+put.
+
+## Scan beam and vignette
+
+Two finishing steps have no controls of their own. A soft band of light about
+60 pixels tall sweeps down the frame, its strength tied to Glow. Then a
+vignette darkens the corners: brightness starts to fall 40% of the way from the
+centre to a corner, and everything beyond 70% of that distance is at half
+brightness. A subject kept near the middle of the frame never meets it.
+
+## Brightness comes last
+
+Brightness multiplies everything at the very end, after every other step. Its
+neutral point is not the middle of the slider: 33% leaves the image as it is,
+0% halves it and 100% doubles it. Because it comes last, it is the fastest way
+to push highlights into flat colour, and the fastest way to rescue a dim
+source.
+
+## The presets are starting values
+
+The five presets only set these controls; anything you change afterwards
+overrides them.
+
+| Preset | Hue | What sets it apart |
+|---|---|---|
+| Classic | Cyan | Moderate everything; grid, aberration and wobble on |
+| Cyberpunk | Magenta | The strongest scan lines (80%), glow (90%) and glitch (70%) |
+| Ghost | Blue | Edge Detect at 40% and heavy flicker (70%); no grid, no aberration |
+| Glitch | Rainbow | Glitch at 95% and Color Shift at 90%; no wobble |
+| Matrix | Green | Dense scan lines (70%) and little flicker; no aberration, no wobble |
+
+For how to put these together on a real subject, see
+[making a hologram step by step](/tools/holopath/articles/creating-hologram-art).
 
 <p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Try HoloPath Free →</a></p>

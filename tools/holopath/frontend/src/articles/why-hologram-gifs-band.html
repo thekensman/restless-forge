@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why Hologram GIFs Band, and What HoloPath Does About It</title>
+  <meta name="description" content="How HoloPath chooses a GIF&#x27;s 256 colours, the flaw that spent most of them on black, the measured fix, and the settings that still cause banding." />
+  <link rel="canonical" href="https://restless-forge.dev/tools/holopath/articles/why-hologram-gifs-band" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Why Hologram GIFs Band, and What HoloPath Does About It" />
+  <meta property="og:description" content="How HoloPath chooses a GIF&#x27;s 256 colours, the flaw that spent most of them on black, the measured fix, and the settings that still cause banding." />
+  <meta property="og:url" content="https://restless-forge.dev/tools/holopath/articles/why-hologram-gifs-band" />
+  <meta property="og:site_name" content="HoloPath" />
+  <meta property="og:image" content="https://restless-forge.dev/tools/holopath/og-image.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Why Hologram GIFs Band, and What HoloPath Does About It",
+    "description": "How HoloPath chooses a GIF's 256 colours, the flaw that spent most of them on black, the measured fix, and the settings that still cause banding.",
+    "datePublished": "2026-10-13",
+    "dateModified": "2026-10-13",
+    "author": {"@type": "Person", "name": "Kenneth Cross", "url": "https://restless-forge.dev/about", "sameAs": ["https://restlessforge.substack.com"]},
+    "publisher": {"@type": "Organization", "name": "HoloPath", "url": "https://restless-forge.dev/tools/holopath/"},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://restless-forge.dev/tools/holopath/articles/why-hologram-gifs-band"}
+  }
+  </script>
+  <!-- Favicons (canonical RF block — same on every page) -->
+  <link rel="icon" type="image/svg+xml" href="/tools/holopath/favicon.svg">
+  <link rel="icon" href="/tools/holopath/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/tools/holopath/apple-touch-icon.png">
+  <link rel="manifest" href="/tools/holopath/site.webmanifest">
+  <link rel="stylesheet" href="/tool-chrome.css" />
+  <link rel="stylesheet" href="/tools/holopath/pages.css" />  <script src="/shared.js"></script>
+  <script>(function(){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+window.rfAdsenseClientId;document.head.appendChild(s);})();</script>
+  <script src="/tools/holopath/shared.js"></script>
+</head>
+<body>
+  <div id="hp-header"></div>
+  <main class="page-content" role="main">
+    <article class="article">
+      <!-- generated:content — do not edit; edit why-hologram-gifs-band.md and run `npm run sync-content` -->
+<h1>Why Hologram GIFs Band, and What HoloPath Does About It</h1>
+<p class="content-byline" style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">
+  Published October 2026 &middot; By Kenneth Cross
+</p>
+<p>A smooth glow in the preview can turn into visible steps in the saved GIF: rings
+of flat colour where the light used to fade evenly. That is banding, and in a
+GIF it comes from one hard limit, 256 colours, and from how those 256 get
+chosen. This is how HoloPath&#39;s encoder makes that choice, the flaw it used to
+have, and the settings that still cause banding.</p>
+<h2>One palette for the whole animation</h2>
+<p>A GIF can hold at most 256 colours per palette. HoloPath writes one palette for
+the entire animation, so every frame shares the same 256 colours. To choose
+them, it builds a sample that takes each pixel position from a different frame
+in turn, so every frame is represented, and then reduces that sample to 256
+colours.</p>
+<p>The reduction is a classic method called median cut. Put every sampled colour
+in one box. Find the colour channel, red, green or blue, with the widest spread
+in that box, and split the box in two at the median along it. Keep splitting
+until there are 256 boxes, then take the average colour of each box as a
+palette entry. Every pixel of every frame is then drawn in its nearest palette
+colour.</p>
+<h2>The flaw: black ate the palette</h2>
+<p>The question that decides the outcome is which box to split next. HoloPath used
+to split whichever box held the most pixels. A hologram frame is mostly black,
+so the black background was always the biggest box, and it kept being split.
+A box of identical black pixels splits into two boxes of identical black, so the
+palette filled up with copies of black while the subject&#39;s glow went short.</p>
+<p>Measured in a browser on a test subject (a glowing sphere and a letter, Classic
+preset, four-sided pyramid layout, 24 frames), 209 of the 256 entries were
+near-black and 138 were exact duplicates. Only 118 distinct colours were left,
+which is why the glow showed rings. The Pepper&#39;s Ghost layout, whose frame is
+almost all black, kept just 36.</p>
+<p>The encoder now picks the box with the most pixels multiplied by the widest
+colour spread, and never splits a box that holds a single colour. On the same
+test:</p>
+<table>
+<thead>
+<tr>
+<th>Layout</th>
+<th>Distinct colours before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pyramid 360°</td>
+<td>118</td>
+<td>235</td>
+</tr>
+<tr>
+<td>Hologram Fan</td>
+<td>106</td>
+<td>229</td>
+</tr>
+<tr>
+<td>Pepper&#39;s Ghost</td>
+<td>36</td>
+<td>196</td>
+</tr>
+<tr>
+<td>Single Image</td>
+<td>173</td>
+<td>251</td>
+</tr>
+</tbody></table>
+<p>Files changed size by between a tenth smaller and two fifths larger: more
+colours give compression slightly less to work with.</p>
+<h2>Why there is no dithering</h2>
+<p>Many GIF encoders hide banding with dithering: scattering pixels of two nearby
+palette colours so that, from a distance, they average to a shade in between.
+HoloPath does not dither. It maps each pixel to its nearest colour. In a still
+image, dithering trades steps for fine grain. In an animation the grain is
+recalculated every frame and crawls, and grain is also the hardest thing for GIF
+compression to shrink, the same reason the Noise slider can more than double a
+file&#39;s size.</p>
+<h2>What still causes banding</h2>
+<p>With the palette spent sensibly, banding now comes from asking 256 colours to
+cover too much:</p>
+<ul>
+<li><strong>Rainbow Cycle.</strong> The whole frame turns through the colour wheel over the
+loop, and every hue shares the one palette, so each gets only a slice of it.
+A single-hue preset is close to ideal for GIF: every pixel lies on one line
+from black to the hue colour, which 256 entries can cover almost shade for
+shade.</li>
+<li><strong>Noise.</strong> Each grain shade near black is a colour the palette has to hold.</li>
+<li><strong>Chromatic Aberration.</strong> Its fringes add red and blue variations of every
+edge.</li>
+<li><strong>A small subject in a big frame.</strong> The fewer pixels the subject covers, the
+fewer boxes its colours win.</li>
+</ul>
+<p>If you still see bands, try a single-hue preset, lower Noise, or give the
+subject more of the frame. Where your display can play it, a
+<a href="/tools/holopath/articles/gif-vs-video-hologram">video export</a> sidesteps the
+problem: video keeps millions of colours and is far smaller.</p>
+<p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Try HoloPath Free →</a></p>
+<!-- /generated:content -->
+    </article>
+  </main>
+  <aside class="ad-slot ad-slot--bottom">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-slot="7057676288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>window.rfMountAdsenseSlots();</script>
+  </aside>
+  <div id="hp-footer"></div>
+</body>
+</html>
