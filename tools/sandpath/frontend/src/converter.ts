@@ -349,11 +349,18 @@ export function convert(
 
   if (!allLists.length) throw new Error("No valid paths found in SVG.");
 
-  // 3. Bounding box
-  const xs = allLists.flatMap(p => p.map(([x]) => x));
-  const ys = allLists.flatMap(p => p.map(([, y]) => y));
-  const mnX = Math.min(...xs), mxX = Math.max(...xs);
-  const mnY = Math.min(...ys), mxY = Math.max(...ys);
+  // 3. Bounding box. Loops, not Math.min(...xs): spreading every sampled
+  // point into one call overflows the stack past about 125,000 points, which
+  // a detailed trace reaches.
+  let mnX = Infinity, mxX = -Infinity, mnY = Infinity, mxY = -Infinity;
+  for (const p of allLists) {
+    for (const [x, y] of p) {
+      if (x < mnX) mnX = x;
+      if (x > mxX) mxX = x;
+      if (y < mnY) mnY = y;
+      if (y > mxY) mxY = y;
+    }
+  }
   const cw = mxX - mnX, ch = mxY - mnY;
   const ccx = (mnX + mxX) / 2, ccy = (mnY + mxY) / 2;
 
@@ -372,9 +379,10 @@ export function convert(
     // dropped large arcs of off-center content (e.g. the bottom of a watch
     // when the chain pulled the bbox center upward). Anchoring both modes to
     // the actual max distance from center keeps the polar center honest.
-    const maxDist = Math.max(
-      ...allLists.flatMap(p => p.map(([x, y]) => Math.hypot(x - ccx, y - ccy)))
-    );
+    let maxDist = 0;
+    for (const p of allLists) {
+      for (const [x, y] of p) maxDist = Math.max(maxDist, Math.hypot(x - ccx, y - ccy));
+    }
     let polarR: number;
     if (fit === "cover") {
       const halfShort = Math.min(cw, ch) / 2;
