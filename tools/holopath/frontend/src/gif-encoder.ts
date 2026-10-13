@@ -82,19 +82,28 @@ function medianCutPalette(imageData: ImageData, maxColors: number = 256): Uint8A
     return pal;
   }
 
-  // Median cut
+  // Median cut. Split the box with the most pixels × the widest colour spread,
+  // and never a box whose pixels are all one colour. Choosing by pixel count
+  // alone kept splitting the black background that most of every hologram
+  // frame is made of: a box of identical blacks splits into two identical
+  // blacks. On the default pyramid output that left 209 of 256 entries
+  // near-black and 138 exact duplicates, so the subject's glow got a few
+  // dozen shades and banded.
   let boxes: ColorBox[] = [buildBox(pixels)];
   while (boxes.length < maxColors) {
-    // Find largest box (by pixel count)
-    let bestIdx = 0;
-    let bestLen = 0;
+    let bestIdx = -1;
+    let bestScore = 0;
     for (let i = 0; i < boxes.length; i++) {
-      if (boxes[i].pixels.length > bestLen) {
-        bestLen = boxes[i].pixels.length;
+      const box = boxes[i];
+      const spread = Math.max(box.rMax - box.rMin, box.gMax - box.gMin, box.bMax - box.bMin);
+      if (spread === 0 || box.pixels.length < 2) continue;
+      const score = box.pixels.length * spread;
+      if (score > bestScore) {
+        bestScore = score;
         bestIdx = i;
       }
     }
-    if (bestLen <= 1) break;
+    if (bestIdx === -1) break;
     const [a, b] = splitBox(boxes[bestIdx]);
     boxes.splice(bestIdx, 1, a, b);
   }
