@@ -128,7 +128,16 @@ async function loadGrayscale(
   file: File,
   maxDimension: number
 ): Promise<{ pixels: Uint8Array; width: number; height: number }> {
-  const bitmap = await createImageBitmap(file);
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    // The browser's own message ("The source image could not be decoded")
+    // does not say what to do. TIFF is the usual cause: only Safari decodes it.
+    throw new Error(/\.tiff?$/i.test(file.name)
+      ? "This browser cannot open TIFF images; Safari can. Save it as PNG or JPG and upload that."
+      : "This browser cannot open that image. Save it as PNG or JPG and upload that.");
+  }
   let w = bitmap.width, h = bitmap.height;
 
   if (Math.max(w, h) > maxDimension) {

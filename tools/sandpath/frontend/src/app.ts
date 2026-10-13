@@ -315,6 +315,9 @@ async function doConvert() {
     } else {
       // Vectorize first; preserve intermediate SVG for download
       const vResult = await vectorize(selectedFile, getVectorizeOpts());
+      if (!vResult.pathCount) {
+        throw new Error("No lines were found in this image. Try another trace mode, or move the Threshold slider.");
+      }
       svgText = vResult.svgText;
       lastSvgBlob = new Blob([svgText], { type: "image/svg+xml" });
       traceStats = {
