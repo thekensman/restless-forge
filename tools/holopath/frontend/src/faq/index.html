@@ -25,7 +25,7 @@
     "mainEntity": [
       {
         "@type": "Question", "name": "What file formats does HoloPath accept?",
-        "acceptedAnswer": { "@type": "Answer", "text": "HoloPath accepts static images (JPG, PNG, WebP, BMP), animated GIFs, and video files (MP4, WebM, MOV) up to 15 MB. There is no hard duration limit — longer videos just use more browser memory." }
+        "acceptedAnswer": { "@type": "Answer", "text": "HoloPath accepts static images (JPG, PNG, WebP, BMP), animated GIFs, and video files (MP4, WebM, MOV, M4V, OGG) up to 15 MB. Video is sampled at 10 frames per second up to 900 frames, so a clip of up to 90 seconds keeps its real speed. A longer clip has its 900 frames spread across the whole video, so it plays back faster." }
       },
       {
         "@type": "Question", "name": "What is a hologram pyramid?",
@@ -66,9 +66,11 @@
         <summary>What file formats does HoloPath accept?</summary>
         <div class="faq-answer">
           <p>HoloPath accepts static images (JPG, PNG, WebP, BMP), animated GIFs, and video files
-          (MP4, WebM, MOV, M4V, OGG). All files must be under 15 MB. Videos can be
-          of any length (longer videos use more memory). Video format support depends on your browser — MP4 and WebM
-          have the widest compatibility.</p>
+          (MP4, WebM, MOV, M4V, OGG). All files must be under 15 MB. Video is
+          sampled at 10 frames per second up to 900 frames, so a clip of up to 90
+          seconds keeps its real speed. A longer clip has its 900 frames spread
+          across the whole video, so it plays back faster. Which video formats
+          open depends on your browser; MP4 and WebM have the widest support.</p>
         </div>
       </details>
 
