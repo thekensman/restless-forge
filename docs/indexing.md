@@ -53,7 +53,8 @@ if an entry ever shadows a real page.
 
 | Old URL | Now | Why the old URL exists |
 |---|---|---|
-| `/articles/<slug>` (the 15 HoloPath slugs) | `/tools/holopath/articles/<slug>` | HoloPath's articles index linked here, a holopath.art-era path, until 2026-08-06. Four were still in Search Console's 404 report in September. |
+| `/articles/<slug>` (the 8 HoloPath slugs still published) | `/tools/holopath/articles/<slug>` | HoloPath's articles index linked here, a holopath.art-era path, until 2026-08-06. Four were still in Search Console's 404 report in September. |
+| `/tools/holopath/articles/optimizing-hologram-output` (also `.html` and `/articles/…`) | `/tools/holopath/articles/creating-hologram-art` | Merged on 2026-10-13: both walked through the same tool settings. |
 | `/tools/holopath/{about,faq,how-it-works}.html` | `/tools/holopath/<page>/` | HoloPath's sub-pages were `.html` files from the March 2026 consolidation until 2026-05-08. |
 | `/tools/{what-is-my-time-worth,holopath,tattoosafe}/{privacy,terms,contact}` (with `/`, `.html` or `/index.html`) | `/privacy`, `/terms`, `/contact` | Per-tool legal pages, retired for the site-global ones on 2026-08-04. Cloud-assisted tools keep their own privacy page and are not in the rule. |
 | `/tools/what-is-my-time-worth/blog/` and `/blog/life-energy-and-ymoyl/` | `/tools/what-is-my-time-worth/articles/…` | `blog/` was renamed `articles/` on 2026-03-16, and the whatismytimeworth.app vhost still forwards `/blog/…` path-for-path. |
@@ -72,6 +73,7 @@ if an entry ever shadows a real page.
 | `/essays/the-time-value-philosophy`, `/essays/making-tools-for-the-restless` | "Coming soon" stubs deleted on 2026-07-18 with no successor. They sat in "Crawled, currently not indexed" from their March/April crawls and will move to 404 when Google recrawls, which is correct. |
 | `/tools/<id>/sitemap.xml`, `/tools/<id>/robots.txt` | Leftovers from the standalone domains (see below), removed. |
 | Never-published shapes: `/about/`, `/tools/holopath/articles/<slug>/`, `/tools/sandpath/about.html` | No page was ever there. |
+| `/tools/holopath/articles/` best-hologram-projectors, colour-theory-holographic-art, future-of-holographic-displays, history-of-holograms, hologram-displays-for-business, holograms-in-pop-culture (also `.html` and `/articles/…`) | Removed on 2026-10-13 as generic content unrelated to what HoloPath does (`docs/adsense-readiness.md`, F1). No page replaces them, so a redirect would be a soft 404. |
 
 ## Known limits
 
