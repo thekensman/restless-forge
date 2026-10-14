@@ -17,17 +17,16 @@ TattooSafe moves that check to before the decision.
 
 Two views handle it. The **camera preview** composites your design onto a live
 video feed so you can move it around your actual body at actual scale. The
-**silhouette view** draws a proportioned body outline scaled to your height and
-places the design on it with real centimetre dimensions — useful when you want
+**silhouette view** draws the design on a body outline at its true share of the
+placement for your height, with real centimetre dimensions: useful when you want
 measurements rather than a vibe, and shareable with your artist.
 
 ## How the silhouette is built
 
-The body outline is generated as an inline SVG rather than being a stock image,
-which means it scales to *your* height instead of a generic model's. The
-proportions come from standard anatomical ratios — head height as a fraction of
-total height, limb lengths as fractions of that — so a 155 cm and a 195 cm body
-produce genuinely different outlines rather than the same drawing at two sizes.
+The body outline is a fixed figure, drawn as inline SVG. What scales is each
+placement: its usable area is a set fraction of the height you enter. A design
+8 cm long covers about a third of a 155 cm person's inner forearm and about a
+quarter of a 195 cm person's, and the silhouette draws it at that proportion.
 
 Sixteen placements are modelled, each with its own usable area: inner and outer
 forearm, upper arm, shoulder, wrist, chest, upper and lower back, ribs,
@@ -40,8 +39,8 @@ out at the shop.
 
 Reference images usually arrive with a white or near-white box around the
 artwork, which looks wrong composited onto skin. TattooSafe flood-fills inward
-from the image edges, removing contiguous regions that fall within a tolerance
-of the corner colour.
+from the image edges, removing connected regions close to the border's colour.
+A matte frame and the backdrop behind it come off in separate passes.
 
 This is deliberately conservative. It clears flat backgrounds and leaves
 anything textured alone, because the failure mode of an aggressive algorithm —
@@ -71,8 +70,10 @@ change. Full details in the [privacy policy](/privacy) and
 
 ## Honest limitations
 
-**It is a preview, not a simulation.** The overlay does not wrap to the curve of
-your arm or respond to how skin moves. Treat placement and scale as a good
+**It is a preview, not a simulation.** The overlay does not track your arm or
+respond to how skin moves. The optional curve setting bends it around a cylinder
+whose curvature you choose, which approximates a limb rather than measuring
+yours. Treat placement and scale as a good
 approximation, not a rendering.
 
 **Lighting affects the illusion.** Compositing a flat image onto a lit body

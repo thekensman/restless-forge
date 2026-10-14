@@ -43,15 +43,14 @@ late — after you have chosen the design, booked the slot, and paid a deposit.
 TattooSafe moves that check to before the decision.</p>
 <p>Two views handle it. The <strong>camera preview</strong> composites your design onto a live
 video feed so you can move it around your actual body at actual scale. The
-<strong>silhouette view</strong> draws a proportioned body outline scaled to your height and
-places the design on it with real centimetre dimensions — useful when you want
+<strong>silhouette view</strong> draws the design on a body outline at its true share of the
+placement for your height, with real centimetre dimensions: useful when you want
 measurements rather than a vibe, and shareable with your artist.</p>
 <h2>How the silhouette is built</h2>
-<p>The body outline is generated as an inline SVG rather than being a stock image,
-which means it scales to <em>your</em> height instead of a generic model&#39;s. The
-proportions come from standard anatomical ratios — head height as a fraction of
-total height, limb lengths as fractions of that — so a 155 cm and a 195 cm body
-produce genuinely different outlines rather than the same drawing at two sizes.</p>
+<p>The body outline is a fixed figure, drawn as inline SVG. What scales is each
+placement: its usable area is a set fraction of the height you enter. A design
+8 cm long covers about a third of a 155 cm person&#39;s inner forearm and about a
+quarter of a 195 cm person&#39;s, and the silhouette draws it at that proportion.</p>
 <p>Sixteen placements are modelled, each with its own usable area: inner and outer
 forearm, upper arm, shoulder, wrist, chest, upper and lower back, ribs,
 sternum, thigh, calf, ankle, back of neck, behind the ear, and back of the hand.
@@ -61,8 +60,8 @@ out at the shop.</p>
 <h2>Background removal</h2>
 <p>Reference images usually arrive with a white or near-white box around the
 artwork, which looks wrong composited onto skin. TattooSafe flood-fills inward
-from the image edges, removing contiguous regions that fall within a tolerance
-of the corner colour.</p>
+from the image edges, removing connected regions close to the border&#39;s colour.
+A matte frame and the backdrop behind it come off in separate passes.</p>
 <p>This is deliberately conservative. It clears flat backgrounds and leaves
 anything textured alone, because the failure mode of an aggressive algorithm —
 eating part of the design — is much worse than leaving a faint edge. Designs on
@@ -83,8 +82,10 @@ There is no account, no upload endpoint, and nothing to delete later.</p>
 change. Full details in the <a href="/privacy">privacy policy</a> and
 <a href="/terms">terms of use</a>.</p>
 <h2>Honest limitations</h2>
-<p><strong>It is a preview, not a simulation.</strong> The overlay does not wrap to the curve of
-your arm or respond to how skin moves. Treat placement and scale as a good
+<p><strong>It is a preview, not a simulation.</strong> The overlay does not track your arm or
+respond to how skin moves. The optional curve setting bends it around a cylinder
+whose curvature you choose, which approximates a limb rather than measuring
+yours. Treat placement and scale as a good
 approximation, not a rendering.</p>
 <p><strong>Lighting affects the illusion.</strong> Compositing a flat image onto a lit body
 always reads slightly as a sticker. Judge the size and position, not the
