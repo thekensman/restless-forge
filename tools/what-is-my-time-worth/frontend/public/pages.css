@@ -93,3 +93,7 @@ strong { color: #d8d4cc; font-weight: 600; }
 .footer a:hover { color: var(--accent); }
 /* .footer__donate*, .footer__links, .footer__link, .footer-sep, .footer__copy
    live in site/tool-chrome.css. */
+
+/* Code blocks scroll inside themselves: an unwrapped line must not widen the
+   page on a phone (two pages scrolled sideways at 360 px before this). */
+pre { max-width: 100%; overflow-x: auto; }
