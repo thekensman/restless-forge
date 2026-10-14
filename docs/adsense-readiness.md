@@ -219,3 +219,87 @@ full, Medium when skimmed.
 - `nginx/restless-forge.conf` (legacy map for removed and merged slugs),
   `scripts/check-urls.mjs`, `.github/workflows/deploy.yml`, `docs/indexing.md`
 - `CLAUDE.md` (the runtime chrome note)
+
+## Follow-up, 2026-10-14
+
+What changed on `claude/rf-hav-discovery-improvements-er83dr` after the audit
+above, and what testing and a claim-by-claim check of every live tool page
+against its code turned up. The original findings above are left as written.
+
+### Status of the original findings
+
+| ID | Status | Commits |
+|---|---|---|
+| F1 | Fixed. Six generic articles removed (they 404), two walkthroughs merged (a 301), the other eight rewritten against the engine with byline, date and BlogPosting markup, and one new article on GIF banding. | 986a1fd, 3793e43 |
+| F2 | Fixed: the article carrying them was removed. | 986a1fd |
+| F3 | Fixed: removed. | 986a1fd |
+| F4 | Fixed in the articles. The HoloPath FAQ had the same contradiction ("Why is the output a GIF and not a video?") and is fixed too. | 3793e43, 9d4f0aa |
+| F5 | Fixed: the homepage and essays index in one commit, `/articles/` with the HoloPath rework. | f42e06f, 3793e43 |
+| F6 | Fixed. | f42e06f |
+| F7 | Open: waiting on the Magna-Tiles photos and post text. | |
+| F8 | Context. Recheck after the recrawl. | |
+| F9 | Kept by owner decision; the browser checks below pass. | |
+| F10 | Fixed in the FAQ, and in the life-energy article, which repeated it. | f42e06f, 0e1a36b |
+| F11 | Confirmed working in a browser; see below. Real phones not tested. | |
+| F12 | Fixed. | f42e06f |
+
+### Browser checks (F11)
+
+Playwright with Chromium against the built `dist/`, served statically, at the
+branch head on 2026-10-14. 53 of 53 passed.
+
+- **Chrome on seven page types** (site page, essay, tool page, HoloPath
+  article, SandPath sub-page, What Is My Time Worth article, TattooSafe page):
+  - header and footer render, with links to About, Contact, Privacy and Terms;
+  - the AdSense loader is inserted with `ca-pub-5516736042033534`.
+- **No sideways scroll at 360 px** on 36 pages: every index, every tool page,
+  every edited article and every FAQ. Two failed on the first run, both from
+  code blocks, and were fixed (F22).
+- **Each tool at 390 px and 1280 px:**
+  - HoloPath generates a GIF;
+  - SandPath converts;
+  - TattooSafe prices a design ($110 to $211) and shows a plain message when
+    the camera is unavailable;
+  - What Is My Time Worth computes a real wage.
+- **Two targeted checks:**
+  - What Is My Time Worth with California selected computes, and its tax
+    tooltips carry the 2026 year and the $184,500 wage base;
+  - SandPath converts the full sand-art photo (806 paths) with no error.
+
+Not covered: real phones, and camera permissions on iOS Safari.
+
+### New findings
+
+| ID | Finding | Label | Status |
+|---|---|---|---|
+| F13 | HoloPath's GIF palette went mostly on duplicate black. The default test kept 118 distinct colours of 256, and Pepper's Ghost 36, so glows banded. | Confirmed | Fixed: 235 and 196 (cfdf242) |
+| F14 | HoloPath's reflective layouts weren't mirrored, so text read backwards in the reflection. Pyramid copies cut notches into each other, and the how-it-works page described several effects wrongly. | Confirmed | Fixed (15d4445, 3793e43) |
+| F15 | SandPath's default trace mode, Outline, lost most of every image. A ring came back as one speck, drawn as a triangle on the table, and a star made Convert fail. Centerline returned no paths at all for line drawings. | Confirmed | Fixed, with tests that fail if any part is reverted (7caa608) |
+| F16 | SandPath's Convert crashed ("Maximum call stack size exceeded") at the app's own maximum-detail settings on every test photo. | Confirmed | Fixed (7caa608) |
+| F17 | Five statements in SandPath's guides described behaviour the tool doesn't have, among them a preview that shows travel moves. TIFF was listed as supported, but only Safari can open it. | Confirmed | Fixed, with clearer error messages (f4e5782) |
+| F18 | What Is My Time Worth had stale tax-year copy ("2024/2025", and the 2025 wage base in a tooltip), false claims in the job-offers article, two unsourced statistics, and a privacy answer that denied the site has a backend. State tax is one flat bracket rate per state, which overstates it where a state taxes in brackets: California, single, $105,000 gives $9,765 against about $5,520. | Confirmed | Copy fixed and tooltips built from the tax data (0e1a36b). Brackets planned in `docs/state-income-tax-brackets.md` (d4d8e19). |
+| F19 | TattooSafe's pricing page says it documents the estimator exactly but missed three of its rules. The About page and sizing article described a silhouette that changes with height, which it doesn't, and the sizing article opened with an unsupported statistic about tattoo regret. | Confirmed | Fixed (1dafbbd) |
+| F20 | All four tool home pages carried FAQ markup for questions they don't show, and the FAQ pages' markup had drifted from their visible answers. | Confirmed | Fixed; `check-links` now fails on any mismatch (9d4f0aa) |
+| F21 | The site says "open source" in about ten places, and the Terms say the code is on GitHub "under their respective licenses", but the repository has no LICENSE file. | Confirmed | Open: owner decision |
+| F22 | Code blocks made two pages scroll sideways at 360 px. | Confirmed | Fixed (ecbd2b1) |
+
+### Odds, revisited
+
+Unchanged: about even or somewhat better once the work is deployed and
+recrawled. The fixes since the first estimate remove defects a reviewer could
+meet directly: a default mode that produced nothing usable, FAQ answers that
+contradicted their tools, and markup describing content that isn't on the page.
+They leave the estimate's main uncertainty where it was: how Google judges a
+small site with little outside history (F8).
+
+### Follow-ups, not in this PR
+
+- State income tax brackets: `docs/state-income-tax-brackets.md`.
+- SandPath: a tracer that follows one-pixel lines instead of tracing around
+  them, since each traced line is drawn out and back today; and a preview that
+  shows travel moves.
+- What Is My Time Worth: local income taxes and credits stay outside the model.
+- PlotPath (unlaunched) spreads points into `Math.min(...)` the way SandPath
+  did. Fix it before launch.
+- F21: add a license or reword the "open source" claims.
+- F7: the Magna-Tiles origin article and the HoloPath About paragraph.
