@@ -11,7 +11,7 @@ Several tools carry rate data that changes yearly (see
 |---|---|---|
 | Federal brackets, standard deductions | `data/tax.ts` (year-keyed `TAX_YEARS` — append, never overwrite) | IRS Rev. Proc. (published ~Oct/Nov) |
 | SS wage base | same | SSA announcement (~Oct) |
-| State income tax rates (sanity pass) | same (`stateRates`) | Tax Foundation |
+| State income tax rates (sanity pass; one flat rate per state until brackets land, see `docs/state-income-tax-brackets.md`) | same (`stateRates`) | Tax Foundation |
 | IRS standard mileage rate | `data/mileage.ts` (year-keyed `MILEAGE_RATES` — append) | IRS Notice (~late Dec) |
 | CPI annual average | `data/cpi.ts` (year-keyed `CPI_ANNUAL` — append) | BLS series CUUR0000SA0 (~Jan 11) |
 | Subscription preset prices | `data/subscription-presets.ts` (`SUBSCRIPTION_PRESETS`) | vendor pricing pages |

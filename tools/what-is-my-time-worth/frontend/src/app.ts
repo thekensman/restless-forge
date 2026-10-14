@@ -11,6 +11,7 @@ import {
   calculateQueueTotals,
   normalizeToMonthly,
   compareJobs,
+  taxTooltips,
   STATE_TAX_RATES,
   DECISION_PRESETS,
   FREQUENCY_LABELS,
@@ -76,6 +77,16 @@ function populateStates(): void {
   });
   const jbState = document.getElementById("jb-state") as HTMLSelectElement;
   if (jbState) jbState.value = "TX";
+}
+
+// ─── Tax tooltips ────────────────────────────────────────────
+
+// The static text in index.html is a year-free fallback; this fills in the
+// figures the calculation actually uses.
+function applyTaxTooltips(): void {
+  for (const [row, text] of Object.entries(taxTooltips())) {
+    document.getElementById(`tip-${row}`)?.setAttribute("data-tip", text);
+  }
 }
 
 // ─── Tab Switching ───────────────────────────────────────────
@@ -720,6 +731,7 @@ function initBreakdown(): void {
 
 function init(): void {
   populateStates();
+  applyTaxTooltips();
   initTabs();
   renderPresets();
   initInputListeners();

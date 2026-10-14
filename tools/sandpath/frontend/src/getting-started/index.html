@@ -45,15 +45,17 @@ controller expects. If yours is not listed, choose Custom Circular or Custom
 Rectangular and enter the bed size — see
 <a href="/tools/sandpath/supported-tables/">supported tables</a>.</li>
 <li><strong>Drop in a file.</strong> SVG works best. Raster images (JPG, PNG, WebP, BMP, GIF,
-TIFF) are also fine — they go through a tracing step first.</li>
+and TIFF in Safari) also work; they go through a tracing step first.</li>
 <li><strong>Choose a trace mode</strong> if you uploaded a raster image. Outline for
 photographs, Threshold for logos and high-contrast art, Centerline for line
 drawings and handwriting.</li>
-<li><strong>Check the preview.</strong> This is the step worth not skipping. The preview shows
-the actual path the ball will follow, including the travel moves between
-shapes.</li>
-<li><strong>Adjust Path Detail</strong> if needed. Coarser means smaller files and smoother
-curves; finer captures more detail at the cost of longer draw times.</li>
+<li><strong>Check the preview.</strong> This is the step worth not skipping. For a raster
+image, Preview Trace shows the lines SandPath found and counts the separate
+paths. The ball makes a travel move from each path to the next, which the
+preview does not draw, so a high count warns you before the sand does.</li>
+<li><strong>Adjust Path Detail</strong> if needed (raster images only). Coarser simplifies the
+traced lines more and drops the shortest ones, for smaller files and fewer
+travel moves; finer keeps more detail at the cost of longer draws.</li>
 <li><strong>Download</strong> and copy the file to your table however it normally accepts
 patterns.</li>
 </ol>
@@ -98,9 +100,11 @@ the source image before converting rather than after.</p>
 <p><strong>Prefer continuous strokes.</strong> An SVG drawn as a handful of long paths produces
 a far cleaner result than the same image drawn as hundreds of short disconnected
 segments, because the ball spends less time travelling between them.</p>
-<p><strong>Watch the travel lines in the preview.</strong> If the preview shows straight lines
-slashing across your design, that is what the sand will show too. Reducing the
-number of separate shapes usually fixes it.</p>
+<p><strong>Watch the path count.</strong> Every separate path costs a travel move, and a move
+out to a stray piece cuts across the whole design. If a raster image traces into
+hundreds of short paths, try Noise Reduction at 2 before anything else. On three
+test photos, moving it there from the default of 1 cut the count by between 29%
+and 88%. Much past that, the picture itself starts to disappear.</p>
 <p><strong>Let it finish.</strong> Patterns take time — anywhere from fifteen minutes to well
 over an hour depending on bed size and path length. A pattern that looks wrong
 halfway through often resolves completely once the remaining strokes land.</p>

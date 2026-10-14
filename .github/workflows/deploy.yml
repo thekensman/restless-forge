@@ -444,8 +444,8 @@ jobs:
           paths="
           $S/tools/holopath/articles/how-hologram-pyramids-work.html|$S/tools/holopath/articles/how-hologram-pyramids-work
           $S/tools/holopath/articles/diy-hologram-pyramid.html|$S/tools/holopath/articles/diy-hologram-pyramid
-          $S/tools/holopath/articles/best-hologram-projectors.html|$S/tools/holopath/articles/best-hologram-projectors
-          $S/tools/holopath/articles/optimizing-hologram-output.html|$S/tools/holopath/articles/optimizing-hologram-output
+          $S/tools/holopath/articles/optimizing-hologram-output.html|$S/tools/holopath/articles/creating-hologram-art
+          $S/articles/optimizing-hologram-output|$S/tools/holopath/articles/creating-hologram-art
           $S/tools/holopath/articles/peppers-ghost-illusion.html|$S/tools/holopath/articles/peppers-ghost-illusion
           $S/about.html|$S/about
           $S/essays/why-i-build-these-tools.html|$S/essays/why-i-build-these-tools
@@ -461,6 +461,9 @@ jobs:
           $S/tools/what-is-my-time-worth/privacy/|$S/privacy
           $S/tools/what-is-my-time-worth/blog/life-energy-and-ymoyl/|$S/tools/what-is-my-time-worth/articles/life-energy-and-ymoyl/
           $S/essays/the-time-value-philosophy|404
+          $S/tools/holopath/articles/best-hologram-projectors|404
+          $S/tools/holopath/articles/history-of-holograms.html|404
+          $S/articles/holograms-in-pop-culture|404
           $S/tools/holopath/sitemap.xml|404
           "
           hosts="

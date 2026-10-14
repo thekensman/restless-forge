@@ -2,10 +2,10 @@
  * HoloPath — Layout compositor (client-side).
  *
  * Supports 5 output layouts for different hologram hardware:
- *   pyramid4      — 4 copies for 4-sided glass pyramid (360°)
- *   pyramid3      — 3 copies for 3-sided showcase (270°)
+ *   pyramid4      — 4 mirrored copies for 4-sided glass pyramid (360°)
+ *   pyramid3      — 3 mirrored copies for 3-sided showcase (270°)
  *   fan           — Circular crop for LED hologram fan / POV
- *   peppers_ghost — Lower-centre of 16:9 black canvas
+ *   peppers_ghost — Mirrored, lower-centre of 16:9 black canvas
  *   single        — No compositing, direct output
  *
  * All compositing uses offscreen Canvas 2D.
@@ -18,11 +18,11 @@ export type LayoutMode = "pyramid4" | "pyramid3" | "fan" | "peppers_ghost" | "si
 export const LAYOUT_INFO: Record<LayoutMode, { label: string; description: string }> = {
   pyramid4: {
     label: "Pyramid 360°",
-    description: "4 views for 4-sided pyramid projectors",
+    description: "4 mirrored views for 4-sided pyramid projectors",
   },
   pyramid3: {
     label: "Pyramid 270°",
-    description: "3 views for 3-sided showcase displays",
+    description: "3 mirrored views for 3-sided showcase displays",
   },
   fan: {
     label: "Hologram Fan",
@@ -30,7 +30,7 @@ export const LAYOUT_INFO: Record<LayoutMode, { label: string; description: strin
   },
   peppers_ghost: {
     label: "Pepper's Ghost",
-    description: "Single view for 45° glass reflectors",
+    description: "Single mirrored view for 45° glass reflectors",
   },
   single: {
     label: "Single Image",
@@ -77,6 +77,21 @@ function fitSubject(
   return c;
 }
 
+/**
+ * A left-right mirror image of a canvas. Every reflective layout needs it: a
+ * single reflection in a 45° pane swaps left and right (the reason a
+ * teleprompter shows its text mirrored), so the screen must carry the mirror
+ * image for the viewer to see the original. Without it, text and logos read
+ * backwards in a pyramid. The fan is viewed directly and is not mirrored.
+ */
+function mirrorX(src: HTMLCanvasElement): HTMLCanvasElement {
+  const [c, ctx] = createCanvas(src.width, src.height);
+  ctx.translate(src.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(src, 0, 0);
+  return c;
+}
+
 /** Draw a canvas rotated by degrees around its centre, onto target canvas at (x, y). */
 function drawRotated(
   target: CanvasRenderingContext2D,
@@ -106,12 +121,16 @@ function composePyramid4(frame: ImageData, outputSize: number): ImageData {
   const cy = outputSize / 2;
   const sep = 1; // 1px separator at center cross
 
-  // Size subject to fill ~88% of the half-canvas (minus inset).
-  // Clipping prevents any overlap between quadrants.
+  // Size subject to fill ~88% of the half-canvas (minus inset). Each copy is
+  // clipped to its half, but neighbouring halves share the diagonal corners,
+  // so two copies can land on the same pixels there. Drawing with "lighten"
+  // keeps the brighter of the two: without it, each later copy's black
+  // background cut a hard-edged notch out of the earlier copy's glow.
   const quadrantMax = Math.round((outputSize / 2 - inset) * 0.88);
-  const subject = fitSubject(srcCanvas, quadrantMax);
+  const subject = mirrorX(fitSubject(srcCanvas, quadrantMax));
   const fw = subject.width;
   const fh = subject.height;
+  ctx.globalCompositeOperation = "lighten";
 
   // Top: upright, clipped to upper half
   ctx.save();
@@ -165,8 +184,9 @@ function composePyramid3(frame: ImageData, outputSize: number): ImageData {
   const maxSubject = Math.round((outputSize - insetPx * 2) * 0.42);
   const subjectSize = maxSubject;
   const srcCanvas = imageDataToCanvas(frame);
-  const subject = fitSubject(srcCanvas, subjectSize);
+  const subject = mirrorX(fitSubject(srcCanvas, subjectSize));
   const cx = outputSize / 2;
+  ctx.globalCompositeOperation = "lighten"; // overlapping copies: black never covers light
 
   // Top-centre: normal
   ctx.drawImage(subject, Math.round(cx - subject.width / 2), insetPx);
@@ -237,7 +257,7 @@ function composePeppersGhost(frame: ImageData, outputSize: number): ImageData {
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, outW, outH);
 
-  const srcCanvas = imageDataToCanvas(frame);
+  const srcCanvas = mirrorX(imageDataToCanvas(frame));
 
   // Subject fills lower portion
   let subjectH = Math.round(outH * GHOST_VERTICAL);

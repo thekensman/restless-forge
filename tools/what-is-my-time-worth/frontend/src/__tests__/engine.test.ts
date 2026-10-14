@@ -14,11 +14,14 @@ import {
   fmtPercent,
   fmtHoursMinutes,
   fmtNumber,
+  taxTooltips,
+  TAX_YEAR,
   STATE_TAX_RATES,
   DECISION_PRESETS,
   type WageInputs,
   type JobInputs,
 } from "../engine";
+import { TAX } from "../../../../../data/tax";
 
 // ─── Defaults ────────────────────────────────────────────────
 
@@ -511,6 +514,19 @@ describe("STATE_TAX_RATES", () => {
     expect(noTax).toContain("TX");
     expect(noTax).toContain("FL");
     expect(noTax).toContain("WA");
+  });
+});
+
+describe("taxTooltips", () => {
+  // The breakdown's tooltips once quoted a wage base a year out of date.
+  // They are now built from the data the calculation uses.
+  it("quotes the tax year and the Social Security wage base in use", () => {
+    const tips = taxTooltips();
+    expect(tips.federal).toContain(String(TAX_YEAR));
+    expect(tips.fica).toContain(fmtCurrency(TAX.ssWageBase));
+    expect(tips.fica).toContain(fmtCurrency(TAX.medicareSurtaxThreshold));
+    expect(tips.fica).toContain("6.2%");
+    expect(tips.fica).toContain("1.45%");
   });
 });
 

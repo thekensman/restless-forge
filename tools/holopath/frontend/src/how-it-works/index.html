@@ -60,8 +60,8 @@
       and changes are reflected in real-time in the animated preview:</p>
 
       <h3>1. Wobble</h3>
-      <p>Subtle horizontal offset that oscillates per frame, simulating a floating holographic
-      projection that isn't perfectly stable.</p>
+      <p>A drift of a few pixels, sideways and up and down, that repeats every loop, so the
+      projection never sits perfectly still.</p>
 
       <h3>2. Luminance Extraction</h3>
       <p>The RGB image is converted to greyscale luminance values. This becomes the brightness
@@ -73,21 +73,22 @@
       to dominant edge-only rendering.</p>
 
       <h3>4. Hue Colorisation</h3>
-      <p>The greyscale luminance is re-coloured with the selected holographic hue. Options
-      include cyan, green, magenta, blue, and rainbow (which varies hue by vertical position).
-      The colorisation uses HSL-to-RGB conversion for natural-looking colour gradients.</p>
+      <p>The greyscale luminance is re-coloured with the selected hue. Cyan, green, magenta and
+      blue are each one fixed colour; rainbow turns the whole frame through the colour wheel
+      once per loop. Colour in your source does not survive this step, only its brightness.</p>
 
       <h3>5. Flicker</h3>
       <p>Sinusoidal brightness modulation that varies per frame, creating the unsteady glow of
       a projection that's not quite stable — a hallmark of realistic hologram aesthetics.</p>
 
       <h3>6. Colour Shift</h3>
-      <p>Per-row hue variation that creates subtle colour banding across the image. This
-      simulates the chromatic non-uniformity of real projection systems.</p>
+      <p>A slow tint drift: red, green and blue are nudged by different amounts on a cycle that
+      repeats once per loop, so the colour breathes slightly over time.</p>
 
       <h3>7. Glow Boost</h3>
-      <p>Amplifies bright areas of the image, making highlights bloom outward. Creates the
-      characteristic "glowing from within" look of sci-fi holograms.</p>
+      <p>Pixels brighter than half brightness are pushed further toward the full hue colour.
+      Nothing is blurred: highlights saturate where they are, so a high glow flattens the
+      brightest parts of a subject into solid colour.</p>
 
       <h3>8. Glitch</h3>
       <p>Random horizontal displacement of image slices, simulating data corruption or signal
@@ -102,12 +103,12 @@
       floor of a projection system and adds visual texture.</p>
 
       <h3>11. Chromatic Aberration</h3>
-      <p>Red and blue colour channels are shifted horizontally in opposite directions, creating
-      the colour-fringing effect seen in cheap optics and sci-fi holograms alike.</p>
+      <p>An on/off setting. Red is blended in from a few pixels to one side and blue from the
+      other, 2 to 6 pixels apart depending on the Glitch setting, which fringes every edge
+      with colour.</p>
 
       <h3>12. Grid Overlay</h3>
-      <p>A subtle grid pattern overlaid on the image, simulating the pixel grid of a projection
-      surface. The grid scrolls slowly across frames.</p>
+      <p>A faint 20-pixel grid in the hue colour. Its horizontal lines scroll with the loop.</p>
 
       <h3>13. Scan Beam &amp; Vignette</h3>
       <p>A moving highlight bar sweeps vertically across the image each loop, and a radial vignette
@@ -119,15 +120,17 @@
       output layout. HoloPath supports five layouts, each designed for specific display hardware:</p>
 
       <h3>Pyramid 360° (4-sided)</h3>
-      <p>Four copies of the hologram are placed on a square black canvas — one at top (normal),
-      bottom (rotated 180°), left (rotated 90° CW), and right (rotated 90° CCW). Each copy
-      faces inward toward the centre, where the pyramid's apex sits. This is the most popular
-      layout for DIY smartphone hologram pyramids.</p>
+      <p>Four copies of the hologram are placed on a square black canvas: top (upright), bottom
+      (rotated 180°), left (rotated 90° counter-clockwise) and right (rotated 90° clockwise).
+      Each copy's top points at the nearest edge of the screen and its base at the centre,
+      where the pyramid's small end sits. Every copy is mirrored left to right, because the
+      reflection in each face swaps left and right again. This is the most popular layout for
+      DIY smartphone hologram pyramids.</p>
 
       <h3>Pyramid 270° (3-sided)</h3>
-      <p>Three copies arranged for 3-sided pyramid showcases commonly used in retail and museums.
-      One copy faces up from top-centre, and two are angled at the bottom corners. The back side
-      is left blank since these displays sit against a wall.</p>
+      <p>Three mirrored copies arranged for 3-sided pyramid showcases: one upright at
+      top-centre and two turned 120° at the bottom corners. The back side is left blank since
+      these displays sit against a wall.</p>
 
       <h3>Hologram Fan (LED POV)</h3>
       <p>The hologram is centred on a square black canvas with a circular mask applied. This
@@ -135,9 +138,9 @@
       since the fan can't display it anyway.</p>
 
       <h3>Pepper's Ghost</h3>
-      <p>The hologram is positioned in the lower-centre portion of a 16:9 landscape canvas.
-      This is optimised for Pepper's Ghost setups where a screen lies flat and a piece of glass
-      at 45° reflects the image upward toward the viewer.</p>
+      <p>The hologram is mirrored and placed in the lower-centre portion of a 16:9 landscape
+      canvas, for Pepper's Ghost setups where a screen lies flat under a sheet of glass at 45°
+      that reflects it toward the viewer.</p>
 
       <h3>Single Image</h3>
       <p>No layout compositing — just the raw hologrammed frame. Use this for social media

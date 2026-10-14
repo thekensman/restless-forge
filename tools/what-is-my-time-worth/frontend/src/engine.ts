@@ -619,6 +619,26 @@ export const DECISION_PRESETS: DecisionPreset[] = [
 // public API unchanged.
 export const STATE_TAX_RATES: { id: string; name: string; rate: number }[] = TAX.stateRates;
 
+// ─── Tax Tooltips ────────────────────────────────────────────
+
+/**
+ * Tooltip text for the tax rows of the breakdown, built from the same data
+ * the calculation uses, so the yearly data refresh cannot leave it behind.
+ * (Hard-coded copy once kept the 2025 wage base, $176,100, into 2026.)
+ */
+export function taxTooltips(): { federal: string; state: string; fica: string } {
+  const pct = (rate: number): string => `${+(rate * 100).toFixed(2)}%`;
+  return {
+    federal: `Estimated using ${TAX_YEAR} IRS brackets and your filing status, with the standard deduction.`,
+    state: "One flat rate per state, applied to the whole salary. States that tax in brackets usually charge less than this.",
+    fica:
+      `Employee share: ${pct(TAX.ficaSocialSecurityRate)} Social Security on wages up to ` +
+      `${fmtCurrency(TAX.ssWageBase)}, plus ${pct(TAX.ficaMedicareRate)} Medicare and ` +
+      `${pct(TAX.medicareSurtaxRate)} more on wages over ${fmtCurrency(TAX.medicareSurtaxThreshold)}. ` +
+      `Self-employed people pay ${pct(TAX.selfEmploymentRate)} in total.`,
+  };
+}
+
 // ─── Formatting Helpers ──────────────────────────────────────
 
 export function fmtCurrency(value: number, decimals: number = 0): string {

@@ -27,7 +27,7 @@ task:
 
 | Feeling about the task | Multiplier |
 |---|---|
-| Actively avoid it | 1.5 |
+| Prefer to avoid | 1.5 |
 | Dislike it | 1.2 |
 | Neutral | 1.0 |
 | Enjoy it | 0.7 |

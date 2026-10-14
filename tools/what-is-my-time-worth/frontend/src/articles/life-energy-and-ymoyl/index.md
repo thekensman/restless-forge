@@ -36,13 +36,13 @@ The formula is simple:
 
 <div class="formula">Real hourly wage = (Annual take-home − Annual work costs) ÷ Annual work hours <span>Where "annual work hours" includes commute, getting-ready time, decompression time, and unpaid overtime</span></div>
 
-Most people who do this calculation for the first time discover their real hourly wage is 30–50% lower than what they assumed. A $75,000 salary might yield a real hourly wage of $18 or $22 once you've run the honest numbers.
+Run a $75,000 salary through the calculator with its starting values for everything else, and with 2026 tax figures the real hourly wage comes to $20.47, against $36.06 for the salary divided by 2,080: 43% lower. Your own inputs will move it in either direction.
 
 ## Why It Matters: The Life Energy Price Tag
 
 Once you know your real hourly wage, every purchase has a second price tag. A $60 dinner at a nice restaurant isn't just $60 — it's the equivalent of three hours of your life, if your real wage is $20/hr. That might be worth it. Or it might not. The point isn't to feel guilty about spending; it's to spend *consciously*.
 
-Robin and Dominguez describe this as asking three questions before any significant purchase:
+Robin and Dominguez ask three questions of every category of spending:
 
 -   Did I receive fulfillment proportional to the life energy I spent?
 -   Is this expenditure in alignment with my values and life purpose?

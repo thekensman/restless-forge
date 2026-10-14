@@ -30,7 +30,8 @@ export interface VectorizeOpts {
   maxDimension?: number;
   /** SVG stroke width */
   lineWidth?: number;
-  /** Drop contours shorter than this many points (post-DP simplification). */
+  /** Drop contours shorter than this many points (post-DP simplification).
+   *  Defaults to 3 for outline/centerline, 4 for threshold. */
   minPathLength?: number;
 }
 
@@ -45,19 +46,25 @@ export interface VectorizeResult {
 // ─── Public API ───────────────────────────────────────────────
 
 export async function vectorize(file: File, opts: VectorizeOpts = {}): Promise<VectorizeResult> {
+  // 1–3. Decode, resize, composite on white, greyscale
+  const { pixels, width, height } = await loadGrayscale(file, opts.maxDimension ?? 800);
+  return traceGray(pixels, width, height, opts);
+}
+
+/** Steps 4–9 on an already-decoded greyscale image (row-major, one byte per
+ *  pixel). Separate from decoding so it runs without a canvas, e.g. in tests. */
+export function traceGray(
+  pixels: Uint8Array, w: number, h: number, opts: VectorizeOpts = {}
+): VectorizeResult {
   const {
     mode = "outline",
     threshold = 128,
     blur = 1.0,
     invert = false,
     detail = 1.5,
-    maxDimension = 800,
     lineWidth = 2.0,
-    minPathLength = 4,
+    minPathLength,
   } = opts;
-
-  // 1–3. Decode, resize, composite on white, greyscale
-  const { pixels, width: w, height: h } = await loadGrayscale(file, maxDimension);
 
   // 4. Invert
   let gray = pixels;
@@ -84,15 +91,23 @@ export async function vectorize(file: File, opts: VectorizeOpts = {}): Promise<V
     grid = thresholdGrid(gray, w, h, threshold);
   }
 
-  // 7. Marching squares
-  const contours = marchingSquares(grid, w, h);
+  // 7. Marching squares. Outline and centerline produce one-pixel lines,
+  // which step diagonally wherever they are not horizontal or vertical;
+  // those modes join pixels that touch only at a corner (see marchingSquares).
+  const contours = marchingSquares(grid, w, h, mode !== "threshold");
 
   // 8. Simplify + drop short/noise contours.
   // Short fragments add visible "extra lines" without contributing structure —
   // they are the dominant noise source in Sobel-based tracing.
   const simplified: [number, number][][] = [];
   let totalPts = 0;
-  const minPts = Math.max(2, minPathLength);
+  // Outline and centerline trace one-pixel lines, which marching squares
+  // returns as narrow loops. Douglas-Peucker folds the loop around a straight
+  // line to three points, out and back, so a floor of four dropped every
+  // straight stroke. Those modes keep three-point paths; the length check
+  // below still removes specks. Threshold traces region boundaries and keeps
+  // the floor of four.
+  const minPts = Math.max(2, minPathLength ?? (mode === "threshold" ? 4 : 3));
   for (const contour of contours) {
     const simp = douglasPeucker(contour, detail);
     if (simp.length < minPts) continue;
@@ -113,7 +128,16 @@ async function loadGrayscale(
   file: File,
   maxDimension: number
 ): Promise<{ pixels: Uint8Array; width: number; height: number }> {
-  const bitmap = await createImageBitmap(file);
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    // The browser's own message ("The source image could not be decoded")
+    // does not say what to do. TIFF is the usual cause: only Safari decodes it.
+    throw new Error(/\.tiff?$/i.test(file.name)
+      ? "This browser cannot open TIFF images; Safari can. Save it as PNG or JPG and upload that."
+      : "This browser cannot open that image. Save it as PNG or JPG and upload that.");
+  }
   let w = bitmap.width, h = bitmap.height;
 
   if (Math.max(w, h) > maxDimension) {
@@ -194,7 +218,7 @@ function gaussianBlur(pixels: Uint8Array, w: number, h: number, radius: number):
  * pixel along each edge. Without NMS, marching squares traces both sides of
  * the 2–3 px wide Sobel response, producing two parallel contours per edge.
  */
-function sobelEdgesThinned(
+export function sobelEdgesThinned(
   pixels: Uint8Array, w: number, h: number, threshold: number
 ): number[][] {
   const mag = new Float32Array(w * h);
@@ -222,10 +246,15 @@ function sobelEdgesThinned(
       if (m <= threshold) { row.push(0); continue; }
       let m1 = 0, m2 = 0;
       const d = dir[y * w + x];
+      // Compare across the edge, i.e. along the gradient. With y pointing
+      // down, bin 1 (gradient near 45°) points down-right or up-left, and bin
+      // 3 (near 135°) down-left or up-right. The two diagonal pairs were once
+      // swapped, which compared along diagonal edges instead of across them
+      // and broke every curve into fragments.
       if (d === 0)      { m1 = mag[y * w + Math.max(0, x-1)];           m2 = mag[y * w + Math.min(w-1, x+1)]; }
-      else if (d === 1) { m1 = mag[Math.max(0, y-1) * w + Math.min(w-1, x+1)]; m2 = mag[Math.min(h-1, y+1) * w + Math.max(0, x-1)]; }
+      else if (d === 1) { m1 = mag[Math.max(0, y-1) * w + Math.max(0, x-1)];   m2 = mag[Math.min(h-1, y+1) * w + Math.min(w-1, x+1)]; }
       else if (d === 2) { m1 = mag[Math.max(0, y-1) * w + x];           m2 = mag[Math.min(h-1, y+1) * w + x]; }
-      else              { m1 = mag[Math.max(0, y-1) * w + Math.max(0, x-1)];   m2 = mag[Math.min(h-1, y+1) * w + Math.min(w-1, x+1)]; }
+      else              { m1 = mag[Math.max(0, y-1) * w + Math.min(w-1, x+1)]; m2 = mag[Math.min(h-1, y+1) * w + Math.max(0, x-1)]; }
       row.push(m >= m1 && m >= m2 ? 1 : 0);
     }
     grid.push(row);
@@ -251,38 +280,62 @@ function thresholdGrid(pixels: Uint8Array, w: number, h: number, level: number):
   return grid;
 }
 
+/**
+ * Threshold, then thin every stroke to a one-pixel skeleton with Zhang–Suen
+ * (Zhang & Suen, "A fast parallel algorithm for thinning digital patterns",
+ * CACM 1984). Its two sub-passes only delete a pixel whose removal cannot
+ * split a stroke (exactly one 0→1 transition around it) and that is not a
+ * line end (at least two neighbours), so lines thin to their middle and stay
+ * whole. The earlier single-pass approximation had no connectivity check and
+ * eroded line drawings to nothing.
+ */
 function centerline(pixels: Uint8Array, w: number, h: number, level: number): number[][] {
-  // Threshold first
-  let grid = thresholdGrid(pixels, w, h, level);
+  const img = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) img[i] = pixels[i] < level ? 1 : 0;
+  const at = (x: number, y: number): number =>
+    x < 0 || y < 0 || x >= w || y >= h ? 0 : img[y * w + x];
 
-  // Iterative border-pixel thinning (simplified Zhang-Suen approximation)
-  const iters = Math.floor(Math.max(w, h) / 4);
-  for (let _ = 0; _ < iters; _++) {
-    let changed = false;
-    const next = grid.map(row => row.slice());
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        if (!grid[y][x]) continue;
-        let n = 0;
-        for (let dy = -1; dy <= 1; dy++)
-          for (let dx = -1; dx <= 1; dx++)
-            if (dx || dy) n += grid[y + dy][x + dx];
-        if (n <= 2 || n >= 7) continue;
-        if (!grid[y-1][x] || !grid[y+1][x] || !grid[y][x-1] || !grid[y][x+1]) {
-          next[y][x] = 0;
-          changed = true;
+  const doomed: number[] = [];
+  const n = new Uint8Array(8); // neighbours clockwise from north: P2 … P9
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (let pass = 0; pass < 2; pass++) {
+      doomed.length = 0;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          if (!img[y * w + x]) continue;
+          n[0] = at(x, y-1); n[2] = at(x+1, y); n[4] = at(x, y+1); n[6] = at(x-1, y);
+          // All four edge neighbours set: inside a stroke, and both
+          // sub-passes below would keep it anyway.
+          if (n[0] && n[2] && n[4] && n[6]) continue;
+          n[1] = at(x+1, y-1); n[3] = at(x+1, y+1); n[5] = at(x-1, y+1); n[7] = at(x-1, y-1);
+          let count = 0, transitions = 0;
+          for (let k = 0; k < 8; k++) {
+            count += n[k];
+            if (!n[k] && n[(k + 1) % 8]) transitions++;
+          }
+          if (count < 2 || count > 6 || transitions !== 1) continue;
+          const [p2, , p4, , p6, , p8] = n;
+          if (pass === 0 ? (p2 && p4 && p6) || (p4 && p6 && p8)
+                         : (p2 && p4 && p8) || (p2 && p6 && p8)) continue;
+          doomed.push(y * w + x);
         }
       }
+      for (const i of doomed) img[i] = 0;
+      if (doomed.length) changed = true;
     }
-    grid = next;
-    if (!changed) break;
   }
+
+  const grid: number[][] = [];
+  for (let y = 0; y < h; y++) grid.push(Array.from(img.subarray(y * w, (y + 1) * w)));
   return grid;
 }
 
 // ─── Marching squares ─────────────────────────────────────────
 
-function marchingSquares(grid: number[][], w: number, h: number): [number, number][][] {
+function marchingSquares(
+  grid: number[][], w: number, h: number, joinDiagonals = false
+): [number, number][][] {
   if (h < 2 || w < 2) return [];
 
   const cell = (x: number, y: number): number => {
@@ -309,6 +362,14 @@ function marchingSquares(grid: number[][], w: number, h: number): [number, numbe
     10: [[3,0],[1,2]], 11: [[1,0]], 12: [[3,1]],
     13: [[2,1]], 14: [[3,2]],
   };
+  // Cases 5 and 10 are saddles: two "on" pixels that touch only at a corner.
+  // The table above keeps them apart, which suits filled regions. A one-pixel
+  // line kept apart that way breaks at every diagonal step, so for lines the
+  // saddle cuts off the two "off" corners instead and the pixels join.
+  if (joinDiagonals) {
+    EDGES[5] = [[0,3],[2,1]];
+    EDGES[10] = [[1,0],[3,2]];
+  }
 
   const visitedEdges = new Set<string>();
   const contours: [number, number][][] = [];

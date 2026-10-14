@@ -31,7 +31,7 @@ you have.
 ## Style is the biggest multiplier
 
 Time per square inch varies enormously by what is actually being put into the
-skin:
+skin. These are the figures TattooSafe's estimator uses:
 
 | Style | Minutes per sq in |
 |---|---|
@@ -52,7 +52,7 @@ times over.
 
 ## Placement is about difficulty, not just pain
 
-Placement multipliers run from 1.0 to about 1.4:
+In TattooSafe's estimator, placement multipliers run from 1.0 to about 1.4:
 
 - **1.0** — upper arm, forearm, thigh, upper back. Flat, fleshy, stationary.
 - **1.05–1.15** — shoulder, calf, lower back, chest, wrist.
@@ -65,7 +65,8 @@ tendons. An outer thigh is a nearly flat, stable canvas.
 
 Pain enters the calculation through a side door: it determines how long you can
 sit. A high-pain placement means more breaks, and breaks are billed time. So
-painful placements cost more twice over.
+painful placements cost more twice over. TattooSafe's estimate adds the same
+break time everywhere, so on a painful placement it runs low.
 
 ## The hourly rate
 
@@ -93,7 +94,8 @@ session.
 **Session limits**, typically 6 hours. Past that, skin swells and takes ink
 poorly, and both of you are tired in ways that show. Large work splits into
 multiple sessions — each carrying its own setup, and its own healing gap
-before the next.
+before the next. TattooSafe's estimate counts setup once, so it runs low for
+work split across sessions.
 
 **Shop minimum**, commonly $50–150. A tiny piece that takes twelve minutes still
 costs the minimum, because a fresh needle, fresh ink caps, sterilisation, and the
@@ -101,7 +103,7 @@ booking slot do not scale down.
 
 ## Why your quote came in higher
 
-In rough order of frequency:
+The usual reasons:
 
 1. **Style classification.** You called it "simple"; the artist sees shading.
 2. **Cover-ups.** Working over existing ink is slower than clean skin, and is

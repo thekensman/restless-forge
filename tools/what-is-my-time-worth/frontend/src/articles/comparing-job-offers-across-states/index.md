@@ -11,12 +11,20 @@ State income tax ranges from zero — Texas, Florida, Washington, Nevada, and a
 handful of others — to over 13% at California's top bracket. On a six-figure
 salary, moving between the extremes is worth more than most annual raises.
 
-On $105,000, California state tax runs into five figures. On $95,000 in Texas,
-it is zero. Before anything else is counted, that $10,000 gap has already
-closed and started reversing.
+California taxes income in brackets. For a single filer on $105,000, its 2025
+schedule takes about $5,500: the 9.3% rate applies only to taxable income above
+roughly $72,700, and bands of 1% to 8% cover the rest. On $95,000 in Texas, state
+tax is zero. Before anything else is counted, more than half of the $10,000 gap
+is gone.
+
+The calculator simplifies this step. It applies one rate per state to the whole
+salary, 9.3% for California, which comes to $9,765 on the same income and
+overstates the California side of this comparison by about $4,200. Read a close
+result between a state with brackets and one without in that light.
 
 This is the single most mechanical part of the comparison, which is why it is
-worth doing first: no estimation, no judgment, just a rate applied to an income.
+worth doing first: no estimation and no judgment, only published rates applied
+to an income.
 
 ## Federal tax quietly narrows every gap
 
@@ -27,6 +35,10 @@ rate, which for a mid-career salary is typically 22% or 24%.
 The practical rule: **a raise is worth roughly two-thirds to three-quarters of
 its headline value** once federal and FICA come out. Any comparison done in
 gross dollars is systematically overstating the difference between two offers.
+
+For the two offers above, a single filer pays $2,200 more federal tax and $765
+more FICA on the extra $10,000. Add California's share and about $1,500 of it is
+left.
 
 ## Cost of living is where it actually gets decided
 
@@ -54,7 +66,8 @@ the denominator of your real hourly wage.
 An extra forty-five minutes each way is about 1.5 hours per working day, roughly
 375 hours a year. That is more than nine forty-hour weeks of your life, unpaid.
 Against that, a $10,000 raise is buying your time at under $27 an hour before
-tax — quite possibly less than the job itself pays you.
+tax, quite possibly less than the job itself pays you. After tax, the $1,500
+left in the example above buys those hours at about $4 each.
 
 The offer with the shorter commute frequently wins even at a lower salary, and
 people are consistently surprised by how large the effect is.

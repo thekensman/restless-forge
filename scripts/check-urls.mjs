@@ -56,16 +56,24 @@ const SITE = "https://restless-forge.dev";
 /* ── Retired URLs with a known replacement ──
  * The spec for the $rf_legacy_target table in nginx/restless-forge.conf. Every
  * entry is backed by git history and/or Search Console (docs/indexing.md). */
-const HOLOPATH_SLUGS = [
-  "best-hologram-projectors", "best-images-for-holograms", "colour-theory-holographic-art",
-  "creating-hologram-art", "diy-hologram-pyramid", "future-of-holographic-displays",
-  "gif-vs-video-hologram", "history-of-holograms", "hologram-displays-for-business",
-  "hologram-effects-explained", "holograms-in-pop-culture", "how-hologram-pyramids-work",
-  "led-hologram-fans", "optimizing-hologram-output", "peppers-ghost-illusion",
+const HOLOPATH_SLUGS = [ // the articles still published
+  "best-images-for-holograms", "creating-hologram-art", "diy-hologram-pyramid",
+  "gif-vs-video-hologram", "hologram-effects-explained", "how-hologram-pyramids-work",
+  "led-hologram-fans", "peppers-ghost-illusion",
+];
+/* Removed 2026-10-13 as generic content with no same-content successor
+   (docs/adsense-readiness.md F1). Every spelling must 404, never redirect. */
+const HOLOPATH_REMOVED = [
+  "best-hologram-projectors", "colour-theory-holographic-art", "future-of-holographic-displays",
+  "history-of-holograms", "hologram-displays-for-business", "holograms-in-pop-culture",
 ];
 const LEGACY = [
   // HoloPath's articles index linked here (holopath.art-era paths) until 2026-08-06.
   ...HOLOPATH_SLUGS.map((s) => [`/articles/${s}`, `/tools/holopath/articles/${s}`]),
+  // optimizing-hologram-output merged into creating-hologram-art 2026-10-13.
+  ...["/articles/optimizing-hologram-output", "/tools/holopath/articles/optimizing-hologram-output",
+    "/tools/holopath/articles/optimizing-hologram-output.html"]
+    .map((u) => [u, "/tools/holopath/articles/creating-hologram-art"]),
   // HoloPath's sub-pages were <page>.html until 2026-05-08.
   ["/tools/holopath/about.html", "/tools/holopath/about/"],
   ["/tools/holopath/faq.html", "/tools/holopath/faq/"],
@@ -91,8 +99,11 @@ const LEGACY = [
    investigation. Check 2 already covers every .html spelling; these are named
    so that a failure reads in the investigation's own terms. */
 const INVESTIGATION_PAIRS = ["how-hologram-pyramids-work", "diy-hologram-pyramid",
-  "best-hologram-projectors", "optimizing-hologram-output", "peppers-ghost-illusion"]
+  "peppers-ghost-illusion"]
   .map((s) => [`/tools/holopath/articles/${s}.html`, `/tools/holopath/articles/${s}`]);
+// The investigation's other two pairs changed on 2026-10-13:
+// best-hologram-projectors was removed (HOLOPATH_REMOVED), and
+// optimizing-hologram-output now redirects to its merged article (LEGACY).
 
 /* ── URLs that must stay 404 ──
  * A redirect needs a genuine replacement. These have none, and sending them to
@@ -101,7 +112,10 @@ const GONE = [
   "/essays/the-time-value-philosophy",       // "coming soon" stub, deleted 2026-07-18
   "/essays/making-tools-for-the-restless",   // "coming soon" stub, deleted 2026-07-18
   "/no-such-page.html",                      // .html with no file behind it
-  "/tools/holopath/articles/best-hologram-projectors/", // never-published slash form
+  "/tools/holopath/articles/peppers-ghost-illusion/", // never-published slash form
+  ...HOLOPATH_REMOVED.flatMap((s) => [
+    `/tools/holopath/articles/${s}`, `/tools/holopath/articles/${s}.html`, `/articles/${s}`,
+  ]),
   "/tools/holopath/sitemap.xml",             // per-tool sitemaps were stale; removed
   "/tools/holopath/robots.txt",              // robots.txt only counts at the host root
   "/./about.html",                           // dot segments must not mint a duplicate

@@ -196,10 +196,10 @@ for (const [sliderId, dispId, pct] of SLIDERS) {
 // ─── Layout mode selector ────────────────────────────────────
 
 const LAYOUT_NOTES: Record<string, string> = {
-  pyramid4: "4 rotations for 4-sided pyramid projectors",
-  pyramid3: "3 rotations for 3-sided showcase displays",
+  pyramid4: "4 rotated copies, mirrored so the reflection reads the right way round",
+  pyramid3: "3 rotated copies, mirrored so the reflection reads the right way round",
   fan: "Circular crop for LED fan / POV displays",
-  peppers_ghost: "Positioned for 45° angled glass reflectors",
+  peppers_ghost: "Mirrored and set low for a 45° glass reflector",
   single: "Direct hologram output — no layout compositing",
 };
 

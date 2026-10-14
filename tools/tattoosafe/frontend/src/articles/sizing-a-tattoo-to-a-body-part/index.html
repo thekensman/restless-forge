@@ -23,7 +23,7 @@
     "headline": "Sizing a Tattoo to a Body Part",
     "description": "Why a design that looks right on screen arrives wrong on skin, how body proportions scale with height, and what actually limits the size of a piece.",
     "datePublished": "2026-08-04",
-    "dateModified": "2026-08-04",
+    "dateModified": "2026-10-14",
     "author": {"@type": "Person", "name": "Kenneth Cross", "url": "https://restless-forge.dev/about", "sameAs": ["https://restlessforge.substack.com"]},
     "publisher": {"@type": "Organization", "name": "TattooSafe", "url": "https://restless-forge.dev/tools/tattoosafe/"},
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://restless-forge.dev/tools/tattoosafe/articles/sizing-a-tattoo-to-a-body-part/"}
@@ -79,13 +79,14 @@
 
       <div class="article__meta">
         <span>August 4, 2026</span>
+        <span>Updated October 14, 2026</span>
         <span>By <a data-rf-link="substack" target="_blank" rel="noopener">Kenneth Cross</a></span>
         <span>7 min read</span>
       </div>
 
       <div class="article__body">
         <!-- generated:content — do not edit; edit index.md and run `npm run sync-content` -->
-<p>The most common tattoo regret is not the design. It is the size.</p>
+<p>A tattoo can be well designed and still disappoint, because of its size.</p>
 <p>People show their artist a picture on a phone, agree it looks great, and end up
 with something noticeably smaller or larger than the thing in their head. The
 design was fine. The problem was that a screen tells you nothing about how a
@@ -97,10 +98,8 @@ surface 25 cm long, seen at whatever distance people stand at.</p>
 <p>Your brain does not do that conversion. It stores &quot;how the design looked&quot; —
 which was: large, centred, detailed, the only thing you were looking at. On skin
 it is a small object among other things, at an angle, on a curved surface.</p>
-<p>The result is a systematic bias in one direction. People consistently
-underestimate the size needed for a design to read the way it did on screen,
-which is why &quot;I wish I&#39;d gone bigger&quot; is a far more common regret than the
-reverse.</p>
+<p>So the bias runs one way: a size that looked right filling a phone screen
+tends to read small on skin.</p>
 <h2>Bodies scale, and not the way you would guess</h2>
 <p>The other half of the problem is that &quot;an inner forearm&quot; is not one size.</p>
 <p>Body proportions scale with height in roughly predictable ratios — forearm
@@ -111,11 +110,12 @@ canvas differs proportionally.</p>
 is reasonable advice for someone of average height and actively misleading at
 either extreme. On a short forearm it dominates; on a long one it floats in the
 middle looking undersized.</p>
-<p>TattooSafe generates its silhouette from your entered height using those ratios,
-so the outline and every placement area scale to you rather than to a stock
-model.</p>
+<p>TattooSafe sizes every placement&#39;s usable area from your entered height using
+ratios like these, so the fit check works on your proportions rather than a
+stock model&#39;s. The outline itself is a fixed figure; what changes is how much of
+each placement your design fills.</p>
 <h2>What actually limits size</h2>
-<p>Four constraints, in rough order of how often they bite.</p>
+<p>Four constraints set the limit.</p>
 <p><strong>Usable area.</strong> Each placement has boundaries that are not the whole limb.
 An inner forearm runs wrist to elbow crease, but the last couple of centimetres
 at each end are awkward — skin folds, the piece distorts when you bend. The
@@ -145,7 +145,7 @@ exceeds the usable area rather than letting you discover it from a stencil.</p>
 camera preview answers &quot;does this sit right here&quot; — position, angle,
 relationship to your actual arm. The silhouette answers &quot;how big is this
 really,&quot; in centimetres, and is the one to screenshot for your artist.</p>
-<p><strong>Try one size up.</strong> Given the systematic bias toward undersizing, deliberately
+<p><strong>Try one size up.</strong> Given the pull toward undersizing, deliberately
 previewing a larger version is worth the ten seconds. Often it is obviously
 better, and the cost difference is smaller than the regret.</p>
 <p><strong>Then talk to your artist.</strong> They will have opinions about how the design needs
@@ -153,8 +153,9 @@ to change at your chosen size — line weights that work at 15 cm do not work at
 7 cm, and details often need removing rather than shrinking. That conversation
 goes much better when you arrive with dimensions instead of a phone.</p>
 <h2>What a preview cannot tell you</h2>
-<p>It is a flat overlay. It does not wrap to your arm, respond to how skin moves, or
-account for how the piece will look in three years.</p>
+<p>It is an overlay. It does not track your arm or respond to how skin moves (the
+optional curve setting approximates a limb rather than measuring yours), and it
+cannot show how the piece will look in three years.</p>
 <p>What it does is remove the most avoidable failure mode — discovering scale at
 the moment the stencil goes on, when you have already chosen the design, booked
 the slot, and paid the deposit.</p>

@@ -26,8 +26,9 @@
  *     essay front-matter (generated:essay-cards block).
  *
  * Front-matter (--- key: value --- block): title, description, date
- * (YYYY-MM-DD), author. `date`/`author` render a byline under the first
- * heading; title/description/date drive shell creation and index cards.
+ * (YYYY-MM-DD), updated (YYYY-MM-DD), author. `date`/`updated`/`author`
+ * render a byline under the first heading; title/description/date drive
+ * shell creation and index cards.
  *
  * External links (http/https) automatically get target="_blank"
  * rel="noopener", so Markdown needs no inline HTML for them.
@@ -146,9 +147,12 @@ function renderContent(mdPath) {
   } else {
     html = marked.parse(body).trim();
   }
-  if (meta.date || meta.author) {
+  if (meta.date || meta.updated || meta.author) {
     const parts = [];
     if (meta.date) parts.push(`Published ${fmtDate(meta.date)}`);
+    // `updated:` marks a substantial revision. Shown beside the original date
+    // rather than replacing it, so a reworked page does not pose as new.
+    if (meta.updated) parts.push(`Updated ${fmtDate(meta.updated)}`);
     if (meta.author) parts.push(`By ${meta.author}`);
     const byline = `<p class="content-byline" style="color: var(--text-dim); font-style: italic; margin-bottom: 2rem;">\n  ${parts.join(" &middot; ")}\n</p>`;
     const h1End = html.indexOf("</h1>");

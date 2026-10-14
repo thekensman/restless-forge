@@ -14,6 +14,8 @@ off your network connection, and convert something. It still works.
 ## What file types can I upload?
 
 SVG vector files, and raster images in JPG, JPEG, PNG, WebP, BMP, GIF, and TIFF.
+TIFF opens only in Safari, because other browsers cannot decode it; elsewhere,
+save it as PNG first.
 
 SVGs are converted directly from their path data, which is why they give the
 cleanest results. Raster images go through a tracing stage first to produce
@@ -49,19 +51,25 @@ are still prominent:
 
 - Use source art with fewer disconnected shapes.
 - For SVGs, join separate paths into continuous strokes where you can.
-- Increase curve smoothness, which can merge nearby endpoints.
+- For a raster image, raise Noise Reduction or coarsen Path Detail. Both cut
+  the number of separate paths.
 - Accept a few. Every sand pattern has some, and they fade from notice once the
   design reads.
 
 ## What does Path Detail actually change?
 
-It controls how densely curves are sampled and how aggressively the traced
-paths are simplified afterwards.
+It applies to raster images, after tracing. Path Detail is how far, in pixels
+of the working image, a simplified line may stray from the traced edge, and any
+path shorter than four times that distance is dropped.
 
-Coarser settings produce fewer points: smaller files, faster draws, smoother
-curves, less fidelity. Finer settings keep more points: bigger files, longer
-draws, more faithful detail — up to the point where the detail is finer than the
-ball can carve, after which you are paying in draw time for nothing.
+Coarser settings produce fewer points: smaller files, faster draws, less
+fidelity. Finer settings keep more points: bigger files, longer draws, more
+faithful detail, up to the point where the detail is finer than the ball can
+carve, after which you are paying in draw time for nothing.
+
+Curve Smoothness is a separate control. It sets how many points each segment of
+a path is sampled into when SandPath converts to table coordinates, for SVGs and
+traced images alike.
 
 ## Why does my fine detail disappear in the sand?
 
