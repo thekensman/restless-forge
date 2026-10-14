@@ -64,6 +64,8 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 - **No clean API** — scraped from Tax Foundation or manually entered
 - **Updates:** `data/tax.ts` → `stateRates` in the current
   year's entry (sanity pass; same file as the federal data).
+- **Planned:** real brackets, deductions and exemptions per state, and the
+  yearly job that keeps them current: `docs/state-income-tax-brackets.md`.
 
 ### 5. FICA / SE Tax Rates
 - **Source:** SSA.gov (statutory — rarely change)

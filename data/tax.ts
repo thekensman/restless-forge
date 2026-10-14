@@ -40,7 +40,9 @@ export interface TaxYearData {
   selfEmploymentRate: number;
   /** Net-earnings factor: SE tax applies to 92.35% of net SE income. */
   selfEmploymentNetFactor: number;
-  /** Simplified flat effective rates (Tax Foundation) — sanity-passed yearly. */
+  /** One bracket rate per state (Tax Foundation), applied flat to the whole
+   *  salary. That overstates tax in states with graduated brackets; real
+   *  brackets are planned in docs/state-income-tax-brackets.md. */
   stateRates: StateTaxRate[];
 }
 
