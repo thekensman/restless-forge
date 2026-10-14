@@ -325,15 +325,15 @@
               <span id="bd-gross">—</span>
             </div>
             <div class="breakdown__row breakdown__row--sub">
-              <span>Federal income tax <span class="tooltip" data-tip="Estimated using 2026 IRS brackets and your filing status. Standard deduction applied.">ⓘ</span></span>
+              <span>Federal income tax <span class="tooltip" id="tip-federal" data-tip="Estimated using this year's IRS brackets and your filing status, with the standard deduction.">ⓘ</span></span>
               <span id="bd-fed">—</span>
             </div>
             <div class="breakdown__row breakdown__row--sub">
-              <span>State income tax <span class="tooltip" data-tip="Flat-rate state approximation. Varies by state — your actual rate may differ.">ⓘ</span></span>
+              <span>State income tax <span class="tooltip" id="tip-state" data-tip="One flat rate per state, applied to the whole salary. States that tax in brackets usually charge less than this.">ⓘ</span></span>
               <span id="bd-state">—</span>
             </div>
             <div class="breakdown__row breakdown__row--sub">
-              <span>FICA (SS + Medicare) <span class="tooltip" data-tip="Employee share: 6.2% Social Security (up to $176,100) + 1.45% Medicare. Self-employed pay 15.3% total.">ⓘ</span></span>
+              <span>FICA (SS + Medicare) <span class="tooltip" id="tip-fica" data-tip="Employee share: 6.2% Social Security up to the year's wage cap, plus 1.45% Medicare and 0.9% more on wages over $200,000. Self-employed people pay 15.3% in total.">ⓘ</span></span>
               <span id="bd-fica">—</span>
             </div>
             <div class="breakdown__row breakdown__row--accent">
@@ -401,7 +401,7 @@
           </details>
 
           <div class="tax-warning">
-            <strong>⚠ Tax estimates are approximations</strong> using 2026 federal brackets and simplified flat-rate state taxes. FICA is 7.65% (employee share). Consult a CPA for your specific situation.
+            <strong>⚠ Tax estimates are approximations:</strong> this year's federal brackets, one flat rate per state (which usually overstates tax in states with brackets), and the employee share of FICA. Consult a CPA for your specific situation.
           </div>
         </div>
       </div>
