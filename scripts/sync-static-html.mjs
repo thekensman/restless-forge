@@ -164,15 +164,16 @@ function joinBlurbs(live) {
   return b.length > 1 ? `${b.slice(0, -1).join(", ")}, and ${b.at(-1)}` : b[0];
 }
 
+/* One sentence for the visible answer and its FAQPage JSON-LD: Google requires
+   FAQ markup to match what the page shows, and check-links enforces it. The two
+   used to be separate templates that said different things. */
+function faqAnswerText(live) {
+  return "Restless Forge is a one-person workshop that builds free, open-source web tools: " +
+    `${joinBlurbs(live)} — with many more in the forge. Each tool is designed to be useful, honest, and private.`;
+}
+
 function renderFaqAnswer(live) {
-  return [
-    "        <p>",
-    "          Restless Forge is a one-person workshop that builds free,",
-    `          open-source web tools: ${joinBlurbs(live)} —`,
-    "          with many more in the forge. Each tool is designed to be useful,",
-    "          honest, and private.",
-    "        </p>",
-  ].join("\n");
+  return ["        <p>", `          ${esc(faqAnswerText(live))}`, "        </p>"].join("\n");
 }
 
 /* The FAQ JSON-LD answer can't carry HTML-comment markers (it's JSON),
@@ -181,7 +182,7 @@ function renderFaqAnswer(live) {
    preserved so the drift check stays stable). Parsing rather than
    regexing means malformed JSON-LD fails loudly here instead of shipping. */
 function syncFaqJsonLd(html, live, file) {
-  const text = `Restless Forge is a collection of free, open-source web tools built by Kenneth Cross. It includes ${joinBlurbs(live)}. All tools are privacy-first and run in your browser.`;
+  const text = faqAnswerText(live);
   const blockRe = /(<script type="application\/ld\+json">\n)([\s\S]*?)(\n[ \t]*<\/script>)/g;
   let updated = false;
   const out = html.replace(blockRe, (whole, open, body, close) => {
