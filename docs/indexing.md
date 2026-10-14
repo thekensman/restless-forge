@@ -239,6 +239,24 @@ one identity, Kenneth Cross with `/about` as the profile page
 
 ## October 2026 indexing experiment
 
+**Status: ended early, 2026-10-13.** The goal moved to AdSense resubmission
+(`docs/adsense-readiness.md`), and that work broke the freeze below on the day
+the requests began, so the comparison can't be read as designed:
+
+- `best-hologram-projectors`, one of the six, was removed with five other
+  generic HoloPath articles, and they now 404 (see Deliberately 404). Those
+  five were controls.
+- `optimizing-hologram-output`, another control, was merged into
+  `creating-hologram-art` (a 301). The remaining two controls and all five
+  HoloPath treatment articles were rewritten against the engine, and so was
+  `gif-vs-video-hologram`, one of the six.
+- The homepage, `/articles/`, the HoloPath and TattooSafe article indexes and
+  the sitemap changed.
+
+Requests already made stay in place; they do no harm. The dates under Schedule
+are still worth checking, but read the results as a before-and-after on the
+reworked site, not as the comparison below.
+
 Planned 2026-10-12; requests from 2026-10-13 (the exact date is recorded under
 Baseline). With the URL graph clean since the 2026-09-30 deploy, the question is
 what Google now does with the pages it has been passing over. Two tests run side
