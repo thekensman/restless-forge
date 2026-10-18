@@ -6,13 +6,15 @@
  */
 
 import { TAX, CURRENT_TAX_YEAR } from "../../../../data/tax";
+import type { Allowance, TaxBracket } from "../../../../data/tax";
 
 // ─── Types ───────────────────────────────────────────────────
 
 export interface WageInputs {
   annualGrossSalary: number;
   filingStatus: "single" | "mfj";
-  stateTaxRate: number;
+  /** "none" or a state id from STATES. */
+  stateId: string;
 
   // Hidden money costs
   dailyCommuteCost: number;
@@ -95,7 +97,7 @@ export interface DecisionResult {
 export interface JobInputs {
   label: string;
   annualSalary: number;
-  stateTaxRate: number;
+  stateId: string;
   dailyCommuteCost: number;
   dailyCommuteMinutes: number;
   monthlyClothing: number;
@@ -136,19 +138,10 @@ const STANDARD_DEDUCTION_MFJ = TAX.standardDeductionMfj;
 
 // ─── Tax Calculations ────────────────────────────────────────
 
-export function calcFederalIncomeTax(
-  grossIncome: number,
-  filingStatus: "single" | "mfj"
-): number {
-  const brackets =
-    filingStatus === "mfj" ? FEDERAL_BRACKETS_MFJ : FEDERAL_BRACKETS_SINGLE;
-  const deduction =
-    filingStatus === "mfj" ? STANDARD_DEDUCTION_MFJ : STANDARD_DEDUCTION_SINGLE;
-
-  const taxableIncome = Math.max(0, grossIncome - deduction);
-
+/** Tax on `taxable` under marginal brackets (each limit is an upper bound). */
+export function taxFromBrackets(taxable: number, brackets: TaxBracket[]): number {
   let tax = 0;
-  let remaining = taxableIncome;
+  let remaining = Math.max(0, taxable);
   let prevLimit = 0;
 
   for (const bracket of brackets) {
@@ -160,12 +153,70 @@ export function calcFederalIncomeTax(
     if (remaining <= 0) break;
   }
 
+  return tax;
+}
+
+export function calcFederalIncomeTax(
+  grossIncome: number,
+  filingStatus: "single" | "mfj"
+): number {
+  const brackets =
+    filingStatus === "mfj" ? FEDERAL_BRACKETS_MFJ : FEDERAL_BRACKETS_SINGLE;
+  const deduction =
+    filingStatus === "mfj" ? STANDARD_DEDUCTION_MFJ : STANDARD_DEDUCTION_SINGLE;
+
+  const tax = taxFromBrackets(grossIncome - deduction, brackets);
   return Math.round(tax * 100) / 100;
 }
 
-export function calcStateTax(grossIncome: number, rate: number): number {
-  if (rate <= 0 || grossIncome <= 0) return 0;
-  return Math.round(grossIncome * rate * 100) / 100;
+/** The value of a state deduction, exemption or credit at this income. */
+export function allowanceAt(allowance: Allowance | undefined, income: number): number {
+  if (allowance === undefined) return 0;
+  if (typeof allowance === "number") return allowance;
+
+  let amount = allowance.amount;
+  for (const step of allowance.steps ?? []) {
+    if (income > step.over) amount = step.amount;
+  }
+  const phaseOut = allowance.phaseOut;
+  if (phaseOut && income > phaseOut.start) {
+    const reduced = amount - (income - phaseOut.start) * phaseOut.rate;
+    amount = Math.max(phaseOut.floor ?? 0, reduced);
+  }
+  return amount;
+}
+
+/**
+ * State income tax on wages: gross minus the standard deduction and
+ * exemption, through the state's brackets, minus any exemption credit.
+ * Phase-outs are measured on gross income, which stands in for AGI.
+ */
+export function calcStateTax(
+  grossIncome: number,
+  stateId: string,
+  filingStatus: "single" | "mfj"
+): number {
+  const state = TAX.states.find((s) => s.id === stateId);
+  if (!state || grossIncome <= 0) return 0;
+  const brackets = state.brackets[filingStatus];
+  if (brackets.length === 0) return 0;
+
+  const taxable = Math.max(
+    0,
+    grossIncome -
+      allowanceAt(state.standardDeduction?.[filingStatus], grossIncome) -
+      allowanceAt(state.exemption?.[filingStatus], grossIncome)
+  );
+
+  const high = state.highIncome;
+  let tax = taxFromBrackets(
+    taxable,
+    high && taxable > high.over ? high.brackets : brackets
+  );
+  if (state.addedTax && taxable > state.addedTax.over) tax += state.addedTax.amount;
+  tax -= allowanceAt(state.exemptionCredit?.[filingStatus], grossIncome);
+
+  return Math.round(Math.max(0, tax) * 100) / 100;
 }
 
 export function calcFICA(grossIncome: number): number {
@@ -190,7 +241,7 @@ export function calculateRealWage(inputs: WageInputs): WageResult {
   const {
     annualGrossSalary,
     filingStatus,
-    stateTaxRate,
+    stateId,
     dailyCommuteCost,
     monthlyClothing,
     dailyMealCost,
@@ -212,7 +263,7 @@ export function calculateRealWage(inputs: WageInputs): WageResult {
   // Step 1: Annual take-home pay
   const grossAnnual = annualGrossSalary;
   const federalTax = calcFederalIncomeTax(grossAnnual, filingStatus);
-  const stateTax = calcStateTax(grossAnnual, stateTaxRate);
+  const stateTax = calcStateTax(grossAnnual, stateId, filingStatus);
   const ficaTax = calcFICA(grossAnnual);
   const totalTax = federalTax + stateTax + ficaTax;
   const annualTakeHome = grossAnnual - totalTax;
@@ -384,7 +435,7 @@ export function compareJobs(
   const toWageInputs = (job: JobInputs): WageInputs => ({
     annualGrossSalary: job.annualSalary,
     filingStatus,
-    stateTaxRate: job.stateTaxRate,
+    stateId: job.stateId,
     dailyCommuteCost: job.dailyCommuteCost,
     monthlyClothing: job.monthlyClothing,
     dailyMealCost: job.dailyMealCost,
@@ -613,11 +664,10 @@ export const DECISION_PRESETS: DecisionPreset[] = [
   { id: "refi",     icon: "🏦", label: "Refinance (broker)",   hours: 20,   cost: 500,  defaultEnjoyment: "avoid",   defaultFrequency: "one-time" },
 ];
 
-// ─── State Tax Rates ─────────────────────────────────────────
+// ─── States ──────────────────────────────────────────────────
 
-// Lives in data/tax.ts; re-exported to keep this engine's
-// public API unchanged.
-export const STATE_TAX_RATES: { id: string; name: string; rate: number }[] = TAX.stateRates;
+// The state select lists these after a "No state tax" option.
+export const STATES: { id: string; name: string }[] = TAX.states.map(({ id, name }) => ({ id, name }));
 
 // ─── Tax Tooltips ────────────────────────────────────────────
 
@@ -630,7 +680,9 @@ export function taxTooltips(): { federal: string; state: string; fica: string } 
   const pct = (rate: number): string => `${+(rate * 100).toFixed(2)}%`;
   return {
     federal: `Estimated using ${TAX_YEAR} IRS brackets and your filing status, with the standard deduction.`,
-    state: "One flat rate per state, applied to the whole salary. States that tax in brackets usually charge less than this.",
+    state:
+      `Estimated using each state's ${TAX_YEAR} brackets, standard deduction and personal exemption. ` +
+      "Local income taxes and most credits are left out.",
     fica:
       `Employee share: ${pct(TAX.ficaSocialSecurityRate)} Social Security on wages up to ` +
       `${fmtCurrency(TAX.ssWageBase)}, plus ${pct(TAX.ficaMedicareRate)} Medicare and ` +

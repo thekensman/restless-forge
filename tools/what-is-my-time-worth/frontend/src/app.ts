@@ -12,7 +12,7 @@ import {
   normalizeToMonthly,
   compareJobs,
   taxTooltips,
-  STATE_TAX_RATES,
+  STATES,
   DECISION_PRESETS,
   FREQUENCY_LABELS,
   fmtCurrency,
@@ -64,13 +64,10 @@ function populateStates(): void {
     "#w-state, #ja-state, #jb-state"
   );
   selects.forEach((sel) => {
-    STATE_TAX_RATES.forEach((state) => {
+    [{ id: "none", name: "No state tax" }, ...STATES].forEach((state) => {
       const opt = document.createElement("option");
       opt.value = state.id;
-      opt.textContent =
-        state.rate > 0
-          ? `${state.name} (${(state.rate * 100).toFixed(1)}%)`
-          : state.name;
+      opt.textContent = state.name;
       if (state.id === "IL") opt.selected = true;
       sel.appendChild(opt);
     });
@@ -171,13 +168,10 @@ function updateDecisionWageHint(): void {
 // ─── Tab 1: Real Wage ────────────────────────────────────────
 
 function updateWage(): void {
-  const stateId = strVal("w-state");
-  const stateRate = STATE_TAX_RATES.find((s) => s.id === stateId)?.rate ?? 0;
-
   const inputs: WageInputs = {
     annualGrossSalary: numVal("w-salary"),
     filingStatus: strVal("w-filing") as "single" | "mfj",
-    stateTaxRate: stateRate,
+    stateId: strVal("w-state"),
     dailyCommuteCost: numVal("w-commute-cost"),
     monthlyClothing: numVal("w-clothing"),
     dailyMealCost: numVal("w-meals"),
@@ -537,12 +531,10 @@ function initAddToQueue(): void {
 // ─── Tab 3: Compare ──────────────────────────────────────────
 
 function readJobInputs(prefix: string): JobInputs {
-  const stateId = strVal(`${prefix}-state`);
-  const stateRate = STATE_TAX_RATES.find((s) => s.id === stateId)?.rate ?? 0;
   return {
     label: strVal(`${prefix}-label`),
     annualSalary: numVal(`${prefix}-salary`),
-    stateTaxRate: stateRate,
+    stateId: strVal(`${prefix}-state`),
     dailyCommuteCost: numVal(`${prefix}-commute-cost`),
     dailyCommuteMinutes: numVal(`${prefix}-commute-time`),
     monthlyClothing: numVal(`${prefix}-clothing`),
