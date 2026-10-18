@@ -1,216 +1,90 @@
-# State income tax brackets for What Is My Time Worth: to do
+# State income tax in What Is My Time Worth
 
-**Status: not started.** Planned for its own session. The data source,
-`taxfoundation.org`, is blocked by the cloud environment's network policy, and an
-allowlist change only reaches sessions started after it. Written 2026-10-14
-during the AdSense-readiness work.
+**Status: done (2026-10-18).** This replaced a flat rate per state (one bracket
+rate applied to the whole salary, which overstated tax wherever a state taxes in
+brackets: California, single, $105,000 came to $9,765 instead of $5,520). The
+yearly refresh that keeps it current is step 1 of the routine prompt in
+`docs/automation.md`.
 
-Two jobs: **TODO 1** adds the initial 2026 numbers and the model that uses
-them; **TODO 2** puts state brackets into the yearly data refresh. The last
-section lists the copy that has to change when they land.
+## The model
 
-## Why
+`data/tax.ts` holds `states` in each year's entry: the 50 states and DC. Each
+entry has:
 
-`calcStateTax(gross, rate)` in
-`tools/what-is-my-time-worth/frontend/src/engine.ts` returns `gross × rate`. The
-rate comes from `TAX.stateRates` in `data/tax.ts` (the 2026 entry): one number
-per state, applied to the whole salary, with no standard deduction and no
-exemption.
+- `brackets` for single and married filing jointly, on state taxable income;
+- `standardDeduction` and `exemption`, taken off income;
+- `exemptionCredit`, taken off the tax (California, Oregon, Utah's 6% credit
+  and others);
+- for Arkansas, `highIncome`: a second table that applies to all taxable
+  income over $94,700;
+- for Ohio, `addedTax`: the $332 added once taxable income passes $26,050.
 
-Those numbers are bracket rates, not effective rates. California is stored as
-9.3%, New York 6.85%, Oregon 9%, Minnesota 7.85%, Hawaii 7.5%, each a middle or
-upper bracket of that state's schedule. Applied to the whole salary, they
-overstate state tax for most salaries wherever a state taxes in brackets.
+A deduction, exemption or credit is either a number or an `Allowance` with a
+linear `phaseOut` (start, rate, floor) and/or `steps`. `calcStateTax(gross,
+stateId, filingStatus)` in the engine measures phase-outs on gross income, which
+stands in for AGI.
 
-Measured example, California, single, $105,000:
+The written plan left phase-outs out. They went in because several bite at
+ordinary salaries. On $65,000 single, leaving them out would have understated
+tax by about $355 in South Carolina, $608 in Utah and $290 in Wisconsin. In
+Connecticut, a $15,000 exemption would have applied to people who have none
+left above $45,000.
 
-| | State tax |
-|---|---|
-| Calculator today: 9.3% × $105,000 | $9,765 |
-| California's 2025 schedule: $105,000 − $5,706 standard deduction = $99,294 taxable; 1%, 2%, 4%, 6% and 8% bands up to $72,724, 9.3% above; $5,673, minus the $153 personal exemption credit | about $5,520 |
+Left out, and said so in the copy:
 
-The calculator overstates this case by about $4,200 a year, roughly $1.70 an hour
-of real wage at the calculator's default 2,532 work hours. 2026 indexing moves
-the real figure slightly. Flat-tax states (Illinois, Pennsylvania, Colorado and
-others) are already close, apart from their missing exemptions and deductions.
+- local income taxes (New York City, Yonkers, Maryland counties, Ohio and
+  Pennsylvania municipalities, and others);
+- credits other than the personal exemption credit;
+- New York's and Connecticut's benefit recapture, and Connecticut's phase-out of
+  its 2% bracket;
+- deducting federal tax from state income (Alabama, Missouri, Oregon and
+  others);
+- Vermont's 3%-of-AGI minimum above $150,000, and Arkansas's bracket
+  adjustment between $94,701 and $97,600;
+- itemized deductions, dependents, and age or blindness additions.
 
-Other facts for the next session:
+## How the 2026 numbers were settled
 
-- Only What Is My Time Worth reads state tax data: its engine, `app.ts` and
-  `__tests__/engine.test.ts`. The header of `data/tax.ts` notes two hidden
-  finance tools that will migrate to it later.
-- `data/tax.ts` holds only the 2026 year, so changing the shape of its state data
-  rewrites no history.
-- The state list has 51 entries: "No state tax" plus the 50 states. DC is missing,
-  so people working in DC have no correct choice.
-- Until this lands, the site says what the calculator does: the FAQ, the About
-  page, the global FAQ, the state tooltip and the job-offers article all describe
-  one flat rate per state that usually overstates.
+Sources:
 
-## TODO 1: add the initial numbers (2026)
+- Tax Foundation, "State Individual Income Tax Rates and Brackets, 2026"
+  (the `.xlsx` linked from the page, published February 2026);
+- PolicyEngine US 2.49.4, its YAML parameters read without running the package;
+- the state's own statute or revenue publication wherever the two disagreed.
 
-### Before starting the session
+Only statutory numbers were copied, never code or text.
 
-Add `taxfoundation.org` under Allowed domains in the environment's Network
-access settings, then start a new session. `pypi.org` and
-`files.pythonhosted.org` are already allowed, which the cross-check needs.
+| State | Field | Tax Foundation | PolicyEngine | Used | Settled by |
+|---|---|---|---|---|---|
+| AR | rates | 2%, 3.9% | 0% to 3.7%, plus a high-income table | PolicyEngine | Act 1 of 2026 (HB 1001, 1st Extraordinary Session) |
+| AZ | standard deduction | $8,350 / $16,700 | $16,100 / $32,200 | PolicyEngine | Laws 2026, ch. 140 (A.R.S. 43-1041, indexed like the federal amount) |
+| CA | standard deduction | $5,540 / $11,080 | $5,706 / $11,412 | PolicyEngine | FTB's 2026 Form 540-ES instructions use the 2025 amounts |
+| DC | standard deduction | $16,100 / $32,200 | $15,000 / $30,000 | PolicyEngine | D.C. Act 26-214: DC's own amount, indexed from 2025; 2026 index not yet published |
+| GA | rate, standard deduction | 5.19%, $12,000 / $24,000 | 4.99%, $15,000 / $30,000 | PolicyEngine | HB 463 (2026) |
+| HI | standard deduction | $4,400 / $8,800 | $8,000 / $16,000 | PolicyEngine | HRS 235-2.4(a)(2)(F), as enacted by HB 2404 (2024) |
+| IL | exemption | $2,925 | $2,850 (2025) | Tax Foundation | IDOR Booklet IL-700-T 2026 |
+| LA | standard deduction | $12,875 / $25,750 | $12,838 / $25,676 | PolicyEngine | LDR Revenue Information Bulletin 26-019 |
+| ME | standard deduction | $8,350 / $16,700 | $15,700 / $31,400 | PolicyEngine | 36 M.R.S. 5124-C(1-C) |
+| ME | brackets | $27,399 / $64,849 | $27,400 / $64,850 | PolicyEngine | Not settled: Maine's 2026 rate schedule refuses automated fetches. $1 apart. |
+| ME | exemption | $5,300 | $5,150 (2025) | $5,150 | Not settled; the published 2025 figure is used |
+| ND | brackets | 2025 widths | $49,575 / $250,400 (single) | PolicyEngine | 2026 Form ND-1ES schedules |
+| OH | tax above $26,050 | 2.75% | $332 + 2.75% | PolicyEngine | ORC 5747.02(A)(3)(c) |
+| OR | exemption credit | $256 | $256 (2025) | $263 | 2026 withholding formulas, 150-206-436 (allowance amount) |
+| OR | standard deduction | $2,910 / $5,820 | $2,835 / $5,670 (2025) | Tax Foundation | 2026 withholding formulas, 150-206-436 |
+| SC | rates, deduction | 0%, 3%, 6%; federal deduction | 1.99%, 5.21%; SC Income Adjusted Deduction | PolicyEngine | H.4216 (Act 110 of 2026), first applies to 2026 |
+| UT | rate | 4.5% | 4.45% | PolicyEngine | SB 60 (2026), retrospective to January 1, 2026 |
+| WV | rates | 2.22% to 4.82% | 2.11% to 4.58% | PolicyEngine | W. Va. Code 11-21-4j |
 
-### Get the numbers
+These still use the latest published year, because the 2026 figure was not
+out on 2026-10-18:
 
-1. From Tax Foundation's "State Individual Income Tax Rates and Brackets, 2026"
-   (<https://taxfoundation.org/data/all/state/state-income-tax-rates-2026/>),
-   take for every state and DC:
-   - single and married-filing-jointly brackets (rate and threshold);
-   - the standard deduction for single filers and couples;
-   - the personal exemption for single filers and couples, noting whether it is
-     a deduction from income or a credit against tax;
-   - the footnotes.
-   If the table is not in the page's HTML, use the data file the page links on
-   the same domain.
-2. Cross-check every value against PolicyEngine US (`policyengine-us` on PyPI;
-   2.41.2 was current on 2026-10-13). Download the wheel into its own empty
-   directory, unzip it, and read the YAML parameter files under
-   `policyengine_us/parameters/gov/states/<state>/tax/income/` with
-   `python3 -I`. Never import or run the package. Use the values dated 2026, and
-   note any that PolicyEngine projects (uprates) rather than takes from a
-   published schedule.
-3. Settle every mismatch from the state revenue department's own 2026
-   schedule. Never guess: a value that can't be settled stays out, and the PR
-   says so.
-4. Put the mismatch table in the PR body. Columns: state, field, Tax Foundation,
-   PolicyEngine, resolution, source.
+- California: brackets, deduction and credit (2025);
+- Idaho: bracket threshold (2025);
+- Massachusetts: surtax threshold (2025);
+- Vermont: brackets, deduction and exemption (2025);
+- DC: standard deduction (2025 base);
+- Utah: credit phase-out start (2025);
+- Maine: standard deduction phase-out start and exemption (2025).
 
-The repo copies statutory numbers only, never code or text. The `source` field
-cites Tax Foundation and mentions the PolicyEngine cross-check.
-
-### Data model (`data/tax.ts`)
-
-```ts
-export interface StateIncomeTax {
-  id: string;   // "CA"; include "DC"
-  name: string;
-  /** Brackets on state taxable income. Empty: the state does not tax wages. */
-  bracketsSingle: TaxBracket[]; // limit = upper bound; the top bracket is Infinity
-  bracketsMfj: TaxBracket[];
-  /** 0 when the state has none; the federal amount when the state uses it. */
-  standardDeductionSingle: number;
-  standardDeductionMfj: number;
-  /** Personal exemption taken off income. */
-  exemptionSingle: number;
-  exemptionMfj: number;
-  /** Personal exemption taken off the tax instead (California, for one). */
-  exemptionCreditSingle?: number;
-  exemptionCreditMfj?: number;
-}
-```
-
-- Replace the 2026 `stateRates` with `states` (the 50 states and DC) and delete
-  `StateTaxRate`.
-- Massachusetts' 4% surtax becomes its top bracket. A state that starts from
-  federal taxable income stores the 2026 federal standard deduction explicitly.
-- Left out, and said so in the copy:
-  - local income taxes (New York City, Yonkers, Maryland counties, cities in
-    Ohio, Pennsylvania and Michigan, and others);
-  - credits other than the personal exemption credit;
-  - phase-outs and benefit recapture;
-  - deducting federal tax from state income (Alabama, Missouri and others).
-
-### Engine (`tools/what-is-my-time-worth/frontend/src/engine.ts`)
-
-- Move the bracket loop out of `calcFederalIncomeTax` into
-  `taxFromBrackets(taxable, brackets)`, and use it for federal and state tax.
-- `calcStateTax(gross, state, filingStatus)`:
-  1. Subtract the standard deduction and the exemption from gross, floored at 0.
-  2. Apply `taxFromBrackets`.
-  3. Subtract any exemption credit, floor at 0 and round to cents.
-- In `WageInputs` and `JobInputs`, `stateTaxRate: number` becomes
-  `stateId: string` (`"none"` or a state id). Export `STATES` (`{ id, name }`)
-  in place of `STATE_TAX_RATES`.
-- `app.ts` reads the state select in two places, the wage calculator and the
-  job comparison. Both pass `stateId`. The selects list `STATES` after a "No
-  state tax" option, and the default stays Illinois.
-- `taxTooltips()` in `engine.ts` builds the tooltip text at runtime. Its state
-  line changes from the flat-rate wording to brackets, the standard deduction
-  and what is left out.
-
-### Tests (`tools/what-is-my-time-worth/frontend/src/__tests__/engine.test.ts`)
-
-- Hand-worked cases from the source table, each with its arithmetic in a
-  comment:
-  - California, single and married filing jointly, $105,000 (exemption credit);
-  - New York, single, $85,000;
-  - Oregon, single, $60,000;
-  - Minnesota, single, $75,000;
-  - New Jersey, single, $90,000 (no standard deduction, $1,000 exemption);
-  - Pennsylvania, $65,000 (flat, no deduction);
-  - Illinois, single, $65,000 (flat, with exemption);
-  - Massachusetts, $1.2 million (surtax bracket);
-  - Texas and `"none"` return 0.
-- Data integrity:
-  - 51 unique ids;
-  - brackets ascending and ending at `Infinity`;
-  - every rate at least 0 and below 0.15;
-  - married-filing-jointly thresholds at or above single ones;
-  - AK, FL, NV, NH, SD, TN, TX, WA and WY have empty brackets.
-- Replace the flat-rate `calcStateTax` and `STATE_TAX_RATES` tests, and move
-  the `calculateRealWage` and `compareJobs` fixtures to `stateId`.
-
-## TODO 2: put state brackets in the yearly job
-
-The annual refresh routine is described in `docs/automation.md` and runs from
-GitHub Actions on January 16.
-
-- **`docs/automation.md`, data matrix:** replace the "State income tax rates
-  (sanity pass)" row with:
-
-  ```
-  | State income tax brackets, standard deductions, exemptions | same (`states` in each year's entry) | Tax Foundation "State Individual Income Tax Rates and Brackets" (~February), cross-checked against PolicyEngine US |
-  ```
-
-- **`docs/automation.md`, routine prompt step 1:** replace "Sanity-pass
-  stateRates for well-sourced changes only." with:
-
-  ```
-  Copy every state's entry into the new year, then update its brackets,
-  standard deductions and exemptions from Tax Foundation's table for the new
-  year, cross-checking each value against PolicyEngine US (read its YAML
-  parameters; never run the package) and settling mismatches from the state's
-  revenue department. Tax Foundation usually publishes in February, after this
-  job runs: if the new table is not out yet, carry last year's state figures
-  forward, say so in the PR, and list the states to revisit in the "Annual data
-  refresh blocked" issue.
-  ```
-
-- **The routine's environment** must allow `taxfoundation.org`. PyPI is already
-  allowed.
-- **`scripts/maintenance/DEPENDENCIES.md`:**
-  - Matrix: replace the WIMTW "State income tax rates" row with:
-
-    ```
-    | WIMTW (via `data/tax.ts`) | State brackets, standard deductions, exemptions | Annually | **Jan 1** changes; Tax Foundation table ~February | Medium: wrong state tax |
-    ```
-  - Section "4. State Tax Rates": the update target becomes `states`, with the
-    cross-check.
-- **The freshness check** greps `CURRENT_TAX_YEAR` and needs no change.
-
-## Copy to update when the brackets land
-
-- `tools/what-is-my-time-worth/frontend/src/faq/index.html`, "How accurate are
-  the tax estimates?". Update both the visible answer and the FAQPage JSON-LD:
-  brackets, deduction and exemption per state, and what is left out.
-- The tax sentence in `tools/what-is-my-time-worth/frontend/src/about/index.html`
-  and `site/faq.html`.
-- The "Tax estimates are approximations" note in
-  `tools/what-is-my-time-worth/frontend/src/index.html`.
-- `articles/comparing-job-offers-across-states/index.md`: the state-tax section
-  explains the flat approximation. Rewrite it from the new engine's California
-  and Texas numbers and recheck its conclusion.
-- Worked examples computed on the flat model. Recompute them, since Illinois'
-  personal exemption will move them slightly:
-  - `articles/what-your-real-hourly-wage-subtracts/index.md` ($65,000 comes to
-    $17.83 an hour);
-  - `articles/life-energy-and-ymoyl/index.md` ($75,000 comes to $20.47).
-- The FAQ claim that "a remote job paying $15,000 less can have a higher real
-  hourly wage" held on the flat model ($23.10 against $21.76). Recheck it.
-- Run `npm run sync-content`, then bump the "Updated" line and `dateModified`
-  on every edited article.
+Each state's comment in `data/tax.ts` says the same. The January refresh should
+update them.

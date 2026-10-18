@@ -277,7 +277,7 @@ Not covered: real phones, and camera permissions on iOS Safari.
 | F15 | SandPath's default trace mode, Outline, lost most of every image. A ring came back as one speck, drawn as a triangle on the table, and a star made Convert fail. Centerline returned no paths at all for line drawings. | Confirmed | Fixed, with tests that fail if any part is reverted (7caa608) |
 | F16 | SandPath's Convert crashed ("Maximum call stack size exceeded") at the app's own maximum-detail settings on every test photo. | Confirmed | Fixed (7caa608) |
 | F17 | Five statements in SandPath's guides described behaviour the tool doesn't have, among them a preview that shows travel moves. TIFF was listed as supported, but only Safari can open it. | Confirmed | Fixed, with clearer error messages (f4e5782) |
-| F18 | What Is My Time Worth had stale tax-year copy ("2024/2025", and the 2025 wage base in a tooltip), false claims in the job-offers article, two unsourced statistics, and a privacy answer that denied the site has a backend. State tax is one flat bracket rate per state, which overstates it where a state taxes in brackets: California, single, $105,000 gives $9,765 against about $5,520. | Confirmed | Copy fixed and tooltips built from the tax data (0e1a36b). Brackets planned in `docs/state-income-tax-brackets.md` (d4d8e19). |
+| F18 | What Is My Time Worth had stale tax-year copy ("2024/2025", and the 2025 wage base in a tooltip), false claims in the job-offers article, two unsourced statistics, and a privacy answer that denied the site has a backend. State tax is one flat bracket rate per state, which overstates it where a state taxes in brackets: California, single, $105,000 gives $9,765 against about $5,520. | Confirmed | Copy fixed and tooltips built from the tax data (0e1a36b). State tax now uses each state's 2026 brackets, deductions and exemptions; record in `docs/state-income-tax-brackets.md`. |
 | F19 | TattooSafe's pricing page says it documents the estimator exactly but missed three of its rules. The About page and sizing article described a silhouette that changes with height, which it doesn't, and the sizing article opened with an unsupported statistic about tattoo regret. | Confirmed | Fixed (1dafbbd) |
 | F20 | All four tool home pages carried FAQ markup for questions they don't show, and the FAQ pages' markup had drifted from their visible answers. | Confirmed | Fixed; `check-links` now fails on any mismatch (9d4f0aa) |
 | F21 | The site says "open source" in about ten places, and the Terms say the code is on GitHub "under their respective licenses", but the repository has no LICENSE file. | Confirmed | Fixed: `LICENSE.md` puts the code under MIT and keeps the written content, images and branding all rights reserved. The Terms and the global FAQ (visible answer and JSON-LD) now say so. |
@@ -294,7 +294,6 @@ small site with little outside history (F8).
 
 ### Follow-ups, not in this PR
 
-- State income tax brackets: `docs/state-income-tax-brackets.md`.
 - SandPath: a tracer that follows one-pixel lines instead of tracing around
   them, since each traced line is drawn out and back today; and a preview that
   shows travel moves.

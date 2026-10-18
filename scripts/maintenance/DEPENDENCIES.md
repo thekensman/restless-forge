@@ -14,7 +14,7 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 | Tool | Data Source | Update Frequency | When to Run | Risk if Stale |
 |------|-----------|-----------------|-------------|---------------|
 | WIMTW (via `data/tax.ts`) | Federal tax brackets | Annually | **Jan 1** (IRS publishes Oct/Nov for next year) | Medium — wrong tax estimates |
-| WIMTW | State income tax rates | Annually | **Jan 1** | Low — simplified flat rates |
+| WIMTW (via `data/tax.ts`) | State brackets, standard deductions, exemptions | Annually | **Jan 1** changes; Tax Foundation table ~February; legislated changes through spring | Medium: wrong state tax |
 | WIMTW | FICA rate | Rarely (last changed 2013) | **Jan 1** (verify) | Low |
 | WIMTW | SS wage base | Annually | **Jan 1** | Very low — only affects high earners |
 | Is My Raise Real | CPI annual average | Annually | **Mid-January** (BLS publishes ~Jan 11) | High — core functionality |
@@ -59,13 +59,15 @@ client code, zero points of failure for users. The cost is periodic maintenance.
 - **Updates:** `data/mileage.ts` → append a `MILEAGE_RATES` entry and
   bump `CURRENT_MILEAGE_YEAR` (side-hustle-reality imports it).
 
-### 4. State Tax Rates
-- **Source:** Tax Foundation annual compilation
-- **No clean API** — scraped from Tax Foundation or manually entered
-- **Updates:** `data/tax.ts` → `stateRates` in the current
-  year's entry (sanity pass; same file as the federal data).
-- **Planned:** real brackets, deductions and exemptions per state, and the
-  yearly job that keeps them current: `docs/state-income-tax-brackets.md`.
+### 4. State Income Tax
+- **Source:** Tax Foundation's annual table (an `.xlsx` linked from the
+  page), cross-checked against PolicyEngine US's YAML parameters; any
+  disagreement is settled from the state's statute or revenue department.
+- **No clean API**: the spreadsheet is parsed by hand or script each year.
+- **Updates:** `data/tax.ts` → `states` in the current year's entry
+  (brackets, standard deduction, exemption, exemption credit and their
+  phase-outs; Arkansas's high-income table; Ohio's added tax). Procedure:
+  step 1 of the routine prompt in `docs/automation.md`.
 
 ### 5. FICA / SE Tax Rates
 - **Source:** SSA.gov (statutory — rarely change)
