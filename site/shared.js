@@ -37,6 +37,7 @@
     email: 'mailto:' + RF_EMAIL,
     githubRepo: RF_GITHUB_REPO,
     githubIssues: RF_GITHUB_REPO + '/issues',
+    githubLicense: RF_GITHUB_REPO + '/blob/main/LICENSE.md',
     // Tools that live in their own repos (pre-monorepo); everything else
     // shares the restless-forge repo above.
     wimtwRepo: 'https://github.com/thekensman/what-is-my-time-worth',
