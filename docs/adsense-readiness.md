@@ -236,7 +236,7 @@ against its code turned up. The original findings above are left as written.
 | F4 | Fixed in the articles. The HoloPath FAQ had the same contradiction ("Why is the output a GIF and not a video?") and is fixed too. | 3793e43, 9d4f0aa |
 | F5 | Fixed: the homepage and essays index in one commit, `/articles/` with the HoloPath rework. | f42e06f, 3793e43 |
 | F6 | Fixed. | f42e06f |
-| F7 | Open: waiting on the Magna-Tiles photos and post text. | |
+| F7 | Fixed by link, not by copy. The origin story already lives on Substack ("Hologram STEM", 2026-03-06, with the build photos), and republishing it would put the same text on two sites. The HoloPath About page now tells it first-hand in one paragraph, under the author's name, and links the post; the DIY pyramid article already linked it. | |
 | F8 | Context. Recheck after the recrawl. | |
 | F9 | Kept by owner decision; the browser checks below pass. | |
 | F10 | Fixed in the FAQ, and in the life-energy article, which repeated it. | f42e06f, 0e1a36b |
@@ -280,7 +280,7 @@ Not covered: real phones, and camera permissions on iOS Safari.
 | F18 | What Is My Time Worth had stale tax-year copy ("2024/2025", and the 2025 wage base in a tooltip), false claims in the job-offers article, two unsourced statistics, and a privacy answer that denied the site has a backend. State tax is one flat bracket rate per state, which overstates it where a state taxes in brackets: California, single, $105,000 gives $9,765 against about $5,520. | Confirmed | Copy fixed and tooltips built from the tax data (0e1a36b). Brackets planned in `docs/state-income-tax-brackets.md` (d4d8e19). |
 | F19 | TattooSafe's pricing page says it documents the estimator exactly but missed three of its rules. The About page and sizing article described a silhouette that changes with height, which it doesn't, and the sizing article opened with an unsupported statistic about tattoo regret. | Confirmed | Fixed (1dafbbd) |
 | F20 | All four tool home pages carried FAQ markup for questions they don't show, and the FAQ pages' markup had drifted from their visible answers. | Confirmed | Fixed; `check-links` now fails on any mismatch (9d4f0aa) |
-| F21 | The site says "open source" in about ten places, and the Terms say the code is on GitHub "under their respective licenses", but the repository has no LICENSE file. | Confirmed | Open: owner decision |
+| F21 | The site says "open source" in about ten places, and the Terms say the code is on GitHub "under their respective licenses", but the repository has no LICENSE file. | Confirmed | Fixed: `LICENSE.md` puts the code under MIT and keeps the written content, images and branding all rights reserved. The Terms and the global FAQ (visible answer and JSON-LD) now say so. |
 | F22 | Code blocks made two pages scroll sideways at 360 px. | Confirmed | Fixed (ecbd2b1) |
 
 ### Odds, revisited
@@ -301,5 +301,3 @@ small site with little outside history (F8).
 - What Is My Time Worth: local income taxes and credits stay outside the model.
 - PlotPath (unlaunched) spreads points into `Math.min(...)` the way SandPath
   did. Fix it before launch.
-- F21: add a license or reword the "open source" claims.
-- F7: the Magna-Tiles origin article and the HoloPath About paragraph.
