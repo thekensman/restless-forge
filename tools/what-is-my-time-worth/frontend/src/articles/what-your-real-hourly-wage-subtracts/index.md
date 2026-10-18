@@ -84,7 +84,7 @@ hours the job consumes:
 
 Both halves move against you compared with the naive version. The numerator
 shrinks; the denominator grows. With 2026 tax figures and the values the
-calculator starts with, a $65,000 salary comes to $17.83 an hour, against $31.25
+calculator starts with, a $65,000 salary comes to $17.88 an hour, against $31.25
 by the shortcut: 43% lower. A longer commute or childcare costs push it further
 down.
 

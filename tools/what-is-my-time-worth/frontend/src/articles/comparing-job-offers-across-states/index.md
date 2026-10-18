@@ -11,16 +11,18 @@ State income tax ranges from zero — Texas, Florida, Washington, Nevada, and a
 handful of others — to over 13% at California's top bracket. On a six-figure
 salary, moving between the extremes is worth more than most annual raises.
 
-California taxes income in brackets. For a single filer on $105,000, its 2025
-schedule takes about $5,500: the 9.3% rate applies only to taxable income above
-roughly $72,700, and bands of 1% to 8% cover the rest. On $95,000 in Texas, state
-tax is zero. Before anything else is counted, more than half of the $10,000 gap
-is gone.
+California taxes income in brackets. For a single filer on $105,000, the
+calculator takes off California's $5,706 standard deduction, runs the remaining
+$99,294 through the brackets and subtracts the $153 exemption credit: $5,520. The
+9.3% rate applies only to taxable income above $72,724, and bands of 1% to 8%
+cover the rest, so the bill is about 5.3% of salary, not 9.3%. On $95,000 in
+Texas, state tax is zero. Before anything else is counted, more than half of the
+$10,000 gap is gone.
 
-The calculator simplifies this step. It applies one rate per state to the whole
-salary, 9.3% for California, which comes to $9,765 on the same income and
-overstates the California side of this comparison by about $4,200. Read a close
-result between a state with brackets and one without in that light.
+The calculator applies each state's own brackets, standard deduction and
+personal exemption in the same way. It leaves out local income taxes, which
+matter in a few places: New York City, Maryland's counties and many Ohio and
+Pennsylvania towns add a percent or more.
 
 This is the single most mechanical part of the comparison, which is why it is
 worth doing first: no estimation and no judgment, only published rates applied
