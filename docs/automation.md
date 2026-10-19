@@ -50,6 +50,29 @@ prior-year constants), and opens **one PR**:
 `claude/annual-data-refresh-<YEAR>`. You review and merge; the deploy
 workflow ships it.
 
+What the workflow gives the agent, and how it proves it finished:
+
+- **Tools.** `claude_args` passes `--allowedTools` for web fetch and
+  search and for the shell commands the routine needs: `curl`, `unzip`,
+  `mkdir`, `ls`, `python3`, `pdftotext`, `node`, `npm`, `npx`, `git`
+  and `gh`. Without it the action lets the agent read and edit files
+  but refuses every command, and still reports success. That is how the
+  July 2026 test run ended: green, 7 permission denials, no PR. Add any
+  command a new routine step needs to that list.
+- **Data libraries.** `openpyxl`, `pyyaml` (via `setup-python`) and
+  `poppler-utils` are installed before the agent starts, for the state
+  income tax step.
+- **Run report.** `display_report: true` writes what the agent did to the
+  run's summary page.
+- **Outcome check.** A last step fails the run unless it opened the
+  `claude/annual-data-refresh-<YEAR>` PR or an open "Annual data refresh
+  blocked" issue dated within the last day. A green run therefore means
+  one of the two exists.
+- **CI on the refresh PR.** A PR opened with the workflow's
+  `GITHUB_TOKEN` does not start other workflows, so the `CI` check will
+  not run on it by itself. The agent runs the affected test suites before
+  opening it; to run CI as well, push any commit to the branch.
+
 **Credentials (either one; OAuth takes precedence):** the workflow checks
 secrets in this order:
 
