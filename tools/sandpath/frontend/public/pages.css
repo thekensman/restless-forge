@@ -62,6 +62,11 @@ table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 15px;
 th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
 th { color: var(--sand); font-weight: 500; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
 td { color: var(--text); }
+/* A wide table scrolls inside its own box on phones instead of widening the page. */
+@media (max-width: 640px) {
+  table { display: block; overflow-x: auto; }
+  th, td { padding: 8px; }
+}
 .info-box { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 22px 0; }
 .info-box p:last-child { margin-bottom: 0; }
 .article__cta { margin-top: 36px; }
