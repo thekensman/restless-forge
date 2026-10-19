@@ -1,6 +1,6 @@
 name: Annual data refresh
 
-# Runs the consolidated annual data refresh (tax brackets, SS wage base,
+# Runs the consolidated annual data refresh (federal and state tax, SS wage base,
 # IRS mileage, CPI, subscription prices) as a Claude Code agent job and
 # opens ONE pull request with the updates. The canonical procedure lives
 # in docs/automation.md — this workflow just executes it, so there is a
@@ -63,9 +63,26 @@ jobs:
         with:
           node-version: 20
 
+      # The state income tax step (docs/automation.md, step 1) parses Tax
+      # Foundation's .xlsx with openpyxl, PolicyEngine's YAML with pyyaml,
+      # and state PDFs with pdftotext. setup-python installs into the
+      # interpreter's own site-packages, so `python3 -I` still finds them.
+      - uses: actions/setup-python@v5
+        if: steps.creds.outputs.mode != 'skip'
+        with:
+          python-version: "3.12"
+
+      - name: Install data tools
+        if: steps.creds.outputs.mode != 'skip'
+        run: |
+          python3 -m pip install --quiet openpyxl pyyaml
+          sudo apt-get install -y --no-install-recommends poppler-utils > /dev/null
+
       - name: Run the refresh agent
         if: steps.creds.outputs.mode != 'skip'
         uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -79,4 +96,31 @@ jobs:
             and open ONE pull request against main titled
             "Annual data refresh <YEAR>" from a branch named
             claude/annual-data-refresh-<YEAR>. Do not merge it yourself.
-          claude_args: "--max-turns 200"
+          # Without --allowedTools the agent may read and edit files but
+          # every shell command is refused: the July 2026 test run ended
+          # green with 7 permission denials and no PR. These are the
+          # commands the routine needs (downloads, parsing, tests, git, PR).
+          claude_args: >-
+            --max-turns 200
+            --allowedTools "WebFetch,WebSearch,Bash(curl:*),Bash(unzip:*),Bash(mkdir:*),Bash(ls:*),Bash(python3:*),Bash(pdftotext:*),Bash(node:*),Bash(npm:*),Bash(npx:*),Bash(git:*),Bash(gh:*)"
+          # Writes a summary of what the agent did to the run's summary page.
+          display_report: true
+
+      # The action reports success even when the agent was blocked. The
+      # routine always ends in exactly one of two outcomes, so require one.
+      - name: Require a refresh PR or a blocked issue
+        if: steps.creds.outputs.mode != 'skip'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          year=$(date -u +%Y)
+          since=$(date -u -d '-1 day' +%Y-%m-%dT%H:%M:%SZ)
+          # REST, not `gh pr list`/`gh issue list`: those use GraphQL.
+          prs=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=all&head=$GITHUB_REPOSITORY_OWNER:claude/annual-data-refresh-$year" --jq length)
+          issues=$(gh api "repos/$GITHUB_REPOSITORY/issues?state=open&since=$since&per_page=100" \
+            --jq "[.[] | select(.pull_request | not) | select(.title | startswith(\"Annual data refresh blocked\")) | select(.created_at >= \"$since\")] | length")
+          echo "Refresh PRs for $year: $prs; blocked issues opened since $since: $issues"
+          if [ "$prs" -eq 0 ] && [ "$issues" -eq 0 ]; then
+            echo "::error::The refresh agent finished without opening a PR or a blocked issue. Read the run report above."
+            exit 1
+          fi
