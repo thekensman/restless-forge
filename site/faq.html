@@ -30,7 +30,15 @@
         "name": "What is Restless Forge?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Restless Forge is a collection of free, open-source web tools built by Kenneth Cross. It includes a real hourly wage calculator and DIY-vs-hire decision engine, a hologram GIF generator that processes images, GIFs, and videos in the browser, a converter that turns images and SVGs into sand table patterns (.thr / .gcode), and a tattoo sizing, camera try-on, and pricing preview tool. All tools are privacy-first and run in your browser."
+          "text": "Restless Forge is a one-person workshop that builds free, open-source web tools: a real hourly wage calculator and DIY-vs-hire decision engine, a hologram GIF generator that processes images, GIFs, and videos in the browser, a converter that turns images and SVGs into sand table patterns (.thr / .gcode), and a tattoo sizing, camera try-on, and pricing preview tool — with many more in the forge. Each tool is designed to be useful, honest, and private."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do you build these tools?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Because I needed them and they didn't exist — or the existing options required sign-ups, subscriptions, or sending your data to someone else's server. I believe useful tools should be freely accessible."
         }
       },
       {
@@ -38,7 +46,15 @@
         "name": "Are the tools free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, all tools on Restless Forge are completely free to use with no sign-up required. The source code is open source on GitHub. Donations are optional and appreciated."
+          "text": "Yes, completely free. No accounts, no paywalls, no premium tiers. If you find the tools useful, donations through Ko-fi or Buy Me a Coffee are appreciated but never required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I use the time value calculator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open What Is My Time Worth? and enter your annual salary. Then optionally fill in your hidden costs (commute, clothing, meals) and hidden time costs (commute time, getting ready, decompression). The calculator shows your real hourly wage. Use Tab 2 for DIY-vs-hire decisions and Tab 3 to compare two jobs."
         }
       },
       {
@@ -46,7 +62,7 @@
         "name": "Is my data safe?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. All calculations and processing happen in your browser. No personal data, images, or files are sent to our servers, and Restless Forge itself sets no cookies. Ads are served by Google AdSense, which may use cookies — see our Privacy Policy."
+          "text": "Yes. All tools are frontend-only — calculations, image processing, and file conversion happen entirely in your browser. Your data is never sent to our servers, and Restless Forge itself sets no cookies. Ads are served by Google AdSense, which may use cookies — see our Privacy Policy for details."
         }
       },
       {
@@ -54,7 +70,47 @@
         "name": "What browser do I need?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Any modern browser with JavaScript enabled works: Chrome, Firefox, Safari, Edge. For the best experience, use the latest version of your browser."
+          "text": "Any modern browser with JavaScript enabled: Chrome, Firefox, Safari, or Edge. For best performance with HoloPath and SandPath, use a desktop browser — image processing can be memory-intensive on mobile."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use these tools commercially?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tools are free for personal use. The output you generate (hologram GIFs, sand table patterns, calculation results) belongs to you. The source code is open source under the MIT License, so you may reuse it commercially. The articles, images and branding are not covered by that license; the repository's LICENSE.md sets out which files are which."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What file formats does HoloPath support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HoloPath accepts JPG, PNG, WebP, BMP, animated GIF, and video files (MP4, WebM, MOV). Output can be exported as animated GIF or video (MP4/WebM). Files up to 15 MB are supported."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What sand tables does SandPath support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SandPath supports Oasis Mini, Oasis One, Sisyphus (Mini, Coffee Table, End Table), and ZenXY. You can also configure custom circular or rectangular table dimensions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I export or save my results?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HoloPath: Download generated hologram GIFs or videos directly. SandPath: Download .thr or .gcode files for your sand table. What Is My Time Worth?: Results are displayed on screen; you can screenshot or manually note them."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are the tax calculations accurate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "What Is My Time Worth uses this year's federal tax brackets and each state's own brackets, standard deduction and personal exemption, without local income taxes. These are estimates for educational purposes; they don't account for every deduction, credit, or individual circumstance. Consult a tax professional for precise calculations."
         }
       }
     ]
@@ -77,10 +133,7 @@
       <div class="faq-answer">
 <!-- generated:tools-faq — do not edit; run `npm run sync-static` -->
         <p>
-          Restless Forge is a one-person workshop that builds free,
-          open-source web tools: a real hourly wage calculator and DIY-vs-hire decision engine, a hologram GIF generator that processes images, GIFs, and videos in the browser, a converter that turns images and SVGs into sand table patterns (.thr / .gcode), and a tattoo sizing, camera try-on, and pricing preview tool —
-          with many more in the forge. Each tool is designed to be useful,
-          honest, and private.
+          Restless Forge is a one-person workshop that builds free, open-source web tools: a real hourly wage calculator and DIY-vs-hire decision engine, a hologram GIF generator that processes images, GIFs, and videos in the browser, a converter that turns images and SVGs into sand table patterns (.thr / .gcode), and a tattoo sizing, camera try-on, and pricing preview tool — with many more in the forge. Each tool is designed to be useful, honest, and private.
         </p>
 <!-- /generated:tools-faq -->
       </div>
@@ -155,9 +208,11 @@
         <p>
           The tools are free for personal use. The output you generate (hologram
           GIFs, sand table patterns, calculation results) belongs to you. The
-          source code is open source — check the license on each project's
-          <a data-rf-link="github" href="https://github.com/thekensman/" target="_blank" rel="noopener">GitHub repository</a>
-          for specific terms.
+          source code is open source under the MIT License, so you may reuse it
+          commercially. The articles, images and branding are not covered by that
+          license; the repository's
+          <a data-rf-link="githubLicense" href="https://github.com/thekensman/restless-forge/blob/main/LICENSE.md" target="_blank" rel="noopener">LICENSE.md</a>
+          sets out which files are which.
         </p>
       </div>
     </details>
@@ -202,10 +257,11 @@
       <summary>Are the tax calculations accurate?</summary>
       <div class="faq-answer">
         <p>
-          The calculator uses 2024/2025 federal tax brackets and flat-rate state
-          tax approximations. These are estimates for educational purposes — they
-          don't account for all deductions, credits, or individual circumstances.
-          Consult a tax professional for precise calculations.
+          What Is My Time Worth uses this year's federal tax brackets and each
+          state's own brackets, standard deduction and personal exemption, without
+          local income taxes. These are estimates for educational purposes; they don't account
+          for every deduction, credit, or individual circumstance. Consult a tax
+          professional for precise calculations.
         </p>
       </div>
     </details>

@@ -15,15 +15,17 @@ is turning a picture or a drawing into one.
    Rectangular and enter the bed size — see
    [supported tables](/tools/sandpath/supported-tables/).
 2. **Drop in a file.** SVG works best. Raster images (JPG, PNG, WebP, BMP, GIF,
-   TIFF) are also fine — they go through a tracing step first.
+   and TIFF in Safari) also work; they go through a tracing step first.
 3. **Choose a trace mode** if you uploaded a raster image. Outline for
    photographs, Threshold for logos and high-contrast art, Centerline for line
    drawings and handwriting.
-4. **Check the preview.** This is the step worth not skipping. The preview shows
-   the actual path the ball will follow, including the travel moves between
-   shapes.
-5. **Adjust Path Detail** if needed. Coarser means smaller files and smoother
-   curves; finer captures more detail at the cost of longer draw times.
+4. **Check the preview.** This is the step worth not skipping. For a raster
+   image, Preview Trace shows the lines SandPath found and counts the separate
+   paths. The ball makes a travel move from each path to the next, which the
+   preview does not draw, so a high count warns you before the sand does.
+5. **Adjust Path Detail** if needed (raster images only). Coarser simplifies the
+   traced lines more and drops the shortest ones, for smaller files and fewer
+   travel moves; finer keeps more detail at the cost of longer draws.
 6. **Download** and copy the file to your table however it normally accepts
    patterns.
 
@@ -85,9 +87,11 @@ the source image before converting rather than after.
 a far cleaner result than the same image drawn as hundreds of short disconnected
 segments, because the ball spends less time travelling between them.
 
-**Watch the travel lines in the preview.** If the preview shows straight lines
-slashing across your design, that is what the sand will show too. Reducing the
-number of separate shapes usually fixes it.
+**Watch the path count.** Every separate path costs a travel move, and a move
+out to a stray piece cuts across the whole design. If a raster image traces into
+hundreds of short paths, try Noise Reduction at 2 before anything else. On three
+test photos, moving it there from the default of 1 cut the count by between 29%
+and 88%. Much past that, the picture itself starts to disappear.
 
 **Let it finish.** Patterns take time — anywhere from fifteen minutes to well
 over an hour depending on bed size and path length. A pattern that looks wrong

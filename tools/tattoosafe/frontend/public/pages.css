@@ -81,3 +81,7 @@ strong { color: var(--text); font-weight: 500; }
   margin-bottom: 18px;
 }
 .page-outro:first-of-type { margin-top: 32px; }
+
+/* Code blocks scroll inside themselves: an unwrapped line must not widen the
+   page on a phone (two pages scrolled sideways at 360 px before this). */
+pre { max-width: 100%; overflow-x: auto; }

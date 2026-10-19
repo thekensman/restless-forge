@@ -156,9 +156,29 @@ for (const file of walkHtml(dist)) {
  * scripts/sync-content.mjs. */
 const SITE_AUTHOR = "Kenneth Cross";
 const SUBSTACK = (readFileSync(join(root, "site", "shared.js"), "utf8").match(/RF_SUBSTACK\s*=\s*'([^']+)'/) || [])[1];
+
+/* FAQ structured data must match what the page shows. Google accepts FAQPage
+   markup only for questions and answers a visitor can read on that page.
+   Every tool's home page once carried a FAQPage block for questions shown only
+   on its FAQ page, and the FAQ pages' own blocks had drifted from their
+   visible answers: one still called HoloPath's output GIF-only after it gained
+   video export. Compared word for word, ignoring markup, entities and
+   punctuation. */
+const words = (s) => s.replace(/<[^>]+>/g, " ").replace(/&[#a-z0-9]+;/gi, " ")
+  .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+function visibleFaq(html) {
+  const shown = new Map();
+  const body = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+  for (const m of body.matchAll(/<details[^>]*>\s*<summary[^>]*>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/gi)) {
+    shown.set(words(m[1]), words(m[2]));
+  }
+  return shown;
+}
+
 for (const file of walkHtml(dist)) {
   const rel = relative(dist, file);
-  for (const block of readFileSync(file, "utf8").matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+  const html = readFileSync(file, "utf8");
+  for (const block of html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
     let data;
     try { data = JSON.parse(block[1]); } catch (err) {
       problems.push(`${rel}: JSON-LD block is not valid JSON (${err.message}); Google ignores the whole block`);
@@ -167,6 +187,17 @@ for (const file of walkHtml(dist)) {
     (function visit(node) {
       if (Array.isArray(node)) return node.forEach(visit);
       if (!node || typeof node !== "object") return;
+      if (node["@type"] === "FAQPage") {
+        const shown = visibleFaq(html);
+        for (const q of [node.mainEntity ?? []].flat()) {
+          const answer = shown.get(words(q?.name ?? ""));
+          if (answer === undefined) {
+            problems.push(`${rel}: FAQPage question "${q?.name}" is not shown on the page; FAQ markup must match visible content`);
+          } else if (answer !== words(q?.acceptedAnswer?.text ?? "")) {
+            problems.push(`${rel}: FAQPage answer to "${q.name}" differs from the answer shown on the page`);
+          }
+        }
+      }
       if (node["@type"] === "Person" && /^Ken(?:neth)?\b/.test(node.name || "")) {
         const sameAs = [node.sameAs ?? []].flat();
         if (node.name !== SITE_AUTHOR || node.url !== `${SITE}/about` || !sameAs.includes(SUBSTACK)) {

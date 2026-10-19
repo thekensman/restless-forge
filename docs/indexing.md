@@ -1,9 +1,9 @@
 # Indexing and canonical URLs
 
 How Restless Forge makes sure Google sees exactly one URL per page, how that
-is enforced, and what the September 2026 indexing investigation found. Read
-this before touching `nginx/restless-forge.conf`, renaming or moving a page,
-or deleting one.
+is enforced, what the September 2026 indexing investigation found, and the
+experiment that followed in October. Read this before touching
+`nginx/restless-forge.conf`, renaming or moving a page, or deleting one.
 
 ## The rule: one URL per page
 
@@ -53,7 +53,8 @@ if an entry ever shadows a real page.
 
 | Old URL | Now | Why the old URL exists |
 |---|---|---|
-| `/articles/<slug>` (the 15 HoloPath slugs) | `/tools/holopath/articles/<slug>` | HoloPath's articles index linked here, a holopath.art-era path, until 2026-08-06. Four were still in Search Console's 404 report in September. |
+| `/articles/<slug>` (the 8 HoloPath slugs still published) | `/tools/holopath/articles/<slug>` | HoloPath's articles index linked here, a holopath.art-era path, until 2026-08-06. Four were still in Search Console's 404 report in September. |
+| `/tools/holopath/articles/optimizing-hologram-output` (also `.html` and `/articles/…`) | `/tools/holopath/articles/creating-hologram-art` | Merged on 2026-10-13: both walked through the same tool settings. |
 | `/tools/holopath/{about,faq,how-it-works}.html` | `/tools/holopath/<page>/` | HoloPath's sub-pages were `.html` files from the March 2026 consolidation until 2026-05-08. |
 | `/tools/{what-is-my-time-worth,holopath,tattoosafe}/{privacy,terms,contact}` (with `/`, `.html` or `/index.html`) | `/privacy`, `/terms`, `/contact` | Per-tool legal pages, retired for the site-global ones on 2026-08-04. Cloud-assisted tools keep their own privacy page and are not in the rule. |
 | `/tools/what-is-my-time-worth/blog/` and `/blog/life-energy-and-ymoyl/` | `/tools/what-is-my-time-worth/articles/…` | `blog/` was renamed `articles/` on 2026-03-16, and the whatismytimeworth.app vhost still forwards `/blog/…` path-for-path. |
@@ -72,6 +73,7 @@ if an entry ever shadows a real page.
 | `/essays/the-time-value-philosophy`, `/essays/making-tools-for-the-restless` | "Coming soon" stubs deleted on 2026-07-18 with no successor. They sat in "Crawled, currently not indexed" from their March/April crawls and will move to 404 when Google recrawls, which is correct. |
 | `/tools/<id>/sitemap.xml`, `/tools/<id>/robots.txt` | Leftovers from the standalone domains (see below), removed. |
 | Never-published shapes: `/about/`, `/tools/holopath/articles/<slug>/`, `/tools/sandpath/about.html` | No page was ever there. |
+| `/tools/holopath/articles/` best-hologram-projectors, colour-theory-holographic-art, future-of-holographic-displays, history-of-holograms, hologram-displays-for-business, holograms-in-pop-culture (also `.html` and `/articles/…`) | Removed on 2026-10-13 as generic content unrelated to what HoloPath does (`docs/adsense-readiness.md`, F1). No page replaces them, so a redirect would be a soft 404. |
 
 ## Known limits
 
@@ -216,11 +218,11 @@ one identity, Kenneth Cross with `/about` as the profile page
    ```
 
    Each should print `301` with the canonical URL.
-2. In Search Console, URL-inspect a handful of representative URLs, not all of
-   them: two legacy `.html` URLs (expect "Page with redirect" after recrawl),
-   and two or three current URLs from "Discovered" (Request Indexing on those
-   few only). Then "Validate fix" on "Redirect error"; the 404, Crawled and
-   Discovered validations have been running since 2026-08-26.
+2. In Search Console, URL-inspect two legacy `.html` URLs (expect "Page with
+   redirect" after recrawl). Indexing requests belong to the October 2026
+   experiment below; make none outside it while it runs. Then "Validate fix"
+   on "Redirect error"; the 404, Crawled and Discovered validations have been
+   running since 2026-08-26.
 3. In the Sitemaps report, keep exactly one sitemap,
    `https://restless-forge.dev/sitemap.xml`, and remove the `http://` entry.
    Both read fine today; the http one only redirects to the same file.
@@ -234,3 +236,198 @@ one identity, Kenneth Cross with `/about` as the profile page
    "Page with redirect", and "Discovered" starts converting to "Crawled". Only
    then judge whatever is still "Crawled, currently not indexed" as a content
    question.
+
+## October 2026 indexing experiment
+
+**Status: ended early, 2026-10-13.** The goal moved to AdSense resubmission
+(`docs/adsense-readiness.md`), and that work broke the freeze below on the day
+the requests began, so the comparison can't be read as designed:
+
+- `best-hologram-projectors`, one of the six, was removed with five other
+  generic HoloPath articles, and they now 404 (see Deliberately 404). Those
+  five were controls.
+- `optimizing-hologram-output`, another control, was merged into
+  `creating-hologram-art` (a 301). The remaining two controls and all five
+  HoloPath treatment articles were rewritten against the engine, and so was
+  `gif-vs-video-hologram`, one of the six.
+- The homepage, `/articles/`, the HoloPath and TattooSafe article indexes and
+  the sitemap changed.
+
+Requests already made stay in place; they do no harm. The dates under Schedule
+are still worth checking, but read the results as a before-and-after on the
+reworked site, not as the comparison below.
+
+Planned 2026-10-12; requests from 2026-10-13 (the exact date is recorded under
+Baseline). With the URL graph clean since the 2026-09-30 deploy, the question is
+what Google now does with the pages it has been passing over. Two tests run side
+by side and are read separately.
+
+- **Six indexing requests,** three of them paired with one outside link each.
+  A request almost always gets the page fetched, so the request-only pages show
+  what Google decides after a fresh look, and the linked ones show whether a
+  signal from outside the site changes that decision.
+- **The 2026-09-30 links.** Ten articles gained a contextual link from an
+  indexed tool page (a4e06d2). None is requested, and eight sibling articles
+  without such a link serve as controls. This shows whether a link from an
+  indexed page gets an article crawled.
+
+No internal links were added for this. Four of the six already had every link
+the original brief asked for, and links from indexed pages have a poor record
+here: the homepage has linked `how-a-tool-gets-built` since 2026-07-18
+(c3ecfa9) and `a-floor-of-curiosity` since 2026-08-06 (7974d38), and the
+SandPath page has linked two of its articles since 2026-08-16 (PR #43). None of
+the four had been crawled in the latest data for it, 5 to 11 weeks after the
+link went live. New links on the day of the requests would also have made any
+result impossible to attribute.
+
+### The six requested pages
+
+| URL | Search Console, 2026-10-08 | Static links from |
+|---|---|---|
+| `/tools/holopath/articles/best-hologram-projectors` | Crawled, last 2026-08-16 | `/tools/holopath/articles/` |
+| `/essays/why-i-build-these-tools` | Crawled, last 2026-08-16 | `/`, `/essays/`, `/essays/how-a-tool-gets-built` |
+| `/tools/tattoosafe/` | Crawled, last 2026-08-16 | `/` (tools grid), `/tools/`, `/about`, `/essays/a-floor-of-curiosity` |
+| `/tools/holopath/articles/gif-vs-video-hologram` | Discovered, never crawled | `/tools/holopath/articles/` |
+| `/essays/a-floor-of-curiosity` | Discovered, never crawled | `/`, `/essays/`, `/about` |
+| `/essays/how-a-tool-gets-built` | Discovered, never crawled | `/`, `/essays/`, `/about`, `/essays/why-i-build-these-tools` |
+
+- All six are in the sitemap, self-canonical and indexable.
+- The 2026-08-16 crawls were Google's own; nothing was requested that day.
+- `/tools/holopath/articles/` itself sits in Crawled, last fetched 2026-06-12.
+- For both inspected Crawled pages the Google-selected canonical was the page
+  itself. The referring page Google listed was the article's own `.html` copy
+  (a 301 since 2026-09-30) for `best-hologram-projectors`, and the `http://`
+  sitemap (since removed) for `why-i-build-these-tools`.
+- The essays are published only here; there are no copies on Substack.
+- Every URL that was not requested is a control for the requests. The closest
+  matches are `/essays/self-publishing-dreaming-with-eyes-open` for the essays
+  and the eight HoloPath controls below for the two articles.
+
+The six split into two arms, one page of each kind on each side where the
+kinds allow:
+
+| Request plus one outside link | Request only |
+|---|---|
+| `/essays/a-floor-of-curiosity` | `/essays/how-a-tool-gets-built` |
+| `/tools/holopath/articles/gif-vs-video-hologram` | `/tools/holopath/articles/best-hologram-projectors` |
+| `/tools/tattoosafe/` | `/essays/why-i-build-these-tools` |
+
+An outside link counts only if it is genuine: a Substack post or a community
+answer that cites the page because it helps the reader there, not a bare drop.
+One link per page, all live within 48 hours of the requests, each recorded
+under Baseline with its URL and date. None may point at the 2026-09-30
+treatment or control articles. Whether Substack marks outbound links
+`nofollow` is unverified; Google treats that as a hint, so the link still
+counts as a signal but possibly a weaker one.
+
+### The 2026-09-30 links
+
+| Group | Pages |
+|---|---|
+| Linking pages (indexed) | `/tools/holopath/`, `/tools/what-is-my-time-worth/`, `/tools/sandpath/` |
+| Treatment (10) | HoloPath `how-hologram-pyramids-work`, `led-hologram-fans`, `peppers-ghost-illusion`, `hologram-effects-explained`, `best-images-for-holograms`; What Is My Time Worth `what-your-real-hourly-wage-subtracts/`, `life-energy-and-ymoyl/`, `the-enjoyment-multiplier/`, `comparing-job-offers-across-states/`; SandPath `theta-rho-vs-gcode/` |
+| Controls (8) | HoloPath `colour-theory-holographic-art`, `creating-hologram-art`, `diy-hologram-pyramid`, `future-of-holographic-displays`, `history-of-holograms`, `hologram-displays-for-business`, `holograms-in-pop-culture`, `optimizing-hologram-output` |
+| Reference | SandPath `travel-lines-and-path-ordering/`, `why-scanlines-look-wrong-in-sand/`, linked from the SandPath page since 2026-08-16 |
+
+The fair comparison is within HoloPath, 5 against 8, since every What Is My
+Time Worth article got the new link. No indexed or requested page links a
+control; only the articles index does. The two requested HoloPath articles
+link no other article, header and footer included, and the essays link only
+each other, so the requests leave this comparison intact. `/tools/tattoosafe/`
+does link its own `faq/` and `pricing/`, which is why no TattooSafe page is a
+control.
+
+**Precondition.** A link can only work once Google has re-read the page that
+carries it. Credit a treatment article's crawl to its link only when the
+linking page's last crawl is after 2026-09-30 and the article's first crawl
+comes after that.
+
+### Predictions, recorded before the requests
+
+- By 2026-10-19 Google has crawled all six.
+- On 2026-10-26 most of the six read "Crawled, currently not indexed", and
+  `best-hologram-projectors` is the least likely to be indexed.
+- On 2026-10-26 the treatment looks like the controls, with few or none
+  crawled.
+- The linked arm ends up with more pages indexed than the request-only arm.
+  Low confidence: three pages a side can show a direction, not prove one.
+
+### Reading the result
+
+| Outcome | What it means | Next |
+|---|---|---|
+| The six are indexed after the fresh crawl | Google needed a new look at the cleaned-up site | Request the strongest remaining pages, a few a day |
+| The six are crawled and still not indexed | The limit is Google's judgment of these pages and the site | Test one of the hypotheses below, alone |
+| Linked arm indexed, request-only arm not | Outside signals are the lever | Earn real links for the strongest pages, one at a time |
+| Neither arm indexed | Outside links alone don't tip it | Test content next, starting with `best-hologram-projectors` |
+| Treatment crawled, controls not, precondition met | Links from indexed pages work here, slowly | Link the remaining articles from their tool pages |
+| Both groups crawled | Site-wide reprocessing | Credit neither |
+| Treatment flat | Internal links don't get pages crawled here | Stop proposing more of them as the fix |
+
+The hypotheses behind the arms:
+
+- **Outside signals (tested by the linked arm).** The four indexed pages are
+  `/` and the three tools that inherited 301s from their old domains.
+  `/tools/tattoosafe/` has comparable static text (815 words, against 695 to
+  991 on the indexed tool pages) and the same homepage link, and it is not
+  indexed. Four pages is a small sample, but it is the strongest pattern in the
+  data.
+- **Content (recorded, not tested).** `best-hologram-projectors` promises
+  product recommendations in its title and names no products. Rewriting it now
+  would mix a content change into the request result.
+
+### Freeze
+
+Through 2026-10-26 at minimum, and through 2026-11-09 to cover the last check:
+
+- no launching a tool and no new essay: each rewrites the homepage grid,
+  `/tools/`, `/about` and the sitemap;
+- no nav or footer link changes: `npm run sync` rewrites every site page, which
+  moves each one's sitemap `<lastmod>`;
+- no edits to the six, the indexed pages, or any page in the comparison groups.
+
+Backend work and unlaunched tools are unaffected.
+
+### Schedule
+
+| Date | Check |
+|---|---|
+| Request day | Baseline: export every bucket and the indexed list, note the sitemap's "Last read", inspect the four indexed pages. Then Live Test and Request Indexing on the six only. Outside links for the linked arm within 48 hours. |
+| 2026-10-19 | URL Inspection on the six: last crawl, status, Google-selected canonical |
+| 2026-10-26 | Exports and inspections as on 2026-10-12, plus the six |
+| 2026-11-09 | Exports again: a requested page can be indexed and later dropped |
+
+Each export lists URL and last crawl, so diffing two of them shows every move.
+nginx logs record each Googlebot fetch without Search Console's lag. Stock
+Ubuntu keeps 14 days of them, so capture at every check:
+
+```bash
+zgrep -h -i googlebot /var/log/nginx/access.log* > ~/googlebot-$(date +%F).log
+```
+
+### Baseline
+
+Search Console, report dated 2026-10-08, "All known pages": 4 indexed, 84 not
+indexed (40 Discovered, 36 Crawled, 4 Not found, 3 Page with redirect, 1
+Redirect error). Sitemap-only figures come from the exports.
+
+- **No URL in Crawled or Discovered has been fetched since 2026-08-16.** That
+  is the newest date in the Crawled list, and Discovered has been flat at 40
+  since about 2026-09-21.
+- **Not found fell from 12 to 4.** `best-images-for-holograms`, a 404 in April,
+  is back in Discovered. The exports will show where the others went.
+- **"Page with redirect" is still 3**, short of the rise toward 30 that step 5
+  of "After deploying" expects. The HoloPath `.html` URLs in Crawled still
+  carry last crawls from May to July, so Google has not re-read them since they
+  began to redirect. That window runs to about 2026-11-11.
+- **Validation "Failed" on "Page with redirect" is correct.** Those three URLs
+  redirect by design, and the validation checks whether they still do. Leave
+  it.
+- **"URL is unknown to Google"** in URL Inspection for `gif-vs-video-hologram`
+  and `a-floor-of-curiosity` contradicts the Discovered list of the same date,
+  which names both. The two views disagree; neither shows a missing path to
+  the page.
+
+The per-URL starting state of both comparison groups comes from the
+request-day exports and is added here when they are in hand, with the request
+date and each outside link's URL and date.

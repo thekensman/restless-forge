@@ -11,7 +11,7 @@ Several tools carry rate data that changes yearly (see
 |---|---|---|
 | Federal brackets, standard deductions | `data/tax.ts` (year-keyed `TAX_YEARS` — append, never overwrite) | IRS Rev. Proc. (published ~Oct/Nov) |
 | SS wage base | same | SSA announcement (~Oct) |
-| State income tax rates (sanity pass) | same (`stateRates`) | Tax Foundation |
+| State income tax brackets, standard deductions, exemptions | same (`states` in each year's entry) | Tax Foundation "State Individual Income Tax Rates and Brackets" (~February), cross-checked against PolicyEngine US; mismatches settled from the state's own statute or revenue department |
 | IRS standard mileage rate | `data/mileage.ts` (year-keyed `MILEAGE_RATES` — append) | IRS Notice (~late Dec) |
 | CPI annual average | `data/cpi.ts` (year-keyed `CPI_ANNUAL` — append) | BLS series CUUR0000SA0 (~Jan 11) |
 | Subscription preset prices | `data/subscription-presets.ts` (`SUBSCRIPTION_PRESETS`) | vendor pricing pages |
@@ -94,9 +94,24 @@ updating everything to the CURRENT year:
    entry to TAX_YEARS (copy the prior year, update brackets, standard
    deductions, ssWageBase, and the source field) and bump
    CURRENT_TAX_YEAR (the freshness check greps it). Do NOT delete
-   prior years — the file keeps history by design. Sanity-pass
-   stateRates for well-sourced changes only. Consumers (currently
+   prior years — the file keeps history by design. Consumers (currently
    WIMTW) pick the new year up automatically.
+   State tax: copy every state's entry into the new year, then update
+   its brackets, standard deductions, exemptions and phase-outs from
+   Tax Foundation's table for the new year, cross-checking each value
+   against PolicyEngine US (download the policyengine-us wheel into an
+   empty directory and read the YAML under
+   policyengine_us/parameters/gov/states/<state>/tax/income/ with
+   python3 -I; never import or run the package) and settling every
+   mismatch from the state's own statute or revenue department.
+   Tax Foundation usually publishes in February, after this job runs,
+   and legislatures change rates through the spring (2026: Arkansas,
+   Georgia, South Carolina, Utah and West Virginia). If the new table
+   is not out yet, carry last year's state figures forward, say so in
+   the PR, and list the states to revisit in the "Annual data refresh
+   blocked" issue. Keep each state's comment naming the source that
+   settled a disagreement. maine.gov refuses automated fetches; read
+   Maine statutes at legislature.maine.gov instead.
    Sources: IRS annual inflation-adjustment revenue procedure and the
    SSA wage-base announcement; cross-check two sources per number.
 2. IRS standard mileage rate (data/mileage.ts): append a new

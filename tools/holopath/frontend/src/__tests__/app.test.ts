@@ -263,6 +263,37 @@ describe("GIF encoder", () => {
     expect(() => encodeGif([])).toThrow();
   });
 
+  // A hologram frame is mostly black with a smooth glow on the subject. The
+  // palette must go to the glow: splitting the black area by pixel count used
+  // to fill the table with duplicate blacks and band the gradient.
+  it("spends the palette on the subject, not on duplicate black", () => {
+    const w = 64, h = 64;
+    const img = new ImageData(w, h);
+    const n = w * h;
+    const firstLit = Math.floor(n * 0.8); // 80% pure black, like a pyramid layout
+    for (let i = firstLit; i < n; i++) {
+      const v = Math.round(((i - firstLit) / (n - 1 - firstLit)) * 255);
+      img.data[i * 4] = 0;
+      img.data[i * 4 + 1] = v;
+      img.data[i * 4 + 2] = Math.round(v * 0.95);
+    }
+    for (let i = 0; i < n; i++) img.data[i * 4 + 3] = 255;
+    const gif = encodeGif([{ data: img, delay: 80 }]);
+    const colours = new Set<string>();
+    for (let i = 0; i < 256; i++) {
+      colours.add(`${gif[13 + i * 3]},${gif[14 + i * 3]},${gif[15 + i * 3]}`);
+    }
+    expect(colours.size).toBeGreaterThanOrEqual(200);
+  });
+
+  it("handles a frame of a single colour", () => {
+    const img = new ImageData(8, 8);
+    for (let i = 0; i < 64; i++) img.data[i * 4 + 3] = 255; // all opaque black
+    const gif = encodeGif([{ data: img, delay: 80 }]);
+    expect(new TextDecoder().decode(gif.slice(0, 6))).toBe("GIF89a");
+    expect(gif[gif.length - 1]).toBe(0x3B);
+  });
+
   it("calls progress callback", () => {
     let called = false;
     encodeGif(

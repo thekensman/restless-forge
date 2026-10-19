@@ -20,8 +20,8 @@ contours.
 Each curve is *sampled* into a sequence of points. This is the one place where
 fidelity and file size trade off directly: sample too coarsely and a smooth arc
 becomes a visible polygon; sample too finely and you get a file with tens of
-thousands of coordinate pairs that takes a long time to draw. The Path Detail
-control sets that sampling density.
+thousands of coordinate pairs that takes a long time to draw. The Curve
+Smoothness control sets that sampling density.
 
 Because an SVG's subpaths are stored in whatever order the authoring tool wrote
 them, drawing them in document order usually means the ball jumps across the

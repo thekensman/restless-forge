@@ -15,6 +15,7 @@
   --green: #39ff14;
   --text: #e0e0e8;
   --text-muted: #8888a0;
+  --text-dim: var(--text-muted); /* byline colour from the Markdown pipeline */
   --font-display: 'Orbitron', sans-serif;
   --font-body: 'Share Tech Mono', monospace;
 
@@ -104,6 +105,37 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
 .article li { margin-bottom: 0.3rem; }
 .article li strong { color: var(--cyan-dim); }
 
+/* Tables and formula blocks in articles. A table scrolls inside itself, never
+   the page: display:block + max-width:100% keeps a wide table within a 360px
+   viewport (docs/frontend-pitfalls.md, sideways scroll). */
+.article table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 1.2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.article th, .article td {
+  border: 1px solid var(--rf-border);
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+.article th { color: var(--text); font-weight: 400; background: var(--dark-raised); }
+.article .formula {
+  background: var(--dark-raised);
+  border: 1px solid var(--rf-border);
+  border-left: 3px solid var(--cyan);
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  margin: 0 0 1.2rem;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
 /* CTA button */
 .article__cta {
   margin-top: 2rem;
@@ -184,3 +216,7 @@ a:hover { color: #fff; text-shadow: 0 0 8px var(--cyan); }
   .article h2 { font-size: 1.05rem; }
   .page-content { padding: 1.5rem 1rem 1rem; }
 }
+
+/* Code blocks scroll inside themselves: an unwrapped line must not widen the
+   page on a phone (two pages scrolled sideways at 360 px before this). */
+pre { max-width: 100%; overflow-x: auto; }

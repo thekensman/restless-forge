@@ -1,69 +1,102 @@
-# DIY Hologram Pyramid: Build One with Just a Smartphone and Plastic
+---
+date: 2026-03-15
+updated: 2026-10-13
+author: Kenneth Cross
+---
+# DIY Hologram Pyramid: Cut One to Fit Your Screen
 
-A hologram pyramid — sometimes called a Pepper's Ghost pyramid — is one of the most satisfying craft projects in the maker community. Built from nothing more than a piece of clear plastic and a smartphone, it transforms a flat screen into what appears to be a glowing three-dimensional figure floating in mid-air. The physics is a 19th-century stage illusion, but the effect is genuinely striking. This guide gives you everything you need to build one and set it up with HoloPath.
+A hologram pyramid is four panels of clear plastic taped into an upside-down,
+flat-topped pyramid that stands on a phone or tablet. HoloPath exists because
+of one: it was built for a STEM project that turned Magna-Tiles into a hologram
+projector, written up on [Substack](https://restlessforge.substack.com/p/hologram-stem).
+This guide gives you the measurements for your own screen, worked out so the
+pyramid matches the layout HoloPath produces.
 
-## How It Works
+## What you need
 
-The pyramid sits over your phone screen, which plays a specially formatted video with four copies of the same image arranged around a black centre. Each face of the pyramid is angled at roughly 45 degrees. Light from each quadrant of the screen bounces off the corresponding face toward the viewer's eye, and because the pyramid is clear, all four reflections overlap at the centre. The result is a reflected image that appears to float inside the pyramid with no visible screen behind it — particularly convincing in a dimly lit room.
+- Clear plastic sheet: overhead-projector film, a clear plastic folder, or the
+  lid of a CD case. Thin film flexes but gives the cleanest single image; a CD
+  lid is stiff but thicker, so it shows a faint double image.
+- A ruler, a fine marker and a craft knife or sharp scissors.
+- Clear tape.
 
-## Materials You Need
+Skip glass: it is hard to cut accurately and dangerous to handle as small
+panels. Skip frosted or tinted plastic, which kills the reflection.
 
--   Clear PET plastic sheet, 0.5 mm to 1 mm thick — the cover from a CD jewel case works perfectly, as does an overhead projector transparency sheet or a thin plastic folder
--   A ruler and fine-tipped marker or scribe
--   Sharp scissors or a craft knife and cutting mat
--   Clear adhesive tape, superglue gel, or a hot glue gun
--   Your smartphone
+## The shape of each panel
 
-Avoid glass, which is hazardous to cut and too heavy. Avoid frosted or tinted plastic, which kills the reflection. CD case covers are ideal because they are perfectly flat, optically clear, and just the right weight to hold shape without warping.
+Each of the four panels is a trapezoid: a long bottom edge, a short top edge
+and two slanted sides. In use the pyramid stands on its short end, and the
+faces lean out at 45°. Three measurements define it:
 
-## Dimensions and Cutting
+- **Base (B)**, the long edge.
+- **Top (T)**, the short edge, which becomes the square opening that sits on
+  the screen.
+- **Panel height (H)**, measured straight up the middle of the panel.
 
-Each pyramid is made from four identical trapezoid panels. The trapezoid has a short parallel edge at the top (the apex of the pyramid), a longer parallel edge at the bottom (which rests on the phone screen), and two angled sides. The key relationship is that the bottom edge equals one quarter of your phone screen's short dimension, and the height of the trapezoid is derived from the geometry of a 45-degree reflection.
+For the faces to sit at exactly 45°, the panel height and the slanted sides
+follow from the other two:
 
-### For a 5-Inch Screen (approximately 62 mm wide display area)
+<div class="formula">H = 0.707 × (B − T)<br>slanted side = 0.866 × (B − T)</div>
 
--   Top edge (apex): 10 mm
--   Bottom edge: 55 mm
--   Height of trapezoid: 30 mm
--   The angled sides will measure approximately 32 mm each
+The well-known template of a 60 mm base, 10 mm top and 35 mm height is this
+rule at work: 0.707 × 50 = 35.4.
 
-### For a 6-Inch Screen (approximately 74 mm wide display area)
+## Sizing it to HoloPath's layout
 
--   Top edge (apex): 12 mm
--   Bottom edge: 65 mm
--   Height of trapezoid: 36 mm
--   The angled sides will measure approximately 38 mm each
+HoloPath's four-sided layout leaves 3% of the screen empty at each edge, then
+draws each copy almost to the centre, stopping about 5.6% of the screen's width
+short of it. A pixel's distance from the centre becomes its height in the
+floating image, so the pyramid has to cover that whole band:
 
-Draw the trapezoid on the plastic using a ruler and marker. Score along the lines with a craft knife and snap cleanly, or cut with sharp scissors in a single smooth stroke. Cut four identical pieces. The cleaner and more precise your cuts, the better the final image quality — mismatched panels create visible seams in the reflection.
+- make the **base about 95%** of your screen's short side, no less than 94%;
+- make the **top about 11%** of it, no more than 11.3%.
 
-## Assembly
+A smaller base cuts off the top of the hologram; a wider top opening cuts off
+its feet. Measure the screen's short side across the lit area only, not the
+bezel, because a square GIF played full screen fills exactly that width.
 
-Assemble the four panels into a truncated pyramid shape with the small edges meeting at the top and the large edges forming a square base. Hold the first two panels together at their angled sides with a small strip of clear tape on the outside edge — tape on the inside face will be visible in the reflection. Continue adding panels until all four are joined. Run a thin bead of superglue along each interior joint for rigidity, or use a hot glue gun carefully to avoid drips inside the faces. Allow to cure completely before use.
+| Screen's short side | Base | Top | Panel height | Slanted side |
+|---|---|---|---|---|
+| 65 mm (typical phone) | 62 mm | 7 mm | 38.9 mm | 47.6 mm |
+| 150 mm (small tablet) | 143 mm | 16 mm | 89.8 mm | 110.0 mm |
 
-Test the fit on your phone. The base should sit flat on the screen with the four bottom edges forming a neat square centred on the display. The pyramid should be stable and not rock.
+The phone pyramid makes a hologram about 27 mm tall; the tablet one, about
+62 mm.
 
-## Setting Up HoloPath for Pyramid Playback
+## Cutting and assembly
 
-In HoloPath, select the **Pyramid (4-way)** layout option. This arranges four copies of your holographic GIF around a black centre square, rotated so that each face of the pyramid receives the correct orientation. Use a pure black background — any ambient light from the screen area outside your subject will wash out the reflection. Set your phone to maximum brightness and disable auto-brightness.
+1. Draw one trapezoid on paper first and check it against the formula: if the
+   slanted sides come out shorter or longer than 0.866 × (B − T), the faces
+   will not sit at 45°.
+2. Trace four copies onto the plastic. Score film or a CD lid with a knife
+   along a ruler and snap it, or cut film with scissors in one smooth stroke.
+   Matching panels matter more than perfect edges.
+3. Tape the slanted sides together on the outside only. Tape on the inside
+   faces shows up in the reflection.
+4. Check that the top opening is square and the pyramid stands without rocking.
 
-Play the resulting GIF full-screen on your phone in landscape or portrait orientation depending on which matches your pyramid's base orientation. Dim the room lights as much as possible. Position the pyramid over the GIF and step back slightly — the sweet spot viewing distance is roughly 20 to 40 cm from the pyramid's apex, at eye level with the tip.
+## Using it
 
-## Troubleshooting
+Make the hologram in HoloPath with the **Pyramid 360°** layout, which places
+four mirrored copies with their bases pointing at the centre. Play it full
+screen at maximum brightness, with auto-brightness off, in a dark room. Stand
+the pyramid on its small end in the middle of the screen, with its sides
+parallel to the screen edges, and look straight in at the height of its middle.
 
-### Image Is Too Dim
+## When it does not look right
 
-Check that your phone is at maximum brightness. Ensure the room is as dark as possible — even a small ambient light source behind the viewer will compete with the reflection. Thinner plastic transmits light better than thicker material; if your plastic is 2 mm or more, try sourcing a thinner sheet.
-
-### Reflection Visible from Wrong Angle
-
-The pyramid panels must be at exactly 45 degrees to the screen. If panels are tilted inward or outward, the reflected image will shift angle and appear ghosted. Rebuild the joints and use a set square to verify the panel angle before the adhesive sets.
-
-### Image Appears Doubled or Ghosted
-
-PET plastic produces two reflections: one from each surface. Using thinner plastic minimises the gap between them. Anti-reflection coating on one surface eliminates the secondary reflection entirely — some presentation-quality transparency sheets have this coating.
-
-### Visible Seams Between Panels
-
-Score and cut more carefully, and sand the edges lightly with fine-grit sandpaper for a tighter joint. Tape only the very outer edge of the joint to keep the reflective inner face clear.
+- **A faint second image beside the first.** Both surfaces of the plastic
+  reflect. Use thinner sheet.
+- **One pair of opposite faces is much dimmer.** Your screen's light is
+  polarised, and a face reflects one polarisation ten times better than the
+  other. Turn the phone through 90° to swap the dim pair; the [optics
+  article](/tools/holopath/articles/how-hologram-pyramids-work) explains why.
+- **The image tilts or sits too high or too low.** The faces are not at 45°.
+  Re-check the panel height against the formula.
+- **The feet or the top of the hologram are missing.** The opening is too wide
+  or the base too small for the layout; see the sizing rules above.
+- **Text reads backwards.** The file was made with a layout that is not
+  mirrored, such as Single Image. Use Pyramid 360°.
 
 <p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Try HoloPath Free →</a></p>

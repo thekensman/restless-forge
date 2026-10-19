@@ -25,27 +25,51 @@
     "mainEntity": [
       {
         "@type": "Question", "name": "What file formats does HoloPath accept?",
-        "acceptedAnswer": { "@type": "Answer", "text": "HoloPath accepts static images (JPG, PNG, WebP, BMP), animated GIFs, and video files (MP4, WebM, MOV) up to 15 MB. There is no hard duration limit — longer videos just use more browser memory." }
+        "acceptedAnswer": { "@type": "Answer", "text": "HoloPath accepts static images (JPG, PNG, WebP, BMP), animated GIFs, and video files (MP4, WebM, MOV, M4V, OGG). All files must be under 15 MB. Video is sampled at 10 frames per second up to 900 frames, so a clip of up to 90 seconds keeps its real speed. A longer clip has its 900 frames spread across the whole video, so it plays back faster. Which video formats open depends on your browser; MP4 and WebM have the widest support." }
       },
       {
-        "@type": "Question", "name": "What is a hologram pyramid?",
-        "acceptedAnswer": { "@type": "Answer", "text": "A hologram pyramid is a transparent four-sided pyramid (often made from plastic or glass) placed on a screen. The screen displays the same image in four orientations facing inward, and the pyramid reflects each one to create the illusion of a 3D floating hologram visible from all sides." }
+        "@type": "Question", "name": "Is HoloPath really free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free. No account, no sign-up, no watermarks, no limits on downloads. The holograms you make, GIF or video, are yours to use however you like, including commercially." }
+      },
+      {
+        "@type": "Question", "name": "Are my uploaded files stored anywhere?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens entirely in your browser using client-side JavaScript. Your files are never uploaded to any server. They are read locally, processed in your browser's memory, and the hologram file is created on your device. See our Privacy Policy for full details." }
+      },
+      {
+        "@type": "Question", "name": "What is a hologram pyramid and how does it work?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A hologram pyramid is a transparent four-sided pyramid (usually plastic or glass) placed point-down on a flat screen. The screen shows the same image in four orientations — top, bottom, left, right — each one reflected by a face of the pyramid toward the centre, creating the illusion of a 3D object floating inside. This is technically a Pepper's Ghost effect applied in four directions simultaneously." }
       },
       {
         "@type": "Question", "name": "How do I make a DIY hologram pyramid?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Cut four identical trapezoid pieces from clear plastic (CD cases work well) and tape them into a pyramid shape. Place it point-down on your phone or tablet screen, play a HoloPath Pyramid 360° GIF in fullscreen, and dim the room lights." }
+        "acceptedAnswer": { "@type": "Answer", "text": "You need four identical trapezoids of clear, flat plastic; old CD jewel cases work well. For a phone about 65 mm across its short side, each panel has a 62 mm bottom edge, a 7 mm top edge and a height of 38.9 mm, which gives 45° faces sized to HoloPath's layout. Tape the four together, stand the pyramid on its narrow end at the centre of the screen, play a \"Pyramid 360°\" hologram full screen, and dim the room. The DIY pyramid guide has sizes for other screens and the formula behind them." }
       },
       {
         "@type": "Question", "name": "What is a hologram fan display?",
-        "acceptedAnswer": { "@type": "Answer", "text": "A hologram fan (or POV display) uses rapidly spinning LED blades to create the illusion of a floating 3D image. Content for fan displays needs a circular crop on a black background, which is exactly what HoloPath's Fan layout produces." }
+        "acceptedAnswer": { "@type": "Answer", "text": "A hologram fan (also called a POV or persistence-of-vision display) is a device with LED-equipped blades that spin at high speed. Because the LEDs change colour faster than your eye can track, you see a floating image instead of the spinning blades. Content needs to be circular, centred on a black background — which is exactly what HoloPath's \"Hologram Fan\" layout produces. Fans differ in what they accept: some read MP4 or GIF files from a memory card, others only take files through their own app, so check the manual." }
       },
       {
-        "@type": "Question", "name": "Is HoloPath free?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes, HoloPath is completely free with no account required. Generated hologram GIFs can be downloaded instantly." }
+        "@type": "Question", "name": "What is Pepper's Ghost?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Pepper's Ghost is an optical illusion from the 1800s that's still widely used today. A piece of glass or clear acrylic is angled at 45° between the viewer and a hidden screen. The screen shows a bright image on a black background, which the glass reflects toward the viewer — making it appear to float in mid-air. HoloPath's \"Pepper's Ghost\" layout sets the hologram low on a 16:9 black canvas and mirrors it, because a single reflection swaps left and right." }
       },
       {
-        "@type": "Question", "name": "Are my uploaded files stored?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens entirely in your browser. Your files are never uploaded to any server and cannot be accessed by anyone." }
+        "@type": "Question", "name": "What's the difference between Pyramid 360° and Pyramid 270°?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Pyramid 360° places four copies of the hologram (top, bottom, left, right) for 4-sided pyramids — viewable from all angles. Pyramid 270° places three copies for 3-sided showcase displays common in retail and museum settings, where the back is against a wall and you view from three sides." }
+      },
+      {
+        "@type": "Question", "name": "Should I export a GIF or a video?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A GIF plays and loops on almost any device without a video player, which suits a pyramid on a phone. It is limited to 256 colours and comes out large: a test hologram at default settings was 8.3 MB. The video option records MP4 where your browser supports it, and WebM otherwise. It keeps smooth colour and is far smaller (0.12 MB for the same test), but it records in real time and does not loop by itself, so set your player to repeat. GIF vs video covers which to use for each display." }
+      },
+      {
+        "@type": "Question", "name": "What resolution should I use?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Resolution sets the size HoloPath processes your subject at, and the layout canvas is twice that, up to 800 px. From 400 up the canvas is already 800 px, so a higher setting only adds detail where a layout shows the subject large: the Hologram Fan draws it up to 600 px across, so 640 or 800 helps there. Pyramid copies are at most 331 px across and the Pepper's Ghost subject is about 248 px tall, so 400 or 512 is plenty for those. HoloPath never enlarges your source, and higher settings take longer and make bigger files." }
+      },
+      {
+        "@type": "Question", "name": "What do the effect presets do?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Classic: cyan, with moderate scan lines, glow, a grid and chromatic aberration. Cyberpunk: magenta, with heavy glitch, strong scan lines and chromatic aberration. Ghost: blue, with edge detection, heavy flicker and no grid. Glitch: near-maximum glitch and strong noise, with the colour cycling through the rainbow. Matrix: green, with sharp scan lines and a grid. Every preset is a starting point; each setting can be changed afterwards." }
+      },
+      {
+        "@type": "Question", "name": "Why does processing take a while for videos?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Each frame goes through a 13-stage rendering pipeline (edge detection, hue colorisation, scan lines, glow, glitch, noise, chromatic aberration, etc.), then gets composed into the chosen layout — all running in your browser using JavaScript and Canvas 2D. A 10-second video at 10fps produces 100 frames, each requiring full pipeline processing. Lower resolution and fewer frames will speed things up. Performance depends on your device's CPU capabilities." }
       }
     ]
   }
@@ -66,9 +90,11 @@
         <summary>What file formats does HoloPath accept?</summary>
         <div class="faq-answer">
           <p>HoloPath accepts static images (JPG, PNG, WebP, BMP), animated GIFs, and video files
-          (MP4, WebM, MOV, M4V, OGG). All files must be under 15 MB. Videos can be
-          of any length (longer videos use more memory). Video format support depends on your browser — MP4 and WebM
-          have the widest compatibility.</p>
+          (MP4, WebM, MOV, M4V, OGG). All files must be under 15 MB. Video is
+          sampled at 10 frames per second up to 900 frames, so a clip of up to 90
+          seconds keeps its real speed. A longer clip has its 900 frames spread
+          across the whole video, so it plays back faster. Which video formats
+          open depends on your browser; MP4 and WebM have the widest support.</p>
         </div>
       </details>
 
@@ -76,7 +102,7 @@
         <summary>Is HoloPath really free?</summary>
         <div class="faq-answer">
           <p>Yes, completely free. No account, no sign-up, no watermarks, no limits on downloads.
-          The generated hologram GIFs are yours to use however you like, including commercially.</p>
+          The holograms you make, GIF or video, are yours to use however you like, including commercially.</p>
         </div>
       </details>
 
@@ -85,7 +111,7 @@
         <div class="faq-answer">
           <p>No. All processing happens entirely in your browser using client-side JavaScript.
           Your files are never uploaded to any server. They are read locally, processed in your
-          browser's memory, and the generated hologram GIF is created on your device.
+          browser's memory, and the hologram file is created on your device.
           See our <a href="/privacy">Privacy Policy</a> for full details.</p>
         </div>
       </details>
@@ -106,12 +132,13 @@
       <details class="faq-item">
         <summary>How do I make a DIY hologram pyramid?</summary>
         <div class="faq-answer">
-          <p>You need four identical trapezoid-shaped pieces of clear, flat plastic. Old CD jewel
-          cases work well. The standard dimensions for a smartphone-sized pyramid are roughly
-          1cm top edge, 6cm bottom edge, and 3.5cm height. Cut four pieces, tape them together into
-          a truncated pyramid shape, place it point-down on your phone screen, play a
-          HoloPath "Pyramid 360°" GIF in fullscreen, and dim the room lights. There are many
-          YouTube tutorials with exact templates.</p>
+          <p>You need four identical trapezoids of clear, flat plastic; old CD jewel cases work
+          well. For a phone about 65 mm across its short side, each panel has a 62 mm bottom edge,
+          a 7 mm top edge and a height of 38.9 mm, which gives 45° faces sized to HoloPath's layout.
+          Tape the four together, stand the pyramid on its narrow end at the centre of the screen,
+          play a "Pyramid 360°" hologram full screen, and dim the room. The
+          <a href="/tools/holopath/articles/diy-hologram-pyramid">DIY pyramid guide</a> has sizes
+          for other screens and the formula behind them.</p>
         </div>
       </details>
 
@@ -122,7 +149,8 @@
           LED-equipped blades that spin at high speed. Because the LEDs change colour faster than
           your eye can track, you see a floating image instead of the spinning blades. Content needs
           to be circular, centred on a black background — which is exactly what HoloPath's "Hologram Fan"
-          layout produces. Most fan displays accept MP4 or GIF files via SD card or Wi-Fi.</p>
+          layout produces. Fans differ in what they accept: some read MP4 or GIF files from a
+          memory card, others only take files through their own app, so check the manual.</p>
         </div>
       </details>
 
@@ -133,7 +161,8 @@
           A piece of glass or clear acrylic is angled at 45° between the viewer and a hidden screen.
           The screen shows a bright image on a black background, which the glass reflects toward
           the viewer — making it appear to float in mid-air. HoloPath's "Pepper's Ghost" layout
-          positions the hologram in the lower-centre of a 16:9 black canvas, optimised for this setup.</p>
+          sets the hologram low on a 16:9 black canvas and mirrors it, because a single reflection
+          swaps left and right.</p>
         </div>
       </details>
 
@@ -150,34 +179,39 @@
       <h2>Output &amp; Quality</h2>
 
       <details class="faq-item">
-        <summary>Why is the output a GIF and not a video?</summary>
+        <summary>Should I export a GIF or a video?</summary>
         <div class="faq-answer">
-          <p>GIFs are universally supported — they autoplay and loop on every device, browser, and
-          platform without needing a video player. This is important for hologram pyramids, which
-          need seamless looping. For hologram fan displays that prefer MP4, you can convert the GIF
-          to MP4 using free tools like ffmpeg or online converters.</p>
+          <p>A GIF plays and loops on almost any device without a video player, which suits a
+          pyramid on a phone. It is limited to 256 colours and comes out large: a test hologram at
+          default settings was 8.3 MB. The video option records MP4 where your browser supports it,
+          and WebM otherwise. It keeps smooth colour and is far smaller (0.12 MB for the same test),
+          but it records in real time and does not loop by itself, so set your player to repeat.
+          <a href="/tools/holopath/articles/gif-vs-video-hologram">GIF vs video</a> covers which
+          to use for each display.</p>
         </div>
       </details>
 
       <details class="faq-item">
         <summary>What resolution should I use?</summary>
         <div class="faq-answer">
-          <p>For smartphone hologram pyramids, 400–512px is usually sufficient. For tablet displays
-          or hologram fans, 600–800px gives better detail. Higher resolution means larger file sizes
-          and longer processing times. The output resolution refers to the hologram image size before
-          it's placed into the layout canvas.</p>
+          <p>Resolution sets the size HoloPath processes your subject at, and the layout canvas is
+          twice that, up to 800 px. From 400 up the canvas is already 800 px, so a higher setting
+          only adds detail where a layout shows the subject large: the Hologram Fan draws it up to
+          600 px across, so 640 or 800 helps there. Pyramid copies are at most 331 px across and the
+          Pepper's Ghost subject is about 248 px tall, so 400 or 512 is plenty for those. HoloPath
+          never enlarges your source, and higher settings take longer and make bigger files.</p>
         </div>
       </details>
 
       <details class="faq-item">
         <summary>What do the effect presets do?</summary>
         <div class="faq-answer">
-          <p><strong>Classic</strong> — traditional cyan/green hologram with moderate scan lines and glow.
-          <strong>Cyberpunk</strong> — high-contrast magenta with strong glitch and chromatic aberration.
-          <strong>Ghost</strong> — faded, transparent look with heavy flicker and low saturation.
-          <strong>Glitch</strong> — aggressive horizontal displacement and noise.
-          <strong>Matrix</strong> — green-tinted with prominent scan lines and grid overlay.
-          All presets are starting points — every parameter can be adjusted individually.</p>
+          <p><strong>Classic:</strong> cyan, with moderate scan lines, glow, a grid and chromatic
+          aberration. <strong>Cyberpunk:</strong> magenta, with heavy glitch, strong scan lines and
+          chromatic aberration. <strong>Ghost:</strong> blue, with edge detection, heavy flicker and
+          no grid. <strong>Glitch:</strong> near-maximum glitch and strong noise, with the colour
+          cycling through the rainbow. <strong>Matrix:</strong> green, with sharp scan lines and a
+          grid. Every preset is a starting point; each setting can be changed afterwards.</p>
         </div>
       </details>
 

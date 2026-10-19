@@ -240,19 +240,25 @@ llms.txt, grids, and the about/terms/FAQ tool copy automatically.
 Two generators emit checked-in, marker-bounded HTML; CI regenerates
 and fails on drift:
 
-1. **Chrome + site metadata** — `scripts/sync-static-html.mjs`
-   (`npm run sync-static`): the global nav/footer and the tools grids
-   on `/` and `/tools/` are JS-injected at runtime, but each
-   placeholder div also carries a static pre-rendered copy for
-   crawlers, emitted by running the REAL renderers from
-   `site/shared.js` + `site/tools-data.js` in a sandbox. The same run
-   generates **`site/sitemap.xml`** (site pages must have a rule in the
-   script — it fails on unknown pages; live-tool sub-pages are
-   discovered, with legal/noindex pages excluded), **`/llms.txt`**, and
-   the live-tool lists on `/about`, `/terms`, and the FAQ answer
-   (visible + JSON-LD) from each live tool's `blurb`. Re-run after
-   changing nav links, footer links, tool directory data, or launching
-   a tool.
+1. **Tool grids + site metadata** — `scripts/sync-static-html.mjs`
+   (`npm run sync-static`): the tools grids on `/` and `/tools/` and the
+   Sites I Like list are JS-injected at runtime, and each placeholder
+   div also carries a static pre-rendered copy for crawlers, emitted by
+   running the REAL renderers from `site/shared.js` +
+   `site/tools-data.js` in a sandbox. **Nav, footer and tool headers are
+   not pre-rendered.** Since 6d9d1f7 they exist only after JavaScript
+   runs (`rfNav`/`rfFooter`, and each tool's `rfMountToolChrome`), so a
+   page without JS links nowhere; Google renders JS, and
+   `docs/adsense-readiness.md` records the browser check that they
+   render on every page type. The same run generates
+   **`site/sitemap.xml`** (site pages must have a rule in the script; it
+   fails on unknown pages; live-tool sub-pages are discovered, with
+   legal/noindex pages excluded), **`/llms.txt`**, and the live-tool
+   lists on `/about`, `/terms`, `/privacy`, and the FAQ answer from each
+   live tool's `blurb`. That answer's visible text and its FAQPage
+   JSON-LD come from one sentence, and `check-links` fails on any page
+   whose FAQ markup differs from the answers it shows. Re-run after
+   changing tool directory data, the friends list, or launching a tool.
 2. **Prose** — `scripts/sync-content.mjs` (`npm run sync-content`):
    page copy lives in sibling Markdown files (`X.md` next to `X.html`)
    and renders into `generated:content` blocks; essay shells are

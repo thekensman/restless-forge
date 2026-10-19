@@ -34,8 +34,8 @@ So SandPath does what practically everyone does: it approximates.
 ## Nearest neighbour
 
 The heuristic is simple to state. Start with the first path. When it ends, look
-at every path not yet drawn and jump to whichever one starts closest to where
-you are. Repeat until none are left.
+at every path not yet drawn and jump to whichever one has an end closest to
+where you are, then draw it from that end. Repeat until none are left.
 
 It runs fast, it is easy to reason about, and it typically lands within
 20–25% of optimal — a large improvement over document order, which is
@@ -70,9 +70,11 @@ better than effort spent on the optimiser.
 adjacent paths where you can. A single continuous outline is dramatically better
 than the same outline chopped into segments.
 
-**Watch the preview.** The preview shows travel moves. If it shows lines
-slashing across empty space, the sand will too. This is the cheapest possible
-feedback loop and it is worth using before every conversion.
+**Count the paths.** The ball makes a travel move from each path to the next,
+so the number of paths is the number to watch. For a raster image, the trace
+preview reports it before you convert; after converting, the results report it
+as subpaths. It is the cheapest feedback there is, and worth checking before
+every conversion.
 
 **Prefer designs that are already connected.** Continuous-line art, single-stroke
 lettering, and spiral-based designs convert beautifully because they were
@@ -96,8 +98,8 @@ how the machine works.
 
 They stop registering as defects once the pattern reads as a whole. The
 reasonable goal is not zero travel lines — it is not having one long obvious
-scar across an otherwise empty area. If the preview does not show that, the
-pattern is fine.
+scar across an otherwise empty area, and those come from pieces that sit far
+out on their own. A design without them is fine.
 
 Ready to try it? [Open the converter](/tools/sandpath/), or read
 [how the conversion works](/tools/sandpath/how-it-works/).

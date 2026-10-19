@@ -1,49 +1,87 @@
-# LED Hologram Fans: How POV Technology Creates 3D Displays
+---
+date: 2026-03-15
+updated: 2026-10-13
+author: Kenneth Cross
+---
+# LED Hologram Fans: How a Spinning Blade Draws an Image
 
-Walk into a shopping mall in 2026 and there is a reasonable chance you will see one: a spinning disc of light suspended on a wall or ceiling, a glowing logo or product image apparently floating in mid-air with nothing supporting it. LED hologram fans have moved from novelty to mainstream display technology in just a few years. Understanding how they actually work — and what they can and cannot do — helps you use them effectively and set realistic expectations.
+An LED hologram fan is a blade, or several, lined with LEDs and spun fast enough
+to disappear. As it turns, a controller switches each LED on and off at exactly
+the right moment, and your eye merges the sweeps into a picture that seems to
+hang in the air. Unlike a pyramid, a fan reflects nothing: it draws the image
+directly, one ring of light at a time, and that shapes what works on one.
 
-## The Core Mechanism: Persistence of Vision
+## Persistence of vision, in practice
 
-LED hologram fans are persistence-of-vision (POV) displays. The term refers to the way the human visual system retains an impression of a light source for a brief period — roughly 1/25 of a second — after the source has moved or switched off. Early cinema exploited this property: a film projector shows only 24 still frames per second, but the eye blends them into apparent continuous motion.
+Your eye cannot follow the blade. What it registers is the light each LED
+leaves along its path, blended over many turns. Once the blade completes a turn
+faster than your eye can separate, the trails fuse into a steady image and the
+dark blade between the lit points vanishes. A faster blade, or more blades,
+makes the picture steadier; more LEDs along each blade make it sharper.
 
-A hologram fan exploits POV in a more aggressive way. The device is essentially a motorized arm with one or more LED strips mounted along its length. The arm spins rapidly — typically 700 to 900 revolutions per minute. At that speed, one complete revolution takes roughly 70 milliseconds, which is comfortably within the human visual retention window. As the arm sweeps around its circular path, the LEDs flash on and off in carefully timed patterns. The eye, receiving these flashes from slightly different angular positions many times per second, integrates them into a complete circular image that appears to hover in the disc swept by the spinning arm.
+## The picture is drawn in rings and spokes
 
-## How Pixels Are Timed
+A rectangular image has to be redrawn in the fan's own geometry. Each LED sits
+at a fixed distance from the hub and can only ever draw one ring. The
+controller divides each turn into a fixed number of steps and decides, at every
+step, which LEDs to light. The fan's pixels sit where those rings cross those
+spokes.
 
-The image displayed on a hologram fan is pre-processed by the fan's internal controller to map a conventional rectangular image onto a polar coordinate system. Each column of pixels in the source image corresponds to a radial strip — a spoke — of the circular display area. Each row of pixels corresponds to a specific distance from the center of rotation.
+That makes detail uneven across the disc. Near the hub the steps crowd
+together, and at the rim they spread apart. On a hypothetical fan that switches
+its LEDs 360 times per turn, the gap between steps is under 1 mm at 5 cm from
+the hub and about 4.4 mm at the rim of a 50 cm disc. Fine detail belongs near
+the centre; the edge suits bold shapes.
 
-The controller tracks the arm's angular position using a Hall effect sensor (a magnetic position detector) and fires the LEDs in the correct sequence as each angular position is reached. The LEDs must switch on and off in microseconds to achieve the illusion cleanly. The more LEDs per blade and the faster the motor, the higher the achievable resolution and the smoother the image appears.
+## Black is the trick
 
-## Single-Blade vs. Multi-Blade Designs
+An LED that is off is invisible, and through the gaps in the spinning blade you
+see the wall behind. That is what makes a fan image float: every black pixel in
+your file is a hole in the picture. It is also why the background must be pure
+black. Anything else, even a faint grey, lights LEDs across the whole disc and
+turns the floating object into a glowing plate.
 
-Entry-level hologram fans use a single LED strip as their rotor. The single blade sweeps the entire 360-degree arc on every revolution, painting the image one radial stripe at a time. Because the entire image must be completed in one revolution (or a small number of revolutions), single-blade fans require precise timing and produce images with a characteristic "waterfall" update pattern that is visible when viewing animated content.
+HoloPath helps twice here. Its output colour is the source's brightness times
+the hue, so black in your source stays black, and its fan layout forces
+everything outside a circle to black.
 
-Dual-blade designs mount two LED strips at 180 degrees to each other. Each blade handles 180 degrees of the image arc, effectively doubling the number of LED flashes per unit area per second. This reduces visible flickering and allows faster animation playback. Four-blade designs, common in higher-end commercial units, distribute the work across 90-degree arcs each, producing the smoothest, most stable images with the highest apparent brightness.
+## What HoloPath's fan layout does
 
-## Resolution, Color, and Image Quality
+The Hologram Fan layout draws on a square canvas, 800 by 800 pixels at the
+default resolution setting:
 
-The effective resolution of an LED fan depends on two factors: the number of LEDs per blade (radial resolution) and the number of angular positions the controller distinguishes per revolution (angular resolution). A typical consumer fan with 224 LEDs per blade and 224 angular steps produces an effective circular image of roughly 224×224 pixels across the diameter. Higher-end units reach 400–500 effective pixels across.
+- the subject is scaled to fit 75% of the width, up to 600 pixels, and centred;
+- everything outside a circle 90% of the width is set to black, leaving a
+  margin inside the disc;
+- the image is not mirrored, because you look at a fan directly rather than in
+  a reflection.
 
-Color is handled by RGB LEDs that can mix any color, but the fast switching times required by POV displays mean that color reproduction is less accurate than a static display. Bright, saturated colors work best. Subtle gradients and skin tones are challenging — they can appear banded or slightly off-hue when reproduced through LED POV timing.
+The vignette that darkens the corners of every HoloPath frame suits a fan well,
+since the circle would have cut those corners off anyway.
 
-The floating quality comes from the dark environment: the spinning blade itself is nearly invisible because it is thin, moving fast, and the eye is focusing on the illuminated image it traces. The complete absence of a visible screen boundary, combined with the circular form and apparent depth of the image, creates a strong impression of genuine three-dimensionality.
+## Sending a file to a fan
 
-## Preparing GIF Files for Fan Displays
+Fans differ more than any other hologram display, so check the manual for three
+things:
 
-Most consumer LED fans accept GIF files loaded via USB drive or a companion smartphone app. Preparing content for fan display requires a few specific steps beyond standard image creation.
+- **Which formats it takes.** Some fans read GIFs or videos from a memory card;
+  others only accept files through their own app, which converts what you give
+  it.
+- **Its resolution.** Fans are far coarser than an 800-pixel canvas, and their
+  software scales your file down. If the fan's app limits file size, the
+  Resolution setting of 256 gives a 512-pixel canvas at about half the size.
+- **How it handles timing.** A converter may re-time frames to the fan's own
+  rate, so a loop can run faster or slower than it did in HoloPath.
 
--   **Circular crop:** The fan displays a circular image area. Content should be cropped to a circle with a black or transparent background outside the circle. Square images with content in the corners will simply have those corners cut off.
--   **Recommended resolution:** Match the fan's native resolution — typically 200×200, 224×224, or 448×448 pixels depending on model. Larger images are downscaled and do not improve quality; smaller images are upscaled and may appear blurry.
--   **Background:** Pure black backgrounds are essential. Any non-black area of the image will be displayed as illuminated pixels, creating a filled disc rather than a floating figure against darkness.
--   **Frame rate:** Most fans support 10–25 frames per second for animated GIFs. Match your GIF frame delay to the fan's playback speed — check the manufacturer's specification. A mismatch results in jerky or accelerated animation.
--   **File size:** Keep GIF files under 10 MB for reliable loading on most fan controllers. Long animations with many frames should be compressed aggressively or converted to video if the fan supports it.
+At default settings, a 24-frame fan GIF measured 6.9 MB on a test subject. If
+that is too big for your fan's transfer, cut Noise first, because random grain
+compresses worst of all. Fewer frames or a lower resolution come next.
 
-## Common Use Cases and Limitations
+## Mounting and viewing
 
-LED fans excel in retail environments, trade shows, event decoration, and home display setups where a striking visual effect is more important than photographic image quality. A glowing company logo, a spinning product render, or an animated mascot all work brilliantly. Photorealistic imagery — detailed faces, complex textures, subtle color work — is less successful due to the resolution and color limitations.
-
-Fans also require a dark or dim environment. In brightly lit spaces, ambient light overwhelms the LED output and the image washes out. The noise from the motor (a gentle whirring sound) is worth considering in quiet environments. And unlike static displays, fans have moving parts that require occasional maintenance — bearings wear out over time in heavily used units.
-
-Despite these limitations, no other consumer display technology produces a comparable floating-in-air visual effect at this price point. For the right application and environment, an LED fan display is genuinely impressive — and pairing one with holographic-style image content generated by tools like HoloPath produces results that stop people in their tracks.
+A fan is a fast-spinning blade, so mount it on a wall or stand out of reach,
+with its guard on if it came with one. View it from straight in front: from the
+side the disc flattens into an ellipse and the image with it. Like every
+hologram display, it looks best in dim light.
 
 <p class="article__cta"><a href="/tools/holopath/" class="btn--holo">Try HoloPath Free →</a></p>

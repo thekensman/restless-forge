@@ -83,6 +83,11 @@ author: Kenneth Cross
 
 - `date`/`author` render a byline under the first heading. `author`
   defaults to Kenneth Cross; see "One author identity" below.
+- `updated` (optional, `YYYY-MM-DD`) adds "Updated <month year>" beside the
+  published date. Use it for a substantial revision; keep `date` as the
+  original publication so a reworked page does not pose as new. A tool
+  article's hand-written JSON-LD carries the same pair as `datePublished`
+  and `dateModified`.
 - `title`/`description`/`date` are required on an essay, and drive its
   `generated:head` block plus the essays index cards.
 - `image` (optional, essays) sets that essay's social card — `og:image`

@@ -14,7 +14,9 @@ bit bigger" changes a quote so much more than people expect.
 
 Area in square inches is multiplied by a **time-per-square-inch** rate for the
 style, then by a **placement multiplier**, giving needle time. Setup time and
-breaks are added. Finally, hours are multiplied by the artist's hourly rate.
+breaks are added. Finally, hours are multiplied by the artist's hourly rate: the
+low end of the estimate uses the bottom of the tier's rate, and the high end uses
+the top of it plus another 15%.
 
 ## Style: the largest single multiplier
 
@@ -53,8 +55,10 @@ over bone that moves with every breath. Hands are the highest multiplier because
 the skin is thin, mobile, and full of tendons. A flat, fleshy, stationary
 surface like an outer thigh is simply faster to work on.
 
-Pain matters for a different reason: it determines how long you can sit. A
-high-pain placement means more breaks, and breaks are billed time.
+Pain matters for a different reason: it decides how long you can sit, and a
+painful placement usually means more breaks, which are billed time. The estimator
+adds the same break time everywhere, so on a painful placement expect the real
+figure to run higher.
 
 ## Artist rate
 
@@ -80,6 +84,8 @@ Estimated time is not just needle time:
 
 Multi-session work usually costs slightly more in total than the same hours in
 one sitting, because each session carries its own setup and its own healing gap.
+The estimator counts setup once, so when it splits a piece into sessions, add
+about half an hour at the artist's rate for each extra session.
 
 ## Shop minimums
 
