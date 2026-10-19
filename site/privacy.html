@@ -27,7 +27,7 @@
 
   <main class="page">
     <h1>Privacy at Restless Forge</h1>
-    <p><em>Last updated: August 2026</em></p>
+    <p><em>Last updated: October 2026</em></p>
 
     <h2>The Short Version</h2>
     <p>
@@ -44,9 +44,13 @@
 
     <h2>Data Collection</h2>
     <p>
-      <strong>We do not collect personal data.</strong> Restless Forge does not
-      require accounts, logins, or any form of registration. We don't use
+      <strong>We collect almost no personal data.</strong> Restless Forge does
+      not require accounts, logins, or any form of registration. We don't use
       contact forms that store submissions. We don't set first-party cookies.
+      The only personal data our servers handle is your IP address in basic
+      server logs, kept for up to 14 days (see Data Retention), and, if you use
+      a cloud-assisted tool, the hashed values it keeps for rate limiting (see
+      Cloud-Assisted Tools).
     </p>
 
     <h2>How the Tools Work</h2>
@@ -78,7 +82,8 @@
       describing its exact data flow.
     </p>
     <p>
-      <strong>Rise &amp; Rhyme</strong> sends your Google Calendar public iCal
+      <strong>Rise &amp; Rhyme</strong> (in testing, not yet listed in the tool
+      directory) sends your Google Calendar public iCal
       URL to our server once per day (in the evening before your alarm). Our
       server fetches the calendar feed, extracts event titles and times for
       the next day, and sends them to the Anthropic Claude API to generate
