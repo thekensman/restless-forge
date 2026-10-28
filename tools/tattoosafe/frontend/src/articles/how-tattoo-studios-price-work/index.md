@@ -3,7 +3,7 @@ where on your body. That is not evasion. Those three answers, plus the artist's
 rate, are genuinely the whole calculation — and they combine in a specific order
 that explains most of the quotes people find surprising.
 
-## Almost nobody prices by the piece
+## Most work is priced by time
 
 Flash sheets sometimes carry fixed prices, and very small standard designs
 sometimes do. Everything else is priced by time.
@@ -116,9 +116,10 @@ A quote well above an estimate is usually correct, and the productive question
 is "what about this takes longer than I'm picturing" rather than "why so
 expensive."
 
-A quote well *below* is the one to worry about. Underpricing usually signals an
-apprentice, a rushed session, or corners cut somewhere you cannot see — and this
-is a permanent object on your body.
+A quote well *below* deserves a question too: who will do the work, how many
+sessions it is planned for, and whether the design was simplified. There may be
+a good answer, such as a lower local rate, but this is a permanent object on
+your body, so it is worth knowing which.
 
 ## Using an estimate properly
 
