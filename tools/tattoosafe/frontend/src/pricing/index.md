@@ -1,5 +1,6 @@
-Almost nobody quotes a tattoo by the piece. Artists quote by the hour, and the
-number of hours comes from size, style, and where on your body the work goes.
+Apart from small flash pieces, which many studios price per piece, custom
+tattoos are usually quoted by the hour or by a session rate, and the number of
+hours comes from size, style, and where on your body the work goes.
 Once you know how those three inputs turn into time, a quote stops feeling
 arbitrary and you can tell a fair one from a bad one.
 
@@ -112,9 +113,10 @@ toward. If a quote comes in far above the estimate, the useful question is not
 "why so expensive" but "what about this piece takes longer than I'm picturing" —
 the answer is usually complexity or placement, and it is usually correct.
 
-If a quote comes in far *below*, be careful. Underpricing tends to mean an
-apprentice, a rushed session, or a shop cutting corners somewhere you cannot
-see.
+If a quote comes in far *below*, ask what accounts for the difference: who
+will do the work, how many sessions it is planned for, and whether the design
+was simplified. There may be a good answer, such as a lower local rate or a
+guest artist's promotion, but it is worth knowing which.
 
 Ready to estimate? Open the [TattooSafe preview tool](/tools/tattoosafe/) for
 the full experience including camera preview and size checking against 16 body
