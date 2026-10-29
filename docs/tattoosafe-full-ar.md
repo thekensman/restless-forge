@@ -1,14 +1,19 @@
 # TattooSafe Full AR
 
-Opt-in body tracking in TattooSafe's camera preview. The standard preview is a
+Opt-in body mapping in TattooSafe's camera preview. The standard preview is a
 static overlay the visitor drags into place; Full AR finds their body with
 MediaPipe and keeps the design on the placement they picked as they move:
 turned with the limb, foreshortened with it, curved to its measured width, and
 hidden where clothing covers the skin. Everything runs in the visitor's tab.
 Nothing is uploaded, so the tool stays client-side (not `tier: 'cloud'`).
 
+Visitor-facing copy calls it **body mapping**, never "tracking": on a site whose
+promise is that nothing about the visitor leaves their device, "tracking" reads
+as surveillance. Code and these docs keep the library's own terms (tracker,
+landmarks).
+
 It costs a download of about 30 MB, so nothing loads until the visitor presses
-**Full AR (body tracking)** and accepts the notice, which states the download,
+**Full AR (body mapping)** and accepts the notice, which states the download,
 the face-first requirement, the device load, and that the size is an estimate.
 
 ## Files

@@ -92,9 +92,10 @@ goes much better when you arrive with dimensions instead of a phone.
 
 ## What a preview cannot tell you
 
-It is an overlay. It does not track your arm or respond to how skin moves (the
-optional curve setting approximates a limb rather than measuring yours), and it
-cannot show how the piece will look in three years.
+It is an overlay. The standard preview stays where you put it, and Full AR
+follows your limb from a distance but still draws a flat image on it. Neither
+responds to how skin stretches as you move, and neither can show how the piece
+will look in three years.
 
 What it does is remove the most avoidable failure mode — discovering scale at
 the moment the stencil goes on, when you have already chosen the design, booked

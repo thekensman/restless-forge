@@ -192,7 +192,7 @@
       device &mdash; nothing is recorded or uploaded.</p>
       <canvas class="ar__canvas" id="ar-canvas" width="640" height="480"></canvas>
       <p class="ar__hint" id="ar-hint" aria-live="polite"></p>
-      <progress class="ar__progress" id="ar-progress" max="1" value="0" hidden aria-label="Body tracking download"></progress>
+      <progress class="ar__progress" id="ar-progress" max="1" value="0" hidden aria-label="Body mapping download"></progress>
       <div class="ar__cal" id="ar-cal" hidden>
         <label class="ar__cal-size">Card outline
           <input type="range" id="ar-cal-size" min="5" max="95" value="30" aria-label="Card outline size">
@@ -212,7 +212,7 @@
       </div>
       <div class="ar__buttons">
         <button class="btn btn--primary" id="ar-start" disabled>Start Camera</button>
-        <button class="btn" id="ar-full" disabled>Full AR (body tracking)</button>
+        <button class="btn" id="ar-full" disabled>Full AR (body mapping)</button>
         <button class="btn" id="ar-standard" hidden>Standard preview</button>
         <button class="btn" id="ar-stop" hidden>Stop Camera</button>
         <button class="btn" id="ar-flip" hidden>Flip camera</button>
@@ -243,7 +243,7 @@
     <dialog class="ar-dialog" id="ar-dialog" aria-labelledby="ar-dialog-title">
       <form method="dialog">
         <h2 class="ar-dialog__title" id="ar-dialog-title">Turn on Full AR?</h2>
-        <p>Full AR tracks your body, so the design stays on the part you picked as you move,
+        <p>Full AR maps your body, so the design stays on the part you picked as you move,
         turns with it, curves around it and hides under your clothes.</p>
         <ul class="ar-dialog__list">
           <li><strong>It downloads about 30&nbsp;MB</strong> the first time, from this site. Your
@@ -251,7 +251,7 @@
           <li><strong>It finds your face first.</strong> Prop your phone up or stand in front of a
           mirror so your face and the body part are both in view. A close-up of one arm won't
           lock on.</li>
-          <li><strong>Everything runs on your device.</strong> The video never leaves it. Tracking
+          <li><strong>Everything runs on your device.</strong> The video never leaves it. Mapping
           works the processor hard, so older phones may slow down or get warm.</li>
           <li><strong>The size is an estimate</strong> from the height you entered. For an exact
           size, use the standard preview and calibrate it with a card.</li>
@@ -302,7 +302,7 @@
       holding a printed stencil against your skin, and use the silhouette mockup to see the size
       against the whole placement.</p>
       <p><strong>Full AR</strong> makes the opposite trade. After a one-time download of about
-      30&nbsp;MB of body-tracking models from this site, it keeps the design on the placement you
+      30&nbsp;MB of body-mapping models from this site, it keeps the design on the placement you
       chose as you move: turned and shortened with the limb, curved to the limb's measured width,
       and hidden where clothing covers the skin. It finds you by your face, so it works with the
       phone propped up or facing a mirror rather than up close, and it follows eight placements:
@@ -310,7 +310,7 @@
       estimate from the height you enter. The <a href="/tools/tattoosafe/faq/">FAQ</a> covers how
       to frame yourself for it.</p>
       <p>Nothing from the camera is recorded or transmitted, in either mode. The video stream is
-      read by JavaScript in your tab and drawn straight to a canvas, and Full AR's tracking runs in
+      read by JavaScript in your tab and drawn straight to a canvas, and Full AR's body mapping runs in
       the same tab; there is no upload step and no server that could receive it.</p>
 
       <h2>Why Placement Changes the Answer</h2>

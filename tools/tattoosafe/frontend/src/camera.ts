@@ -630,7 +630,7 @@ export function setupCameraPreview(
       out = ar.tracker.detect(video, now, wantMask);
     } catch (e) {
       endAr();
-      onError(`Body tracking stopped (${(e as Error).message}). The standard preview still works.`);
+      onError(`Body mapping stopped (${(e as Error).message}). The standard preview still works.`);
       return;
     }
     if (out.mask) takeMask(out.mask);
@@ -972,7 +972,7 @@ export function setupCameraPreview(
     const name = (getBodyPart(placementId)?.label ?? "this placement").toLowerCase();
     if (!spec) {
       return `Full AR doesn't follow the ${name}, so drag the design into place. ` +
-        `It tracks the ${AR_PLACEMENT_LIST}.`;
+        `It follows the ${AR_PLACEMENT_LIST}.`;
     }
     if (!ar.anchor) {
       return `Looking for you. Step back until ${spec.needs} are in view. ` +
@@ -1022,15 +1022,15 @@ export function setupCameraPreview(
       if (ar || arLoading || !design) return;
       arLoading = true;
       endCalibration(false);
-      arStatus = "Downloading body tracking…";
+      arStatus = "Downloading body mapping…";
       if (progress) progress.value = 0;
       syncControls();
       updateHint();
       const mb = (n: number): string => (n / 1e6).toFixed(0);
       const trackerP = load((loaded, total) => {
-        arStatus = `Downloading body tracking: ${mb(loaded)} of ${mb(total)} MB`;
+        arStatus = `Downloading body mapping: ${mb(loaded)} of ${mb(total)} MB`;
         if (progress) progress.value = total ? loaded / total : 0;
-        if (loaded >= total) arStatus = "Starting body tracking…";
+        if (loaded >= total) arStatus = "Starting body mapping…";
         updateHint();
       });
       trackerP.catch(() => undefined); // handled below; avoid an unhandled rejection if the camera fails first

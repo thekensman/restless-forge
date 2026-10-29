@@ -18,7 +18,7 @@ TattooSafe moves that check to before the decision.
 Two views handle it. The **camera preview** composites your design onto a live
 video feed so you can move it around your actual body; calibrate it against a
 bank card held on your skin and the design is drawn at its real size. Turn on
-**Full AR** and the preview tracks your body instead, keeping the design on your
+**Full AR** and the preview maps your body instead, keeping the design on your
 forearm, thigh or chest as you move. The **silhouette view** draws the design's
 footprint on a body outline at its true share of the placement for your height,
 with real centimetre dimensions: useful when you want measurements rather than
@@ -61,10 +61,10 @@ the reasoning rather than trust the output.
 It is a sanity check, not a quote. A real quote comes from a real artist looking
 at a real design.
 
-## Body tracking
+## Body mapping
 
 Full AR is optional and off until you ask for it, because it is heavy. It runs
-MediaPipe, Google's open-source body-tracking library, in your browser: a pose
+MediaPipe, Google's open-source body-mapping library, in your browser: a pose
 model finds your shoulders, elbows, hips and knees in each frame, and a second
 model sorts the picture into skin, clothes and background. TattooSafe anchors
 the design between the joints of the placement you chose, turns and shortens it
@@ -83,7 +83,7 @@ body proportions, so for an exact size the card calibration is still the way.
 Nothing you enter or upload is sent to a server. The camera feed is processed
 frame by frame in the browser and never recorded. Images stay on your device.
 There is no account, no upload endpoint, and nothing to delete later. Full AR
-downloads its tracking models from this site and runs them in your browser, so
+downloads its body-mapping models from this site and runs them in your browser, so
 the frames it reads stay on your device too.
 
 This is a property of how the tool is built, not a policy that could quietly

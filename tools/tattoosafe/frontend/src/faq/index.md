@@ -33,21 +33,21 @@ screen to match.
 
 ## What is Full AR?
 
-An optional mode that tracks your body. Tap **Full AR (body tracking)** and the
+An optional mode that maps your body. Tap **Full AR (body mapping)** and the
 design stays on the placement you picked as you move. It turns with the limb,
 shortens when the limb points toward the camera, curves to the limb's measured
 width when **Curve around a limb** is on, and disappears under clothing that
 covers the skin when **Hide under clothing** is on.
 
-It runs MediaPipe, Google's open-source body-tracking library, inside your
+It runs MediaPipe, Google's open-source body-mapping library, inside your
 browser. The first time, that means a download of about 30 MB from this site;
-your browser keeps it, so later visits start faster. Tracking works the
+your browser keeps it, so later visits start faster. Body mapping works the
 processor hard, so older phones may slow down or get warm. The standard preview
 stays the default, and **Standard preview** switches back at any time.
 
 ## Why does Full AR need to see my face?
 
-The body tracker finds a person by their face first and works out the rest of
+The body mapping finds a person by their face first and works out the rest of
 the body from there. A close-up of one arm or leg, with no face in view, never
 locks on.
 
@@ -55,7 +55,7 @@ So frame yourself the way a mirror would. Prop your phone against something, or
 hold it facing a mirror, and step back until your face and the body part are
 both in view. For a thigh or calf that means most of your body, so the design
 takes up a small part of the screen. That is the trade-off for having it
-follow you. If tracking loses you, the hint under the preview says what it
+follow you. If it loses you, the hint under the preview says what it
 needs to see.
 
 Full AR starts with the front camera and mirrors the picture. **Flip camera**
@@ -68,7 +68,7 @@ calf. Choose a side with the **Side** menu, or leave it on **Either** to follow
 whichever side is more visible.
 
 The other eight stay where you drag them, even in Full AR. The wrist, the back
-of the hand and the spot behind the ear are too small for a body tracker to
+of the hand and the spot behind the ear are too small for body mapping to
 place a design on reliably, and nobody can film their own upper back, lower
 back or back of the neck.
 
@@ -77,7 +77,7 @@ back or back of the neck.
 It is an estimate. Full AR works out the scale from the height you entered and
 the usual proportions of a body: a forearm is about 15% of a person's height, a
 thigh about 25%. Your own proportions can differ from those averages by a few
-percent, and the tracker's idea of where your joints are can be off by a few
+percent, and the model's idea of where your joints are can be off by a few
 percent more. It leans on the limbs that look longest, because a limb pointing
 at the camera looks shorter than it is.
 
@@ -93,7 +93,7 @@ There is no upload endpoint to send them to — the tool has no backend for imag
 handling at all. You can verify this by loading the page, disconnecting from the
 network, and using it normally.
 
-Full AR changes none of that. Its tracking model downloads from this site and
+Full AR changes none of that. Its body-mapping model downloads from this site and
 then runs in your browser, on frames that never leave your device. It needs a
 connection the first time, for that download.
 

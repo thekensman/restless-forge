@@ -259,7 +259,7 @@ function setupFullAr(): void {
   };
   $("#ar-full")?.addEventListener("click", () => {
     if (typeof dialog?.showModal !== "function") {
-      if (window.confirm("Full AR downloads about 30 MB the first time and runs body tracking on this device. It needs to see your face. Continue?")) begin();
+      if (window.confirm("Full AR downloads about 30 MB the first time and runs body mapping on this device. It needs to see your face. Continue?")) begin();
       return;
     }
     dialog.returnValue = "";
