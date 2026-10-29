@@ -183,6 +183,45 @@ describe("generateSilhouetteSvg", () => {
     expect(svg).toContain("5 in");
     expect(svg).not.toContain("cm</text>");
   });
+
+  // The design rect is the filled one; the usable area is the dashed outline.
+  const num = "(-?[\\d.e-]+)";
+  const designRect = (svg: string) => {
+    const m = svg.match(new RegExp(`<rect x="${num}" y="${num}" width="${num}" height="${num}" fill="#a882ff"`))!;
+    return { x: +m[1], y: +m[2], w: +m[3], h: +m[4] };
+  };
+  const usableRect = (svg: string) => {
+    const m = svg.match(new RegExp(`<rect class="usable-area" x="${num}" y="${num}" width="${num}" height="${num}"`))!;
+    return { x: +m[1], y: +m[2], w: +m[3], h: +m[4] };
+  };
+
+  it("keeps the design's aspect ratio on every placement", () => {
+    for (const bp of BODY_PARTS) {
+      for (const [w, h] of [[5, 5], [6, 10], [12, 4]]) {
+        const r = designRect(generateSilhouetteSvg(bp.id, 170, w, h));
+        expect(r.h / r.w, `${bp.id} ${w}x${h}`).toBeCloseTo(h / w, 6);
+      }
+    }
+  });
+
+  it("draws the usable area at the placement's real proportions, inside its zone", () => {
+    for (const bp of BODY_PARTS) {
+      const a = usableRect(generateSilhouetteSvg(bp.id, 170, 5, 5));
+      expect(a.h / a.w, bp.id).toBeCloseTo(bp.heightRatio / bp.widthRatio, 6);
+      expect(a.w).toBeLessThanOrEqual(bp.zone.w * 200 + 1e-9);
+      expect(a.h).toBeLessThanOrEqual(bp.zone.h * 400 + 1e-9);
+    }
+  });
+
+  it("a design at the maximum fills the usable area; an oversized one spills past it", () => {
+    const max = maxTattooDimensions("thigh", 170)!;
+    const svgMax = generateSilhouetteSvg("thigh", 170, max.maxWidthCm, max.maxHeightCm);
+    const a = usableRect(svgMax), d = designRect(svgMax);
+    expect(d.w).toBeCloseTo(a.w, 1);
+    expect(d.h).toBeCloseTo(a.h, 1);
+    const big = designRect(generateSilhouetteSvg("thigh", 170, max.maxWidthCm * 1.5, max.maxHeightCm));
+    expect(big.w).toBeGreaterThan(a.w * 1.4);
+  });
 });
 
 // ─── Pricing Market Data ─────────────────────────────────────

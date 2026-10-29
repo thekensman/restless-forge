@@ -109,6 +109,21 @@ a { color: var(--accent); } a:hover { color: var(--accent-light); }
 
 .ar__curve { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); }
 .ar__curve input[type="range"] { accent-color: var(--accent); width: 120px; }
+/* The toggles above set display, which beats the UA's [hidden] rule. */
+.ar [hidden] { display: none; }
+
+/* ─── Card calibration + controls under the camera ─── */
+.ar__cal { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; width: 100%; }
+.ar__cal-size, .ar__quick-field {
+  display: flex; align-items: center; gap: 0.6rem; width: 100%; max-width: 360px;
+  font-size: 0.85rem; color: var(--text-muted);
+}
+.ar__cal-size input, .ar__quick-field input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.ar__cal-buttons { display: flex; gap: 0.6rem; }
+.ar__quick { display: none; width: 100%; flex-direction: column; align-items: center; gap: 0.4rem; }
+.ar--active .ar__quick { display: flex; }
+.ar--calibrating .ar__quick, .ar--calibrating .ar__buttons { display: none; }
+.field__input[aria-invalid="true"] { border-color: var(--error); }
 
 /* ─── SEO / explainer content ─── */
 .seo-content { width: 100%; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }

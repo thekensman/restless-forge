@@ -4,6 +4,13 @@ Upload your design, activate your camera, and the image is composited onto the
 live video feed with Canvas. Drag to position, pinch to resize, and use the
 rotation slider to angle it.
 
+A camera cannot tell how far away your arm is, so the size starts as an
+estimate. Tap **Calibrate size**, hold a bank or ID card flat against your skin,
+and drag and resize the outline on screen until it matches the card. From then
+on the design is drawn at its real size for that distance, and pinching it
+changes the tattoo's size and the price estimate together. Calibrate again if
+you move the phone closer or further away.
+
 There is deliberately no body tracking or AI. You line the design up against
 your own reflection and screenshot it. That sounds like a limitation, and in one
 sense it is — but manual positioning is more precise than automatic placement
@@ -24,10 +31,11 @@ network, and using it normally.
 
 It is a sanity check, not a quote.
 
-The estimates come from aggregated US market data and a documented model: area
-times a per-square-inch rate for the style, adjusted by placement difficulty,
-plus setup and breaks, times an hourly rate. Every constant is published on the
-[pricing page](/tools/tattoosafe/pricing/).
+The estimate comes from a documented model: area times a per-square-inch rate
+for the style, adjusted by placement difficulty, plus setup and breaks, times an
+hourly rate. The hourly bands are typical ranges for US shops, and the minutes
+per square inch are planning assumptions. Every constant is published on the
+[pricing page](/tools/tattoosafe/pricing/) so you can check it.
 
 What it cannot know is your specific artist's rate, your region, whether the
 design needs custom drawing time, or whether you are covering existing ink. Use
@@ -82,7 +90,8 @@ than a faint edge. For best results, upload artwork on a plain solid background.
 Because it is a flat image composited onto a lit, curved, moving body. No
 overlay that is not doing full 3D surface reconstruction will read as real ink.
 
-Judge scale and placement from the preview, not realism. That is what it is for.
+Use the preview to judge placement, and to judge size once you have calibrated
+it with a card. That is what it is for.
 
 ## Can I show the preview to my artist?
 

@@ -6,11 +6,19 @@
  * rotation/opacity sliders apply live. No body tracking — the user lines
  * the design up against their own reflection, then screenshots it.
  *
+ * Scale: a camera can't measure distance, so until the user calibrates,
+ * the frame is assumed to be DEFAULT_FRAME_WIDTH_CM across and the hint
+ * calls the size approximate. Calibration matches an on-screen outline to
+ * a bank or ID card (ISO/IEC 7810 ID-1, 85.60 × 53.98 mm) held flat on the
+ * skin, which gives the frame's real width at that distance. After that,
+ * pinch resizes the tattoo itself (in cm, through onResize) instead of
+ * zooming the picture, so the size panel and price follow.
+ *
  * Pure geometry helpers are exported for unit tests; DOM/media wiring is
  * in setupCameraPreview().
  */
 
-import { removeFlatBackground, invertForDarkBackdrop } from "./engine";
+import { removeFlatBackground, invertForDarkBackdrop, MIN_TATTOO_CM, MAX_TATTOO_CM } from "./engine";
 
 // ─── Overlay state & pure helpers ────────────────────────────
 
@@ -24,6 +32,13 @@ export interface OverlayState {
 
 export const MIN_SCALE = 0.05;
 export const MAX_SCALE = 8;
+
+/** Assumed real width of the camera frame until the user calibrates, cm. */
+export const DEFAULT_FRAME_WIDTH_CM = 50;
+/** ID-1 card (bank card, driving licence): 85.60 × 53.98 mm, 3.18 mm corners. */
+export const CARD_W_CM = 8.56;
+export const CARD_H_CM = 5.398;
+export const CARD_RADIUS_CM = 0.318;
 
 /** Keep the overlay center inside the canvas so it can't be lost off-screen. */
 export function clampCenter(x: number, y: number, canvasW: number, canvasH: number): { x: number; y: number } {
@@ -54,6 +69,53 @@ export function drawSize(imgW: number, imgH: number, canvasW: number, scale: num
   return { w, h: imgH > 0 && imgW > 0 ? (w * imgH) / imgW : w };
 }
 
+/**
+ * On-screen size of the design, in canvas px. With a real-world size, the
+ * tattoo's width is mapped onto the frame's width in cm (assumed until
+ * calibrated); without one, drawSize's image-based default applies.
+ * `scale` is the free zoom used before calibration (1 after it).
+ */
+export function overlaySize(
+  canvasW: number, frameWidthCm: number, wCm: number, hCm: number,
+  imgW: number, imgH: number, scale: number
+): { w: number; h: number } {
+  if (wCm > 0 && frameWidthCm > 0) {
+    const w = canvasW * (wCm / frameWidthCm) * scale;
+    const h = hCm > 0 ? (w * hCm) / wCm : imgW > 0 && imgH > 0 ? (w * imgH) / imgW : w;
+    return { w, h };
+  }
+  return drawSize(imgW, imgH, canvasW, scale);
+}
+
+/** Real width of the whole frame, given the matched card outline's width in canvas px. */
+export function frameWidthFromCard(canvasW: number, cardPx: number): number {
+  return cardPx > 0 ? (CARD_W_CM * canvasW) / cardPx : NaN;
+}
+
+/**
+ * Scale a w×h size by f, keeping its proportions and both sides within
+ * [min, max]. Used when pinch resizes a calibrated tattoo.
+ */
+export function scaleSize(w: number, h: number, f: number, min: number, max: number): { w: number; h: number } {
+  if (!(w > 0 && h > 0) || !Number.isFinite(f)) return { w, h };
+  const lo = Math.max(min / w, min / h);
+  const hi = Math.min(max / w, max / h);
+  const k = Math.min(Math.max(f, lo), Math.max(lo, hi));
+  return { w: w * k, h: h * k };
+}
+
+/** The status line under the canvas. */
+export function cameraHint(o: { calibrating: boolean; calibrated: boolean; sizeLabel: string }): string {
+  if (o.calibrating) {
+    return "Hold a bank or ID card flat on your skin where the tattoo will go. " +
+      "Drag the outline onto the card and resize it until the edges line up, then tap Done.";
+  }
+  const size = o.sizeLabel ? `${o.sizeLabel} · ` : "";
+  return o.calibrated
+    ? `${size}true size at the distance you calibrated · drag to move · pinch or scroll to resize`
+    : `${size}approximate size until you calibrate with a card · drag to move · pinch or scroll to zoom`;
+}
+
 export interface WrapStrip {
   /** Source x range, in design pixels. */
   u0: number;
@@ -61,6 +123,12 @@ export interface WrapStrip {
   /** Destination x range, centered on 0, in display pixels. */
   x0: number;
   x1: number;
+}
+
+/** On-screen width of a design dispW wide wrapped over `span` radians of a cylinder. */
+export function wrapProjectedWidth(dispW: number, span: number): number {
+  const sp = Math.min(Math.max(span, 0.02), Math.PI);
+  return 2 * (dispW / sp) * Math.sin(sp / 2);
 }
 
 /**
@@ -81,8 +149,8 @@ export function computeWrapStrips(
   // span→0 degenerates to flat (projW → dispW); span=π is a half wrap.
   const sp = Math.min(Math.max(span, 0.02), Math.PI);
   const R = dispW / sp;
-  const X = R * Math.sin(sp / 2);
-  const projW = 2 * X;
+  const projW = wrapProjectedWidth(dispW, sp);
+  const X = projW / 2;
   const out: WrapStrip[] = [];
   for (let i = 0; i < strips; i++) {
     const x0 = -X + (projW * i) / strips;
@@ -107,14 +175,14 @@ export function wrapShadeAt(t: number, span: number): number {
 }
 
 /**
- * Is a canvas point inside the (rotated) overlay? Used to decide whether a
- * pointer-down starts a drag. Rotation in degrees, matching the UI slider.
+ * Is a canvas point inside the (rotated) overlay, drawn w×h px at the
+ * state's center? Used to decide whether a pointer-down starts a drag.
+ * Rotation in degrees, matching the UI slider.
  */
 export function hitTest(
   px: number, py: number,
-  state: OverlayState, imgW: number, imgH: number, canvasW: number, rotationDeg: number
+  state: { x: number; y: number }, w: number, h: number, rotationDeg: number
 ): boolean {
-  const { w, h } = drawSize(imgW, imgH, canvasW, state.scale);
   const rad = (-rotationDeg * Math.PI) / 180;
   // Transform the point into the overlay's local (unrotated) space.
   const dx = px - state.x;
@@ -154,10 +222,10 @@ export interface CameraController {
   /** Give the preview the (new) design image. Enables the start button. */
   setDesign(img: HTMLImageElement): void;
   /**
-   * Reflect the size panel: real-world dimensions (always cm — they drive
-   * the overlay's base size) plus the unit the size hint should display.
+   * Reflect the size panel: real-world dimensions in cm (they drive the
+   * overlay's size) and the size as the page displays it, for the hint.
    */
-  setTattooSize(wCm: number, hCm: number, placementLabel: string, displayUnit?: "cm" | "in"): void;
+  setTattooSize(wCm: number, hCm: number, sizeLabel: string): void;
   /** True while the camera is streaming. */
   isActive(): boolean;
 }
@@ -165,7 +233,9 @@ export interface CameraController {
 export function setupCameraPreview(
   getRotation: () => number,
   getOpacity: () => number,
-  onError: (msg: string) => void
+  onError: (msg: string) => void,
+  /** Pinch on a calibrated preview resizes the tattoo: new size in cm. */
+  onResize?: (wCm: number, hCm: number) => void
 ): CameraController | null {
   const $ = (sel: string) => document.querySelector(sel);
   const refs: CameraRefs = {
@@ -182,20 +252,20 @@ export function setupCameraPreview(
   if (!ctx) return null;
 
   let design: HTMLImageElement | null = null;
-  // Real-world tattoo size from the settings panel. The camera can't know
-  // true scale without a reference object, so we assume the visible frame is
-  // ~VIEW_WIDTH_CM across at typical arm's-length framing; pinch refines it.
-  const VIEW_WIDTH_CM = 50;
   let tattooWCm = 0;
   let tattooHCm = 0;
-  let placement = "";
-  let hintUnit: "cm" | "in" = "cm";
+  let sizeLabel = "";
   const wrapToggle = document.querySelector<HTMLInputElement>("#ar-wrap");
   const wrapLabel = document.querySelector<HTMLElement>("#ar-wrap-label");
   const curveSlider = document.querySelector<HTMLInputElement>("#ar-curve");
   const curveLabel = document.querySelector<HTMLElement>("#ar-curve-label");
   const removeBgToggle = document.querySelector<HTMLInputElement>("#ar-removebg");
   const removeBgLabel = document.querySelector<HTMLElement>("#ar-removebg-label");
+  const calBtn = document.querySelector<HTMLButtonElement>("#ar-calibrate");
+  const calPanel = document.querySelector<HTMLElement>("#ar-cal");
+  const calSize = document.querySelector<HTMLInputElement>("#ar-cal-size");
+  const calDone = document.querySelector<HTMLButtonElement>("#ar-cal-done");
+  const calCancel = document.querySelector<HTMLButtonElement>("#ar-cal-cancel");
   let wrapCanvas: HTMLCanvasElement | null = null;
   let designProc: HTMLCanvasElement | null = null;
 
@@ -236,13 +306,32 @@ export function setupCameraPreview(
   let video: HTMLVideoElement | null = null;
   let stream: MediaStream | null = null;
   let raf = 0;
+  // A start in flight (permission prompt open); stop() bumps the token so
+  // a start it overtook releases its stream instead of keeping it.
+  let starting = false;
+  let startToken = 0;
   const state: OverlayState = { x: 0, y: 0, scale: 1 };
+  // Size the design was last drawn at (wrapped width when curved), for hit-testing.
+  let drawnW = 0;
+  let drawnH = 0;
+
+  // Calibration
+  let calibrating = false;
+  let calibrated = false;
+  let frameWidthCm = DEFAULT_FRAME_WIDTH_CM;
+  /** Video aspect at calibration; a change (phone rotated) invalidates it. */
+  let calAspect = 0;
+  let notice = "";
+  const card = { x: 0, y: 0, w: 0 };
 
   // Pointer tracking for drag + pinch
   const pointers = new Map<number, { x: number; y: number }>();
   let dragging = false;
   let pinchStartDist = 0;
   let pinchStartScale = 1;
+  let pinchStartCard = 0;
+  let pinchStartW = 0;
+  let pinchStartH = 0;
 
   const canvasPoint = (e: PointerEvent): { x: number; y: number } => {
     const r = refs.canvas.getBoundingClientRect();
@@ -252,30 +341,107 @@ export function setupCameraPreview(
     };
   };
 
+  function setCardWidth(px: number): void {
+    const cw = refs.canvas.width;
+    card.w = Math.min(Math.max(px, cw * 0.05), cw * 0.95);
+    if (calSize) calSize.value = String(Math.round((card.w / cw) * 100));
+  }
+
+  function resetCalibration(): void {
+    calibrated = false;
+    frameWidthCm = DEFAULT_FRAME_WIDTH_CM;
+    calAspect = 0;
+    if (calBtn) calBtn.textContent = "Calibrate size";
+  }
+
+  function beginCalibration(): void {
+    if (!stream || !video) return;
+    calibrating = true;
+    notice = "";
+    card.x = refs.canvas.width / 2;
+    card.y = refs.canvas.height / 2;
+    // Start from the current calibration, so recalibrating is a small nudge.
+    setCardWidth(refs.canvas.width * (calibrated ? CARD_W_CM / frameWidthCm : 0.3));
+    refs.section.classList.add("ar--calibrating");
+    if (calPanel) calPanel.hidden = false;
+    updateHint();
+  }
+
+  function endCalibration(apply: boolean): void {
+    if (!calibrating) return;
+    calibrating = false;
+    if (apply && video && card.w > 0) {
+      frameWidthCm = frameWidthFromCard(refs.canvas.width, card.w);
+      calAspect = video.videoWidth / video.videoHeight;
+      calibrated = true;
+      state.scale = 1;
+      if (calBtn) calBtn.textContent = "Recalibrate";
+    }
+    refs.section.classList.remove("ar--calibrating");
+    if (calPanel) calPanel.hidden = true;
+    updateHint();
+  }
+
+  function drawCard(c: CanvasRenderingContext2D): void {
+    const w = card.w;
+    const h = (w * CARD_H_CM) / CARD_W_CM;
+    const r = (w * CARD_RADIUS_CM) / CARD_W_CM;
+    c.save();
+    c.beginPath();
+    c.roundRect(card.x - w / 2, card.y - h / 2, w, h, r);
+    c.lineWidth = 4;
+    c.strokeStyle = "rgba(0, 0, 0, 0.55)";
+    c.stroke();
+    c.setLineDash([8, 5]);
+    c.lineWidth = 2;
+    c.strokeStyle = "#c9b0ff";
+    c.stroke();
+    c.restore();
+  }
+
+  /** Pinch on a calibrated preview: resize the tattoo itself, in cm. */
+  function resizeTattoo(baseW: number, baseH: number, f: number): void {
+    const s = scaleSize(baseW, baseH, f, MIN_TATTOO_CM, MAX_TATTOO_CM);
+    onResize?.(s.w, s.h);
+  }
+
   function render(): void {
     if (!video || !ctx) return;
     const { canvas } = refs;
     if (video.videoWidth && canvas.width !== canvas.clientWidth) {
+      const prevW = canvas.width;
       canvas.width = canvas.clientWidth;
       canvas.height = Math.round((canvas.clientWidth * 3) / 4);
       if (state.x === 0 && state.y === 0) {
         state.x = canvas.width / 2;
         state.y = canvas.height / 2;
+      } else if (prevW > 0) {
+        // Layout changed (rotation, resize): keep positions in proportion.
+        // The card is stored relative to the canvas too, so a calibration
+        // (a fraction of the frame) stays valid.
+        const k = canvas.width / prevW;
+        state.x *= k; state.y *= k;
+        card.x *= k; card.y *= k; card.w *= k;
+      }
+    }
+    if (calibrated && video.videoHeight) {
+      const aspect = video.videoWidth / video.videoHeight;
+      if (Math.abs(aspect - calAspect) > 0.02) {
+        resetCalibration();
+        notice = "The camera view changed, so the size is approximate again.";
+        updateHint();
       }
     }
     const crop = coverCrop(video.videoWidth, video.videoHeight, canvas.width, canvas.height);
     ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, canvas.width, canvas.height);
 
-    if (design) {
-      let w: number, h: number;
-      if (tattooWCm > 0) {
-        // cm-driven: overlay width maps the declared size onto the assumed frame width
-        w = canvas.width * (tattooWCm / VIEW_WIDTH_CM) * state.scale;
-        h = tattooHCm > 0 ? (w * tattooHCm) / tattooWCm
-                          : (w * design.naturalHeight) / design.naturalWidth;
-      } else {
-        ({ w, h } = drawSize(design.naturalWidth, design.naturalHeight, canvas.width, state.scale));
-      }
+    if (calibrating) {
+      drawCard(ctx);
+    } else if (design) {
+      const { w, h } = overlaySize(canvas.width, frameWidthCm, tattooWCm, tattooHCm,
+                                   design.naturalWidth, design.naturalHeight, state.scale);
+      drawnW = w;
+      drawnH = h;
       ctx.save();
       ctx.translate(state.x, state.y);
       ctx.rotate((getRotation() * Math.PI) / 180);
@@ -292,6 +458,7 @@ export function setupCameraPreview(
         // onto a cached offscreen canvas with geometric cos(θ) shading and
         // composite once.
         const { projW, strips } = computeWrapStrips(design.naturalWidth, w, 64, span);
+        drawnW = projW;
         const off = (wrapCanvas ??= document.createElement("canvas"));
         const offW = Math.max(2, Math.ceil(projW));
         const offH = Math.max(2, Math.ceil(h));
@@ -328,28 +495,44 @@ export function setupCameraPreview(
   }
 
   async function start(): Promise<void> {
+    if (starting || stream) return;
+    starting = true;
+    refs.startBtn.disabled = true;
+    const token = ++startToken;
+    let s: MediaStream | null = null;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 } },
-        audio: false,
-      });
-    } catch {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        s = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment", width: { ideal: 1280 } },
+          audio: false,
+        });
       } catch {
-        onError("Camera unavailable. Check browser permissions and try again.");
+        s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
+      const v = document.createElement("video");
+      v.srcObject = s;
+      v.playsInline = true;
+      v.muted = true;
+      if (token === startToken) await v.play();
+      if (token !== startToken) {
+        s.getTracks().forEach((t) => t.stop()); // stopped while the prompt was open
         return;
       }
+      stream = s;
+      video = v;
+    } catch {
+      s?.getTracks().forEach((t) => t.stop());
+      onError("Camera unavailable. Check browser permissions and try again.");
+      return;
+    } finally {
+      starting = false;
+      refs.startBtn.disabled = !design;
     }
-    video = document.createElement("video");
-    video.srcObject = stream;
-    video.playsInline = true;
-    video.muted = true;
-    await video.play();
     refs.section.classList.add("ar--active");
     refs.startBtn.hidden = true;
     refs.stopBtn.hidden = false;
     refs.shotBtn.hidden = false;
+    if (calBtn) calBtn.hidden = false;
     if (wrapLabel) wrapLabel.hidden = false;
     if (curveLabel) curveLabel.hidden = false;
     if (removeBgLabel) removeBgLabel.hidden = false;
@@ -358,14 +541,20 @@ export function setupCameraPreview(
   }
 
   function stop(): void {
+    startToken++;
     cancelAnimationFrame(raf);
     stream?.getTracks().forEach((t) => t.stop());
     stream = null;
     video = null;
+    endCalibration(false);
+    // A new session is a new distance: the old calibration no longer holds.
+    resetCalibration();
+    notice = "";
     refs.section.classList.remove("ar--active");
     refs.startBtn.hidden = false;
     refs.stopBtn.hidden = true;
     refs.shotBtn.hidden = true;
+    if (calBtn) calBtn.hidden = true;
     if (wrapLabel) wrapLabel.hidden = true;
     if (curveLabel) curveLabel.hidden = true;
     if (removeBgLabel) removeBgLabel.hidden = true;
@@ -383,6 +572,10 @@ export function setupCameraPreview(
   refs.startBtn.addEventListener("click", () => void start());
   refs.stopBtn.addEventListener("click", stop);
   refs.shotBtn.addEventListener("click", screenshot);
+  calBtn?.addEventListener("click", beginCalibration);
+  calDone?.addEventListener("click", () => endCalibration(true));
+  calCancel?.addEventListener("click", () => endCalibration(false));
+  calSize?.addEventListener("input", () => setCardWidth((Number(calSize.value) / 100) * refs.canvas.width));
 
   refs.canvas.addEventListener("pointerdown", (e) => {
     refs.canvas.setPointerCapture(e.pointerId);
@@ -392,8 +585,13 @@ export function setupCameraPreview(
       const [a, b] = [...pointers.values()];
       pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y);
       pinchStartScale = state.scale;
+      pinchStartCard = card.w;
+      pinchStartW = tattooWCm;
+      pinchStartH = tattooHCm;
       dragging = false;
-    } else if (design && hitTest(p.x, p.y, state, design.naturalWidth, design.naturalHeight, refs.canvas.width, getRotation())) {
+    } else if (calibrating) {
+      dragging = true; // the outline moves from anywhere on the canvas
+    } else if (design && hitTest(p.x, p.y, state, drawnW, drawnH, getRotation())) {
       dragging = true;
     }
   });
@@ -404,11 +602,15 @@ export function setupCameraPreview(
     pointers.set(e.pointerId, p);
     if (pointers.size === 2 && pinchStartDist > 0) {
       const [a, b] = [...pointers.values()];
-      state.scale = pinchScale(pinchStartScale, pinchStartDist, Math.hypot(a.x - b.x, a.y - b.y));
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (calibrating) setCardWidth((pinchStartCard * dist) / pinchStartDist);
+      else if (calibrated) resizeTattoo(pinchStartW, pinchStartH, dist / pinchStartDist);
+      else state.scale = pinchScale(pinchStartScale, pinchStartDist, dist);
     } else if (dragging) {
-      const c = clampCenter(state.x + (p.x - prev.x), state.y + (p.y - prev.y), refs.canvas.width, refs.canvas.height);
-      state.x = c.x;
-      state.y = c.y;
+      const target = calibrating ? card : state;
+      const c = clampCenter(target.x + (p.x - prev.x), target.y + (p.y - prev.y), refs.canvas.width, refs.canvas.height);
+      target.x = c.x;
+      target.y = c.y;
     }
   });
   const endPointer = (e: PointerEvent): void => {
@@ -421,36 +623,34 @@ export function setupCameraPreview(
   refs.canvas.addEventListener("wheel", (e) => {
     if (!stream) return;
     e.preventDefault();
-    state.scale = wheelScale(state.scale, e.deltaY);
+    const f = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+    if (calibrating) setCardWidth(card.w * f);
+    else if (calibrated) resizeTattoo(tattooWCm, tattooHCm, f);
+    else state.scale = wheelScale(state.scale, e.deltaY);
   }, { passive: false });
 
   // Don't hold the camera open in a background tab.
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && stream) stop();
+    if (document.hidden && (stream || starting)) stop();
   });
 
   function updateHint(): void {
     if (!stream) return;
-    const fmt = (cm: number): number =>
-      Math.round((hintUnit === "in" ? cm / 2.54 : cm) * 10) / 10;
-    const size = tattooWCm > 0
-      ? `${fmt(tattooWCm)} × ${fmt(tattooHCm)} ${hintUnit}${placement ? " on " + placement : ""} · `
-      : "";
-    refs.hint.textContent = `${size}drag to position · pinch to calibrate scale · curve slider bends the design around a limb (manual)`;
+    const hint = cameraHint({ calibrating, calibrated, sizeLabel });
+    refs.hint.textContent = notice ? `${notice} ${hint}` : hint;
   }
 
   return {
     setDesign(img: HTMLImageElement): void {
       design = img;
       rebuildProcessedDesign();
-      refs.startBtn.disabled = false;
+      refs.startBtn.disabled = starting;
       if (!stream) refs.hint.textContent = "Design loaded — start the camera to preview it on your body.";
     },
-    setTattooSize(wCm: number, hCm: number, placementLabel: string, displayUnit: "cm" | "in" = "cm"): void {
+    setTattooSize(wCm: number, hCm: number, label: string): void {
       tattooWCm = wCm;
       tattooHCm = hCm;
-      placement = placementLabel;
-      hintUnit = displayUnit;
+      sizeLabel = label;
       updateHint();
     },
     isActive: () => stream !== null,

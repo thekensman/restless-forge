@@ -16,7 +16,8 @@ late — after you have chosen the design, booked the slot, and paid a deposit.
 TattooSafe moves that check to before the decision.
 
 Two views handle it. The **camera preview** composites your design onto a live
-video feed so you can move it around your actual body at actual scale. The
+video feed so you can move it around your actual body; calibrate it against a
+bank card held on your skin and the design is drawn at its real size. The
 **silhouette view** draws the design on a body outline at its true share of the
 placement for your height, with real centimetre dimensions: useful when you want
 measurements rather than a vibe, and shareable with your artist.

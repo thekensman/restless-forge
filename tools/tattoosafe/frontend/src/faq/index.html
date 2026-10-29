@@ -35,6 +35,12 @@
 <p>Upload your design, activate your camera, and the image is composited onto the
 live video feed with Canvas. Drag to position, pinch to resize, and use the
 rotation slider to angle it.</p>
+<p>A camera cannot tell how far away your arm is, so the size starts as an
+estimate. Tap <strong>Calibrate size</strong>, hold a bank or ID card flat against your skin,
+and drag and resize the outline on screen until it matches the card. From then
+on the design is drawn at its real size for that distance, and pinching it
+changes the tattoo&#39;s size and the price estimate together. Calibrate again if
+you move the phone closer or further away.</p>
 <p>There is deliberately no body tracking or AI. You line the design up against
 your own reflection and screenshot it. That sounds like a limitation, and in one
 sense it is — but manual positioning is more precise than automatic placement
@@ -49,10 +55,11 @@ handling at all. You can verify this by loading the page, disconnecting from the
 network, and using it normally.</p>
 <h2>How accurate is the pricing calculator?</h2>
 <p>It is a sanity check, not a quote.</p>
-<p>The estimates come from aggregated US market data and a documented model: area
-times a per-square-inch rate for the style, adjusted by placement difficulty,
-plus setup and breaks, times an hourly rate. Every constant is published on the
-<a href="/tools/tattoosafe/pricing/">pricing page</a>.</p>
+<p>The estimate comes from a documented model: area times a per-square-inch rate
+for the style, adjusted by placement difficulty, plus setup and breaks, times an
+hourly rate. The hourly bands are typical ranges for US shops, and the minutes
+per square inch are planning assumptions. Every constant is published on the
+<a href="/tools/tattoosafe/pricing/">pricing page</a> so you can check it.</p>
 <p>What it cannot know is your specific artist&#39;s rate, your region, whether the
 design needs custom drawing time, or whether you are covering existing ink. Use
 it to tell a reasonable quote from an unreasonable one, then get a real quote at
@@ -90,7 +97,8 @@ than a faint edge. For best results, upload artwork on a plain solid background.
 <h2>Why does my design look like a sticker?</h2>
 <p>Because it is a flat image composited onto a lit, curved, moving body. No
 overlay that is not doing full 3D surface reconstruction will read as real ink.</p>
-<p>Judge scale and placement from the preview, not realism. That is what it is for.</p>
+<p>Use the preview to judge placement, and to judge size once you have calibrated
+it with a card. That is what it is for.</p>
 <h2>Can I show the preview to my artist?</h2>
 <p>Yes, and it is genuinely useful. Screenshot either view. The silhouette view is
 the better one to bring — it carries precise centimetre dimensions your artist
