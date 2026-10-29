@@ -240,8 +240,8 @@ one identity, Kenneth Cross with `/about` as the profile page
 ## October 2026 indexing experiment
 
 **Status: ended early, 2026-10-13.** The goal moved to AdSense resubmission
-(`docs/adsense-readiness.md`), and that work broke the freeze below on the day
-the requests began, so the comparison can't be read as designed:
+(`docs/adsense-readiness.md`), and that work changed the compared pages on the
+day the requests began, so the comparison can't be read as designed:
 
 - `best-hologram-projectors`, one of the six, was removed with five other
   generic HoloPath articles, and they now 404 (see Deliberately 404). Those
@@ -375,18 +375,6 @@ The hypotheses behind the arms:
 - **Content (recorded, not tested).** `best-hologram-projectors` promises
   product recommendations in its title and names no products. Rewriting it now
   would mix a content change into the request result.
-
-### Freeze
-
-Through 2026-10-26 at minimum, and through 2026-11-09 to cover the last check:
-
-- no launching a tool and no new essay: each rewrites the homepage grid,
-  `/tools/`, `/about` and the sitemap;
-- no nav or footer link changes: `npm run sync` rewrites every site page, which
-  moves each one's sitemap `<lastmod>`;
-- no edits to the six, the indexed pages, or any page in the comparison groups.
-
-Backend work and unlaunched tools are unaffected.
 
 ### Schedule
 
