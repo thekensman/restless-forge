@@ -36,7 +36,8 @@
     { id: 'tattoosafe', label: 'TattooSafe', category: 'Lifestyle', status: 'live',
       cta: 'Launch Preview',
       desc: 'Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.',
-      blurb: 'a tattoo sizing, camera try-on, and pricing preview tool' },
+      blurb: 'a tattoo sizing, camera try-on, and pricing preview tool',
+      privacyNote: 'Its optional Full AR mode downloads a body-tracking model from this site and runs it on your device; the camera feed still never leaves it.' },
 
     // ── In the forge (never rendered as links) ──
     { id: 'is-my-raise-real', label: 'Is My Raise Real?', category: 'Financial', status: 'soon',

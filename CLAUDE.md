@@ -323,6 +323,11 @@ retired-URL table, and how to add to it: `docs/indexing.md`.
   Current exceptions: `pdf-lib` (pure-JS, MIT) in forgedoc, forgeinvoice,
   and forgeresume, because parsing/producing real PDFs is not
   hand-rollable. Vite bundles it per tool; nothing is fetched at runtime.
+  `@mediapipe/tasks-vision` (Apache-2.0) in TattooSafe, for the opt-in Full
+  AR mode only (body tracking is not hand-rollable). It is a lazy chunk that
+  loads after the visitor accepts the download notice, and its WASM runtime
+  and models are self-hosted under `/tools/tattoosafe/ar/`, hash-pinned and
+  fetched at build time (`docs/tattoosafe-full-ar.md`).
 - Vanilla DOM manipulation (no React/Vue/Angular).
 - CSS custom properties for theming.
 - BEM-like class naming (`.block__element--modifier`).
@@ -384,6 +389,7 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 | `/shared.js` returns the wrong content in dev | `tools/vite-tool-config.ts` — `configureServer` middleware serves it from `site/shared.js` |
 | Built HTML points at `/tools/<name>/shared.js` where it should be `/shared.js` | Sentinel plugins in `tools/vite-tool-config.ts` — verify the SITE_GLOBAL_URLS list includes the URL |
 | Sub-page 404s in dev | Sub-page HTML must live under `src/`, not `public/`. Vite MPA only routes files in `src/` |
+| TattooSafe Full AR won't start, or the build fails in `fetch-ar-assets` | `docs/tattoosafe-full-ar.md`: the model hashes and mirror fallback, the `/tools/tattoosafe/ar/` nginx location, and the Cloudflare cache rule. |
 | Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? nginx serves css/js `immutable` for a year, so an unbusted stable filename is served stale until the browser is forced to refetch (`docs/frontend-pitfalls.md` §1). `npm run check-links` fails on any unbusted reference. |
 | Page scrolls sideways on a phone / images jump on load / ad slot leaves a blank band | `docs/frontend-pitfalls.md` — these have all shipped before, with the cause and the rule that prevents each. |
 | New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |

@@ -74,10 +74,12 @@ everything after it.
 fit the placement on your proportions. TattooSafe will tell you when a design
 exceeds the usable area rather than letting you discover it from a stencil.
 
-**Use the camera view for placement, the silhouette for measurement.** The
-camera preview answers "does this sit right here" — position, angle,
-relationship to your actual arm. The silhouette answers "how big is this
-really," in centimetres, and is the one to screenshot for your artist.
+**Calibrate before you judge size on camera.** The camera preview answers
+"does this sit right here": position, angle, relationship to your actual arm.
+It answers "how big is this really" only after you calibrate it with a bank
+card held against your skin; until then the size on screen is an estimate. The
+silhouette gives the size in centimetres too, and is the one to screenshot for
+your artist.
 
 **Try one size up.** Given the pull toward undersizing, deliberately
 previewing a larger version is worth the ten seconds. Often it is obviously

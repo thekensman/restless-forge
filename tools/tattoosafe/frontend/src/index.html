@@ -60,7 +60,8 @@
   <div class="tool-intro">
     <h1>Free AR Tattoo Preview &amp; Pricing Calculator</h1>
     <p>See how a tattoo design looks on your body using your camera. Upload any image, activate the
-    camera, and drag your design into position. Then estimate cost based on size, style, and placement.
+    camera, and drag your design into position, or turn on Full AR and let it follow your body as
+    you move. Then estimate cost based on size, style, and placement.
     Everything runs in your browser — no uploads, no accounts.</p>
   </div>
 
@@ -191,6 +192,7 @@
       device &mdash; nothing is recorded or uploaded.</p>
       <canvas class="ar__canvas" id="ar-canvas" width="640" height="480"></canvas>
       <p class="ar__hint" id="ar-hint" aria-live="polite"></p>
+      <progress class="ar__progress" id="ar-progress" max="1" value="0" hidden aria-label="Body tracking download"></progress>
       <div class="ar__cal" id="ar-cal" hidden>
         <label class="ar__cal-size">Card outline
           <input type="range" id="ar-cal-size" min="5" max="95" value="30" aria-label="Card outline size">
@@ -210,7 +212,10 @@
       </div>
       <div class="ar__buttons">
         <button class="btn btn--primary" id="ar-start" disabled>Start Camera</button>
+        <button class="btn" id="ar-full" disabled>Full AR (body tracking)</button>
+        <button class="btn" id="ar-standard" hidden>Standard preview</button>
         <button class="btn" id="ar-stop" hidden>Stop Camera</button>
+        <button class="btn" id="ar-flip" hidden>Flip camera</button>
         <button class="btn" id="ar-calibrate" hidden>Calibrate size</button>
         <button class="btn" id="ar-screenshot" hidden>Save Screenshot</button>
         <label class="ar__wrap-toggle" id="ar-wrap-label" hidden>
@@ -221,10 +226,44 @@
           <input type="range" id="ar-curve" min="0" max="100" value="40" aria-label="Wrap curvature">
         </label>
         <label class="ar__wrap-toggle" id="ar-removebg-label" hidden><input type="checkbox" id="ar-removebg" checked> Remove flat background</label>
+        <label class="ar__wrap-toggle" id="ar-clothes-label" hidden><input type="checkbox" id="ar-clothes" checked> Hide under clothing</label>
+        <label class="ar__wrap-toggle" id="ar-side-label" hidden>Side
+          <select class="ar__select" id="ar-side">
+            <option value="auto" selected>Either</option>
+            <option value="left">Your left</option>
+            <option value="right">Your right</option>
+          </select>
+        </label>
       </div>
-      <p class="ar__note">Upload a design above to enable the camera preview. The overlay is a
-      static try-on aid — position it against your reflection; it doesn't track your body.</p>
+      <p class="ar__note">Upload a design above to enable the camera preview. The standard preview
+      stays where you put it. Full AR follows the body part you picked, after a one-time download.</p>
     </section>
+
+    <!-- ─── Full AR notice (shown before anything downloads) ─── -->
+    <dialog class="ar-dialog" id="ar-dialog" aria-labelledby="ar-dialog-title">
+      <form method="dialog">
+        <h2 class="ar-dialog__title" id="ar-dialog-title">Turn on Full AR?</h2>
+        <p>Full AR tracks your body, so the design stays on the part you picked as you move,
+        turns with it, curves around it and hides under your clothes.</p>
+        <ul class="ar-dialog__list">
+          <li><strong>It downloads about 30&nbsp;MB</strong> the first time, from this site. Your
+          browser keeps it, so later visits start faster.</li>
+          <li><strong>It finds your face first.</strong> Prop your phone up or stand in front of a
+          mirror so your face and the body part are both in view. A close-up of one arm won't
+          lock on.</li>
+          <li><strong>Everything runs on your device.</strong> The video never leaves it. Tracking
+          works the processor hard, so older phones may slow down or get warm.</li>
+          <li><strong>The size is an estimate</strong> from the height you entered. For an exact
+          size, use the standard preview and calibrate it with a card.</li>
+          <li>It follows the inner and outer forearm, upper arm, shoulder, chest, sternum, thigh
+          and calf. Other placements stay where you drag them.</li>
+        </ul>
+        <div class="ar-dialog__buttons">
+          <button class="btn btn--primary" value="go">Download and start</button>
+          <button class="btn" value="cancel">Not now</button>
+        </div>
+      </form>
+    </dialog>
 
     <!-- ─── Error ─── -->
     <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
@@ -258,13 +297,21 @@
       <strong>Calibrate size</strong>, hold a bank or ID card flat against your skin and match the
       outline on screen to it. The design is then drawn at its real dimensions for that distance,
       and pinching it changes the tattoo's size and the price estimate together.</p>
-      <p>It is a static overlay. The design stays where you put it and does not follow you as you
-      move, and the optional curve setting bends it around a cylinder at a curvature you set by
-      hand. Treat it as holding a printed stencil against your skin, and use the silhouette mockup
-      to see the size against the whole placement.</p>
-      <p>Nothing from the camera is recorded or transmitted. The video stream is read by JavaScript
-      in your tab and drawn straight to a canvas; there is no upload step and no server that could
-      receive it.</p>
+      <p>The standard preview is a static overlay. The design stays where you put it, and the
+      optional curve setting bends it around a cylinder at a curvature you set by hand. Treat it as
+      holding a printed stencil against your skin, and use the silhouette mockup to see the size
+      against the whole placement.</p>
+      <p><strong>Full AR</strong> makes the opposite trade. After a one-time download of about
+      30&nbsp;MB of body-tracking models from this site, it keeps the design on the placement you
+      chose as you move: turned and shortened with the limb, curved to the limb's measured width,
+      and hidden where clothing covers the skin. It finds you by your face, so it works with the
+      phone propped up or facing a mirror rather than up close, and it follows eight placements:
+      inner and outer forearm, upper arm, shoulder, chest, sternum, thigh and calf. Its size is an
+      estimate from the height you enter. The <a href="/tools/tattoosafe/faq/">FAQ</a> covers how
+      to frame yourself for it.</p>
+      <p>Nothing from the camera is recorded or transmitted, in either mode. The video stream is
+      read by JavaScript in your tab and drawn straight to a canvas, and Full AR's tracking runs in
+      the same tab; there is no upload step and no server that could receive it.</p>
 
       <h2>Why Placement Changes the Answer</h2>
       <p>The same design is a different tattoo on a forearm than on a rib cage. Sixteen placements

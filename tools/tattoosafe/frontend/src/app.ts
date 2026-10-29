@@ -228,6 +228,7 @@ function updateSizeInfo(): void {
   }
 
   // Reflect the size settings in the camera preview.
+  camera?.setPlacement(bpId, heightCm);
   camera?.setTattooSize(tattooWCm, tattooHCm,
     `${toDisplay(tattooWCm)} × ${toDisplay(tattooHCm)} ${unitLabel()}${bp ? " on " + bp.label : ""}`);
 }
@@ -245,6 +246,26 @@ function linkRanges(mainSel: string, quickSel: string, valueSel: string): void {
   };
   main?.addEventListener("input", () => apply(main, quick));
   quick?.addEventListener("input", () => apply(quick, main));
+}
+
+/**
+ * Full AR asks first: the notice says what downloads and what the tracking
+ * needs, and only "Download and start" imports the runtime chunk.
+ */
+function setupFullAr(): void {
+  const dialog = document.querySelector<HTMLDialogElement>("#ar-dialog");
+  const begin = (): void => {
+    void camera?.startAr((onProgress) => import("./ar-tracking").then((m) => m.createTracker(onProgress)));
+  };
+  $("#ar-full")?.addEventListener("click", () => {
+    if (typeof dialog?.showModal !== "function") {
+      if (window.confirm("Full AR downloads about 30 MB the first time and runs body tracking on this device. It needs to see your face. Continue?")) begin();
+      return;
+    }
+    dialog.returnValue = "";
+    dialog.showModal();
+  });
+  dialog?.addEventListener("close", () => { if (dialog.returnValue === "go") begin(); });
 }
 
 function setupFileUpload(): void {
@@ -330,11 +351,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   setupFileUpload();
+  setupFullAr();
   camera = setupCameraPreview(
     () => parseFloat(input("#rotation-range")?.value ?? "") || 0,
     () => (parseFloat(input("#opacity-range")?.value ?? "") || 85) / 100,
     showError,
-    // Pinch on a calibrated preview resizes the tattoo: same path as typing it.
+    // Pinch on a calibrated or tracked preview resizes the tattoo: same path as typing it.
     (wCm, hCm) => {
       tattooWCm = clampCm(wCm);
       tattooHCm = clampCm(hCm);
