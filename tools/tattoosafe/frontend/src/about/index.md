@@ -16,10 +16,13 @@ late — after you have chosen the design, booked the slot, and paid a deposit.
 TattooSafe moves that check to before the decision.
 
 Two views handle it. The **camera preview** composites your design onto a live
-video feed so you can move it around your actual body at actual scale. The
-**silhouette view** draws the design on a body outline at its true share of the
-placement for your height, with real centimetre dimensions: useful when you want
-measurements rather than a vibe, and shareable with your artist.
+video feed so you can move it around your actual body; calibrate it against a
+bank card held on your skin and the design is drawn at its real size. Turn on
+**Full AR** and the preview maps your body instead, keeping the design on your
+forearm, thigh or chest as you move. The **silhouette view** draws the design's
+footprint on a body outline at its true share of the placement for your height,
+with real centimetre dimensions: useful when you want measurements rather than
+a vibe, and shareable with your artist.
 
 ## How the silhouette is built
 
@@ -58,11 +61,30 @@ the reasoning rather than trust the output.
 It is a sanity check, not a quote. A real quote comes from a real artist looking
 at a real design.
 
+## Body mapping
+
+Full AR is optional and off until you ask for it, because it is heavy. It runs
+MediaPipe, Google's open-source body-mapping library, in your browser: a pose
+model finds your shoulders, elbows, hips and knees in each frame, and a second
+model sorts the picture into skin, clothes and background. TattooSafe anchors
+the design between the joints of the placement you chose, turns and shortens it
+with the limb, curves it to the limb's measured width, and hides it where
+clothing covers the skin.
+
+Three things come with that. It downloads about 30 MB from this site the first
+time. It finds you by your face, so the camera has to see your face and the
+body part together, which means propping the phone up or using a mirror. And it
+follows eight placements: inner and outer forearm, upper arm, shoulder, chest,
+sternum, thigh and calf. Its size comes from the height you entered and typical
+body proportions, so for an exact size the card calibration is still the way.
+
 ## Your data
 
 Nothing you enter or upload is sent to a server. The camera feed is processed
 frame by frame in the browser and never recorded. Images stay on your device.
-There is no account, no upload endpoint, and nothing to delete later.
+There is no account, no upload endpoint, and nothing to delete later. Full AR
+downloads its body-mapping models from this site and runs them in your browser, so
+the frames it reads stay on your device too.
 
 This is a property of how the tool is built, not a policy that could quietly
 change. Full details in the [privacy policy](/privacy) and
@@ -70,11 +92,12 @@ change. Full details in the [privacy policy](/privacy) and
 
 ## Honest limitations
 
-**It is a preview, not a simulation.** The overlay does not track your arm or
-respond to how skin moves. The optional curve setting bends it around a cylinder
-whose curvature you choose, which approximates a limb rather than measuring
-yours. Treat placement and scale as a good
-approximation, not a rendering.
+**It is a preview, not a simulation.** The standard overlay does not track your
+arm or respond to how skin moves, and its curve setting bends the design around
+a cylinder whose curvature you choose. Full AR follows the limb and measures its
+width, but only from far enough away to see your face, and its size is an
+estimate from your height. Treat placement and scale as a good approximation,
+not a rendering.
 
 **Lighting affects the illusion.** Compositing a flat image onto a lit body
 always reads slightly as a sticker. Judge the size and position, not the

@@ -45,10 +45,13 @@ on a thigh.</p>
 late — after you have chosen the design, booked the slot, and paid a deposit.
 TattooSafe moves that check to before the decision.</p>
 <p>Two views handle it. The <strong>camera preview</strong> composites your design onto a live
-video feed so you can move it around your actual body at actual scale. The
-<strong>silhouette view</strong> draws the design on a body outline at its true share of the
-placement for your height, with real centimetre dimensions: useful when you want
-measurements rather than a vibe, and shareable with your artist.</p>
+video feed so you can move it around your actual body; calibrate it against a
+bank card held on your skin and the design is drawn at its real size. Turn on
+<strong>Full AR</strong> and the preview maps your body instead, keeping the design on your
+forearm, thigh or chest as you move. The <strong>silhouette view</strong> draws the design&#39;s
+footprint on a body outline at its true share of the placement for your height,
+with real centimetre dimensions: useful when you want measurements rather than
+a vibe, and shareable with your artist.</p>
 <h2>How the silhouette is built</h2>
 <p>The body outline is a fixed figure, drawn as inline SVG. What scales is each
 placement: its usable area is a set fraction of the height you enter. A design
@@ -77,19 +80,36 @@ documented on the <a href="/tools/tattoosafe/pricing/">pricing page</a> so you c
 the reasoning rather than trust the output.</p>
 <p>It is a sanity check, not a quote. A real quote comes from a real artist looking
 at a real design.</p>
+<h2>Body mapping</h2>
+<p>Full AR is optional and off until you ask for it, because it is heavy. It runs
+MediaPipe, Google&#39;s open-source body-mapping library, in your browser: a pose
+model finds your shoulders, elbows, hips and knees in each frame, and a second
+model sorts the picture into skin, clothes and background. TattooSafe anchors
+the design between the joints of the placement you chose, turns and shortens it
+with the limb, curves it to the limb&#39;s measured width, and hides it where
+clothing covers the skin.</p>
+<p>Three things come with that. It downloads about 30 MB from this site the first
+time. It finds you by your face, so the camera has to see your face and the
+body part together, which means propping the phone up or using a mirror. And it
+follows eight placements: inner and outer forearm, upper arm, shoulder, chest,
+sternum, thigh and calf. Its size comes from the height you entered and typical
+body proportions, so for an exact size the card calibration is still the way.</p>
 <h2>Your data</h2>
 <p>Nothing you enter or upload is sent to a server. The camera feed is processed
 frame by frame in the browser and never recorded. Images stay on your device.
-There is no account, no upload endpoint, and nothing to delete later.</p>
+There is no account, no upload endpoint, and nothing to delete later. Full AR
+downloads its body-mapping models from this site and runs them in your browser, so
+the frames it reads stay on your device too.</p>
 <p>This is a property of how the tool is built, not a policy that could quietly
 change. Full details in the <a href="/privacy">privacy policy</a> and
 <a href="/terms">terms of use</a>.</p>
 <h2>Honest limitations</h2>
-<p><strong>It is a preview, not a simulation.</strong> The overlay does not track your arm or
-respond to how skin moves. The optional curve setting bends it around a cylinder
-whose curvature you choose, which approximates a limb rather than measuring
-yours. Treat placement and scale as a good
-approximation, not a rendering.</p>
+<p><strong>It is a preview, not a simulation.</strong> The standard overlay does not track your
+arm or respond to how skin moves, and its curve setting bends the design around
+a cylinder whose curvature you choose. Full AR follows the limb and measures its
+width, but only from far enough away to see your face, and its size is an
+estimate from your height. Treat placement and scale as a good approximation,
+not a rendering.</p>
 <p><strong>Lighting affects the illusion.</strong> Compositing a flat image onto a lit body
 always reads slightly as a sticker. Judge the size and position, not the
 realism.</p>

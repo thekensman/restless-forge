@@ -147,7 +147,8 @@ function renderTermsToolList(live) {
 /* /privacy enumerates how each live tool handles data. Generated from the same
    source so the policy can never silently omit a tool (it previously missed
    TattooSafe). Cloud-assisted tools are called out and linked to their own
-   per-tool privacy page; everything else is browser-only. */
+   per-tool privacy page; everything else is browser-only. A browser-only tool
+   can add a `privacyNote` sentence (TattooSafe's Full AR model download). */
 function renderPrivacyToolList(live) {
   return live.map((t) => {
     if (t.tier === "cloud") {
@@ -155,7 +156,8 @@ function renderPrivacyToolList(live) {
         `        See <a href="/tools/${t.id}/privacy/">${esc(t.label)} privacy</a> for its exact data flow.</li>`;
     }
     return `      <li><strong>${esc(t.label)}</strong> — ${esc(cap(t.blurb))}.\n` +
-      `        Runs entirely in your browser; nothing you enter or open is uploaded.</li>`;
+      `        Runs entirely in your browser; nothing you enter or open is uploaded.` +
+      (t.privacyNote ? `\n        ${esc(t.privacyNote)}</li>` : `</li>`);
   }).join("\n");
 }
 

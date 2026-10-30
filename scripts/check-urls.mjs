@@ -36,6 +36,9 @@
  *   7. No internal link the site emits points at a redirect or an error: the
  *      static HTML, the JSON-LD, and the nav/footer that shared.js renders at
  *      runtime.
+ *   8. TattooSafe's Full AR files (runtime + models under /tools/tattoosafe/ar/)
+ *      answer 200 with a one-year immutable cache and the security headers,
+ *      and the .wasm runtime is gzipped with the type browsers compile from.
  */
 import { spawnSync } from "node:child_process";
 import {
@@ -446,6 +449,46 @@ for (const [url, from] of links) {
   tally("link");
   const r = await get(url);
   if (r.status !== 200) problem("link", `${from} links ${url.slice(SITE.length)} → ${r.status}${r.location ? ` ${r.location}` : ""}`);
+}
+
+// ── 8: Full AR files ─────────────────────────────────────────────────────────
+/* Status and headers only; these files run to megabytes. */
+function headers(url, extra = {}) {
+  const u = new URL(url);
+  return new Promise((resolve) => {
+    const req = https.request({
+      host: "127.0.0.1", port: httpsPort, servername: u.hostname, path: rawPath(url), method: "GET",
+      headers: { Host: u.hostname, ...extra }, agent: agents["https:"],
+    }, (res) => { res.resume(); resolve({ status: res.statusCode, h: res.headers }); });
+    req.setTimeout(10000, () => req.destroy(new Error(`timeout: ${url}`)));
+    req.on("error", (err) => resolve({ status: `no answer (${err.message})`, h: {} }));
+    req.end();
+  });
+}
+{
+  const arDir = join(dist, "tools", "tattoosafe", "ar");
+  const files = [];
+  const walk = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      if (e.isDirectory()) walk(join(d, e.name)); else files.push(join(d, e.name));
+    }
+  };
+  if (existsSync(arDir)) walk(arDir);
+  else problem("ar-asset", "dist/tools/tattoosafe/ar/ is missing: the TattooSafe build did not fetch its Full AR files");
+  for (const f of files) {
+    tally("ar-asset");
+    const url = `${SITE}/${relative(dist, f).split("\\").join("/")}`;
+    const r = await headers(url, { "Accept-Encoding": "gzip" });
+    const path = url.slice(SITE.length);
+    const cc = String(r.h["cache-control"] || "");
+    if (r.status !== 200) { problem("ar-asset", `${path} → ${r.status}`); continue; }
+    if (!/immutable/.test(cc) || !/max-age=31536000/.test(cc)) problem("ar-asset", `${path} Cache-Control "${cc}", want public, immutable for a year`);
+    if (!r.h["strict-transport-security"]) problem("ar-asset", `${path} lost the security headers (add_header gotcha)`);
+    if (f.endsWith(".wasm")) {
+      if (r.h["content-type"] !== "application/wasm") problem("ar-asset", `${path} Content-Type "${r.h["content-type"]}", want application/wasm`);
+      if (r.h["content-encoding"] !== "gzip") problem("ar-asset", `${path} is not gzipped (gzip_types needs application/wasm)`);
+    }
+  }
 }
 
 // ── report ───────────────────────────────────────────────────────────────────

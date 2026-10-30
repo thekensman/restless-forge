@@ -4,12 +4,14 @@
  *
  * All dimensions are held canonically in CM; the single "Units" dropdown
  * only changes how values are DISPLAYED (inputs, sliders, max-area text,
- * silhouette labels, camera hint) and converts them on switch.
+ * silhouette labels, camera hint). Switching units never rewrites the
+ * canonical values, so switching back shows exactly what was entered.
  */
 import {
   BODY_PARTS, getBodyPart, maxTattooDimensions, checkFit,
   ftInToCm, cmToIn, inToCm, generateSilhouetteSvg,
   COMPLEXITY, HOURLY_RATES, calculatePrice, fmtPriceRange, fmtTime,
+  MIN_TATTOO_CM, MAX_TATTOO_CM,
   type ComplexityKey, type ArtistKey,
 } from "./engine";
 import { setupCameraPreview, type CameraController } from "./camera";
@@ -21,17 +23,18 @@ type Units = "metric" | "imperial";
 
 let units: Units = "metric";
 let heightCm = 170;
-let tattooWCm = 8;
-let tattooHCm = 12;
+// Default fits the default placement (inner forearm, 7.6 cm wide at 170 cm).
+let tattooWCm = 6;
+let tattooHCm = 10;
 /** h/w of the uploaded design, once one is loaded. */
 let designRatio: number | null = null;
 /** Active h/w ratio while the aspect lock is on. */
 let lockedRatio: number | null = null;
 let camera: CameraController | null = null;
 
-const MIN_CM = 0.5;
-const MAX_CM = 100;
-const clampCm = (v: number): number => Math.min(Math.max(v, MIN_CM), MAX_CM);
+const MIN_HEIGHT_CM = 100;
+const MAX_HEIGHT_CM = 250;
+const clampCm = (v: number): number => Math.min(Math.max(v, MIN_TATTOO_CM), MAX_TATTOO_CM);
 const displayStep = (): number => (units === "imperial" ? 0.25 : 0.5);
 const toDisplay = (cm: number): number => {
   const v = units === "imperial" ? cmToIn(cm) : cm;
@@ -40,6 +43,8 @@ const toDisplay = (cm: number): number => {
 };
 const fromDisplay = (v: number): number => (units === "imperial" ? inToCm(v) : v);
 const unitLabel = (): "cm" | "in" => (units === "imperial" ? "in" : "cm");
+/** A length as the inputs show it, so every label agrees with them. */
+const fmtLen = (cm: number): string => `${toDisplay(cm)} ${unitLabel()}`;
 const round1 = (v: number): number => Math.round(v * 10) / 10;
 
 function showError(msg: string): void {
@@ -118,51 +123,59 @@ function onSizeEdit(dim: "w" | "h", raw: number, source?: HTMLInputElement | nul
   updateSizeInfo();
 }
 
+/** Show the canonical height in whichever unit is active. */
+function setHeightInputs(): void {
+  const totalIn = Math.round(cmToIn(heightCm));
+  const ft = input("#height-ft"), inch = input("#height-in"), cm = input("#height-input");
+  if (ft) ft.value = String(Math.floor(totalIn / 12));
+  if (inch) inch.value = String(totalIn % 12);
+  if (cm) cm.value = String(Math.round(heightCm));
+  for (const el of [ft, inch, cm]) el?.removeAttribute("aria-invalid");
+}
+
+/**
+ * Height typed: accept it only inside the plausible adult range, so a
+ * half-typed "17" doesn't briefly turn every placement into a 1000%
+ * oversize. Out-of-range input is flagged and ignored until fixed; on
+ * blur the last accepted height is put back.
+ */
 function onHeightEdit(): void {
+  let cm: number;
+  let fields: Array<HTMLInputElement | null>;
   if (units === "imperial") {
     const ft = parseFloat(input("#height-ft")?.value ?? "") || 0;
     const inches = parseFloat(input("#height-in")?.value ?? "") || 0;
-    const cm = ftInToCm(ft, inches);
-    if (Number.isFinite(cm) && cm > 0) heightCm = cm;
+    cm = ftInToCm(ft, inches);
+    fields = [input("#height-ft"), input("#height-in")];
   } else {
-    const v = parseFloat(input("#height-input")?.value ?? "");
-    if (Number.isFinite(v) && v > 0) heightCm = v;
+    cm = parseFloat(input("#height-input")?.value ?? "");
+    fields = [input("#height-input")];
   }
+  const ok = Number.isFinite(cm) && cm >= MIN_HEIGHT_CM && cm <= MAX_HEIGHT_CM;
+  for (const el of fields) el?.setAttribute("aria-invalid", String(!ok));
+  if (!ok) return;
+  heightCm = cm;
   updateSizeInfo();
 }
 
-/** Reflect the current unit system in every control, converting values. */
+/** Reflect the current unit system in every control. Display only. */
 function applyUnits(): void {
   const imp = units === "imperial";
   const metricRow = $("#height-metric");
   const imperialRow = $("#height-imperial");
   if (metricRow) metricRow.style.display = imp ? "none" : "";
   if (imperialRow) imperialRow.style.display = imp ? "" : "none";
-  if (imp) {
-    const totalIn = Math.round(cmToIn(heightCm));
-    const ft = input("#height-ft"), inch = input("#height-in");
-    if (ft) ft.value = String(Math.floor(totalIn / 12));
-    if (inch) inch.value = String(totalIn % 12);
-    heightCm = ftInToCm(Math.floor(totalIn / 12), totalIn % 12);
-  } else {
-    const h = input("#height-input");
-    heightCm = Math.round(heightCm);
-    if (h) h.value = String(heightCm);
-  }
-  // Snap the canonical sizes to what the (rounded) inputs will show, so
-  // the silhouette labels, price, and inputs all agree after a switch.
-  tattooWCm = clampCm(fromDisplay(toDisplay(tattooWCm)));
-  tattooHCm = clampCm(fromDisplay(toDisplay(tattooHCm)));
+  setHeightInputs();
 
   for (const el of [input("#tattoo-width"), input("#tattoo-height")]) {
     if (!el) continue;
-    el.min = imp ? "0.25" : String(MIN_CM);
-    el.max = imp ? "40" : String(MAX_CM);
+    el.min = imp ? "0.25" : String(MIN_TATTOO_CM);
+    el.max = imp ? "40" : String(MAX_TATTOO_CM);
     el.step = String(displayStep());
   }
   for (const el of [input("#tattoo-width-range"), input("#tattoo-height-range")]) {
     if (!el) continue;
-    el.min = imp ? "0.25" : String(MIN_CM);
+    el.min = imp ? "0.25" : String(MIN_TATTOO_CM);
     el.max = imp ? "24" : "60";
     el.step = String(displayStep());
   }
@@ -197,8 +210,8 @@ function updateSizeInfo(): void {
   const opacity = (parseFloat(input("#opacity-range")?.value ?? "") || 85) / 100;
   const container = $("#silhouette-preview");
   if (container) {
-    container.innerHTML = generateSilhouetteSvg(bpId, heightCm, round1(tattooWCm), round1(tattooHCm), {
-      rotation, opacity, unit: unitLabel(),
+    container.innerHTML = generateSilhouetteSvg(bpId, heightCm, tattooWCm, tattooHCm, {
+      rotation, opacity, unit: unitLabel(), labels: { w: fmtLen(tattooWCm), h: fmtLen(tattooHCm) },
     });
   }
 
@@ -215,13 +228,53 @@ function updateSizeInfo(): void {
   }
 
   // Reflect the size settings in the camera preview.
-  camera?.setTattooSize(round1(tattooWCm), round1(tattooHCm), bp?.label ?? "", unitLabel());
+  camera?.setPlacement(bpId, heightCm);
+  camera?.setTattooSize(tattooWCm, tattooHCm,
+    `${toDisplay(tattooWCm)} × ${toDisplay(tattooHCm)} ${unitLabel()}${bp ? " on " + bp.label : ""}`);
+}
+
+/**
+ * Rotation and opacity have a second copy under the camera, so they can be
+ * adjusted while watching the feed on a phone. Both copies stay in sync.
+ */
+function linkRanges(mainSel: string, quickSel: string, valueSel: string): void {
+  const main = input(mainSel), quick = input(quickSel), value = $(valueSel);
+  const apply = (from: HTMLInputElement, to: HTMLInputElement | null): void => {
+    if (to) to.value = from.value;
+    if (value) value.textContent = from.value;
+    updateSizeInfo();
+  };
+  main?.addEventListener("input", () => apply(main, quick));
+  quick?.addEventListener("input", () => apply(quick, main));
+}
+
+/**
+ * Full AR asks first: the notice says what downloads and what the tracking
+ * needs, and only "Download and start" imports the runtime chunk.
+ */
+function setupFullAr(): void {
+  const dialog = document.querySelector<HTMLDialogElement>("#ar-dialog");
+  const begin = (): void => {
+    void camera?.startAr((onProgress) => import("./ar-tracking").then((m) => m.createTracker(onProgress)));
+  };
+  $("#ar-full")?.addEventListener("click", () => {
+    if (typeof dialog?.showModal !== "function") {
+      if (window.confirm("Full AR downloads about 30 MB the first time and runs body mapping on this device. It needs to see your face. Continue?")) begin();
+      return;
+    }
+    dialog.returnValue = "";
+    dialog.showModal();
+  });
+  dialog?.addEventListener("close", () => { if (dialog.returnValue === "go") begin(); });
 }
 
 function setupFileUpload(): void {
   const dz = $("#drop-zone"), fi = input("#file-input");
   if (!dz || !fi) return;
   dz.addEventListener("click", () => fi.click());
+  dz.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fi.click(); }
+  });
   dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("upload__circle--active"); });
   dz.addEventListener("dragleave", () => dz.classList.remove("upload__circle--active"));
   dz.addEventListener("drop", e => { e.preventDefault(); dz.classList.remove("upload__circle--active"); if ((e as DragEvent).dataTransfer?.files.length) handleFile((e as DragEvent).dataTransfer!.files[0]); });
@@ -261,13 +314,16 @@ document.addEventListener("DOMContentLoaded", () => {
   populatePricingSelects();
 
   // Panel controls that only need a recompute.
-  for (const s of ["#body-part-select", "#rotation-range", "#opacity-range", "#complexity-select", "#artist-select"]) {
+  for (const s of ["#body-part-select", "#complexity-select", "#artist-select"]) {
     $(s)?.addEventListener("input", updateSizeInfo);
     $(s)?.addEventListener("change", updateSizeInfo);
   }
+  linkRanges("#rotation-range", "#ar-rotation", "#rotation-value");
+  linkRanges("#opacity-range", "#ar-opacity", "#opacity-value");
   // Height (both unit variants).
   for (const s of ["#height-input", "#height-ft", "#height-in"]) {
     $(s)?.addEventListener("input", onHeightEdit);
+    $(s)?.addEventListener("change", setHeightInputs);
   }
   // Unified unit switch.
   $("#unit-select")?.addEventListener("change", () => {
@@ -294,13 +350,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  $("#rotation-range")?.addEventListener("input", e => { const v = (e.target as HTMLInputElement).value; const el = $("#rotation-value"); if (el) el.textContent = v; });
-  $("#opacity-range")?.addEventListener("input", e => { const v = (e.target as HTMLInputElement).value; const el = $("#opacity-value"); if (el) el.textContent = v; });
   setupFileUpload();
+  setupFullAr();
   camera = setupCameraPreview(
     () => parseFloat(input("#rotation-range")?.value ?? "") || 0,
     () => (parseFloat(input("#opacity-range")?.value ?? "") || 85) / 100,
     showError,
+    // Pinch on a calibrated or tracked preview resizes the tattoo: same path as typing it.
+    (wCm, hCm) => {
+      tattooWCm = clampCm(wCm);
+      tattooHCm = clampCm(hCm);
+      setSizeInputs();
+      updateSizeInfo();
+    },
   );
+  setSizeInputs();
   updateSizeInfo();
 });

@@ -49,6 +49,10 @@ export type ArtistKey = "apprentice" | "experienced" | "specialist" | "celebrity
 
 // ─── Unit Conversions ────────────────────────────────────────
 
+/** Allowed tattoo dimension range, cm (inputs, pinch-resize). */
+export const MIN_TATTOO_CM = 0.5;
+export const MAX_TATTOO_CM = 100;
+
 export function ftInToCm(ft: number, inches: number): number {
   if (ft < 0 || inches < 0 || inches >= 12) return NaN;
   return (ft * 12 + inches) * 2.54;
@@ -125,7 +129,11 @@ export const FIGURE_REGIONS: Record<string, { x: number; y: number; w: number; h
 
 export function generateSilhouetteSvg(
   bodyPartId: string, heightCm: number, tattooWCm: number, tattooHCm: number,
-  options: { rotation?: number; opacity?: number; unit?: "cm" | "in" } = {},
+  options: {
+    rotation?: number; opacity?: number; unit?: "cm" | "in";
+    /** Dimension labels as the page displays them; default: rounded from cm. */
+    labels?: { w: string; h: string };
+  } = {},
 ): string {
   const bp = getBodyPart(bodyPartId);
   if (!bp) return "";
@@ -137,10 +145,17 @@ export function generateSilhouetteSvg(
   const vw = 200, vh = 400;
   const zx = bp.zone.x * vw, zy = bp.zone.y * vh, zw = bp.zone.w * vw, zh = bp.zone.h * vh;
   const maxW = heightCm * bp.widthRatio, maxH = heightCm * bp.heightRatio;
-  const scaleW = Math.min(1, tattooWCm / maxW), scaleH = Math.min(1, tattooHCm / maxH);
-  const tw = zw * scaleW, th = zh * scaleH;
-  const tx = zx + (zw - tw) / 2, ty = zy + (zh - th) / 2;
-  const cx = tx + tw / 2, cy = ty + th / 2;
+  // One px-per-cm for both axes, so the design keeps its shape: the
+  // placement's usable area is fitted inside its zone at its real
+  // proportions, and the design is drawn at its share of that area. An
+  // oversized design spills past the dashed usable-area outline.
+  const pxPerCm = Math.min(zw / maxW, zh / maxH);
+  const aw = maxW * pxPerCm, ah = maxH * pxPerCm;
+  const ax = zx + (zw - aw) / 2, ay = zy + (zh - ah) / 2;
+  const cx = ax + aw / 2, cy = ay + ah / 2;
+  const tw = tattooWCm * pxPerCm, th = tattooHCm * pxPerCm;
+  const tx = cx - tw / 2, ty = cy - th / 2;
+  const labelY = Math.max(ty - 10, 8);
   return `<svg viewBox="0 0 ${vw} ${vh}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tattoo placement preview on ${bp.label}">
   <rect width="${vw}" height="${vh}" fill="#1a1a2a" rx="8"/>
   <ellipse cx="100" cy="28" rx="16" ry="22" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
@@ -154,14 +169,15 @@ export function generateSilhouetteSvg(
   <rect x="102" y="194" width="20" height="180" rx="8" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
   <ellipse cx="86" cy="382" rx="11" ry="7" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
   <ellipse cx="114" cy="382" rx="11" ry="7" fill="#2a2a3a" stroke="#444" stroke-width="0.5"/>
+  <rect class="usable-area" x="${ax}" y="${ay}" width="${aw}" height="${ah}" fill="none" stroke="#6b4fb3" stroke-width="0.5" stroke-dasharray="2 1.5"/>
   <g transform="rotate(${rotation}, ${cx}, ${cy})">
     <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="#a882ff" opacity="${opacity * 0.35}" rx="1"/>
     <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="none" stroke="#c9b0ff" stroke-width="0.6" rx="1"/>
   </g>
-  <line x1="${tx}" y1="${ty - 6}" x2="${tx + tw}" y2="${ty - 6}" stroke="#c9b0ff" stroke-width="0.4"/>
-  <text x="${cx}" y="${ty - 10}" text-anchor="middle" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${dim(tattooWCm)}</text>
-  <line x1="${tx + tw + 6}" y1="${ty}" x2="${tx + tw + 6}" y2="${ty + th}" stroke="#c9b0ff" stroke-width="0.4"/>
-  <text x="${tx + tw + 10}" y="${cy + 2}" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${dim(tattooHCm)}</text>
+  <line x1="${tx}" y1="${labelY + 4}" x2="${tx + tw}" y2="${labelY + 4}" stroke="#c9b0ff" stroke-width="0.4"/>
+  <text x="${cx}" y="${labelY}" text-anchor="middle" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${options.labels?.w ?? dim(tattooWCm)}</text>
+  <line x1="${Math.min(tx + tw + 6, vw - 28)}" y1="${ty}" x2="${Math.min(tx + tw + 6, vw - 28)}" y2="${ty + th}" stroke="#c9b0ff" stroke-width="0.4"/>
+  <text x="${Math.min(tx + tw + 10, vw - 24)}" y="${cy + 2}" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${options.labels?.h ?? dim(tattooHCm)}</text>
   <text x="100" y="${vh - 10}" text-anchor="middle" fill="#706b82" font-size="7" font-family="Inter, sans-serif">${bp.label}</text>
 </svg>`;
 }

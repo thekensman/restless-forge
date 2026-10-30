@@ -74,10 +74,12 @@ everything after it.
 fit the placement on your proportions. TattooSafe will tell you when a design
 exceeds the usable area rather than letting you discover it from a stencil.
 
-**Use the camera view for placement, the silhouette for measurement.** The
-camera preview answers "does this sit right here" — position, angle,
-relationship to your actual arm. The silhouette answers "how big is this
-really," in centimetres, and is the one to screenshot for your artist.
+**Calibrate before you judge size on camera.** The camera preview answers
+"does this sit right here": position, angle, relationship to your actual arm.
+It answers "how big is this really" only after you calibrate it with a bank
+card held against your skin; until then the size on screen is an estimate. The
+silhouette gives the size in centimetres too, and is the one to screenshot for
+your artist.
 
 **Try one size up.** Given the pull toward undersizing, deliberately
 previewing a larger version is worth the ten seconds. Often it is obviously
@@ -90,9 +92,10 @@ goes much better when you arrive with dimensions instead of a phone.
 
 ## What a preview cannot tell you
 
-It is an overlay. It does not track your arm or respond to how skin moves (the
-optional curve setting approximates a limb rather than measuring yours), and it
-cannot show how the piece will look in three years.
+It is an overlay. The standard preview stays where you put it, and Full AR
+follows your limb from a distance but still draws a flat image on it. Neither
+responds to how skin stretches as you move, and neither can show how the piece
+will look in three years.
 
 What it does is remove the most avoidable failure mode — discovering scale at
 the moment the stencil goes on, when you have already chosen the design, booked

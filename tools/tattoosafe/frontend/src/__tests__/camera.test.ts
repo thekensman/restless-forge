@@ -6,7 +6,8 @@
 import { describe, it, expect } from "vitest";
 import {
   clampCenter, pinchScale, wheelScale, drawSize, hitTest, coverCrop,
-  computeWrapStrips, MIN_SCALE, MAX_SCALE,
+  computeWrapStrips, wrapProjectedWidth, MIN_SCALE, MAX_SCALE,
+  overlaySize, frameWidthFromCard, scaleSize, cameraHint, CARD_W_CM, CARD_H_CM,
 } from "../camera";
 
 describe("clampCenter", () => {
@@ -63,19 +64,86 @@ describe("drawSize", () => {
 
 describe("hitTest", () => {
   const state = { x: 300, y: 200, scale: 1 };
-  // canvas 600 wide → overlay 200×100 for a 200×100 image
+  // overlay drawn 200×100 px at (300, 200)
   it("hits the center and misses far away", () => {
-    expect(hitTest(300, 200, state, 200, 100, 600, 0)).toBe(true);
-    expect(hitTest(10, 10, state, 200, 100, 600, 0)).toBe(false);
+    expect(hitTest(300, 200, state, 200, 100, 0)).toBe(true);
+    expect(hitTest(10, 10, state, 200, 100, 0)).toBe(false);
   });
   it("respects the unrotated bounding box edges", () => {
-    expect(hitTest(300 + 99, 200, state, 200, 100, 600, 0)).toBe(true);
-    expect(hitTest(300 + 101, 200, state, 200, 100, 600, 0)).toBe(false);
+    expect(hitTest(300 + 99, 200, state, 200, 100, 0)).toBe(true);
+    expect(hitTest(300 + 101, 200, state, 200, 100, 0)).toBe(false);
   });
   it("accounts for rotation", () => {
     // Rotated 90°: the wide axis is now vertical.
-    expect(hitTest(300, 200 + 99, state, 200, 100, 600, 90)).toBe(true);
-    expect(hitTest(300 + 99, 200, state, 200, 100, 600, 90)).toBe(false);
+    expect(hitTest(300, 200 + 99, state, 200, 100, 90)).toBe(true);
+    expect(hitTest(300 + 99, 200, state, 200, 100, 90)).toBe(false);
+  });
+  it("uses the size the design is drawn at (regression: a large tattoo's edge was not grabbable)", () => {
+    // 30 cm on a 600 px canvas showing 50 cm: drawn 360 px wide.
+    const { w, h } = overlaySize(600, 50, 30, 45, 300, 450, 1);
+    expect(w).toBeCloseTo(360);
+    expect(hitTest(300 + 150, 200, state, w, h, 0)).toBe(true);
+    expect(hitTest(300 + 190, 200, state, w, h, 0)).toBe(false);
+  });
+});
+
+describe("overlaySize", () => {
+  it("maps the tattoo's cm onto the frame's real width", () => {
+    expect(overlaySize(600, 50, 10, 5, 100, 100, 1)).toEqual({ w: 120, h: 60 });
+  });
+  it("applies the free zoom", () => {
+    expect(overlaySize(600, 50, 10, 5, 100, 100, 2).w).toBe(240);
+  });
+  it("falls back to the image's proportions without a height", () => {
+    expect(overlaySize(600, 50, 10, 0, 200, 100, 1).h).toBe(60);
+  });
+  it("falls back to drawSize without a real-world size", () => {
+    expect(overlaySize(600, 50, 0, 0, 200, 100, 1)).toEqual(drawSize(200, 100, 600, 1));
+  });
+});
+
+describe("card calibration", () => {
+  it("derives the frame's width from the matched card outline", () => {
+    // Card outline 120 px wide on a 600 px canvas → frame is 5 cards wide.
+    expect(frameWidthFromCard(600, 120)).toBeCloseTo(5 * CARD_W_CM, 9);
+  });
+  it("after calibrating, a tattoo the card's width is drawn exactly over the card", () => {
+    const frame = frameWidthFromCard(640, 173);
+    expect(overlaySize(640, frame, CARD_W_CM, CARD_H_CM, 1, 1, 1).w).toBeCloseTo(173, 9);
+  });
+  it("rejects an empty outline", () => {
+    expect(frameWidthFromCard(600, 0)).toBeNaN();
+  });
+});
+
+describe("scaleSize", () => {
+  it("scales both sides by the factor", () => {
+    const s = scaleSize(6, 10, 1.5, 0.5, 100);
+    expect(s.w).toBeCloseTo(9);
+    expect(s.h).toBeCloseTo(15);
+  });
+  it("stops at the limits without changing proportions", () => {
+    const big = scaleSize(20, 40, 10, 0.5, 100);
+    expect(big.h).toBeCloseTo(100);
+    expect(big.w).toBeCloseTo(50);
+    const small = scaleSize(2, 1, 0.01, 0.5, 100);
+    expect(small.h).toBeCloseTo(0.5);
+    expect(small.w).toBeCloseTo(1);
+  });
+});
+
+describe("cameraHint", () => {
+  it("calls an uncalibrated size approximate", () => {
+    const h = cameraHint({ calibrating: false, calibrated: false, sizeLabel: "6 × 10 cm on Thigh" });
+    expect(h).toContain("6 × 10 cm on Thigh");
+    expect(h).toContain("approximate");
+    expect(h).not.toContain("true size");
+  });
+  it("claims true size only once calibrated", () => {
+    expect(cameraHint({ calibrating: false, calibrated: true, sizeLabel: "" })).toContain("true size");
+  });
+  it("explains the card step while calibrating", () => {
+    expect(cameraHint({ calibrating: true, calibrated: false, sizeLabel: "x" })).toContain("card");
   });
 });
 
@@ -132,6 +200,12 @@ describe("computeWrapStrips", () => {
     // Center of a half-cylinder viewed straight on is very nearly 1:1
     // (srcW 400 over dispW 300 gives a base texel ratio of 400/300).
     expect(center).toBeCloseTo(400 / 300, 1);
+  });
+
+  it("projected width matches wrapProjectedWidth (used for hit-testing)", () => {
+    for (const span of [0.5, 2, Math.PI]) {
+      expect(computeWrapStrips(400, 300, 16, span).projW).toBeCloseTo(wrapProjectedWidth(300, span), 9);
+    }
   });
 
   it("source mapping is monotonic", () => {

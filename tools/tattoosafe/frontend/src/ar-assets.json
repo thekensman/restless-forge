@@ -1,0 +1,17 @@
+{
+  "tasksVision": "1.1.1",
+  "models": {
+    "pose": {
+      "file": "pose_landmarker_full-5134a3aad27a.task",
+      "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task",
+      "sha256": "5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1",
+      "bytes": 9398198
+    },
+    "segmenter": {
+      "file": "selfie_multiclass_256x256-c6748b1253a9.tflite",
+      "url": "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/1/selfie_multiclass_256x256.tflite",
+      "sha256": "c6748b1253a99067ef71f7e26ca71096cd449baefa8f101900ea23016507e0e0",
+      "bytes": 16371837
+    }
+  }
+}

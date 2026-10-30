@@ -60,7 +60,8 @@
   <div class="tool-intro">
     <h1>Free AR Tattoo Preview &amp; Pricing Calculator</h1>
     <p>See how a tattoo design looks on your body using your camera. Upload any image, activate the
-    camera, and drag your design into position. Then estimate cost based on size, style, and placement.
+    camera, and drag your design into position, or turn on Full AR and let it follow your body as
+    you move. Then estimate cost based on size, style, and placement.
     Everything runs in your browser — no uploads, no accounts.</p>
   </div>
 
@@ -124,22 +125,22 @@
         <label class="field__label">Tattoo Size</label>
         <div class="field__row">
           <div class="field__input-group">
-            <input class="field__input field__input--short" type="number" id="tattoo-width" value="8" min="0.5" max="100" step="0.5" aria-label="Tattoo width">
+            <input class="field__input field__input--short" type="number" id="tattoo-width" value="6" min="0.5" max="100" step="0.5" aria-label="Tattoo width">
             <span class="field__unit-label" id="width-unit-label">cm</span>
           </div>
           <span class="field__x">&times;</span>
           <div class="field__input-group">
-            <input class="field__input field__input--short" type="number" id="tattoo-height" value="12" min="0.5" max="100" step="0.5" aria-label="Tattoo height">
+            <input class="field__input field__input--short" type="number" id="tattoo-height" value="10" min="0.5" max="100" step="0.5" aria-label="Tattoo height">
             <span class="field__unit-label" id="height-unit-label">cm</span>
           </div>
         </div>
         <div class="size-slider">
           <span class="size-slider__label">W</span>
-          <input class="field__range" type="range" id="tattoo-width-range" min="0.5" max="60" step="0.5" value="8" aria-label="Tattoo width slider">
+          <input class="field__range" type="range" id="tattoo-width-range" min="0.5" max="60" step="0.5" value="6" aria-label="Tattoo width slider">
         </div>
         <div class="size-slider">
           <span class="size-slider__label">H</span>
-          <input class="field__range" type="range" id="tattoo-height-range" min="0.5" max="60" step="0.5" value="12" aria-label="Tattoo height slider">
+          <input class="field__range" type="range" id="tattoo-height-range" min="0.5" max="60" step="0.5" value="10" aria-label="Tattoo height slider">
         </div>
         <label class="field__check">
           <input type="checkbox" id="aspect-lock">
@@ -191,9 +192,31 @@
       device &mdash; nothing is recorded or uploaded.</p>
       <canvas class="ar__canvas" id="ar-canvas" width="640" height="480"></canvas>
       <p class="ar__hint" id="ar-hint" aria-live="polite"></p>
+      <progress class="ar__progress" id="ar-progress" max="1" value="0" hidden aria-label="Body mapping download"></progress>
+      <div class="ar__cal" id="ar-cal" hidden>
+        <label class="ar__cal-size">Card outline
+          <input type="range" id="ar-cal-size" min="5" max="95" value="30" aria-label="Card outline size">
+        </label>
+        <div class="ar__cal-buttons">
+          <button class="btn btn--primary" id="ar-cal-done">Done</button>
+          <button class="btn" id="ar-cal-cancel">Cancel</button>
+        </div>
+      </div>
+      <div class="ar__quick">
+        <label class="ar__quick-field">Rotation
+          <input type="range" id="ar-rotation" min="-180" max="180" value="0" step="5" aria-label="Rotation">
+        </label>
+        <label class="ar__quick-field">Opacity
+          <input type="range" id="ar-opacity" min="20" max="100" value="85" step="5" aria-label="Opacity">
+        </label>
+      </div>
       <div class="ar__buttons">
         <button class="btn btn--primary" id="ar-start" disabled>Start Camera</button>
+        <button class="btn" id="ar-full" disabled>Full AR (body mapping)</button>
+        <button class="btn" id="ar-standard" hidden>Standard preview</button>
         <button class="btn" id="ar-stop" hidden>Stop Camera</button>
+        <button class="btn" id="ar-flip" hidden>Flip camera</button>
+        <button class="btn" id="ar-calibrate" hidden>Calibrate size</button>
         <button class="btn" id="ar-screenshot" hidden>Save Screenshot</button>
         <label class="ar__wrap-toggle" id="ar-wrap-label" hidden>
           <input type="checkbox" id="ar-wrap"> Curve around a limb
@@ -203,10 +226,44 @@
           <input type="range" id="ar-curve" min="0" max="100" value="40" aria-label="Wrap curvature">
         </label>
         <label class="ar__wrap-toggle" id="ar-removebg-label" hidden><input type="checkbox" id="ar-removebg" checked> Remove flat background</label>
+        <label class="ar__wrap-toggle" id="ar-clothes-label" hidden><input type="checkbox" id="ar-clothes" checked> Hide under clothing</label>
+        <label class="ar__wrap-toggle" id="ar-side-label" hidden>Side
+          <select class="ar__select" id="ar-side">
+            <option value="auto" selected>Either</option>
+            <option value="left">Your left</option>
+            <option value="right">Your right</option>
+          </select>
+        </label>
       </div>
-      <p class="ar__note">Upload a design above to enable the camera preview. The overlay is a
-      static try-on aid — position it against your reflection; it doesn't track your body.</p>
+      <p class="ar__note">Upload a design above to enable the camera preview. The standard preview
+      stays where you put it. Full AR follows the body part you picked, after a one-time download.</p>
     </section>
+
+    <!-- ─── Full AR notice (shown before anything downloads) ─── -->
+    <dialog class="ar-dialog" id="ar-dialog" aria-labelledby="ar-dialog-title">
+      <form method="dialog">
+        <h2 class="ar-dialog__title" id="ar-dialog-title">Turn on Full AR?</h2>
+        <p>Full AR maps your body, so the design stays on the part you picked as you move,
+        turns with it, curves around it and hides under your clothes.</p>
+        <ul class="ar-dialog__list">
+          <li><strong>It downloads about 30&nbsp;MB</strong> the first time, from this site. Your
+          browser keeps it, so later visits start faster.</li>
+          <li><strong>It finds your face first.</strong> Prop your phone up or stand in front of a
+          mirror so your face and the body part are both in view. A close-up of one arm won't
+          lock on.</li>
+          <li><strong>Everything runs on your device.</strong> The video never leaves it. Mapping
+          works the processor hard, so older phones may slow down or get warm.</li>
+          <li><strong>The size is an estimate</strong> from the height you entered. For an exact
+          size, use the standard preview and calibrate it with a card.</li>
+          <li>It follows the inner and outer forearm, upper arm, shoulder, chest, sternum, thigh
+          and calf. Other placements stay where you drag them.</li>
+        </ul>
+        <div class="ar-dialog__buttons">
+          <button class="btn btn--primary" value="go">Download and start</button>
+          <button class="btn" value="cancel">Not now</button>
+        </div>
+      </form>
+    </dialog>
 
     <!-- ─── Error ─── -->
     <div class="error-toast" id="error-toast" hidden role="alert"><p id="error-msg"></p></div>
@@ -217,10 +274,10 @@
       <p>Most tattoo regret isn't about the design — it's about scale and placement. A piece that
       looks perfect on a phone screen can read completely differently at 8&nbsp;cm on a wrist or
       30&nbsp;cm across a back. TattooSafe exists to close that gap before any ink is involved:
-      enter your height and a body placement, and the proportional mockup shows your design at
-      true relative scale on an average body of your height, flagging when it physically won't fit the area.
-      The camera preview then lets you hold the design against your actual skin — a static,
-      honestly-labeled try-on aid, not AI body tracking.</p>
+      enter your height and a body placement, and the proportional mockup draws your design inside
+      that placement's usable area on an average body of your height, at its true share of the
+      space, and flags when it physically won't fit. The camera preview then lets you hold the
+      design against your actual skin, at its real size once you calibrate it with a bank card.</p>
       <h2>How the Price Estimate Works</h2>
       <p>The estimate combines four real cost drivers: the tattoo's area, the style's needle-time
       per square inch (fine line work is far faster than photorealism), a placement difficulty
@@ -235,27 +292,39 @@
 
       <h2>What the Camera Preview Is, and Isn't</h2>
       <p>The camera view composites your design over a live video feed so you can hold your arm,
-      ribs or shoulder in frame and see the piece at the size you selected. It is a static overlay:
-      the design does not track your body, wrap around a limb, or follow you as you move. That is a
-      deliberate limit rather than a missing feature — body-tracking overlays tend to look
-      convincing while quietly distorting scale, which is the one thing this tool exists to get
-      right. Treat it as holding a printed stencil against your skin, and use the proportional
-      silhouette mockup when you want the measurement rather than the impression.</p>
-      <p>Nothing from the camera is recorded or transmitted. The video stream is read by JavaScript
-      in your tab and drawn straight to a canvas; there is no upload step and no server that could
-      receive it.</p>
+      ribs or shoulder in frame and see how the piece sits. A camera cannot tell how far away your
+      arm is, so until you calibrate, the size on screen is an estimate. Tap
+      <strong>Calibrate size</strong>, hold a bank or ID card flat against your skin and match the
+      outline on screen to it. The design is then drawn at its real dimensions for that distance,
+      and pinching it changes the tattoo's size and the price estimate together.</p>
+      <p>The standard preview is a static overlay. The design stays where you put it, and the
+      optional curve setting bends it around a cylinder at a curvature you set by hand. Treat it as
+      holding a printed stencil against your skin, and use the silhouette mockup to see the size
+      against the whole placement.</p>
+      <p><strong>Full AR</strong> makes the opposite trade. After a one-time download of about
+      30&nbsp;MB of body-mapping models from this site, it keeps the design on the placement you
+      chose as you move: turned and shortened with the limb, curved to the limb's measured width,
+      and hidden where clothing covers the skin. It finds you by your face, so it works with the
+      phone propped up or facing a mirror rather than up close, and it follows eight placements:
+      inner and outer forearm, upper arm, shoulder, chest, sternum, thigh and calf. Its size is an
+      estimate from the height you enter. The <a href="/tools/tattoosafe/faq/">FAQ</a> covers how
+      to frame yourself for it.</p>
+      <p>Nothing from the camera is recorded or transmitted, in either mode. The video stream is
+      read by JavaScript in your tab and drawn straight to a canvas, and Full AR's body mapping runs in
+      the same tab; there is no upload step and no server that could receive it.</p>
 
       <h2>Why Placement Changes the Answer</h2>
       <p>The same design is a different tattoo on a forearm than on a rib cage. Sixteen placements
       are modelled, each with its own usable area and difficulty multiplier, because two things
       vary independently: how much room the area physically offers, and how much longer the work
-      takes there. Ribs, hands, feet and necks are slower to tattoo — thinner skin over bone, more
+      takes there. Ribs, hands, ankles and necks are slower to tattoo — thinner skin over bone, more
       breaks, more repositioning — so an identical piece costs more on ribs than on a thigh, even
       at the same size and the same artist rate.</p>
       <p>Size is where most plans go wrong in the other direction. Fine detail has a floor: line
       weight, needle size and ink spread mean a design with dense linework simply cannot be
-      rendered at 5&nbsp;cm and stay legible in five years. When the calculator flags a design as
-      too small for its placement, that is what it is warning about.</p>
+      rendered at 5&nbsp;cm and stay legible in five years. The fit check only catches designs
+      that are too big for their placement, so ask your artist how small yours can go and still
+      read clearly.</p>
 
       <h2>Who This Is For</h2>
       <p>It is for the stage before you book — working out whether the piece you like fits where

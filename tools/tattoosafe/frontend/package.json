@@ -4,19 +4,23 @@
   "description": "AR tattoo preview & pricing calculator — see your design in real time.",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "node scripts/fetch-ar-assets.mjs && vite",
+    "build": "node scripts/fetch-ar-assets.mjs && tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "ar-assets": "node scripts/fetch-ar-assets.mjs"
   },
   "devDependencies": {
+    "jsdom": "^25.0.0",
     "typescript": "^5.4.0",
     "vite": "^5.4.0",
-    "vitest": "^2.0.0",
-    "jsdom": "^25.0.0"
+    "vitest": "^2.0.0"
   },
   "author": "Kenneth Cross",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.1.1"
+  }
 }
