@@ -4,12 +4,16 @@
  * Imported only after the visitor accepts the Full AR notice, so the page
  * itself never pays for it. Wraps MediaPipe Tasks Vision: the pose
  * landmarker says where the body is, and the multiclass selfie segmenter
- * says which pixels are skin and which are clothes. Both run in this tab.
+ * says which pixels are skin and which are clothes. The face landmarker
+ * (478-point face mesh) loads only when the face placement is first chosen.
+ * All of them run in this tab.
  * The WASM runtime and the models are served from this site (see
  * scripts/fetch-ar-assets.mjs); nothing about the visitor goes anywhere.
  */
-import { FilesetResolver, ImageSegmenter, PoseLandmarker } from "@mediapipe/tasks-vision";
+import { FaceLandmarker, FilesetResolver, ImageSegmenter, PoseLandmarker } from "@mediapipe/tasks-vision";
 import assets from "./ar-assets.json";
+import { FACE_TRIANGLES, FACE_UV, FACE_XYZ } from "./face-mesh";
+import type { FaceMesh } from "./ar-face";
 
 const AR_BASE = "/tools/tattoosafe/ar";
 /** Width the segmenter sees; its model works at 256×256 anyway. */
@@ -24,12 +28,20 @@ export interface TrackerOutput {
 
 export interface Tracker {
   readonly delegate: "GPU" | "CPU";
+  /** The canonical face mesh the face placement maps onto. */
+  readonly faceMesh: FaceMesh;
   detect(video: HTMLVideoElement, tMs: number, withMask: boolean): TrackerOutput;
+  /** True once loadFace() has finished. */
+  faceReady(): boolean;
+  /** Download and start the face landmarker (first time the face is chosen). */
+  loadFace(onProgress: (loaded: number, total: number) => void): Promise<void>;
+  /** 478 face landmarks normalized to the video frame, or null if no face is found. */
+  detectFace(video: HTMLVideoElement, tMs: number): { x: number; y: number }[] | null;
   close(): void;
 }
 
-/** Download size of the models, for the notice and the progress line. */
-export const MODEL_BYTES = Object.values(assets.models).reduce((n, m) => n + m.bytes, 0);
+/** Download size of the body models (the face model loads later, on demand). */
+export const MODEL_BYTES = assets.models.pose.bytes + assets.models.segmenter.bytes;
 
 async function download(file: string, sha256: string, onChunk: (n: number) => void): Promise<Uint8Array> {
   const res = await fetch(`${AR_BASE}/models/${file}`);
@@ -107,6 +119,10 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
   }
   const { pose, seg } = tasks;
 
+  let face: FaceLandmarker | null = null;
+  let faceLoad: Promise<void> | null = null;
+  let lastFace = -1;
+
   const small = document.createElement("canvas");
   const sctx = small.getContext("2d", { willReadFrequently: true });
   // Each task needs strictly increasing timestamps.
@@ -114,6 +130,31 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
 
   return {
     delegate,
+    faceMesh: { tri: FACE_TRIANGLES, uv: FACE_UV, xyz: FACE_XYZ },
+    faceReady: () => face !== null,
+    loadFace(onProgress) {
+      faceLoad ??= (async () => {
+        const m = assets.models.face;
+        let loaded = 0;
+        const buf = await download(m.file, m.sha256, (n) => { loaded += n; onProgress(loaded, m.bytes); });
+        face = await FaceLandmarker.createFromOptions(fileset, {
+          baseOptions: { modelAssetBuffer: buf, delegate },
+          runningMode: "VIDEO",
+          numFaces: 1,
+        });
+      })();
+      // A failed load can be retried by choosing the face again.
+      faceLoad.catch(() => { faceLoad = null; });
+      return faceLoad;
+    },
+    detectFace(video, tMs) {
+      if (!face) return null;
+      const t = Math.max(tMs, lastFace + 1);
+      lastFace = t;
+      const r = face.detectForVideo(video, t);
+      const first = r.faceLandmarks[0];
+      return first ? first.map((p) => ({ x: p.x, y: p.y })) : null;
+    },
     detect(video, tMs, withMask) {
       const tp = Math.max(tMs, lastPose + 1);
       lastPose = tp;
@@ -142,6 +183,7 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
     close() {
       pose.close();
       seg.close();
+      face?.close();
     },
   };
 }

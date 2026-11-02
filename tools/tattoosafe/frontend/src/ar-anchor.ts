@@ -88,8 +88,9 @@ export const AR_PLACEMENTS: Record<string, AnchorSpec> = {
   calf: { kind: "limb", from: KNEE, to: ANKLE, t: 0.4, ratio: SEGMENT_RATIO.shank, needs: "your face and both legs down to the ankles" },
 };
 
+/** Placements Full AR follows: the eight above, plus the face (face mesh, ar-face.ts). */
 export function isTrackable(placementId: string): boolean {
-  return placementId in AR_PLACEMENTS;
+  return placementId in AR_PLACEMENTS || placementId === "face";
 }
 
 export interface Anchor {

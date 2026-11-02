@@ -57,7 +57,7 @@ In TattooSafe's estimator, placement multipliers run from 1.0 to about 1.4:
 - **1.0** — upper arm, forearm, thigh, upper back. Flat, fleshy, stationary.
 - **1.05–1.15** — shoulder, calf, lower back, chest, wrist.
 - **1.2–1.3** — ankle, back of neck, behind the ear.
-- **1.35–1.4** — ribs, sternum, back of the hand.
+- **1.35–1.4** — ribs, sternum, back of the hand, face.
 
 These track how hard the surface is to work on. Ribs curve in two directions
 over bone that moves with every breath. Hands have thin, mobile skin over

@@ -80,6 +80,7 @@ export const BODY_PARTS: BodyPart[] = [
   { id: "ankle", label: "Ankle", group: "leg", widthRatio: 0.04, heightRatio: 0.04, difficulty: 1.3, circumferenceCm: 22, description: "Small bony area, higher pain. Popular for minimalist and wrap designs.", zone: { x: 0.52, y: 0.88, w: 0.08, h: 0.04 } },
   { id: "back_of_neck", label: "Back of Neck", group: "other", widthRatio: 0.06, heightRatio: 0.05, difficulty: 1.3, circumferenceCm: 38, description: "Small area, moderate pain. Easily hidden by hair or collar.", zone: { x: 0.44, y: 0.12, w: 0.12, h: 0.05 } },
   { id: "behind_ear", label: "Behind Ear", group: "other", widthRatio: 0.025, heightRatio: 0.03, difficulty: 1.4, circumferenceCm: 56, description: "Tiny, delicate area. Higher pain due to thin skin and proximity to bone.", zone: { x: 0.40, y: 0.07, w: 0.06, h: 0.04 } },
+  { id: "face", label: "Face", group: "other", widthRatio: 0.08, heightRatio: 0.11, difficulty: 1.5, circumferenceCm: 56, description: "The most visible placement there is: thin skin over bone, and hard to hide. Many artists only take face work from clients who already have other tattoos.", zone: { x: 0.43, y: 0.025, w: 0.14, h: 0.09 } },
   { id: "hand", label: "Back of Hand", group: "other", widthRatio: 0.045, heightRatio: 0.05, difficulty: 1.5, circumferenceCm: 21, description: "High visibility, high pain, faster fading due to frequent washing and sun exposure.", zone: { x: 0.25, y: 0.58, w: 0.08, h: 0.05 } },
 ];
 
@@ -214,6 +215,7 @@ export const PLACEMENT_DIFFICULTY: Record<string, { mult: number; pain: string; 
   ankle:         { mult: 1.2,  pain: "Moderate-high", label: "Ankle" },
   back_of_neck:  { mult: 1.2,  pain: "Moderate-high", label: "Back of neck" },
   behind_ear:    { mult: 1.3,  pain: "High",          label: "Behind ear" },
+  face:          { mult: 1.4,  pain: "High",          label: "Face" },
   hand:          { mult: 1.4,  pain: "High",          label: "Back of hand" },
 };
 

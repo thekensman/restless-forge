@@ -4,7 +4,8 @@ Opt-in body mapping in TattooSafe's camera preview. The standard preview is a
 static overlay the visitor drags into place; Full AR finds their body with
 MediaPipe and keeps the design on the placement they picked as they move:
 turned with the limb, foreshortened with it, curved to its measured width, and
-hidden where clothing covers the skin. Everything runs in the visitor's tab.
+hidden where clothing covers the skin. On the face it maps the design onto
+MediaPipe's face mesh instead. Everything runs in the visitor's tab.
 Nothing is uploaded, so the tool stays client-side (not `tier: 'cloud'`).
 
 Visitor-facing copy calls it **body mapping**, never "tracking": on a site whose
@@ -21,7 +22,9 @@ the face-first requirement, the device load, and that the size is an estimate.
 | File | Role |
 |---|---|
 | `src/ar-anchor.ts` | Pure geometry, unit-tested: which landmarks each placement anchors to, px-per-cm from the entered height, side choice, smoothing, limb width from the mask. No MediaPipe import. |
-| `src/ar-tracking.ts` | The lazily loaded chunk: downloads and hash-checks the models, creates the pose landmarker and the segmenter, picks GPU or CPU. Imported only after the notice. |
+| `src/ar-face.ts` | Pure face-mapping geometry, unit-tested: per-triangle affine maps from the mesh's texture space to the live landmarks, local cm-per-UV, which triangles face the camera, drag axes. |
+| `src/face-mesh.ts` | MediaPipe's canonical face mesh (468 landmarks' UV and cm positions, 898 triangles), generated from `canonical_face_model.obj`, Apache-2.0. Bundled into the lazy chunk only. |
+| `src/ar-tracking.ts` | The lazily loaded chunk: downloads and hash-checks the models, creates the pose landmarker and the segmenter, picks GPU or CPU; loads the face landmarker the first time the face is chosen. Imported only after the notice. |
 | `src/camera.ts` | The camera preview. Full AR is a mode of it (`startAr` / `stopAr`): front camera, mirrored view, tracking per frame, drawing on the anchor. |
 | `src/ar-assets.json` | Single source for the runtime version and each model's URL, SHA-256, size and served file name. Read by the build script and the browser. |
 | `scripts/fetch-ar-assets.mjs` | Fills `public/ar/` (gitignored) before every `npm run dev` and `npm run build`. |
@@ -34,6 +37,7 @@ the face-first requirement, the device load, and that the size is an estimate.
 | `wasm-<version>/vision_wasm_nosimd_internal.{js,wasm}` | 12.6 MB | same; only browsers without WebAssembly SIMD load it |
 | `models/pose_landmarker_full-<sha12>.task` | 9.4 MB | Google's versioned model URL, checked against the pinned SHA-256 |
 | `models/selfie_multiclass_256x256-<sha12>.tflite` | 16.4 MB | same |
+| `models/face_landmarker-<sha12>.task` | 3.8 MB | same; downloaded by the browser only when the face placement is first chosen |
 
 `fetch-ar-assets.mjs` copies the runtime, then for each model tries the
 pinned upstream URL and, if that fails or serves different bytes, the copy
@@ -93,7 +97,17 @@ networks, repackaged with new zip timestamps), which would fail the hash.
   the frame rate to a third for no visible gain.
 - **Segmenter: selfie multiclass.** Its categories separate body skin from
   clothes, which gives both the "hide under clothing" clip and the limb width
-  that drives the automatic curvature.
+  that drives the automatic curvature. The clip removes only pixels classed as
+  clothes. It first kept only pixels classed as skin, and on a real phone
+  (2026-11) that hid a design on a bare forearm entirely; removing clothes
+  instead means a mask that comes back wrong hides nothing.
+- **Face: the face landmarker, drawn per triangle.** Its 478 landmarks are the
+  canonical mesh's vertices, so the design is laid out in the mesh's texture
+  space and each of the ~900 triangles carries its piece of the design to the
+  live face with one affine transform. Triangles go to an offscreen canvas,
+  each clipped 0.6 px wide so no seams show, triangles winding the wrong way
+  (facing away) are skipped, and the result is multiplied onto the frame once.
+  Size uses the canonical mesh's centimetres, an average adult face.
 - **GPU or CPU.** The GPU delegate is tried first, except when WebGL is a
   software renderer (SwiftShader, llvmpipe): there it measured about five times
   slower than the CPU delegate, so the CPU delegate is used.
@@ -103,22 +117,33 @@ networks, repackaged with new zip timestamps), which would fail the hash.
 - **It finds the face first.** MediaPipe's pose detector locates a person by
   their face, so a close-up of one limb never locks on. The visitor has to prop
   the phone up or use a mirror, which makes the design small on screen.
-- **Eight placements:** inner and outer forearm, upper arm, shoulder, chest,
-  sternum, thigh, calf. Wrist, hand and behind the ear are too small for a body
-  model; upper and lower back and the back of the neck can't be filmed by the
-  wearer. Those stay manual inside Full AR.
+- **Nine placements:** inner and outer forearm, upper arm, shoulder, chest,
+  sternum, thigh, calf, and the face (face mesh, works at selfie distance).
+  Wrist, hand and behind the ear are too small for a body model; upper and
+  lower back and the back of the neck can't be filmed by the wearer. Those stay
+  manual inside Full AR.
 - **Size is an estimate.** Scale comes from the entered height and typical
   segment proportions (Drillis and Contini), using the longest-looking
   segments, since a limb pointing at the camera looks short. Individual
   proportions and landmark positions each vary by a few percent; the error has
   not been measured on real people. The standard preview's card calibration is
   the exact route.
-- **Not tested on real phones yet.** Headless Chromium proves the pipeline,
-  not the frame rate or iOS Safari's WebGL quirks.
+- **Real phones.** First tried on a phone on 2026-11-02: it locked onto a
+  forearm in mirror framing, and that test found the skin-only clip bug above.
+  Frame rates across devices are still unmeasured.
+
+## Debugging on a device
+
+Add `?ar-debug` to the page URL. Full AR then tints the segmentation over the
+feed (skin peach, clothes blue, face pink, hair brown), which shows at a glance
+whether the mask lines up with the picture, and `tsAr()` in the browser console
+returns the live state: placement, GPU or CPU, side, anchor, the face center
+and a few face landmarks, and whether the view is mirrored.
 
 ## Testing
 
-- Unit: `src/__tests__/ar-anchor.test.ts` covers the geometry.
+- Unit: `src/__tests__/ar-anchor.test.ts` and `ar-face.test.ts` (on the real
+  mesh) cover the geometry.
 - End to end (manual, not in CI): Chromium accepts a video file as a fake
   camera. Convert MediaPipe's test photo
   (`https://storage.googleapis.com/mediapipe-assets/pose.jpg`) with
@@ -128,4 +153,9 @@ networks, repackaged with new zip timestamps), which would fail the hash.
   Turning Full AR on should reach the tracking hint within seconds, and the
   design should sit on each of the eight placements. The figure in that photo
   wears a tank top and shorts, so the chest design vanishes with "Hide under
-  clothing" on and the thigh design is cut off at the shorts.
+  clothing" on and the thigh design is cut off at the shorts. For the face,
+  MediaPipe's `portrait.jpg` cropped to head and shoulders works; a checkerboard
+  with letters shows both the bending and that text reads the right way round.
+  When a test scrolls the canvas into view, scroll instantly: the page has
+  `scroll-behavior: smooth`, and a drag during the animation reads as a huge
+  move.

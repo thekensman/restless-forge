@@ -51,7 +51,9 @@ The body mapping finds a person by their face first and works out the rest of
 the body from there. A close-up of one arm or leg, with no face in view, never
 locks on.
 
-So frame yourself the way a mirror would. Prop your phone against something, or
+The face is the exception: there, the face is the body part, so hold the phone
+at arm's length like a selfie. For everything else, frame yourself the way a
+mirror would. Prop your phone against something, or
 hold it facing a mirror, and step back until your face and the body part are
 both in view. For a thigh or calf that means most of your body, so the design
 takes up a small part of the screen. That is the trade-off for having it
@@ -63,14 +65,28 @@ switches to the rear camera when someone else is holding the phone.
 
 ## Which placements does Full AR follow?
 
-Eight: inner and outer forearm, upper arm, shoulder, chest, sternum, thigh, and
-calf. Choose a side with the **Side** menu, or leave it on **Either** to follow
-whichever side is more visible.
+Nine: inner and outer forearm, upper arm, shoulder, chest, sternum, thigh, calf,
+and the face. Choose a side with the **Side** menu, or leave it on **Either** to
+follow whichever side is more visible.
 
 The other eight stay where you drag them, even in Full AR. The wrist, the back
 of the hand and the spot behind the ear are too small for body mapping to
 place a design on reliably, and nobody can film their own upper back, lower
 back or back of the neck.
+
+## How does Full AR map a design onto a face?
+
+With a separate face model, which finds 478 points across your face and joins
+them into a mesh of about 900 small triangles. TattooSafe lays your design out
+over that mesh and draws each triangle's piece of it where that triangle is on
+your face, so the design bends over the cheekbone, the nose and the brow, and
+squashes as you turn your head. It starts on one cheek (the **Side** menu picks
+which); drag it anywhere on the face and pinch to resize it.
+
+The face model is another 4 MB, downloaded the first time you choose the face.
+Its size comes from an average adult face rather than your height, so treat it
+as an estimate too. And a practical note: many artists only take face work from
+clients who already have other tattoos.
 
 ## How accurate is the size in Full AR?
 
@@ -80,6 +96,8 @@ thigh about 25%. Your own proportions can differ from those averages by a few
 percent, and the model's idea of where your joints are can be off by a few
 percent more. It leans on the limbs that look longest, because a limb pointing
 at the camera looks shorter than it is.
+
+On the face, the scale comes from an average adult face instead.
 
 For an exact size, use the standard preview and calibrate it with a card.
 
@@ -125,9 +143,9 @@ rather than arguing with. A quote well below it is worth being cautious about.
 
 ## What body placements are supported?
 
-Sixteen: inner and outer forearm, upper arm, shoulder, wrist, chest, upper back,
-ribs, sternum, lower back, thigh, calf, ankle, back of neck, behind the ear, and
-back of the hand.
+Seventeen: inner and outer forearm, upper arm, shoulder, wrist, chest, upper
+back, ribs, sternum, lower back, thigh, calf, ankle, back of neck, behind the
+ear, back of the hand, and the face.
 
 Each has its own usable area, scaled to the height you enter, so the fit check
 reflects your proportions rather than a generic model's.
