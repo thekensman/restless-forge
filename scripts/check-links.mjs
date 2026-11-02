@@ -370,6 +370,23 @@ for (const file of walkHtml(dist)) {
   }
 })(dist);
 
+/* ── Rail ads reach AdSense only once they are visible ──
+ *
+ * The 160x600 side rails are hidden below 1540px. A rail written as
+ * <ins class="adsbygoogle"> is handed to AdSense at every width, and AdSense
+ * throws a TagError for each one with no width: two per narrow-screen view on
+ * every page with rails, until rfMountAdsenseSlots() in site/shared.js started
+ * deferring them. A rail <ins> must be class="rf-ad-rail-slot" so it joins
+ * only when it is laid out. Copying an old snippet would bring the errors back
+ * silently, since nothing on the page looks different.
+ */
+for (const file of walkHtml(dist)) {
+  const html = readFileSync(file, "utf8");
+  if (/<aside class="ad-rail[^"]*"[^>]*>\s*<ins class="adsbygoogle/.test(html)) {
+    problems.push(`${relative(dist, file)}: a rail ad <ins> has class="adsbygoogle"; use class="rf-ad-rail-slot" so it is requested only once visible (site/shared.js)`);
+  }
+}
+
 /* ── Restored games: shipped unchanged, and no monetisation under /games/ ──
  *
  * The rule for restored games (docs/games.md): no ads, no donation links and

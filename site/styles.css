@@ -278,7 +278,10 @@ img { max-width: 100%; height: auto; }
    centered, so at 1540px each margin is 290px and a 160px rail inset 12px
    still clears the text by ~118px. Below that the rails would crowd or overlap
    the prose, which is the one thing a reading page cannot trade away.
-   Prose pages only: these belong beside an essay, not beside an index. */
+   Prose pages only: these belong beside an essay, not beside an index.
+   The <ins> inside a rail is class="rf-ad-rail-slot", not adsbygoogle:
+   rfMountAdsenseSlots() (site/shared.js) turns it into an AdSense slot only
+   once this rule has laid it out, because AdSense throws on a hidden slot. */
 .ad-rail {
   position: fixed;
   top: 50%;

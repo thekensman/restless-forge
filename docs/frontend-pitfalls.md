@@ -93,7 +93,7 @@ open, so the pre-load reservation is observed rather than assumed.
 
 ## 4. Ad slots
 
-Three separate failures, all silent:
+Four separate failures, all silent:
 
 - **A slot without a loader renders nothing.** Three TattooSafe sub-pages had
   `<ins class="adsbygoogle">` and called `rfMountAdsenseSlots()` with no loader
@@ -108,6 +108,17 @@ Three separate failures, all silent:
 - **Ads on thin pages are a policy problem, not just an aesthetic one.**
   *Guard:* `check-content-health.mjs` rules 2, 4 and 5 (250-word floor on
   indexable ad-bearing prose; unlaunched tools stay ad-free).
+- **A hidden slot handed to AdSense throws.** The side rails are
+  `display: none` below 1540px, but each was an `<ins class="adsbygoogle">`
+  that `rfMountAdsenseSlots()` pushed at every width, and AdSense throws a
+  `TagError` for a slot with no width: two per narrow-screen view on all six
+  pages with rails, found in November 2026 by a browser sweep of the live site.
+  Skipping hidden rails would have been worse, because each `push()` fills the
+  next unfilled `ins.adsbygoogle` in page order and would have handed the
+  visible slot's request to a hidden rail. A rail `<ins>` is now
+  `class="rf-ad-rail-slot"`, and `rfMountAdsenseSlots()` makes it an AdSense
+  slot only once it is laid out, at load or on a resize past the breakpoint.
+  *Guard:* `check-links.mjs` fails on a rail `<ins>` with `class="adsbygoogle"`.
 
 ---
 

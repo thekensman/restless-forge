@@ -21,9 +21,10 @@
 
   <div id="rf-nav"></div>
 
-  <!-- Rail ads: hidden below 1540px, see .ad-rail in styles.css -->
+  <!-- Rail ads: hidden below 1540px (.ad-rail in styles.css). Each <ins> stays
+       rf-ad-rail-slot until rfMountAdsenseSlots() sees it laid out (site/shared.js). -->
   <aside class="ad-rail ad-rail--left" aria-label="Advertisement">
-    <ins class="adsbygoogle"
+    <ins class="rf-ad-rail-slot"
          style="display:block;width:160px;height:600px"
          data-ad-slot="8568993100"
          data-ad-format="vertical"></ins>
@@ -31,7 +32,7 @@
   </aside>
 
   <aside class="ad-rail ad-rail--right" aria-label="Advertisement">
-    <ins class="adsbygoogle"
+    <ins class="rf-ad-rail-slot"
          style="display:block;width:160px;height:600px"
          data-ad-slot="2979965943"
          data-ad-format="vertical"></ins>

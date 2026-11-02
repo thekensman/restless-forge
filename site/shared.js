@@ -129,11 +129,42 @@
   // Sets data-ad-client on any .adsbygoogle element missing it, then pushes
   // it into the adsbygoogle queue. Safe to call more than once per page —
   // already-tagged elements are skipped.
+  //
+  // Rail slots (the 160x600 side ads) are written as <ins class="rf-ad-rail-slot">
+  // and only become AdSense slots once they are actually laid out. CSS hides
+  // .ad-rail below 1540px, and AdSense throws a TagError for every slot it is
+  // handed with no width: two per page view on every narrow screen until this
+  // existed. A hidden rail cannot simply be skipped while it keeps the
+  // adsbygoogle class, because each push() fills the NEXT unfilled
+  // ins.adsbygoogle in page order: the push meant for the slot below the
+  // content would land on the hidden rail. So a rail joins only when it has a
+  // width, at mount time on a wide screen or on a later resize past the
+  // breakpoint, and an ad is never requested for a slot nobody can see.
+  var railWatcher = null;
   window.rfMountAdsenseSlots = function () {
+    var rails = document.querySelectorAll('ins.rf-ad-rail-slot');
+    var waiting = 0;
+    for (var r = 0; r < rails.length; r++) {
+      if (!rails[r].offsetWidth) { waiting++; continue; }
+      rails[r].classList.remove('rf-ad-rail-slot');
+      rails[r].classList.add('adsbygoogle');
+    }
     var slots = document.querySelectorAll('.adsbygoogle:not([data-ad-client])');
     for (var i = 0; i < slots.length; i++) {
       slots[i].setAttribute('data-ad-client', window.rfAdsenseClientId);
       (window.adsbygoogle = window.adsbygoogle || []).push({});
+    }
+    if (waiting && !railWatcher) {
+      var queued = false;
+      railWatcher = function () {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(function () { queued = false; window.rfMountAdsenseSlots(); });
+      };
+      window.addEventListener('resize', railWatcher, { passive: true });
+    } else if (!waiting && railWatcher) {
+      window.removeEventListener('resize', railWatcher);
+      railWatcher = null;
     }
   };
 
