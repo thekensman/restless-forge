@@ -5,6 +5,7 @@
  * instead of duplicating the full config. All common logic lives here:
  *   - MPA mode with only src/index.html as the Rollup entry
  *   - Dev middleware: serves /shared.js from site/shared.js
+ *   - Dev middleware: serves /fonts.css and /fonts/* (self-hosted web fonts)
  *   - Dev middleware: serves sub-page HTML raw (bypasses Vite's HTML
  *     transform, which can't handle IIFE scripts or public/-relative CSS)
  *
@@ -44,6 +45,8 @@ export function defineToolConfig({ base, port, dir, proxy }: ToolConfigOptions) 
   const siteRoot       = resolve(dir, "../../../site");
   const siteSharedJs   = resolve(siteRoot, "shared.js");
   const siteToolChrome = resolve(siteRoot, "tool-chrome.css");
+  const siteFontsCss   = resolve(siteRoot, "fonts.css");
+  const siteFontsDir   = resolve(siteRoot, "fonts");
 
   // Tool-scoped assets that fall back to site/ when the tool doesn't ship
   // its own copy. Mirrors the nginx regex location in restless-forge.conf.
@@ -72,7 +75,9 @@ export function defineToolConfig({ base, port, dir, proxy }: ToolConfigOptions) 
   // (e.g. `/tools/<name>/shared.js`). We sentinel-mark the site-global URLs
   // in a PRE-transform so Vite's HTML processor leaves them alone, then
   // restore them in the POST-transform.
-  const SITE_GLOBAL_URLS = ["/shared.js", "/tool-chrome.css"];
+  // /fonts.css is linked directly only by the few tool pages without the
+  // shared chrome; every other tool page gets it through tool-chrome.css.
+  const SITE_GLOBAL_URLS = ["/shared.js", "/tool-chrome.css", "/fonts.css"];
   const sentinel = (url: string) => `__RF_SITE__${url}`;
 
   return defineConfig({
@@ -145,6 +150,20 @@ export function defineToolConfig({ base, port, dir, proxy }: ToolConfigOptions) 
           server.middlewares.use("/tool-chrome.css", (_req, res) => {
             res.setHeader("Content-Type", "text/css");
             res.end(readFileSync(siteToolChrome, "utf-8"));
+          });
+
+          // Serve the self-hosted web fonts: site/fonts.css (imported by
+          // tool-chrome.css) and the woff2 files it points at under /fonts/.
+          server.middlewares.use("/fonts.css", (_req, res) => {
+            res.setHeader("Content-Type", "text/css");
+            res.end(readFileSync(siteFontsCss, "utf-8"));
+          });
+          server.middlewares.use("/fonts/", (req, res, next) => {
+            const rel = decodeURIComponent((req.url ?? "").split("?")[0]).replace(/^\/+/, "");
+            const file = resolve(siteFontsDir, rel);
+            if (!file.startsWith(siteFontsDir + "/") || !existsSync(file)) return next();
+            res.setHeader("Content-Type", file.endsWith(".woff2") ? "font/woff2" : "text/plain; charset=utf-8");
+            res.end(readFileSync(file));
           });
 
           // Per-tool asset fallback to site/. Tools may omit any of the

@@ -1,12 +1,14 @@
 # License
 
 This repository holds two kinds of material under two different terms, plus
-restored games that neither covers.
+restored games and third-party fonts that neither covers.
 
 1. **Code** is licensed under the MIT License, reproduced below.
 2. **Content** is © Kenneth Cross, all rights reserved.
 3. **Restored games** belong to their original authors. They are covered by
    neither of the above; see [Restored games](#restored-games).
+4. **Fonts** in `site/fonts/` are third-party typefaces under the SIL Open
+   Font License 1.1. Each family's license sits beside its files as `OFL.txt`.
 
 ## What counts as content
 

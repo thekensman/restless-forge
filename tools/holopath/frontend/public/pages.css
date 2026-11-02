@@ -4,7 +4,6 @@
    These pages aren't processed by Vite, so they need their own styles.
    ═══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 
 :root {
   --dark: #0a0a0f;

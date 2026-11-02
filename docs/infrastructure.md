@@ -215,11 +215,16 @@ it; a headless browser does.
 
 Two consequences:
 
-- **`/privacy` says "We do not use Google Analytics or any third-party
-  analytics service."** Cloudflare Web Analytics is one. Either turn it off
-  (Cloudflare dashboard → Analytics & Logs → Web Analytics → the site →
-  disable automatic setup) or describe it on `/privacy`. That is a
-  decision, not a fix, so it is recorded here until it is made.
+- **`/privacy` describes it.** It used to say the site used no
+  third-party analytics. Ken kept Cloudflare Web Analytics (November 2026),
+  so the Analytics section now says what the beacon reports, measured from
+  a real page load: the page address without its query string, the
+  referrer, the navigation type, the browser engine and version, and load
+  timings, sent to the same-origin `/cdn-cgi/rum`, with no cookies and
+  nothing in local or session storage. If the dashboard setting changes,
+  or Cloudflare changes the beacon, re-measure and update `/privacy`. To
+  turn it off: Cloudflare dashboard → Analytics & Logs → Web Analytics →
+  the site → disable automatic setup.
 - **Restored game pages opt out.** A game page must make no request outside
   the site (`docs/games.md`), so nginx sends `Cache-Control: … no-transform`
   on `/games/<slug>/`. Cloudflare's Web Analytics FAQ: with it, "the Beacon

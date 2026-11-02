@@ -2,7 +2,6 @@
    Mirrors the main app's zen sand palette (src/styles.css) so sub-pages and
    the converter feel like one tool. Sub-pages are copied verbatim by
    build.sh (not Vite-processed), so this file must be self-contained. */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap');
 :root {
   --bg: #0e0e12; --bg-raised: #16161d; --bg-card: #1c1c26;
   --sand: #d4a44a; --sand-light: #f0cc72; --sand-dim: #8a6d2e;

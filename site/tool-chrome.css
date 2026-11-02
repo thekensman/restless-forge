@@ -22,6 +22,9 @@
      --rf-font-mono   nav / footer monospace family
    ═════════════════════════════════════════════════════════ */
 
+/* The fonts every tool uses, self-hosted (site/fonts.css). Must stay the first rule. */
+@import url("/fonts.css");
+
 /* ─── Site Header ─── */
 .site-header {
   border-bottom: 1px solid var(--rf-border);

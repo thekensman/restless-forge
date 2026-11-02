@@ -1,5 +1,4 @@
 /* GerberPeek — Main Tool Styles (Vite-processed) */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 :root {
   --bg: #0d0d14; --bg-raised: #141420; --bg-card: #1a1a2a;
   --accent: #3a9ff0; --accent-light: #3a9ff0cc; --accent-dim: #3a9ff080;

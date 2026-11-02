@@ -51,7 +51,8 @@
       basic server logs record the IP address of every visit and are kept for
       up to 14 days (see Data Retention), and tools marked
       "&#9729; Cloud-assisted" keep hashed values for rate limiting (see
-      Cloud-Assisted Tools).
+      Cloud-Assisted Tools). Page views are also counted, in aggregate and
+      without cookies, by Cloudflare Web Analytics (see Analytics).
     </p>
 
     <h2>How the Tools Work</h2>
@@ -176,7 +177,21 @@
 
     <h2>Analytics</h2>
     <p>
-      We do not use Google Analytics or any third-party analytics service.
+      We do not use Google Analytics. Visits are counted with Cloudflare Web
+      Analytics: Cloudflare, which serves this site, adds a small script to
+      each page that loads from Cloudflare's own servers. When you view a
+      page it reports that page's address (without any query string), the
+      page you came from, whether you followed a link or reloaded, your
+      browser's engine and version, and how long the page took to load.
+      Cloudflare works out the country a visit comes from, as it does for
+      everything it serves, and we see only totals in Cloudflare's
+      dashboard. The script sets no cookies and stores nothing in your
+      browser (we checked in November 2026). Cloudflare handles this data
+      under the
+      <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare privacy policy</a>.
+      The restored games' own pages do not load it.
+    </p>
+    <p>
       Basic server logs (IP address, URL, timestamp) are retained for up to
       14 days for security and debugging purposes, then deleted.
     </p>
