@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games — Restless Forge</title>
+  <meta name="description" content="Old games restored to play in the browser from their original code and artwork. Free to play, with no ads.">
+  <link rel="canonical" href="https://restless-forge.dev/games/">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
+
+  <meta property="og:title" content="Games — Restless Forge">
+  <meta property="og:description" content="Old games restored to play in the browser, free and without ads.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restless-forge.dev/games/">
+  <!-- Restored games carry no monetisation. No AdSense loader on this page or
+       anywhere under /games/, and the site footer leaves out its donation and
+       book links here: rfFooter() in /shared.js reads this flag, and every
+       page under /games/ defaults to off without it. check-links fails the
+       build if ad or donation markup appears under /games/ (docs/games.md). -->
+  <meta name="rf-monetisation" content="off">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/shared.js"></script>
+</head>
+<body>
+
+  <div id="rf-nav"></div>
+
+  <main class="page">
+    <h1>Games</h1>
+    <p>
+      Old games, restored to play in the browser from their original code and
+      artwork. They're free and carry no ads. Saves and high scores stay in
+      your browser.
+    </p>
+
+    <div id="rf-games"><!-- generated:games — do not edit; run `npm run sync-static` -->
+<div class="games-grid">
+<article class="game-card">
+<img class="game-card__image" src="/games/foobar-vs-the-dea/assets/ui/share.png" width="1200" height="630" alt="The Foobar vs. the DEA title logo next to three red jets flying over the level 1 desert canal.">
+<div class="game-card__body">
+<p class="game-card__meta">Funner Software &middot; 1996</p>
+<h2 class="game-card__title">Foobar vs. the DEA</h2>
+<p class="game-card__desc">Richard Cross and Tom Kluge’s Mac shooter, rebuilt for the browser from the original code.</p>
+<p class="game-card__note">Needs a keyboard for now.</p>
+<a class="game-card__link" href="/games/foobar-vs-the-dea/">Play</a>
+</div>
+</article>
+</div>
+<!-- /generated:games --></div>
+  </main>
+
+  <div id="rf-footer"></div>
+
+</body>
+</html>

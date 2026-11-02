@@ -77,6 +77,7 @@
  * file converters, single-purpose calculators) do not warrant articles.
  */
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
+import { GAMES_DIR, loadGames } from "./games.mjs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
 import vm from "node:vm";
@@ -160,6 +161,9 @@ function missingImages(file, html) {
       candidates.push(join(root, "tools", tool[1], "frontend", "public", tool[2]));
       candidates.push(join(root, "site", tool[2]));
     }
+    // Restored games ship from games/<slug>/ unchanged (no fallback to the root).
+    const game = url.match(/^\/games\/([^/]+)\/(.+)$/);
+    if (game) candidates.push(join(GAMES_DIR, game[1], game[2]));
     if (!candidates.some((p) => existsSync(p))) out.push(url);
   }
   return out;
@@ -265,6 +269,16 @@ for (const file of walkHtml(join(root, "site"))) {
   }
 }
 
+/* ── Rule 7 for the restored games' own pages ──
+   A game page's relative asset paths are its own harness's business; what this
+   adds is the absolute og:image, which nothing renders and nobody would see rot. */
+for (const g of loadGames()) {
+  const file = join(GAMES_DIR, g.slug, "index.html");
+  for (const img of missingImages(file, readFileSync(file, "utf8"))) {
+    problems.push(`${relative(root, file)}: references ${img}, which does not exist.`);
+  }
+}
+
 /* ── Rule 10: no unrendered Markdown inside a generated content block ──
  *
  * Markdown inside a raw HTML block is NOT processed, and it fails silently.
@@ -344,7 +358,13 @@ function hasExif(buf) {
     }
     return false;
   }
-  if (buf.slice(0, 8).toString("latin1") === "\x89PNG\r\n\x1a\n") return buf.includes("eXIf");
+  // PNG: the eXIf chunk, and the text chunks ImageMagick writes when it carries
+  // a photo's profiles over from a JPEG ("Raw profile type exif" holds the very
+  // EXIF block, GPS included, that a bare eXIf test misses). The memorial photo
+  // arrived with a "Raw profile type iptc" chunk from its PICT conversion.
+  if (buf.slice(0, 8).toString("latin1") === "\x89PNG\r\n\x1a\n") {
+    return buf.includes("eXIf") || /Raw profile type (?:exif|iptc|xmp|8bim)|XML:com\.adobe\.xmp/i.test(buf.toString("latin1"));
+  }
   if (buf.slice(0, 4).toString("latin1") === "RIFF" && buf.slice(8, 12).toString("latin1") === "WEBP") {
     return buf.slice(12).includes("EXIF");
   }
@@ -362,7 +382,7 @@ function* walkImages(dir) {
   }
 }
 
-for (const img of [...walkImages(join(root, "site")), ...walkImages(join(root, "tools"))]) {
+for (const img of [...walkImages(join(root, "site")), ...walkImages(join(root, "tools")), ...walkImages(GAMES_DIR)]) {
   if (hasExif(readFileSync(img))) {
     problems.push(
       `${relative(root, img)}: carries an EXIF block. Phone photographs embed ` +

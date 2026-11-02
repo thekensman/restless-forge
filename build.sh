@@ -18,16 +18,26 @@ echo "═══ Restless Forge Build ═══"
 echo ""
 
 # ── Clean previous build ──
-echo "[1/5] Cleaning previous build..."
+echo "[1/6] Cleaning previous build..."
 rm -rf "${DIST_DIR}"
 mkdir -p "${DIST_DIR}"
 
 # ── Copy global site pages ──
-echo "[2/5] Copying global site pages..."
+echo "[2/6] Copying global site pages..."
 cp -r "${SCRIPT_DIR}/site/"* "${DIST_DIR}/"
 # Markdown content sources (rendered into the HTML by sync-content) are
 # authoring files, not deployables.
 find "${DIST_DIR}" -name '*.md' -delete
+
+# ── Copy restored games ──
+# Each games/<slug>/ holds a game's full source; only the runtime files listed
+# under `files` in games/games.json ship, copied byte for byte into
+# dist/games/<slug>/. No build step touches them: a game page is never wrapped
+# in the site layout (docs/games.md), and check-links fails if the copy in
+# dist differs from the source by a byte, including after the cache-busting
+# seds below, which run over every HTML file in dist.
+echo "[3/6] Copying restored games..."
+node "${SCRIPT_DIR}/scripts/games.mjs" copy "${DIST_DIR}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # build_vite_tool <label> <dir-name>
@@ -76,7 +86,7 @@ build_vite_tool() {
 # ── Build Vite tools ──
 # Convention-driven: every tools/<name>/frontend/ directory is built.
 # Adding a new tool requires NO edit here — drop it in tools/ and it ships.
-echo "[3/5] Building all tool frontends..."
+echo "[4/6] Building all tool frontends..."
 for frontend in "${SCRIPT_DIR}"/tools/*/frontend; do
   name="$(basename "$(dirname "${frontend}")")"
   [ "${name}" = "template" ] && continue
@@ -88,7 +98,7 @@ done
 # shared.js and pages.css have static filenames, so nginx's immutable
 # 1-year cache would serve stale versions after updates. Inject a content
 # hash into the HTML references so browsers re-fetch only when files change.
-echo "[4/5] Cache-busting shared static files..."
+echo "[5/6] Cache-busting shared static files..."
 
 bust_cache() {
   local dir="$1"
@@ -199,7 +209,7 @@ node "${SCRIPT_DIR}/scripts/inject-sitemap-lastmod.mjs"
 
 # ── Summary ──
 echo ""
-echo "[5/5] Build complete!"
+echo "[6/6] Build complete!"
 echo ""
 echo "Deployable site at: ${DIST_DIR}/"
 echo ""
@@ -217,6 +227,9 @@ echo "  ├── ads.txt"
 echo "  ├── tools/"
 echo "  │   ├── index.html          (tools hub)"
 echo "  │   └── <one dir per tool>/"
+echo "  ├── games/"
+echo "  │   ├── index.html          (games hub)"
+echo "  │   └── <one dir per game>/ (runtime files only, unchanged)"
 echo "  ├── essays/"
 echo "  └── articles/"
 echo ""

@@ -1,0 +1,60 @@
+build 25
+
+REVERSE_ENGINEERING.md  every rule, with the 68k routine it came from
+AUDIT.md                how the port was checked, against the code and the DVD
+CAPTURE_WISHLIST.md     footage that would confirm what only the code has shown
+HANDOFF.md              status, decisions and open items for whoever picks this up
+RF_INTEGRATION.md       putting the game on restless-forge.dev
+tools/README.md         regenerating the assets and rerunning the checks
+
+ON RESTLESS FORGE (still build 25: these landed before its first deploy, so
+no cached ?v=25 file can be stale)
+  - route: https://restless-forge.dev/games/foobar-vs-the-dea/, with the
+    source at games/foobar-vs-the-dea/ in the restless-forge repo. The
+    canonical, Open Graph and Twitter URLs name that address.
+  - <title> carries the site's suffix, and the footer's Restless Forge link
+    opens in the same tab.
+  - memorial: the photo that was assets/ui/PICT_137.png now sits beside the
+    dedication on the title screen. Its source is games/memorials/tom-kluge/
+    in the RF repo, shared with the Foobar sequels; npm run sync writes the
+    block into index.html and copies the photo to assets/memorial/. It is no
+    longer in the preload manifest.
+
+CHANGED IN 25
+  - fonts: the four faces the page uses are served from assets/fonts under
+    the SIL Open Font License, so the page makes no request outside its own
+    folder. Build 24 loaded them from Google Fonts.
+  - link previews: a 1200 x 630 share image (assets/ui/share.png), Open
+    Graph and Twitter tags, a canonical URL and a favicon made from the
+    original's jet. The URLs assume https://restless-forge.dev/games/foobar/.
+  - deploy package: index.html, js/, data/ and assets/ only.
+  - browser test: fails on any request outside the page's own origin, and
+    the high score check reads the final score instead of assuming it, since
+    missiles still in the air can score during the dying frames.
+
+CHANGED IN 24
+  - lag: the side panel writes only what changed and the boss meter moves
+    without layout. Frames over 33 ms in a throttled browser went from 0.8 a
+    second to none.
+  - briefings: the side panel switches to the new level's boss first.
+  - house rule dronesVisibleInFreeze.
+  - QA shortcuts: bbb skips to just before the boss arena, fff shows the
+    frame rate.
+
+CHANGED IN 23
+  - bombs: one every 30 frames per ship, as in the original.
+  - house rules: timed rapid fire, two Foo++ clones, a respawn shield.
+  - when the lead ship is lost, a surviving clone takes over as the lead.
+  - this page's footer leaves out the donation link.
+
+CHANGED IN 22
+  - the game rules are a port of the original 68k code (js/sim.js).
+
+TESTS
+  node test/harness.mjs .                    269 checks, original rules and house rules
+  node test/soak.mjs .                       random play, 0 problems expected
+  node test/boot_e2e.mjs .                   boot to play in a DOM shim
+  python3 test/browser_e2e.py URL shots/     Chromium with real keys
+
+RUN WITH: python3 serve.py
+CHEATS:   qqq permashield, eee next level, bbb boss, fff frame rate, F2 state dump

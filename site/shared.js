@@ -55,6 +55,7 @@
   var nav = [
     ['/', 'Home'],
     ['/tools/', 'Tools'],
+    ['/games/', 'Games'],
     ['/essays/', 'Essays'],
     ['/articles/', 'Articles'],
     ['/about', 'About'],
@@ -64,6 +65,7 @@
   var footerNav = [
     ['/', 'Home'],
     ['/tools/', 'Tools'],
+    ['/games/', 'Games'],
     ['/essays/', 'Essays'],
     ['/about', 'About'],
     ['/contact', 'Contact'],
@@ -94,6 +96,24 @@
     }).join('');
     return '<div class="footer__donate"><span class="footer__donate-label">Support Restless Forge</span>' +
       '<div class="footer__donate-links">' + links + '</div></div>';
+  };
+
+  // ── Monetisation override (restored games) ──
+  // Restored games carry no ads, donation links or sales links (docs/games.md).
+  // A page opts out with <meta name="rf-monetisation" content="off">, and every
+  // page under /games/ is off unless it says content="on". Off, the site footer
+  // drops Ko-fi, Buy Me a Coffee and the Amazon books link and keeps everything
+  // else, retitled so the block does not read as an ask. AdSense is opted out by
+  // the page not loading it; check-links fails the build if ad or donation
+  // markup shows up anywhere under /games/, and checks that switching this back
+  // on restores the global footer exactly. One switch for every page, so the
+  // next restored game needs no code.
+  window.rfMonetisation = function () {
+    var meta = document.querySelector && document.querySelector('meta[name="rf-monetisation"]');
+    var v = meta && meta.getAttribute('content');
+    if (v === 'on') return true;
+    if (v === 'off') return false;
+    return !/^\/games(\/|$)/.test(p);
   };
 
   // Separator spans used between tool links and RF links in nav / footer.
@@ -286,12 +306,14 @@
     });
   };
 
+  // [url, label, monetised]. A page with monetisation off leaves out the
+  // entries marked true (see rfMonetisation above) and keeps the rest.
   var support = [
-    [RF_KOFI, 'Ko-fi'],
-    [RF_BMC, 'Buy Me a Coffee'],
+    [RF_KOFI, 'Ko-fi', true],
+    [RF_BMC, 'Buy Me a Coffee', true],
     [RF_SUBSTACK, 'Subscribe on Substack'],
     [RF_GITHUB, 'GitHub'],
-    [RF_AMAZON, 'Books on Amazon'],
+    [RF_AMAZON, 'Books on Amazon', true],
   ];
 
   // Personal recommendations — friends & family sites, not RF's own work.
@@ -330,7 +352,8 @@
   };
 
   window.rfFooter = function () {
-    var sup = support.map(function (l) {
+    var monetised = window.rfMonetisation();
+    var sup = support.filter(function (l) { return monetised || !l[2]; }).map(function (l) {
       return '<a href="' + l[0] + '" class="support-link" target="_blank" rel="noopener">' + l[1] + '</a>';
     }).join('');
 
@@ -339,7 +362,7 @@
     }).join('');
 
     return '<footer class="site-footer"><div class="site-footer__inner">' +
-      '<div class="site-footer__support"><h3>Support Restless Forge</h3>' +
+      '<div class="site-footer__support"><h3>' + (monetised ? 'Support Restless Forge' : 'Follow Restless Forge') + '</h3>' +
       '<div class="support-links">' + sup + '</div></div>' +
       '<nav class="site-footer__nav">' + links + '</nav>' +
       '<p class="site-footer__copy">&copy; 2026 Restless Forge. All rights reserved.</p>' +

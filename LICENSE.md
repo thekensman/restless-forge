@@ -1,9 +1,12 @@
 # License
 
-This repository holds two kinds of material under two different terms.
+This repository holds two kinds of material under two different terms, plus
+restored games that neither covers.
 
 1. **Code** is licensed under the MIT License, reproduced below.
 2. **Content** is © Kenneth Cross, all rights reserved.
+3. **Restored games** belong to their original authors. They are covered by
+   neither of the above; see [Restored games](#restored-games).
 
 ## What counts as content
 
@@ -21,13 +24,20 @@ came from. Anything beyond that needs written permission
 
 ## What counts as code
 
-Everything else: TypeScript, JavaScript, Python, CSS, shell scripts,
+Everything else outside the restored games: TypeScript, JavaScript, Python, CSS, shell scripts,
 configuration, build tooling, tests, the HTML markup and page structure that
 surrounds the prose, and the datasets in `data/`. If you fork the code to run
 your own copy, replace the content and the branding with your own.
 
 Output you create with the tools (GIFs, sand table files, calculations and so
 on) belongs to you and is covered by neither license.
+
+## Restored games
+
+`games/foobar-vs-the-dea/` is © 1996-97 Richard Cross and Tom Kluge (Funner
+Software), published with Richard Cross's permission. All rights reserved. The
+fonts are under the SIL Open Font License. The same terms cover the memorial
+photo and dedication in `games/memorials/tom-kluge/`, which the game pages show.
 
 ## MIT License
 

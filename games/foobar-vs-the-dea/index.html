@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Foobar vs. the DEA — Restless Forge</title>
+<meta name="description" content="Foobar vs. the DEA (Funner Software, 1996) by Richard Cross and Tom Kluge, rebuilt for the web from the original Macintosh resource fork.">
+<link rel="icon" type="image/png" sizes="72x72" href="assets/ui/icon.png?v=25">
+<!-- Sharing. Link previews need absolute URLs, so these name the page's address on
+     restless-forge.dev. If the game ever moves, change all four together: canonical,
+     og:url, og:image and twitter:image. RF's check-links and check-urls fail the build
+     when the canonical is not the URL the page is served at. -->
+<link rel="canonical" href="https://restless-forge.dev/games/foobar-vs-the-dea/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Restless Forge">
+<meta property="og:title" content="Foobar vs. the DEA">
+<meta property="og:description" content="Richard Cross and Tom Kluge's 1996 Mac shooter, rebuilt for the browser from the original code. Free to play, in memory of Tom.">
+<meta property="og:url" content="https://restless-forge.dev/games/foobar-vs-the-dea/">
+<meta property="og:image" content="https://restless-forge.dev/games/foobar-vs-the-dea/assets/ui/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Foobar vs. the DEA title logo next to three red jets flying over the level 1 desert canal.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Foobar vs. the DEA">
+<meta name="twitter:description" content="Richard Cross and Tom Kluge's 1996 Mac shooter, rebuilt for the browser from the original code. Free to play, in memory of Tom.">
+<meta name="twitter:image" content="https://restless-forge.dev/games/foobar-vs-the-dea/assets/ui/share.png">
+<style>
+/* Fonts are served from this folder (SIL Open Font License, see assets/fonts), so the page
+   makes no request outside its own site. Latin subsets, only the faces the page uses. */
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+  src:url(assets/fonts/ibm-plex-mono-latin-400-normal.woff2?v=25) format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:600;font-display:swap;
+  src:url(assets/fonts/ibm-plex-mono-latin-600-normal.woff2?v=25) format('woff2')}
+@font-face{font-family:'DM Serif Display';font-style:normal;font-weight:400;font-display:swap;
+  src:url(assets/fonts/dm-serif-display-latin-400-normal.woff2?v=25) format('woff2')}
+@font-face{font-family:'Lora';font-style:italic;font-weight:400;font-display:swap;
+  src:url(assets/fonts/lora-latin-400-italic.woff2?v=25) format('woff2')}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C8A04A; --gold-dim:#8B6914; --darker:#070707; --dark:#0D0D0D;
+  --text:#E8E0D0; --dim:#9A917E; --red:#D4423E;
+  --chassis:#00C000; --chassis-hi:#4CE64C; --chassis-lo:#008A00;
+  --panel:#9A9A9A; --panel-hi:#D0D0D0; --panel-lo:#5E5E5E;
+}
+html,body{height:100%;background:var(--darker);color:var(--text);
+  font-family:'IBM Plex Mono',monospace;overflow:hidden}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+
+/* ---- cabinet ---- */
+#cab{position:relative;width:1022px;max-width:100vw;
+  aspect-ratio:1022/768;background:var(--chassis);
+  border:3px solid var(--chassis-lo);border-radius:4px;
+  display:grid;grid-template-columns:1fr 640px 1fr;gap:0;padding:12px}
+.side{display:flex;flex-direction:column;gap:8px;padding:4px}
+.side.right{align-items:stretch}
+
+/* playfield */
+#stage{position:relative;width:640px;height:680px;align-self:start;
+  border:3px solid var(--panel-lo);background:#000;overflow:hidden}
+canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
+
+/* chassis panels */
+.plate{background:var(--panel);border-top:2px solid var(--panel-hi);
+  border-left:2px solid var(--panel-hi);border-right:2px solid var(--panel-lo);
+  border-bottom:2px solid var(--panel-lo);padding:6px}
+.readout{background:#0A0A0A;border:2px solid var(--panel-lo);padding:4px 6px;
+  font-size:.72rem;letter-spacing:.04em}
+/* The readouts change many times a second in a fight. A fixed box that contains its own
+   layout keeps each change from relaying out and repainting the whole cabinet. */
+.readout .v{display:block;height:1.35em;line-height:1.35em;overflow:hidden;white-space:nowrap;
+  contain:strict}
+.readout .k{display:block;font-size:.5rem;color:#666;letter-spacing:.12em}
+#r-score .v{color:#FF4136}
+#r-level .v{color:#4A9BFF}
+#r-yum   .v{color:#FF5FD2}
+#r-fx    .v{color:#8FE8FF;font-size:.58rem;white-space:normal;height:2.7em}
+
+.portrait{background:#1A0033;border:3px solid var(--chassis-hi);
+  display:flex;align-items:center;justify-content:center;aspect-ratio:114/76;overflow:hidden}
+.portrait img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;display:block}
+.nameplate{background:#FFE800;color:#000;font-weight:600;font-size:.62rem;
+  text-align:center;padding:2px;border:2px solid #7A7000;letter-spacing:.02em}
+
+.lifebar{display:flex;align-items:center;gap:8px;background:#0A0A0A;
+  border:2px solid var(--panel-lo);padding:5px 7px}
+.lifebar img{width:20px;image-rendering:pixelated}
+.lifebar span{color:#39D353;font-size:1rem;font-weight:600}
+
+/* boss progress arrow */
+#bossmeter{background:var(--chassis-lo);border:2px solid var(--chassis-hi);
+  padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px}
+#arrow{width:34px;height:150px;position:relative;background:#005E00;
+  border:2px solid #003D00;overflow:hidden}
+#arrowfill{position:absolute;inset:0;
+  background:repeating-linear-gradient(to top,#FFE800 0 8px,#C9B800 8px 12px)}
+/* The unfilled part is a cover that shrinks toward the top. Scaling it is compositor-only
+   work; animating the fill's height used to relayout the page on every step. */
+#arrowcover{position:absolute;inset:0;background:#005E00;transform-origin:50% 0;
+  transform:scaleY(1);transition:transform .25s linear}
+#bossmeter .cap{background:#FFE800;color:#000;font-size:.52rem;font-weight:600;
+  padding:2px 4px;text-align:center;line-height:1.2}
+
+.keycap{display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;background:#F2F2F2;color:#111;border:2px solid #777;
+  font-size:.6rem;font-weight:600;padding:0 4px}
+.keys{display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--chassis-lo);border:2px solid var(--chassis-hi);padding:6px}
+.keys .row{display:flex;gap:3px;align-items:center}
+.keys .lbl{font-size:.46rem;color:#012;background:#FFE800;padding:1px 3px}
+
+.btn{background:var(--panel);border-top:2px solid var(--panel-hi);
+  border-left:2px solid var(--panel-hi);border-right:2px solid var(--panel-lo);
+  border-bottom:2px solid var(--panel-lo);color:#111;font-family:inherit;
+  font-size:.7rem;font-weight:600;padding:7px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--panel-hi)}
+.btn:active{border-top-color:var(--panel-lo);border-left-color:var(--panel-lo);
+  border-right-color:var(--panel-hi);border-bottom-color:var(--panel-hi)}
+.btn.sm{font-size:.58rem;padding:5px}
+
+/* ---- overlays ---- */
+.ovl{position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:20px;z-index:20}
+.ovl.on{display:flex}
+.ovl.dim{background:rgba(7,7,7,.45)}
+.ovl.solid{background:rgba(7,7,7,.93)}
+.ovl h1{font-family:'DM Serif Display',serif;color:var(--gold);font-size:2rem;line-height:1.05}
+.ovl h2{font-family:'DM Serif Display',serif;color:var(--red);font-size:2.5rem;
+  line-height:1;margin-bottom:12px}
+.ovl p{font-size:.68rem;color:var(--dim);line-height:1.7;max-width:400px;margin-bottom:14px}
+.ovl .big{font-size:1.1rem;color:var(--gold);margin-bottom:14px}
+.mbtn{width:230px;margin:4px auto;padding:8px;background:transparent;
+  border:1px solid var(--gold-dim);color:var(--gold);font-family:inherit;
+  font-size:.72rem;cursor:pointer;letter-spacing:.06em}
+.mbtn:hover{background:var(--gold);color:#111}
+.mbtn.pri{background:var(--gold);color:#111;font-weight:600}
+.diffrow{display:flex;gap:5px;justify-content:center;margin:10px 0}
+.dbtn{padding:5px 15px;font-size:.6rem;font-family:inherit;background:transparent;
+  border:1px solid #333;color:#666;cursor:pointer}
+.dbtn.on{border-color:var(--gold);color:var(--gold)}
+.ded{font-family:'Lora',serif;font-style:italic;font-size:.58rem;color:var(--dim);
+  opacity:.75;line-height:1.7;margin-top:16px;max-width:340px}
+#endart{max-width:300px;image-rendering:pixelated;margin-bottom:12px;
+  border:2px solid var(--gold-dim)}
+#loadwrap{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;background:#070707;z-index:30}
+#loadbar{width:220px;height:12px;border:1px solid var(--gold);margin-top:12px}
+#loadfill{height:100%;width:0%;background:var(--gold);transition:width .15s}
+#titleart{max-width:290px;image-rendering:pixelated;margin-bottom:6px}
+#scrollwin,#helpwin{position:absolute;inset:0;overflow:hidden}
+#scrollart,#helpart{position:absolute;left:0;width:100%;image-rendering:pixelated}
+
+/* ---- high scores, laid out in the original's own pixels (320 x 340 playfield) ---- */
+#ov-hs{position:absolute;inset:0;display:none;z-index:25}
+#ov-hs.on{display:block}
+#macroot{position:absolute;left:0;top:0;width:320px;height:340px;transform-origin:0 0;
+  transform:scale(2)}
+.macbox{position:absolute;display:none;background:#fff;color:#000;
+  box-shadow:0 0 0 3px #fff,0 0 0 5px #000,0 0 0 6px #fff,0 0 0 7px #000;
+  font-family:Chicago,Charcoal,'Helvetica Neue',Arial,sans-serif;font-size:12px;text-align:left}
+.macbox .at{position:absolute;white-space:nowrap}
+#hs-dialog{left:41px;top:92px;width:238px;height:155px}
+#hs-prompt{left:9px;top:16px;width:165px;white-space:normal;font-weight:700;line-height:16px}
+#hs-name{position:absolute;left:11px;top:74px;width:146px;height:16px;border:none;padding:0;
+  outline:1px solid #000;outline-offset:3px;background:#fff;color:#000;
+  font:12px/16px Chicago,Charcoal,'Helvetica Neue',Arial,sans-serif}
+#hs-name::selection{background:#CCCCFF}
+#hs-pow{position:absolute;left:171px;top:33px;width:64px;height:64px;image-rendering:pixelated}
+.macbtn{position:absolute;top:119px;width:58px;height:20px;padding:0;background:#fff;color:#000;
+  border:1px solid #000;border-radius:6px;cursor:pointer;
+  font:700 12px/18px Chicago,Charcoal,'Helvetica Neue',Arial,sans-serif}
+.macbtn:active{background:#000;color:#fff}
+#hs-cancel{left:76px}
+#hs-ok{left:159px;box-shadow:0 0 0 1px #fff,0 0 0 4px #000;border-radius:7px}
+#hs-table{left:10px;top:75px;width:300px;height:190px;cursor:pointer;font-size:10px}
+#hs-table .new{color:#DD0806}
+#hs-erase{position:absolute;right:8px;top:4px;padding:1px 5px;background:#fff;color:#000;
+  border:1px solid #000;border-radius:4px;cursor:pointer;
+  font:9px/12px Chicago,Charcoal,'Helvetica Neue',Arial,sans-serif}
+
+/* touch */
+#touch{display:none;position:absolute;inset:0;z-index:15}
+#touch div{position:absolute;opacity:0}
+#t-left{left:0;top:0;width:22%;height:100%}
+#t-right{right:0;top:0;width:22%;height:100%}
+#t-up{left:22%;top:0;width:56%;height:32%}
+#t-down{left:22%;bottom:0;width:56%;height:32%}
+#t-fire{left:22%;top:32%;width:28%;height:36%}
+#t-bomb{right:22%;top:32%;width:28%;height:36%}
+
+#foot{font-size:.52rem;color:var(--dim);text-align:center;line-height:1.8}
+#foot a{color:var(--gold-dim);text-decoration:none}
+#foot a:hover{color:var(--gold)}
+
+@media(max-width:1060px){
+  body{justify-content:flex-start;padding-top:6px;overflow-y:auto}
+  #cab{width:100vw;aspect-ratio:auto;grid-template-columns:1fr;padding:6px;gap:6px}
+  #stage{width:100%;height:auto;aspect-ratio:320/340}
+  canvas{width:100%;height:auto}
+  .side{flex-direction:row;flex-wrap:wrap;gap:6px;justify-content:center}
+  .side>*{flex:1 1 auto}
+  .portrait,#bossmeter,.keys{display:none}
+  #touch{display:block}
+  /* On a phone the title screen is taller than the playfield (its heading was already cut
+     off at 390 px), so let it scroll from the top instead of clipping both ends. */
+  #ov-title{overflow-y:auto;justify-content:safe center}
+}
+</style>
+</head>
+<body>
+
+<div id="cab">
+  <!-- LEFT COLUMN -->
+  <div class="side left">
+    <div class="plate" style="padding:4px">
+      <div class="portrait"><img id="foobar-art" alt="Foobar"></div>
+      <div class="nameplate">Foobar</div>
+    </div>
+    <div class="plate">
+      <div class="lifebar"><img id="life-icon" alt=""><span id="v-lives">5</span></div>
+    </div>
+    <div class="plate"><div class="readout" id="r-level">
+      <span class="k">LEVEL</span><span class="v" id="v-level">1</span></div></div>
+    <div class="plate"><div class="readout" id="r-score">
+      <span class="k">SCORE</span><span class="v" id="v-score">0</span></div></div>
+    <div class="plate"><div class="readout" id="r-yum">
+      <span class="k">YUMMIES</span><span class="v" id="v-yum">0</span></div></div>
+    <div class="plate"><div class="readout" id="r-fx">
+      <span class="k">ACTIVE</span><span class="v" id="v-fx">-</span></div></div>
+    <div class="plate" style="display:flex;flex-direction:column;gap:4px">
+      <button class="btn sm" id="b-pause">PAUSE</button>
+      <button class="btn sm" id="b-music">MUSIC: ON</button>
+    </div>
+  </div>
+
+  <!-- PLAYFIELD -->
+  <div id="stage">
+    <canvas id="c" width="320" height="340"></canvas>
+
+    <div id="touch">
+      <div id="t-left"></div><div id="t-right"></div><div id="t-up"></div>
+      <div id="t-down"></div><div id="t-fire"></div><div id="t-bomb"></div>
+    </div>
+
+    <div id="loadwrap">
+      <img id="titleart" alt="Loading Foobar">
+      <div id="loadbar"><div id="loadfill"></div></div>
+    </div>
+
+    <div class="ovl solid" id="ov-title">
+      <h1>FOOBAR</h1><h2>vs. the DEA</h2>
+      <p>Foobar&rsquo;s boyfriend Ned has been imprisoned in the DEA&rsquo;s
+         mind control camp for drug offenders. Break into the camp&rsquo;s air space,
+         destroy NOSEY the computer, and bring Ned home.</p>
+      <div class="diffrow">
+        <button class="dbtn on" data-d="1">EASY</button>
+        <button class="dbtn" data-d="2">MEDIUM</button>
+        <button class="dbtn" data-d="3">HARD</button>
+      </div>
+      <button class="mbtn pri" id="b-start">START</button>
+      <button class="mbtn" id="b-continue" style="display:none">CONTINUE</button>
+      <button class="mbtn" id="b-help">CONTROLS</button>
+      <button class="mbtn" id="b-scores">HIGH SCORES</button>
+      <p id="helptext" style="display:none;margin-top:10px">
+        WASD or arrows to fly &middot; Z or Space fires at aircraft &middot;
+        X or Shift bombs ground targets &middot; Esc or P pause &middot; M music<br>
+        The pink triangle is your bomb sight: bombs land where it points. Missiles
+        destroy yummies, so fly into them instead.</p>
+      <!-- generated:memorial — do not edit; run `npm run sync-static` -->
+      <figure style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px auto 0;text-align:left">
+        <img src="assets/memorial/tom-kluge.png?v=25" width="187" height="124" alt="Richard Cross and Tom Kluge"
+          style="flex:none;box-sizing:content-box;width:min(187px,30vw);height:auto;border:2px solid var(--gold-dim,#8B6914)">
+        <figcaption style="font-family:'Lora',Georgia,serif;font-style:italic;font-size:.6rem;line-height:1.7;color:var(--dim,#9A917E);max-width:220px">
+          In memory of Tom Kluge, LSU Physics ’95.<br>
+          Foobar was something he was proud of.</figcaption>
+      </figure>
+<!-- /generated:memorial -->
+    </div>
+
+    <div class="ovl solid" id="ov-intro" style="padding:0;justify-content:flex-start">
+      <div id="scrollwin"><img id="scrollart" alt=""></div>
+      <button class="mbtn pri" id="b-skip" style="position:absolute;bottom:14px;width:200px">SKIP</button>
+    </div>
+
+    <div class="ovl solid" id="ov-help" style="padding:0;justify-content:flex-start">
+      <div id="helpwin"><img id="helpart" alt=""></div>
+      <button class="mbtn pri" id="b-help-done" style="position:absolute;bottom:14px;width:200px">BACK</button>
+    </div>
+
+    <div class="ovl solid" id="ov-brief" style="padding:0">
+      <img id="briefart" alt="" style="width:100%;image-rendering:pixelated">
+      <button class="mbtn pri" id="b-brief-go" aria-label="Continue"
+        style="position:absolute;inset:0;width:100%;height:100%;background:transparent;
+               border:none;color:transparent;cursor:pointer"></button>
+    </div>
+
+    <div class="ovl dim" id="ov-pause"><h1>PAUSED</h1>
+      <button class="mbtn pri" id="b-resume">RESUME</button></div>
+
+    <div class="ovl solid" id="ov-over"><h2>GAME OVER</h2>
+      <div class="big">SCORE: <span id="over-score">0</span></div>
+      <button class="mbtn pri" id="b-again">PLAY AGAIN</button>
+      <button class="mbtn" id="b-home">TITLE</button></div>
+
+    <div class="ovl solid" id="ov-win">
+      <img id="endart" alt="Foobar and Ned, together again">
+      <div class="big">FINAL SCORE: <span id="win-score">0</span></div>
+      <p class="ded">Written by Richard Cross and Tom Kluge of Funner Software,
+        using Ingemar Ragnemalm&rsquo;s Sprite Animation Toolkit.<br>
+        Dedicated to Tom&rsquo;s memory.</p>
+      <button class="mbtn pri" id="b-win-again">PLAY AGAIN</button>
+      <button class="mbtn" id="b-win-home">TITLE</button></div>
+
+    <div id="ov-hs"><div id="macroot">
+      <div class="macbox" id="hs-dialog" role="dialog" aria-labelledby="hs-prompt">
+        <div class="at" id="hs-prompt"></div>
+        <input id="hs-name" type="text" maxlength="15" autocomplete="off" spellcheck="false"
+          aria-label="Your name">
+        <img id="hs-pow" alt="">
+        <button class="macbtn" id="hs-cancel">Cancel</button>
+        <button class="macbtn" id="hs-ok">OK</button>
+      </div>
+      <div class="macbox" id="hs-table" role="dialog" aria-label="High scores">
+        <div id="hs-rows"></div>
+        <div class="at" id="hs-foot" style="left:10px;top:170px"></div>
+        <button id="hs-erase">Erase High Scores</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="side right">
+    <div class="plate" style="padding:4px">
+      <div class="portrait" id="boss-portrait"
+           style="background:#2B0A3D;color:#FFE800;font-size:.6rem;padding:8px">?</div>
+      <div class="nameplate" id="boss-name">-</div>
+    </div>
+    <div id="bossmeter">
+      <div id="arrow"><div id="arrowfill"></div><div id="arrowcover"></div></div>
+      <div class="cap">level<br>boss</div>
+    </div>
+    <div class="keys">
+      <div class="row"><span class="keycap">W</span></div>
+      <div class="row"><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span></div>
+      <div class="row"><span class="lbl">FIRE</span><span class="keycap">Z</span></div>
+      <div class="row"><span class="lbl">BOMB</span><span class="keycap">X</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Restored games carry no donation links, so this page's footer leaves Ko-fi out on
+     purpose. The site-wide footer keeps it; this is a page-level override. -->
+<div id="foot">
+  Foobar vs. the DEA, Funner Software, 1996 &middot; rebuilt by
+  <a href="/">Restless Forge</a><br>
+  <a href="https://restlessforge.substack.com" target="_blank" rel="noopener">Substack</a> &middot;
+  <a href="https://github.com/thekensman" target="_blank" rel="noopener">GitHub</a>
+  &middot; <span id="buildstamp"></span>
+</div>
+
+<script type="module">
+import {Input,Assets,Audio} from './js/core.js?v=25';
+import {Game} from './js/game.js?v=25';
+import {HighScores,PROMPT,CONTINUE,DEFAULT_NAME} from './js/scores.js?v=25';
+
+const BUILD='25';
+function fatal(msg){
+  console.error(msg);
+  let bar=document.getElementById('errbar');
+  if(!bar){ bar=document.createElement('div'); bar.id='errbar';
+    bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#B3261E;'+
+      'color:#fff;font:600 12px/1.45 monospace;padding:6px 10px;text-align:left;white-space:pre-wrap';
+    document.body.appendChild(bar); }
+  bar.textContent='ERROR (build '+BUILD+'): '+msg;
+}
+addEventListener('error',e=>fatal((e.message||'script error')+'  @'+(e.filename||'').split('/').pop()+':'+e.lineno));
+addEventListener('unhandledrejection',e=>fatal('unhandled promise: '+((e.reason&&e.reason.message)||e.reason)));
+console.log('%cFoobar vs. the DEA - build '+BUILD,'color:#C8A04A;font-weight:bold');
+const $=id=>document.getElementById(id);
+const canvas=$('c');
+let cfg,game,assets,audio,input,manifest,hs;
+
+async function boot(){
+  [cfg,manifest]=await Promise.all([
+    fetch('data/config.json?v=25').then(r=>r.json()),
+    fetch('data/manifest.json?v=25').then(r=>r.json())]);
+  canvas.width=cfg.playfield.width; canvas.height=cfg.playfield.height;
+  input=new Input(); assets=new Assets(); audio=new Audio(assets);
+  game=new Game(cfg,assets,audio,input,canvas);
+  let store=null; try{ store=window.localStorage; }catch(e){}
+  hs=new HighScores(store);
+  window.__foobar=game; window.__foobarScores=hs;
+
+  $('titleart').src='assets/ui/PICT_156.png?v=25';
+  const tick=setInterval(()=>{$('loadfill').style.width=(assets.progress()*100).toFixed(0)+'%';},80);
+  await Promise.all([assets.load(manifest),game.loadData()]);
+  clearInterval(tick); $('loadfill').style.width='100%';
+
+  $('buildstamp').textContent='build '+BUILD;
+  if(cfg.build && cfg.build!==BUILD){
+    const msg='STALE FILES: index.html is build '+BUILD+' but data/config.json is build '+cfg.build+
+              '. Hard-reload (Ctrl+Shift+R) or run serve.py.';
+    console.error(msg);
+    const bar=document.createElement('div');
+    bar.textContent=msg;
+    bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999;background:#B3261E;color:#fff;'+
+      'font:600 12px/1.5 monospace;padding:6px 10px;text-align:center';
+    document.body.appendChild(bar);
+  }
+  $('foobar-art').src='assets/ui/hero.png?v=25';
+  $('endart').src='assets/ui/'+cfg.intro.ending+'.png?v=25';
+  $('life-icon').src=`assets/sprites/cicn_${cfg.player.lifeIcon}.png?v=25`;
+  $('hs-pow').src='assets/sprites/cicn_181.png?v=25';
+  $('hs-prompt').textContent=PROMPT;
+  $('hs-foot').textContent=CONTINUE;
+  fitMac(); addEventListener('resize',fitMac);
+  $('v-lives').textContent=cfg.player.startLives;
+
+  setTimeout(()=>{$('loadwrap').style.display='none';show('ov-title');},250);
+  wire();
+  requestAnimationFrame(loop);
+}
+
+let last=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(!last){last=now;return;}
+  let dt=now-last; last=now;
+  if(dt>250) dt=250;              // tab was backgrounded; don't fast-forward
+  try{
+    game.tick(dt);
+    game.render();
+  }catch(err){
+    if(!loop._reported){ loop._reported=true;
+      fatal('loop crashed: '+err.message+'  |  '+JSON.stringify(game.diagnostics())); }
+  }
+}
+
+function show(id){ ['ov-title','ov-pause','ov-over','ov-win','ov-intro','ov-help','ov-brief']
+  .forEach(o=>$(o).classList.toggle('on',o===id)); }
+function hideAll(){ show(null); }
+const DIFF_NAMES={1:'EASY',2:'MEDIUM',3:'HARD'};
+
+function wire(){
+  const sv=game.loadSave();
+  if(sv&&sv.lvl>0){ $('b-continue').style.display='block';
+    $('b-continue').textContent=`CONTINUE - LEVEL ${sv.lvl+1}`; }
+
+  document.querySelectorAll('.dbtn').forEach(b=>{
+    b.classList.toggle('on',+b.dataset.d===game.diff);
+    b.onclick=()=>{
+      document.querySelectorAll('.dbtn').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); game.diff=+b.dataset.d; };
+  });
+
+  $('b-start').onclick=()=>{ audio.init(); runIntro(); };
+  $('b-continue').onclick=()=>{const sv=game.loadSave(); audio.init();
+    if(sv){ game.diff=sv.diff||1; beginLevel(sv.lvl,{score:sv.score,lives:sv.lives,rapid:sv.rapid,
+      rapidT:sv.rapidT,clones:sv.clones,clone:sv.clone},true); }
+    else runIntro();};
+  $('b-help').onclick=()=>{ $('helpart').src='assets/ui/'+cfg.intro.instructions+'.png?v=25';
+    $('helpart').style.top='0px'; show('ov-help'); helpScroll(); };
+  $('b-help-done').onclick=()=>{ stopScroll(); show('ov-title'); };
+  $('b-scores').onclick=()=>hsTable(true);
+  $('hs-ok').onclick=()=>hsName(true);
+  $('hs-cancel').onclick=()=>hsName(false);
+  $('hs-dialog').addEventListener('pointerdown',e=>{      // the edit field keeps the focus, as in a Mac dialog
+    if(e.target.tagName!=='BUTTON' && e.target.tagName!=='INPUT'){ e.preventDefault(); $('hs-name').focus(); } });
+  $('ov-hs').addEventListener('pointerdown',e=>{
+    if(hsMode==='table' && e.target!==$('hs-erase')){ e.preventDefault(); hsClose(); } });
+  $('hs-erase').onclick=e=>{ e.stopPropagation(); const b=$('hs-erase');
+    if(b.dataset.armed){ hs.erase(); hsRows(); delete b.dataset.armed; b.textContent='Erase High Scores'; }
+    else { b.dataset.armed='1'; b.textContent='Click again to erase'; } };
+  $('b-skip').onclick=()=>{ stopScroll(); beginLevel(0,{},true); };
+  $('b-brief-go').onclick=()=>{
+    hideAll(); audio.init();
+    if(pending.fresh) game.start(pending.lvl,pending.carry);
+    else game.continueLevel();
+  };
+  $('b-again').onclick=()=>{ beginLevel(0,{},true); };
+  $('b-win-again').onclick=()=>{ beginLevel(0,{},true); };
+  $('b-home').onclick=$('b-win-home').onclick=()=>{game.state='title';audio.stopMusic();show('ov-title');};
+  $('b-resume').onclick=()=>{ hideAll(); game.resume(); };
+  $('b-pause').onclick=()=>{ if(game.state==='play') game.pause(); else if(game.state==='pause'){ hideAll(); game.resume(); } };
+  $('b-music').onclick=()=>{ const on=audio.toggle();
+    $('b-music').textContent='MUSIC: '+(on?'ON':'OFF');
+    if(on&&game.state==='play'){ audio.init(); game.startMusic(); } };
+
+  game.onHud=h=>{
+    setText('v-score',h.score);
+    setText('v-lives',h.lives);
+    setText('v-yum',h.yummies);
+    const fx=[];
+    if(h.rapid)   fx.push(h.rapidT ? 'RAPID '+Math.ceil(h.rapidT)+'s' : 'RAPID');
+    if(h.clones)  fx.push(h.clones>1 ? 'FOO++ x'+h.clones : 'FOO++');
+    if(h.shieldT) fx.push('SHIELD '+Math.ceil(h.shieldT)+'s');
+    if(h.freezeT) fx.push('FREEZE '+Math.ceil(h.freezeT)+'s');
+    if(h.god)     fx.push('PERMASHIELD');
+    setText('v-fx',fx.length?fx.join('  '):'-');
+    hudLevel(h.level);
+    setMeter(h.progress);
+  };
+  game.onState=s=>{
+    if(s==='pause') show('ov-pause');
+    else if(s==='play') hideAll();
+    else if(s==='over'){ $('over-score').textContent=game.sim.score; show('ov-over'); gameEnded(game.sim.score); }
+    else if(s==='brief'){ beginLevel(game.sim.level+1,{},false); }
+    else if(s==='win'){ $('win-score').textContent=game.sim.score; show('ov-win'); gameEnded(game.sim.score); }
+  };
+  addEventListener('keydown',e=>{
+    if(hsMode==='name'){
+      if(e.key==='Enter'){ e.preventDefault(); hsName(true); }
+      else if(e.key==='Escape'){ e.preventDefault(); hsName(false); }
+      return;
+    }
+    if(hsMode==='table'){ e.preventDefault(); hsClose(); return; }
+    const k=e.key.toLowerCase();
+    if(k==='f2'){ e.preventDefault(); const d=JSON.stringify(game.diagnostics(),null,1);
+      console.log(d); fatal('F2 state dump\n'+d); return; }
+    if($('ov-brief').classList.contains('on')){ $('b-brief-go').click(); return; }
+    if($('ov-intro').classList.contains('on')){ $('b-skip').click(); return; }
+    if(k==='p'||k==='escape'){
+      if(game.state==='pause'){ hideAll(); game.resume(); }
+      else if(game.state==='play'){ game.pause(); }
+      return;
+    }
+    if(k==='m'&&game.state==='play'){ $('b-music').click(); }
+  });
+}
+let raf=null, pending={lvl:0,carry:{},fresh:true};
+
+// ---- HUD writes. Only a value that changed touches the page, so a busy fight costs a few
+// text updates a second instead of a full relayout every frame.
+const hudLast={};
+function setText(id,v){ v=String(v); if(hudLast[id]!==v){ hudLast[id]=v; $(id).textContent=v; } }
+function setMeter(p){ const k=(1-Math.max(0,Math.min(1,p))).toFixed(2);
+  if(hudLast.meter!==k){ hudLast.meter=k; $('arrowcover').style.transform='scaleY('+k+')'; } }
+// The level number, boss name and portrait. The original sets the new level and redraws this
+// panel (fn3_4FFE) before its briefing waits for a key, so the briefing shows the boss to come.
+function hudLevel(lvl){
+  const L=cfg.levels[lvl]; if(!L) return;
+  setText('v-level',lvl+1); setText('boss-name',L.boss.name);
+  const want='assets/ui/'+L.portrait+'.png';
+  if(hudLast.portrait!==want){ hudLast.portrait=want;
+    $('boss-portrait').innerHTML='<img src="'+want+'?v=25" alt="" style="width:100%;image-rendering:pixelated">'; }
+}
+
+// ---- high scores (js/scores.js has the rules and where they come from)
+let hsMode=null, hsScore=0;
+function fitMac(){ const st=$('stage'); $('macroot').style.transform='scale('+(st.clientWidth/320)+')'; }
+function gameEnded(score){
+  if(!hs.qualifies(score)) return;           // the original only opens the table for a new entry
+  hsScore=score; hsMode='name';
+  audio.beep();
+  $('hs-table').style.display='none'; $('hs-dialog').style.display='block';
+  $('ov-hs').classList.add('on'); fitMac();
+  const n=$('hs-name'); n.value=DEFAULT_NAME;
+  setTimeout(()=>{ n.focus(); n.select(); },0);
+}
+function hsName(ok){
+  if(hsMode!=='name') return;
+  hs.submit(hsScore, ok ? $('hs-name').value : '');
+  $('hs-name').blur();
+  hsTable(false);
+}
+function hsRows(){
+  let h='';
+  hs.table.forEach((e,i)=>{ const r=i+1, y=15*r-10, c=r===hs.lastRank?' new':'';
+    const esc=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+    h+=`<div class="at${c}" style="left:10px;top:${y}px">${r}</div>`+
+       `<div class="at${c}" style="left:50px;top:${y}px">${esc(e.name)}</div>`+
+       `<div class="at${c}" style="left:200px;top:${y}px">${e.score}</div>`; });
+  $('hs-rows').innerHTML=h;
+}
+function hsTable(fromTitle){
+  hsMode='table'; hsRows();
+  const b=$('hs-erase'); b.style.display=fromTitle?'block':'none';
+  delete b.dataset.armed; b.textContent='Erase High Scores';
+  $('hs-dialog').style.display='none'; $('hs-table').style.display='block';
+  $('ov-hs').classList.add('on'); fitMac();
+}
+function hsClose(){ hsMode=null; $('ov-hs').classList.remove('on');
+  $('hs-dialog').style.display='none'; $('hs-table').style.display='none'; }
+
+function stopScroll(){ if(raf){cancelAnimationFrame(raf);raf=null;} audio.stopMusic(); }
+
+function scrollImage(imgEl, onDone){
+  const win=imgEl.parentElement || imgEl;
+  const run=()=>{
+    const stage=document.getElementById('stage');
+    const wh=win.offsetHeight || (stage&&stage.offsetHeight) || 680;
+    const h=imgEl.offsetHeight || (imgEl.naturalHeight
+              ? imgEl.naturalHeight*(imgEl.offsetWidth||wh)/Math.max(1,imgEl.naturalWidth)
+              : wh);
+    // speed is in source pixels per 60 Hz tick; the image is drawn at 2x
+    const k=(imgEl.offsetWidth||640)/Math.max(1,imgEl.naturalWidth||320);
+    let y=(cfg.intro.startAtTop? 0 : wh), end=-(h+20), lastT=0;
+    const step=t=>{ const dt=lastT?Math.min(100,t-lastT):16.67; lastT=t;
+      y-=cfg.intro.scrollSpeed*k*dt/16.667;
+      imgEl.style.top=y+'px';
+      if(y<=end){ raf=null; onDone&&onDone(); return; }
+      raf=requestAnimationFrame(step); };
+    stopScrollFrame(); raf=requestAnimationFrame(step);
+  };
+  imgEl.onload=run;
+  imgEl.onerror=()=>{ console.warn('intro art failed:',imgEl.src); onDone&&onDone(); };
+  if(imgEl.complete && imgEl.naturalWidth) run();
+}
+function stopScrollFrame(){ if(raf){cancelAnimationFrame(raf);raf=null;} }
+function helpScroll(){ scrollImage($('helpart'), ()=>{ $('helpart').style.top='0px'; }); }
+
+function runIntro(){
+  show('ov-intro');
+  audio.loop('snd_'+cfg.sounds.title, cfg.sounds.titlePeriodTicks*1000/60);
+  const seq=cfg.intro.sequence;
+  let i=0;
+  const next=()=>{
+    if(i>=seq.length){ beginLevel(0,{},true); return; }
+    const art=seq[i++];
+    $('scrollart').src='assets/ui/'+art+'.png?v=25';
+    scrollImage($('scrollart'), next);
+  };
+  next();
+}
+
+function beginLevel(lvl,carry,fresh){
+  stopScroll();
+  pending={lvl,carry,fresh};
+  hudLevel(lvl); setMeter(0);
+  if(fresh){
+    setText('v-score',carry.score||0); setText('v-lives',carry.lives ?? cfg.player.startLives);
+    setText('v-yum',carry.yummiesTaken||0);
+    const fx=[]; if(carry.rapid) fx.push('RAPID'); const n=carry.clones ?? (carry.clone?1:0);
+    if(n) fx.push(n>1?'FOO++ x'+n:'FOO++'); setText('v-fx',fx.length?fx.join('  '):'-');
+  }
+  $('briefart').src='assets/ui/'+cfg.levels[lvl].briefing+'.png?v=25';
+  show('ov-brief');
+}
+
+boot().catch(e=>fatal('boot failed: '+(e&&e.message||e)));
+</script>
+</body>
+</html>

@@ -36,6 +36,8 @@
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
+import vm from "node:vm";
+import { verifyGameCopies } from "./games.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -334,6 +336,59 @@ for (const file of walkHtml(dist)) {
       `Add a bust_cache call in build.sh, or returning visitors keep a stale ` +
       `copy against new HTML.`,
     );
+  }
+}
+
+/* ── Restored games: shipped unchanged, and no monetisation under /games/ ──
+ *
+ * The rule for restored games (docs/games.md): no ads, no donation links and
+ * no sales or affiliate links, on the games and on /games/ itself. It can
+ * break quietly in three ways, so there are three checks:
+ *   1. the build alters a game. Every shipped file must match its source byte
+ *      for byte; the cache-busting seds in build.sh run over every HTML file in
+ *      dist, and a game page has to come through them untouched.
+ *   2. a page under /games/ gains an AdSense loader, an ad slot or a donation
+ *      link in its static HTML.
+ *   3. the site footer, which renders at runtime from shared.js, stops honouring
+ *      the override, or the override stops being one. Switched back on, the
+ *      footer under /games/ must be the global footer exactly, and the global
+ *      footer must still carry its donation links everywhere else.
+ */
+problems.push(...verifyGameCopies(dist));
+
+const MONETISATION = [
+  /adsbygoogle/, /googlesyndication/, /rfAdsenseClientId/, /ko-fi\.com/i,
+  /buymeacoffee\.com/i, /amazon\.[a-z.]+\//i, /patreon\.com/i, /paypal\.(?:me|com)/i,
+];
+if (existsSync(join(dist, "games"))) {
+  for (const file of walkHtml(join(dist, "games"))) {
+    const html = readFileSync(file, "utf8");
+    for (const re of MONETISATION) {
+      if (re.test(html)) problems.push(`${relative(dist, file)} matches ${re.source}; pages under /games/ carry no ads, donation or sales links`);
+    }
+  }
+}
+
+function renderSiteFooter(pathname, flag) {
+  const window = { location: { pathname } };
+  const document = {
+    addEventListener() {}, getElementById: () => null, querySelectorAll: () => [],
+    querySelector: (sel) => (flag && sel === 'meta[name="rf-monetisation"]' ? { getAttribute: () => flag } : null),
+  };
+  vm.runInContext(readFileSync(join(dist, "shared.js"), "utf8"), vm.createContext({ window, document }), { filename: "shared.js" });
+  return window.rfFooter();
+}
+{
+  const global = renderSiteFooter("/");
+  const games = renderSiteFooter("/games/");
+  for (const re of MONETISATION) {
+    if (re.test(games)) problems.push(`the site footer rendered under /games/ matches ${re.source}; rfFooter() must honour rfMonetisation()`);
+  }
+  if (renderSiteFooter("/games/", "on") !== global) {
+    problems.push(`with rf-monetisation="on", the footer under /games/ differs from the global footer; the override must switch the one footer, not fork it`);
+  }
+  if (!/ko-fi\.com/.test(global) || !/buymeacoffee\.com/.test(global)) {
+    problems.push(`the global footer lost its donation links; the monetisation override must only change pages that opt out`);
   }
 }
 

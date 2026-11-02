@@ -39,6 +39,11 @@
  *   8. TattooSafe's Full AR files (runtime + models under /tools/tattoosafe/ar/)
  *      answer 200 with a one-year immutable cache and the security headers,
  *      and the .wasm runtime is gzipped with the type browsers compile from.
+ *   9. Restored games (docs/games.md): every module script answers with a
+ *      JavaScript type at its ?v= URL (browsers refuse module scripts served as
+ *      anything else), the page's og:image gets a short cache (it is named bare
+ *      in the page, so ?v= cannot bust it), and sounds go out as audio/wav.
+ *      The slashless game URL is covered by 2 like every directory page.
  */
 import { spawnSync } from "node:child_process";
 import {
@@ -51,6 +56,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import { gameBuild, loadGames } from "./games.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -488,6 +494,52 @@ function headers(url, extra = {}) {
       if (r.h["content-type"] !== "application/wasm") problem("ar-asset", `${path} Content-Type "${r.h["content-type"]}", want application/wasm`);
       if (r.h["content-encoding"] !== "gzip") problem("ar-asset", `${path} is not gzipped (gzip_types needs application/wasm)`);
     }
+  }
+}
+
+// ── 9: restored games ────────────────────────────────────────────────────────
+for (const g of loadGames()) {
+  const dir = join(dist, "games", g.slug);
+  const base = `${SITE}/games/${g.slug}/`;
+  const v = gameBuild(g.slug) ? `?v=${gameBuild(g.slug)}` : "";
+  if (!existsSync(dir)) { problem("game", `dist/games/${g.slug}/ is missing: build.sh did not copy the game`); continue; }
+  const shipped = [];
+  const walk = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      if (e.isDirectory()) walk(join(d, e.name)); else shipped.push(relative(dir, join(d, e.name)).split("\\").join("/"));
+    }
+  };
+  walk(dir);
+  for (const rel of shipped.filter((f) => f.endsWith(".js"))) {
+    tally("game");
+    const r = await headers(base + rel + v);
+    if (r.status !== 200) problem("game", `/games/${g.slug}/${rel}${v} → ${r.status}`);
+    else if (!/javascript/.test(String(r.h["content-type"]))) {
+      problem("game", `/games/${g.slug}/${rel} Content-Type "${r.h["content-type"]}"; browsers refuse a module script without a JavaScript type`);
+    }
+  }
+  const html = readFileSync(join(dir, "index.html"), "utf8");
+  const og = attr(html, /<meta[^>]+property=["']og:image["'][^>]*>/i, "content");
+  if (!og || !og.startsWith(base)) {
+    problem("game", `/games/${g.slug}/: og:image "${og}" is not under the game's own URL`);
+  } else {
+    tally("game");
+    const r = await headers(og);
+    const cc = String(r.h["cache-control"] || "");
+    if (r.status !== 200) problem("game", `${og.slice(SITE.length)} → ${r.status}`);
+    else if (/immutable/.test(cc) || !/max-age=86400/.test(cc)) {
+      problem("game", `${og.slice(SITE.length)} Cache-Control "${cc}", want a 1-day cache: og:image is named bare, so ?v= cannot bust it`);
+    }
+    if (!r.h["strict-transport-security"]) problem("game", `${og.slice(SITE.length)} lost the security headers (add_header gotcha)`);
+  }
+  const wav = shipped.find((f) => f.endsWith(".wav"));
+  if (wav) {
+    tally("game");
+    const r = await headers(base + wav + v);
+    if (r.status !== 200 || r.h["content-type"] !== "audio/wav") {
+      problem("game", `/games/${g.slug}/${wav} → ${r.status} "${r.h["content-type"]}", want 200 audio/wav`);
+    }
+    if (!r.h["strict-transport-security"]) problem("game", `/games/${g.slug}/${wav} lost the security headers`);
   }
 }
 

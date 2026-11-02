@@ -14,10 +14,13 @@
  * NEVER hand-edit the generated blocks: re-run this script instead
  * (`npm run sync-static`). CI regenerates and fails on drift.
  */
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
 import vm from "node:vm";
+import {
+  GAMES_DIR, loadGames, loadMemorial, renderMemorial, renderGameCards, memorialPhotoPath, gameBuild,
+} from "./games.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const site = (p) => join(root, "site", p);
@@ -231,12 +234,13 @@ const pages = [...walk(join(root, "site"))]
     if (TOOL_LIST_PAGES.includes(rel)) return true;
     const html = readFileSync(site(rel), "utf8");
     if (html.includes("data-rf-link")) return true;
-    return ["rf-tools-landing", "rf-tools-directory", "rf-friends"]
+    return ["rf-tools-landing", "rf-tools-directory", "rf-friends", "rf-games"]
       .some((id) => html.includes(`id="${id}"`));
   })
   .sort();
 
 const live = getLiveTools();
+const games = loadGames();
 
 let changed = 0;
 for (const rel of pages) {
@@ -259,6 +263,10 @@ for (const rel of pages) {
   if (html.includes('id="rf-friends"')) {
     html = inject(html, "rf-friends", "friends", renderFriends(), rel);
   }
+  // /games/ is static only: no runtime renderer, so this IS the content.
+  if (html.includes('id="rf-games"')) {
+    html = inject(html, "rf-games", "games", renderGameCards(games), rel);
+  }
   html = fillProseLinks(html, window);
   if (rel === "about.html") {
     html = inject(html, null, "tools-about", renderAboutToolList(live), rel);
@@ -278,6 +286,40 @@ for (const rel of pages) {
     writeFileSync(file, html);
     changed++;
     console.log(`updated ${relative(root, file)}`);
+  }
+}
+
+/* ── Restored games: the shared memorial block in each game page ──
+   A game page lives outside site/ and ships byte for byte, so nothing here
+   touches it except between its generated:memorial markers. A game that names
+   a memorial in games/games.json must carry the markers (where the block sits
+   is the game's call), and one that names none must not, so a sequel can
+   neither lose the dedication silently nor keep a stale copy of it. The photo
+   is copied into the game folder because the game must still run from its own
+   folder: that is how its own tests and serve.py run it. */
+for (const g of games) {
+  const file = join(GAMES_DIR, g.slug, "index.html");
+  const rel = relative(root, file);
+  const before = readFileSync(file, "utf8");
+  if (!g.memorial) {
+    if (before.includes("<!-- generated:memorial ")) {
+      throw new Error(`${rel}: has generated:memorial markers, but games/games.json names no memorial for it`);
+    }
+    continue;
+  }
+  const m = loadMemorial(g.memorial);
+  const html = inject(before, null, "memorial", renderMemorial(m, gameBuild(g.slug)), rel);
+  if (html !== before) {
+    writeFileSync(file, html);
+    changed++;
+    console.log(`updated ${rel}`);
+  }
+  const photo = join(GAMES_DIR, g.slug, memorialPhotoPath(m));
+  if (!existsSync(photo) || !readFileSync(photo).equals(readFileSync(m.photoFile))) {
+    mkdirSync(dirname(photo), { recursive: true });
+    copyFileSync(m.photoFile, photo);
+    changed++;
+    console.log(`updated ${relative(root, photo)}`);
   }
 }
 
@@ -326,6 +368,14 @@ ${live.map((t) => `- [${t.label}](https://restless-forge.dev/tools/${t.id}/): ${
 
 All tools: https://restless-forge.dev/tools/
 
+## Games
+
+Old games restored to play in the browser, free and without ads.
+
+${games.map((g) => `- [${g.title}](https://restless-forge.dev/games/${g.slug}/) (${g.studio}, ${g.year}): ${g.desc}`).join("\n")}
+
+All games: https://restless-forge.dev/games/
+
 ## Essays
 
 ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug}): ${e.description || ""}`).join("\n")}
@@ -358,6 +408,7 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
   const GLOBAL_PAGE_RULES = new Map([
     ["/", ["monthly", "1.0"]],
     ["/tools/", ["monthly", "0.9"]],
+    ["/games/", ["monthly", "0.7"]],
     ["/essays/", ["weekly", "0.8"]],
     ["/articles/", ["weekly", "0.7"]],
     ["/about", ["monthly", "0.6"]],
@@ -375,6 +426,7 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
   ]);
   const ESSAY_RULE = ["monthly", "0.8"];
   const TOOL_MAIN_RULE = ["monthly", "0.9"];
+  const GAME_RULE = ["monthly", "0.7"];
   const SUB_PAGE_RULES = new Map([
     ["pricing", ["monthly", "0.7"]],
     ["how-it-works", ["monthly", "0.6"]],
@@ -447,6 +499,12 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
       lines.push(entry(path, rule));
     }
   }
+
+  // Restored games live outside site/, so discovery cannot see them; every
+  // entry in games/games.json is a page (loadGames() fails on a game folder
+  // with no entry, so none can be left out).
+  if (games.length) lines.push("", "  <!-- Games -->");
+  for (const g of games) lines.push(entry(`/games/${g.slug}/`, GAME_RULE));
 
   lines.push("</urlset>", "");
   const xml = lines.join("\n");

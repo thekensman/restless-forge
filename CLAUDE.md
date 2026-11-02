@@ -16,6 +16,11 @@ Currently live:
 3. **SandPath** — Image/SVG to sand table converter (formerly sandpath.art)
 4. **TattooSafe** — AR tattoo scale/placement preview and pricing calculator
 
+Restored games live in their own section, **`/games/`** (`games/`, `docs/games.md`):
+currently *Foobar vs. the DEA* (Richard Cross and Tom Kluge, 1996) at
+`/games/foobar-vs-the-dea/`. They carry no ads, donation or sales links, and a
+game page ships byte for byte, never wrapped in the site layout.
+
 Global support pages (about, contact, privacy, terms, FAQ, essays, articles) live at the domain root.
 
 ## Repository Layout
@@ -32,9 +37,13 @@ restless-forge/
 │   ├── holopath/frontend/
 │   ├── sandpath/frontend/
 │   └── tattoosafe/frontend/
+├── games/               → Restored games (docs/games.md): games.json (single source),
+│   ├── memorials/       →   memorials shared by several games (photo + dedication)
+│   └── <slug>/          →   one game's full source; only its listed runtime files ship, unchanged
 ├── backend/             → Shared FastAPI service for cloud-assisted tools (/api/*; docs/backend.md)
 ├── scripts/
-│   └── new-tool.sh      → Scaffolds tools/<name>/frontend/ from tools/template/
+│   ├── new-tool.sh      → Scaffolds tools/<name>/frontend/ from tools/template/
+│   └── games.mjs        → Reads games/games.json; build copy, sync renderers, dist verification
 ├── nginx/               → Production nginx configs (main site + 301 redirects)
 ├── vite.config.ts       → Root dev server (serves site/ + proxies tool servers)
 ├── package.json         → Root scripts: `npm run dev`, `npm test`, `npm run build`
@@ -96,6 +105,8 @@ Served at `/shared.js` in dev and prod. Single source of truth for:
   on once a category holds more than one live tool. Styles: `.related-tools*`
   in `site/tool-chrome.css`.
 - `window.rfFriendLinks` (`[url, name, desc]`) + `window.rfRenderFriends(id)` — the curated "Sites I Like" recommendations. Single data source; `rfRenderFriends` renders the list onto the `/sites-i-like` page's `<div id="rf-friends">` (pre-rendered statically by `sync-static`, re-run at runtime — same pattern as `rfRenderTools`). Linked from the site footer only (`footerNav`), not the top nav.
+
+- `window.rfMonetisation()` — the no-monetisation override for restored games. A page sets `<meta name="rf-monetisation" content="off|on">`; without it, everything under `/games/` is off and everything else is on. Off, `rfFooter()` drops Ko-fi, Buy Me a Coffee and Books on Amazon (the entries marked `true` in `support`) and retitles the block. Pages under `/games/` load no AdSense. `check-links` fails on ad or donation markup under `/games/` and checks that switching the flag on restores the global footer exactly (`docs/games.md`).
 
 Every tool page loads `/shared.js` first, then the tool's own `public/shared.js` (which must call `rfMountToolChrome`, not hand-roll header/footer HTML).
 
@@ -187,7 +198,7 @@ also updating the build output checks.
 ```bash
 npm install          # (first time only)
 npm run dev          # starts site proxy :8080 + all tool dev servers
-npm test             # runs every tool's vitest suite
+npm test             # runs every tool's vitest suite, then each game's own tests
 npm run build        # ./build.sh — compiles all tools into dist/
 npm run check-urls   # after a build: serves dist/ with the real nginx vhost and
                      # checks every page has one URL (needs nginx + openssl)
@@ -259,6 +270,10 @@ and fails on drift:
    JSON-LD come from one sentence, and `check-links` fails on any page
    whose FAQ markup differs from the answers it shows. Re-run after
    changing tool directory data, the friends list, or launching a tool.
+   From `games/games.json` it also renders the `/games/` cards, adds each
+   game to `sitemap.xml` and `llms.txt`, and writes the shared memorial
+   block into every game page that names one (copying its photo into the
+   game). CI's drift check covers `games/` as well as `site/` and `tools/`.
 2. **Prose** — `scripts/sync-content.mjs` (`npm run sync-content`):
    page copy lives in sibling Markdown files (`X.md` next to `X.html`)
    and renders into `generated:content` blocks; essay shells are
@@ -282,7 +297,7 @@ rules): `docs/authoring-content.md`.
 
 - **Tools**: TypeScript → `tsc` → Vite build → `tools/<name>/frontend/dist/`.
 - **Global pages**: static files in `site/` — no compilation.
-- **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`.
+- **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`, then each game's runtime files (`files` in `games/games.json`) into `dist/games/<slug>/` unchanged; `check-links` verifies the copy byte for byte.
 - **Cache-busting**: `build.sh` computes md5 hashes and injects `?v=<hash>` on
   `/styles.css`, `/shared.js`, `/tool-chrome.css`, `/tools-data.js`, each
   tool's `shared.js`, and each tool's `pages.css` across every HTML file.
@@ -307,6 +322,8 @@ rules): `docs/authoring-content.md`.
 | `/tools/<name>/` | `tools/<name>/frontend/dist/` |
 | `/essays/*` | `site/essays/*.html` |
 | `/articles/` | `site/articles/index.html` |
+| `/games/` | `site/games/index.html` |
+| `/games/<slug>/` | `games/<slug>/`, runtime files only, unchanged (nginx `location /`; the slashless URL 301s) |
 | `/api/*` | FastAPI service on 127.0.0.1:8000 (nginx `^~ /api/` proxy; `backend/`) |
 
 Every page has exactly **one** URL, set by its file (`about.html` → `/about`,
@@ -344,7 +361,10 @@ retired-URL table, and how to add to it: `docs/indexing.md`.
 
 ### Update donation links
 Edit `window.rfDonateLinks` in `site/shared.js` — the single source of truth.
-All tool footers read from it via `window.rfDonateHtml()`.
+All tool footers read from it via `window.rfDonateHtml()`. The site footer's
+own list is `support` in the same file: mark any donation, sales or affiliate
+entry `true` there, or it will show on `/games/`, where restored games carry
+none. `check-links` only recognises the platforms it lists in `MONETISATION`.
 
 ### Update AdSense publisher ID
 Search for `ca-pub-5516736042033534` across all HTML files.
@@ -390,6 +410,8 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 | Built HTML points at `/tools/<name>/shared.js` where it should be `/shared.js` | Sentinel plugins in `tools/vite-tool-config.ts` — verify the SITE_GLOBAL_URLS list includes the URL |
 | Sub-page 404s in dev | Sub-page HTML must live under `src/`, not `public/`. Vite MPA only routes files in `src/` |
 | TattooSafe Full AR won't start, or the build fails in `fetch-ar-assets` | `docs/tattoosafe-full-ar.md`: the model hashes and mirror fallback, the `/tools/tattoosafe/ar/` nginx location, and the Cloudflare cache rule. |
+| A game page loads nothing, or shows a red error bar | Reached at the slashless URL? Every path in a game is relative, so `/games/<slug>` must 301 to `/games/<slug>/` (`check-urls` asserts it). A red "STALE FILES" bar means the page and its `?v=` files are different builds. `docs/games.md`. |
+| Ads or donation links on `/games/` | `rfMonetisation()` in `site/shared.js` and the page's `rf-monetisation` meta; `npm run check-links` names the offending page. |
 | Old CSS/JS after deploy | Cache-busting in `build.sh` — did the md5 hash change in the build output? nginx serves css/js `immutable` for a year, so an unbusted stable filename is served stale until the browser is forced to refetch (`docs/frontend-pitfalls.md` §1). `npm run check-links` fails on any unbusted reference. |
 | Page scrolls sideways on a phone / images jump on load / ad slot leaves a blank band | `docs/frontend-pitfalls.md` — these have all shipped before, with the cause and the rule that prevents each. |
 | New tool builds locally but 404s in prod | nginx config + dist assembly in `build.sh` |
@@ -418,6 +440,11 @@ sudo nginx -t && sudo systemctl reload nginx   # only needed for nginx config ch
 - **No per-tool `sitemap.xml` or `robots.txt`**: the root ones are generated
   and are the only ones that count. Tools used to ship stale copies that
   re-advertised retired URLs; `check-links` now fails on any.
+- **Game pages are not site pages**: never wrap one in the site layout, add
+  `/shared.js` to it, or let a build step rewrite it. Edit a game in its own
+  folder, and the memorial in `games/memorials/`. No ads, donation or sales
+  links anywhere under `/games/`. Never commit an original game archive: Foobar's
+  carries an old mailing address that must not go online (`docs/games.md`).
 - **Essays are real content**: `site/essays/` holds published essays
   (global philosophy / meta-project pieces only — tool-specific articles
   live with their tool). Never re-add "coming soon" stub pages; thin
