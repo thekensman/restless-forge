@@ -48,7 +48,7 @@ Placement carries a multiplier from 1.0 to 1.4:
 | 1.2 | Ankle, back of neck |
 | 1.3 | Behind ear |
 | 1.35 | Ribs, sternum |
-| 1.4 | Back of hand |
+| 1.4 | Back of hand, face |
 
 These track working difficulty, which correlates with pain but is not the same
 thing. Ribs and sternum are slow because the surface curves in two directions
@@ -119,5 +119,5 @@ was simplified. There may be a good answer, such as a lower local rate or a
 guest artist's promotion, but it is worth knowing which.
 
 Ready to estimate? Open the [TattooSafe preview tool](/tools/tattoosafe/) for
-the full experience including camera preview and size checking against 16 body
+the full experience including camera preview and size checking against 17 body
 placements.

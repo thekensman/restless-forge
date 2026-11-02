@@ -53,8 +53,8 @@ describe("sqCmToSqIn", () => {
 // ─── Body Part Catalogue ─────────────────────────────────────
 
 describe("BODY_PARTS", () => {
-  it("has 16 entries", () => {
-    expect(BODY_PARTS).toHaveLength(16);
+  it("has 17 entries", () => {
+    expect(BODY_PARTS).toHaveLength(17);
   });
   it("all parts have required fields", () => {
     for (const bp of BODY_PARTS) {
@@ -103,8 +103,8 @@ describe("getBodyPartsByGroup", () => {
   it("leg group has 3 parts", () => {
     expect(getBodyPartsByGroup("leg")).toHaveLength(3);
   });
-  it("other group has 3 parts", () => {
-    expect(getBodyPartsByGroup("other")).toHaveLength(3);
+  it("other group has 4 parts", () => {
+    expect(getBodyPartsByGroup("other")).toHaveLength(4);
   });
 });
 
@@ -249,8 +249,8 @@ describe("COMPLEXITY", () => {
 });
 
 describe("PLACEMENT_DIFFICULTY", () => {
-  it("has 16 placements", () => {
-    expect(Object.keys(PLACEMENT_DIFFICULTY)).toHaveLength(16);
+  it("has 17 placements", () => {
+    expect(Object.keys(PLACEMENT_DIFFICULTY)).toHaveLength(17);
   });
   it("all multipliers >= 1.0", () => {
     for (const place of Object.values(PLACEMENT_DIFFICULTY)) {

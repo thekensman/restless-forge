@@ -23,6 +23,9 @@ import {
   AR_PLACEMENTS, MASK_CLASS, OneEuro, canvasToVideo, computeAnchor, isLimb, maskRunWidth, pickSide,
   unwrapAngle, videoToCanvas, wrapSpanFor, type Anchor, type Crop, type Pt, type Side,
 } from "./ar-anchor";
+import {
+  CHEEK_LANDMARK, affineFromTriangles, cmPerUv, compose, designToUv, faceAxes, facingSign, uvOf, windingOf,
+} from "./ar-face";
 // Type-only: the runtime chunk loads when the visitor turns Full AR on.
 import type { Tracker, TrackerOutput } from "./ar-tracking";
 
@@ -260,17 +263,41 @@ interface ArSession {
   /** Limb width at the anchor, canvas px, from the mask (drives the wrap). */
   limbWidth: number | null;
   mask: TrackerOutput["mask"];
-  /** Skin pixels opaque, everything else clear, at mask resolution. */
-  skin: HTMLCanvasElement | null;
-  skinImg: ImageData | null;
+  /**
+   * Clothing clear, everything else opaque, at mask resolution. The clip
+   * removes only what the segmenter calls clothes, so a mask that comes back
+   * wrong hides nothing instead of everything.
+   */
+  uncovered: HTMLCanvasElement | null;
+  uncoveredImg: ImageData | null;
+  /** ?ar-debug: the categories tinted, drawn over the feed. */
+  tint: HTMLCanvasElement | null;
   filters: { x: OneEuro; y: OneEuro; angle: OneEuro; scale: OneEuro; fore: OneEuro; width: OneEuro };
+  /** Face placement: the 478 smoothed landmarks in canvas px, null while no face is found. */
+  face: Pt[] | null;
+  faceFilters: OneEuro[] | null;
+  /** Where the design's middle sits on the face, in the mesh's UV space. */
+  faceCenter: Pt | null;
+  /** Face model download/start status, for the hint; "" once ready. */
+  faceStatus: string;
 }
+
+const FACE = "face";
 
 /** A body part on screen for longer than this without being found is "lost". */
 const AR_LOST_MS = 600;
 /** How far the design can be nudged from its anchor, cm. */
 const AR_MAX_OFFSET_CM = 30;
-const AR_PLACEMENT_LIST = "inner or outer forearm, upper arm, shoulder, chest, sternum, thigh or calf";
+/**
+ * `?ar-debug` in the page URL tints the segmentation over the feed (skin
+ * peach, clothes blue, face pink, hair brown), to check on a real device that
+ * the mask lines up with the picture.
+ */
+const AR_DEBUG = typeof location !== "undefined" && new URLSearchParams(location.search).has("ar-debug");
+const DEBUG_TINT: Record<number, [number, number, number, number]> = {
+  1: [140, 80, 20, 110], 2: [255, 170, 120, 110], 3: [255, 110, 150, 110], 4: [60, 120, 255, 110],
+};
+const AR_PLACEMENT_LIST = "inner or outer forearm, upper arm, shoulder, chest, sternum, thigh, calf or face";
 
 export function setupCameraPreview(
   getRotation: () => number,
@@ -415,7 +442,10 @@ export function setupCameraPreview(
     refs.stopBtn.hidden = !active;
     refs.shotBtn.hidden = !active;
     if (calBtn) calBtn.hidden = !active || ar !== null;
-    for (const el of [wrapLabel, curveLabel, removeBgLabel]) if (el) el.hidden = !active;
+    // On the face, the mesh does the curving and there is no clothing to clip.
+    const faceAr = ar !== null && placementId === FACE;
+    for (const el of [wrapLabel, curveLabel]) if (el) el.hidden = !active || faceAr;
+    if (removeBgLabel) removeBgLabel.hidden = !active;
     if (flipBtn) flipBtn.hidden = !active;
     if (arBtn) {
       arBtn.hidden = ar !== null;
@@ -423,7 +453,7 @@ export function setupCameraPreview(
     }
     if (arStdBtn) arStdBtn.hidden = ar === null;
     if (sideLabel) sideLabel.hidden = ar === null;
-    if (clothesLabel) clothesLabel.hidden = ar === null;
+    if (clothesLabel) clothesLabel.hidden = ar === null || faceAr;
     if (progress) progress.hidden = !arLoading;
   }
 
@@ -565,6 +595,8 @@ export function setupCameraPreview(
     ar.limbWidth = null;
     ar.lastVideoTime = -1;
     ar.filters = newFilters();
+    ar.face = null;
+    ar.faceFilters = null;
   }
 
   const sideChoice = (): Side | "auto" => {
@@ -572,25 +604,38 @@ export function setupCameraPreview(
     return v === "left" || v === "right" ? v : "auto";
   };
 
-  /** New segmentation: keep it for measuring, and paint the skin-only mask. */
+  /** New segmentation: keep it for measuring, and paint the clip mask. */
   function takeMask(mask: NonNullable<TrackerOutput["mask"]>): void {
     if (!ar) return;
     ar.mask = mask;
-    const skin = (ar.skin ??= document.createElement("canvas"));
-    if (skin.width !== mask.width || skin.height !== mask.height) {
-      skin.width = mask.width;
-      skin.height = mask.height;
+    const cv = (ar.uncovered ??= document.createElement("canvas"));
+    if (cv.width !== mask.width || cv.height !== mask.height) {
+      cv.width = mask.width;
+      cv.height = mask.height;
     }
-    const sctx = skin.getContext("2d");
-    if (!sctx) return;
-    if (!ar.skinImg || ar.skinImg.width !== mask.width || ar.skinImg.height !== mask.height) {
-      ar.skinImg = sctx.createImageData(mask.width, mask.height);
+    const cctx = cv.getContext("2d");
+    if (!cctx) return;
+    if (!ar.uncoveredImg || ar.uncoveredImg.width !== mask.width || ar.uncoveredImg.height !== mask.height) {
+      ar.uncoveredImg = cctx.createImageData(mask.width, mask.height);
     }
-    const px = ar.skinImg.data;
+    const px = ar.uncoveredImg.data;
     for (let i = 0; i < mask.data.length; i++) {
-      px[i * 4 + 3] = mask.data[i] === MASK_CLASS.BODY_SKIN ? 255 : 0;
+      px[i * 4 + 3] = mask.data[i] === MASK_CLASS.CLOTHES ? 0 : 255;
     }
-    sctx.putImageData(ar.skinImg, 0, 0);
+    cctx.putImageData(ar.uncoveredImg, 0, 0);
+    if (AR_DEBUG) {
+      const t = (ar.tint ??= document.createElement("canvas"));
+      t.width = mask.width;
+      t.height = mask.height;
+      const tctx = t.getContext("2d");
+      if (!tctx) return;
+      const img = tctx.createImageData(mask.width, mask.height);
+      for (let i = 0; i < mask.data.length; i++) {
+        const c = DEBUG_TINT[mask.data[i]];
+        if (c) img.data.set(c, i * 4);
+      }
+      tctx.putImageData(img, 0, 0);
+    }
   }
 
   /** Limb width across the anchor, canvas px, from the latest mask. */
@@ -622,6 +667,10 @@ export function setupCameraPreview(
     }
     ar.lastVideoTime = video.currentTime;
     ar.frame++;
+    if (placementId === FACE) {
+      trackFace(now, crop);
+      return;
+    }
     const spec = AR_PLACEMENTS[placementId];
     const wantMask = !!spec && ar.frame % 2 === 0 &&
       (clothesToggle?.checked === true || wrapToggle?.checked === true);
@@ -663,22 +712,154 @@ export function setupCameraPreview(
     }
   }
 
-  /** Draw the skin mask over c, lined up with the video as displayed. */
-  function drawSkinMask(c: CanvasRenderingContext2D, crop: Crop): void {
-    if (!ar?.skin || !video) return;
-    const kx = ar.skin.width / video.videoWidth, ky = ar.skin.height / video.videoHeight;
+  /** Face placement: load the face model once, then follow the face mesh. */
+  function trackFace(now: number, crop: Crop): void {
+    if (!ar || !video) return;
+    const session = ar;
+    if (!session.tracker.faceReady()) {
+      if (!session.faceStatus) {
+        session.faceStatus = "Downloading face mapping…";
+        const mb = (n: number): string => (n / 1e6).toFixed(1);
+        session.tracker.loadFace((loaded, total) => {
+          session.faceStatus = loaded >= total ? "Starting face mapping…"
+            : `Downloading face mapping: ${mb(loaded)} of ${mb(total)} MB`;
+        }).then(() => { session.faceStatus = ""; }).catch((e: Error) => {
+          // Stays in the hint (no retry loop) until another placement is picked.
+          session.faceStatus = `Face mapping couldn't start on this device (${e.message}). ` +
+            "Pick another placement, or switch to the standard preview.";
+        });
+      }
+      return;
+    }
+    let lm: { x: number; y: number }[] | null;
+    try {
+      lm = session.tracker.detectFace(video, now);
+    } catch (e) {
+      endAr();
+      onError(`Face mapping stopped (${(e as Error).message}). The standard preview still works.`);
+      return;
+    }
+    if (!lm) {
+      if (session.face && now - session.lastSeen > AR_LOST_MS) {
+        session.face = null;
+        session.faceFilters = null;
+      }
+      return;
+    }
+    const cw = refs.canvas.width, ch = refs.canvas.height;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    const f = (session.faceFilters ??= Array.from({ length: lm.length * 2 }, () => new OneEuro(1.5, 0.02)));
+    session.face = lm.map((p, i) => {
+      const c = videoToCanvas(p.x, p.y, vw, vh, crop, cw, ch, mirror);
+      return { x: f[2 * i].filter(c.x, now), y: f[2 * i + 1].filter(c.y, now) };
+    });
+    session.lastSeen = now;
+    if (!session.faceCenter) {
+      const side = sideChoice() === "right" ? "right" : "left";
+      session.faceCenter = uvOf(session.tracker.faceMesh, CHEEK_LANDMARK[side]);
+    }
+  }
+
+  // The design, at most 512 px across, for drawing it hundreds of times a frame.
+  let faceSrc: { from: CanvasImageSource; c: HTMLCanvasElement } | null = null;
+  function faceSource(): HTMLCanvasElement | null {
+    if (!design) return null;
+    const from: CanvasImageSource = designProc ?? design;
+    if (faceSrc?.from === from) return faceSrc.c;
+    const k = Math.min(1, 512 / Math.max(design.naturalWidth, design.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(design.naturalWidth * k));
+    c.height = Math.max(1, Math.round(design.naturalHeight * k));
+    c.getContext("2d")?.drawImage(from, 0, 0, c.width, c.height);
+    faceSrc = { from, c };
+    return c;
+  }
+
+  /**
+   * Face placement: lay the design out in the mesh's texture space and draw
+   * each mesh triangle's piece of it onto the live face, so it bends over the
+   * cheekbone, nose and brow. Triangles go to an offscreen canvas first, each
+   * clipped a fraction of a pixel wide so no hairline seams show, and the
+   * result is multiplied onto the frame once.
+   */
+  function drawFace(): void {
+    if (!ar || !ctx) return;
+    const pts = ar.face, center = ar.faceCenter, src = faceSource();
+    if (!pts || !center || !src) return;
+    const mesh = ar.tracker.faceMesh;
+    const scale = cmPerUv(mesh, center.x, center.y) ?? { u: 16, v: 20 };
+    const toUv = designToUv(src.width, src.height, center, tattooWCm, tattooHCm, getRotation(), scale, mirror);
+    // UV box the design covers, to skip triangles it can't touch.
+    const corners = [[0, 0], [src.width, 0], [0, src.height], [src.width, src.height]].map(([x, y]) => ({
+      x: toUv[0] * x + toUv[2] * y + toUv[4], y: toUv[1] * x + toUv[3] * y + toUv[5],
+    }));
+    const u0 = Math.min(...corners.map((p) => p.x)), u1 = Math.max(...corners.map((p) => p.x));
+    const v0 = Math.min(...corners.map((p) => p.y)), v1 = Math.max(...corners.map((p) => p.y));
+    const sign = facingSign(mesh, pts);
+    const cw = refs.canvas.width, ch = refs.canvas.height;
+    const cc = (clipCanvas ??= document.createElement("canvas"));
+    if (cc.width !== cw || cc.height !== ch) {
+      cc.width = cw;
+      cc.height = ch;
+    }
+    const c = cc.getContext("2d");
+    if (!c) return;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, cw, ch);
+    const PAD = 0.6;
+    for (let t = 0; t < mesh.tri.length / 3; t++) {
+      const i0 = mesh.tri[3 * t], i1 = mesh.tri[3 * t + 1], i2 = mesh.tri[3 * t + 2];
+      const a = uvOf(mesh, i0), b = uvOf(mesh, i1), d = uvOf(mesh, i2);
+      if (Math.max(a.x, b.x, d.x) < u0 || Math.min(a.x, b.x, d.x) > u1 ||
+          Math.max(a.y, b.y, d.y) < v0 || Math.min(a.y, b.y, d.y) > v1) continue;
+      const p0 = pts[i0], p1 = pts[i1], p2 = pts[i2];
+      if (windingOf(p0, p1, p2) !== sign) continue; // faces away
+      const m = affineFromTriangles(a, b, d, p0, p1, p2);
+      if (!m) continue;
+      const cx = (p0.x + p1.x + p2.x) / 3, cy = (p0.y + p1.y + p2.y) / 3;
+      const grow = (p: Pt): Pt => {
+        const dx = p.x - cx, dy = p.y - cy, l = Math.hypot(dx, dy) || 1;
+        return { x: p.x + (dx / l) * PAD, y: p.y + (dy / l) * PAD };
+      };
+      const g0 = grow(p0), g1 = grow(p1), g2 = grow(p2);
+      c.save();
+      c.beginPath();
+      c.moveTo(g0.x, g0.y);
+      c.lineTo(g1.x, g1.y);
+      c.lineTo(g2.x, g2.y);
+      c.closePath();
+      c.clip();
+      c.setTransform(...compose(m, toUv));
+      c.drawImage(src, 0, 0);
+      c.restore();
+    }
+    ctx.save();
+    ctx.globalCompositeOperation = "multiply";
+    ctx.globalAlpha = getOpacity();
+    ctx.drawImage(cc, 0, 0);
+    ctx.restore();
+  }
+
+  /** Draw a mask-sized canvas over c, lined up with the video as displayed. */
+  function drawMaskCanvas(c: CanvasRenderingContext2D, m: HTMLCanvasElement | null, crop: Crop): void {
+    if (!m || !video) return;
+    const kx = m.width / video.videoWidth, ky = m.height / video.videoHeight;
     c.save();
     if (mirror) {
       c.translate(refs.canvas.width, 0);
       c.scale(-1, 1);
     }
-    c.drawImage(ar.skin, crop.sx * kx, crop.sy * ky, crop.sw * kx, crop.sh * ky,
+    c.drawImage(m, crop.sx * kx, crop.sy * ky, crop.sw * kx, crop.sh * ky,
                 0, 0, refs.canvas.width, refs.canvas.height);
     c.restore();
   }
 
   function drawTracked(crop: Crop): void {
     if (!ar || !design || !ctx) return;
+    if (placementId === FACE) {
+      drawFace();
+      return;
+    }
     const a = ar.anchor;
     if (!AR_PLACEMENTS[placementId] || !a) {
       // Untracked placement: the design stays where the visitor drags it.
@@ -694,7 +875,7 @@ export function setupCameraPreview(
     const cy = a.y + across.y * du + along.y * dv;
     const span = !wrapToggle?.checked ? 0
       : ar.limbWidth ? wrapSpanFor(w, ar.limbWidth) : curveSpan();
-    const clip = clothesToggle?.checked === true && ar.skin !== null;
+    const clip = clothesToggle?.checked === true && ar.uncovered !== null;
     const cw = refs.canvas.width, ch = refs.canvas.height;
     let target = ctx;
     if (clip) {
@@ -721,7 +902,7 @@ export function setupCameraPreview(
     target.restore();
     if (clip && clipCanvas) {
       target.globalCompositeOperation = "destination-in";
-      drawSkinMask(target, crop);
+      drawMaskCanvas(target, ar.uncovered, crop);
       target.globalCompositeOperation = "source-over";
       ctx.save();
       ctx.globalCompositeOperation = "multiply";
@@ -786,6 +967,7 @@ export function setupCameraPreview(
       drawCard(ctx);
     } else if (ar) {
       trackFrame(now, crop);
+      if (AR_DEBUG) drawMaskCanvas(ctx, ar.tint, crop);
       drawTracked(crop);
       updateHint();
     } else {
@@ -897,7 +1079,10 @@ export function setupCameraPreview(
   calCancel?.addEventListener("click", () => endCalibration(false));
   calSize?.addEventListener("input", () => setCardWidth((Number(calSize.value) / 100) * refs.canvas.width));
   arStdBtn?.addEventListener("click", endAr);
-  sideSelect?.addEventListener("change", resetTracking);
+  sideSelect?.addEventListener("change", () => {
+    resetTracking();
+    if (ar) ar.faceCenter = null; // back to the cheek on the chosen side
+  });
 
   refs.canvas.addEventListener("pointerdown", (e) => {
     refs.canvas.setPointerCapture(e.pointerId);
@@ -911,8 +1096,8 @@ export function setupCameraPreview(
       pinchStartW = tattooWCm;
       pinchStartH = tattooHCm;
       dragging = false;
-    } else if (calibrating) {
-      dragging = true; // the outline moves from anywhere on the canvas
+    } else if (calibrating || (ar && placementId === FACE)) {
+      dragging = true; // the card outline, or the design on a face, moves from anywhere
     } else if (design && hitTest(p.x, p.y, drawn, drawn.w, drawn.h, drawn.rotation)) {
       dragging = true;
     }
@@ -931,7 +1116,17 @@ export function setupCameraPreview(
     } else if (dragging) {
       const dx = p.x - prev.x, dy = p.y - prev.y;
       const a = ar?.anchor;
-      if (ar && a && AR_PLACEMENTS[placementId]) {
+      if (ar && placementId === FACE) {
+        // Move across the face in texture space, whichever way the head is turned.
+        const ax = ar.face && ar.faceCenter ? faceAxes(ar.tracker.faceMesh, ar.face) : null;
+        if (ax && ar.faceCenter) {
+          const clamp01 = (v: number): number => Math.min(Math.max(v, 0.02), 0.98);
+          ar.faceCenter = {
+            x: clamp01(ar.faceCenter.x + (dx * ax.eu.x + dy * ax.eu.y) / ax.su),
+            y: clamp01(ar.faceCenter.y + (dx * ax.ev.x + dy * ax.ev.y) / ax.sv),
+          };
+        }
+      } else if (ar && a && AR_PLACEMENTS[placementId]) {
         // Nudge in the limb's own frame, so the offset rides along with it.
         const clampCm = (v: number): number => Math.min(Math.max(v, -AR_MAX_OFFSET_CM), AR_MAX_OFFSET_CM);
         const cos = Math.cos(a.angle), sin = Math.sin(a.angle);
@@ -968,6 +1163,11 @@ export function setupCameraPreview(
 
   function trackingHint(): string {
     if (!ar) return "";
+    if (placementId === FACE) {
+      if (ar.faceStatus) return ar.faceStatus;
+      if (!ar.face) return "Looking for your face. Hold the phone at arm's length, facing you.";
+      return `${sizeLabel} · mapped onto your face · size based on an average face · drag to move · pinch or scroll to resize`;
+    }
     const spec = AR_PLACEMENTS[placementId];
     const name = (getBodyPart(placementId)?.label ?? "this placement").toLowerCase();
     if (!spec) {
@@ -996,6 +1196,14 @@ export function setupCameraPreview(
   }
 
   syncControls();
+  // ?ar-debug: the live Full AR state, for checking a device from its console.
+  if (AR_DEBUG) {
+    (window as unknown as { tsAr: () => unknown }).tsAr = () => ar && {
+      placementId, delegate: ar.tracker.delegate, side: ar.side, anchor: ar.anchor,
+      faceCenter: ar.faceCenter, faceStatus: ar.faceStatus, mirror,
+      facePoints: ar.face && { 10: ar.face[10], 152: ar.face[152], 234: ar.face[234], 454: ar.face[454], 1: ar.face[1] },
+    };
+  }
 
   return {
     setDesign(img: HTMLImageElement): void {
@@ -1011,12 +1219,16 @@ export function setupCameraPreview(
       updateHint();
     },
     setPlacement(id: string, h: number): void {
-      if (id !== placementId && ar) {
+      const changed = id !== placementId;
+      if (changed && ar) {
         resetTracking();
         ar.offset = { u: 0, v: 0 };
+        ar.faceCenter = null;
+        if (!ar.tracker.faceReady()) ar.faceStatus = "";
       }
       placementId = id;
       heightCm = h;
+      if (changed) syncControls();
     },
     async startAr(load): Promise<void> {
       if (ar || arLoading || !design) return;
@@ -1053,7 +1265,8 @@ export function setupCameraPreview(
         }
         ar = {
           tracker, side: null, anchor: null, lastSeen: 0, lastVideoTime: -1, frame: 0,
-          offset: { u: 0, v: 0 }, limbWidth: null, mask: null, skin: null, skinImg: null, filters: newFilters(),
+          offset: { u: 0, v: 0 }, limbWidth: null, mask: null, uncovered: null, uncoveredImg: null, tint: null, filters: newFilters(),
+          face: null, faceFilters: null, faceCenter: null, faceStatus: "",
         };
       } catch (e) {
         onError(`Full AR couldn't start on this device (${(e as Error).message}). The standard preview still works.`);

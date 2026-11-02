@@ -38,6 +38,10 @@ describe("AR_PLACEMENTS", () => {
     const ids = new Set(BODY_PARTS.map((b) => b.id));
     for (const id of Object.keys(AR_PLACEMENTS)) expect(ids.has(id), id).toBe(true);
   });
+  it("tracks the face through the face mesh", () => {
+    expect(isTrackable("face")).toBe(true);
+    expect("face" in AR_PLACEMENTS).toBe(false);
+  });
   it("leaves the hard-to-film placements manual", () => {
     for (const id of ["upper_back", "lower_back", "back_of_neck", "behind_ear", "wrist", "hand", "ribs", "ankle"]) {
       expect(isTrackable(id), id).toBe(false);

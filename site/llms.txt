@@ -15,7 +15,7 @@ free to use immediately, with no login wall.
 - [What Is My Time Worth?](https://restless-forge.dev/tools/what-is-my-time-worth/): Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.
 - [HoloPath](https://restless-forge.dev/tools/holopath/): Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.
 - [SandPath](https://restless-forge.dev/tools/sandpath/): Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.
-- [TattooSafe](https://restless-forge.dev/tools/tattoosafe/): Preview a tattoo design on your body with your camera, check the size against 16 body placements, and estimate pricing by size, style, and artist tier.
+- [TattooSafe](https://restless-forge.dev/tools/tattoosafe/): Preview a tattoo design on your body with your camera, check the size against 17 body placements, and estimate pricing by size, style, and artist tier.
 
 All tools: https://restless-forge.dev/tools/
 
