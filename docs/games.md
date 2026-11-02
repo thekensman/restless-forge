@@ -65,6 +65,12 @@ A `games.json` entry:
   the redirect, the JavaScript type on every module script, `audio/wav` on sounds, and a
   one-day cache on the page's `og:image`, which is named without `?v=` and would otherwise
   sit under the one-year immutable rule.
+- Cloudflare injects its Web Analytics beacon into every HTML page it serves to a browser
+  (`docs/infrastructure.md`), which would put a request to `static.cloudflareinsights.com`
+  on a page that must make none. nginx sends `Cache-Control: … no-transform` on every game
+  page, the documented way to stop the injection, and `check-urls` asserts the header. The
+  proof is on the live site: the game's browser test run against the live URL fails on any
+  request outside the site.
 - In `npm run dev`, the root server (`vite.config.ts`) streams the shipped files from
   `games/<slug>/` without Vite's HTML transform. A game also runs on its own from its
   folder (Foobar: `python3 serve.py`), which is how its browser test runs it.
@@ -119,15 +125,18 @@ dedication, shared by every Foobar game so the sequels carry it without a copy t
    no ad or donation markup, and its own footer linking to `/`.
 3. Add its entry to `games/games.json`, and the memorial markers if it carries one.
 4. Add it to "Restored games" in `LICENSE.md` with its authors' terms.
-5. Run `npm run sync`, `npm test`, then `./build.sh && npm run check-links && npm run check-urls`.
-6. After deploy, run the game's own checklist (Foobar's is at the end of `RF_INTEGRATION.md`).
+5. Check it fits the screen: a 1366 x 657 laptop window, a phone upright and on its side.
+   Foobar's page had to learn all three (`games/foobar-vs-the-dea/HANDOFF.md`).
+6. Run `npm run sync`, `npm test`, then `./build.sh && npm run check-links && npm run check-urls`.
+7. After deploy, run the game's own checklist (Foobar's is at the end of `RF_INTEGRATION.md`).
 
 ## Updating a game
 
 Change it in its folder and follow its own release notes. Foobar's build number lives in
 several files and the page shows a red bar when they disagree (`RF_INTEGRATION.md`,
 "Updating the game later"). Bump it for any change to `js/`, `data/` or `assets/` after a
-deploy: those files are cached for a year under their `?v=` URL. Then run `npm run sync`,
+deploy: those files are cached for a year under their `?v=` URL. A change to `index.html`
+alone needs no bump, since the page itself is never cached. Then run `npm run sync`,
 which re-stamps the memorial photo with the new build, and `npm test`.
 
 ## Takedowns

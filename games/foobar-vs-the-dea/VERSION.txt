@@ -19,6 +19,12 @@ no cached ?v=25 file can be stale)
     in the RF repo, shared with the Foobar sequels; npm run sync writes the
     block into index.html and copies the photo to assets/memorial/. It is no
     longer in the preload manifest.
+  - after the first deploy, index.html only (it is never cached, so still 25):
+    the footer links All Games; the playfield fits short, wide screens (a
+    laptop under 820 px of browser, a phone on its side) with the panels
+    beside it; overlays scroll instead of clipping on small screens; and the
+    desktop canvas no longer loses its right and bottom 3 game pixels to the
+    stage border.
 
 CHANGED IN 25
   - fonts: the four faces the page uses are served from assets/fonts under
