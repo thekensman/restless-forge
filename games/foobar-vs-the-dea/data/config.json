@@ -1,0 +1,451 @@
+{
+ "_note": "Build 25. Game rules come from the original 68k code (js/sim.js, REVERSE_ENGINEERING.md); this file holds the per-level data that code reads, the house rules that depart from it on purpose, and the presentation settings around them.",
+ "build": "25",
+ "screen": {
+  "width": 511,
+  "height": 384,
+  "scale": 2
+ },
+ "playfield": {
+  "width": 320,
+  "height": 340
+ },
+ "tile": {
+  "size": 32,
+  "cols": 10,
+  "rows": 200
+ },
+ "levelEnd": 6400,
+ "timing": {
+  "frameMs": {
+   "1": 35,
+   "2": 30,
+   "3": 25
+  },
+  "_frameMs": "One original frame per Time Manager tick: 35 ms on Easy, 30 on Medium, 25 on Hard (fn3_575E). Ken's SheepShaver captures scroll at about 28 px/s, which is this. The DVD capture ran at 20 fps; set Easy to 50 to reproduce that pace.",
+  "speedScale": 1.0,
+  "outroFramesPerStep": 3,
+  "_outro": "The original moves the ship off the top after a boss without waiting for the frame timer, so it zooms. Three logic frames per display step approximates that."
+ },
+ "difficultyNames": {
+  "1": "EASY",
+  "2": "MEDIUM",
+  "3": "HARD"
+ },
+ "defaultDifficulty": 1,
+ "player": {
+  "startLives": 5,
+  "lifeIcon": 170
+ },
+ "houseRules": {
+  "_note": "Changes from the original, asked for after build 22 because the original behaviour reads as a bug in play. Each entry names what the original did. Put that value back to play the original way; the test harness checks both.",
+  "rapidFireFrames": 640,
+  "_rapidFireFrames": "Rapid fire runs out after this many frames, counted like protection (only while the level scrolls), and ends when a life is lost. Original: 0, rapid fire lasts the rest of the game.",
+  "maxClones": 2,
+  "_maxClones": "How many Foo++ clones can fly at once. The first sits 33 px left of the lead, the second 33 px right, and the yummy keeps turning up until both slots are filled. Original: 1, and only one Foo++ per life.",
+  "respawnShieldFrames": 180,
+  "_respawnShieldFrames": "After a life is lost the new ship flies in shielded for this many frames, using protection's green outline and its blinking last 100 frames. Original: 0, the fly-in is the only grace.",
+  "dronesVisibleInFreeze": true,
+  "_dronesVisibleInFreeze": "Level 4 fan drones that spawn during a freeze show up straight away. The original gives a drone no face until its fan turns (fn2_4818 sets none, and SAT skips sprites without one), and the fan doesn't turn while frozen, so drones arriving during a freeze stay invisible until it ends. Original: false."
+ },
+ "yummies": {
+  "extraman": {
+   "sprite": 6667,
+   "label": "EXTRA MAN"
+  },
+  "rapidfire": {
+   "sprite": 249,
+   "label": "RAPID FIRE"
+  },
+  "clone": {
+   "sprite": 253,
+   "label": "FOO++"
+  },
+  "protection": {
+   "sprite": 250,
+   "label": "PROTECTION"
+  },
+  "freeze": {
+   "sprite": 251,
+   "label": "FREEZE"
+  },
+  "smartbomb": {
+   "sprite": 252,
+   "label": "SMART BOMB"
+  }
+ },
+ "levels": [
+  {
+   "id": "128",
+   "name": "LEVEL 1",
+   "tileBank": "desert",
+   "arena": "arena_1",
+   "portrait": "boss1",
+   "briefing": "PICT_173",
+   "music": {
+    "snd": 135,
+    "periodTicks": 510
+   },
+   "boss": {
+    "name": "Marlboro Man",
+    "bio": "In charge of research for the big tobacco companies. They have falsified data to show that tobacco is completely harmless, but that marijuana is deadly even in microscopic quantities.",
+    "faces": [
+     173,
+     216,
+     217
+    ],
+    "hp": 5
+   },
+   "machines": [],
+   "air": {
+    "faces": [
+     133,
+     134,
+     135,
+     136,
+     137,
+     138
+    ],
+    "hot": [
+     0,
+     0,
+     32,
+     32
+    ]
+   },
+   "ground": "sub",
+   "dirChance": 30,
+   "rocketFaces": [
+    [
+     15000,
+     15008
+    ],
+    [
+     15001,
+     15009
+    ]
+   ]
+  },
+  {
+   "id": "129",
+   "name": "LEVEL 2",
+   "tileBank": "industrial",
+   "arena": "arena_2",
+   "portrait": "boss2",
+   "briefing": "PICT_174",
+   "music": {
+    "snd": 133,
+    "periodTicks": 355
+   },
+   "boss": {
+    "name": "Telehead",
+    "bio": "Controls the media. He is responsible for a smear campaign that makes people think that people who smoke marijuana become evil zombies.",
+    "faces": [
+     189,
+     218,
+     219
+    ],
+    "hp": 6
+   },
+   "machines": [
+    127
+   ],
+   "air": {
+    "faces": [
+     235,
+     235,
+     235,
+     235,
+     235,
+     235
+    ],
+    "hot": [
+     2,
+     2,
+     38,
+     45
+    ]
+   },
+   "ground": "tele",
+   "dirChance": 25,
+   "rocketFaces": [
+    [
+     15004,
+     15012
+    ],
+    [
+     15005,
+     15013
+    ]
+   ]
+  },
+  {
+   "id": "130",
+   "name": "LEVEL 3",
+   "tileBank": "blueplate",
+   "arena": "arena_3",
+   "portrait": "boss3",
+   "briefing": "PICT_175",
+   "music": {
+    "snd": 136,
+    "periodTicks": 340
+   },
+   "boss": {
+    "name": "Czar Bot",
+    "bio": "The nation's drug Czar. He has been programmed to enforce drug laws. He needs to be reprogrammed to work at McDonalds.",
+    "faces": [
+     191,
+     220,
+     221
+    ],
+    "hp": 7
+   },
+   "machines": [
+    95,
+    159
+   ],
+   "air": {
+    "faces": [
+     203,
+     203,
+     203,
+     203,
+     203,
+     203
+    ],
+    "hot": [
+     3,
+     3,
+     37,
+     28
+    ]
+   },
+   "ground": "jack",
+   "dirChance": 20,
+   "rocketFaces": [
+    [
+     15006,
+     15014
+    ],
+    [
+     15007,
+     15015
+    ]
+   ]
+  },
+  {
+   "id": "131",
+   "name": "LEVEL 4",
+   "tileBank": "bunker",
+   "arena": "arena_4",
+   "portrait": "boss4",
+   "briefing": "PICT_176",
+   "music": {
+    "snd": 138,
+    "periodTicks": 300
+   },
+   "boss": {
+    "name": "NOSEY",
+    "bio": "The evil Microchip that has databases on everyone. He wiretaps phones so he can find social deviants who are smoking pot. When he catches them he reprograms them to be mindless zombie slaves.",
+    "faces": [
+     254,
+     255,
+     256
+    ],
+    "hp": 9
+   },
+   "machines": [
+    63,
+    127,
+    191
+   ],
+   "air": {
+    "faces": [
+     202,
+     202,
+     202,
+     202,
+     202,
+     202
+    ],
+    "hot": [
+     5,
+     3,
+     51,
+     46
+    ]
+   },
+   "ground": "drone",
+   "dirChance": 15,
+   "rocketFaces": [
+    [
+     15002,
+     15010
+    ],
+    [
+     15003,
+     15011
+    ]
+   ]
+  }
+ ],
+ "tileBanks": {
+  "desert": [
+   143,
+   144,
+   145,
+   146,
+   147,
+   148,
+   149,
+   150,
+   151,
+   152,
+   153,
+   154,
+   155,
+   156,
+   157,
+   158,
+   159,
+   160,
+   161,
+   162,
+   163,
+   164
+  ],
+  "industrial": [
+   1000,
+   1001,
+   1002,
+   1003,
+   1004,
+   1005,
+   1006,
+   1007,
+   1008,
+   1009,
+   1010,
+   1011,
+   1012,
+   1013,
+   207,
+   208,
+   209,
+   210,
+   211,
+   212,
+   213,
+   214
+  ],
+  "blueplate": [
+   700,
+   701,
+   702,
+   703,
+   704,
+   705,
+   706,
+   707,
+   708,
+   709,
+   710,
+   711,
+   712,
+   713,
+   714,
+   715,
+   716,
+   717,
+   718,
+   719,
+   720,
+   721
+  ],
+  "bunker": [
+   900,
+   901,
+   902,
+   903,
+   904,
+   905,
+   906,
+   907,
+   908,
+   909,
+   910,
+   911,
+   912,
+   913,
+   914,
+   915,
+   916,
+   160,
+   161,
+   162,
+   163,
+   164
+  ]
+ },
+ "tileBanks_note": "From CODE 3: the same 22 handle slots are filled from a different bank per level. Level 3 uses cicn 700 to 721 (fn3_2EC6, Levl 130), which is blue riveted plate, not water; earlier builds called it 'ocean'. Level 4 uses the gold grid bank 900 to 916 plus 160 to 164 (fn3_361A, Levl 131). Build 21 had levels 3 and 4 swapped. Each boss arena is drawn in the colours of the next level's floor.",
+ "sounds": {
+  "shot": 130,
+  "foeShot": 129,
+  "boom": 132,
+  "bombDrop": 137,
+  "title": 134,
+  "music": [
+   135,
+   133,
+   136,
+   138
+  ],
+  "titlePeriodTicks": 280,
+  "channels": {
+   "1": "shots",
+   "2": "music",
+   "3": "explosions",
+   "4": "bomb drop"
+  }
+ },
+ "intro": {
+  "sequence": [
+   "intro_story",
+   "PICT_1999"
+  ],
+  "instructions": "PICT_1999",
+  "scrollSpeed": 0.1667,
+  "_scrollSpeed": "The original advances the story 1 px every 6 ticks (fn7_0684), 10 px/s.",
+  "startAtTop": true,
+  "ending": "PICT_166"
+ },
+ "cheats": {
+  "enabled": true,
+  "bufferMs": 1200,
+  "codes": {
+   "qqq": "permashield",
+   "eee": "nextlevel",
+   "bbb": "bossjump",
+   "fff": "perf"
+  },
+  "_note": "Typed as a sequence during play. qqq toggles invincibility, eee jumps to the next level briefing. Two QA shortcuts were added in build 24: bbb skips ahead to just before the current level's boss arena, and fff toggles a frame-rate readout in the corner of the playfield. Codes deliberately avoid every gameplay key (wasd, arrows, z, x, shift, space, p, m, esc) so they cannot collide with flying. The buffer also clears after bufferMs of no typing.",
+  "reservedKeys": [
+   "w",
+   "a",
+   "s",
+   "d",
+   "z",
+   "x",
+   "p",
+   "m"
+  ]
+ },
+ "diagnostics": {
+  "enabled": true,
+  "_note": "Uncaught errors and promise rejections paint a red bar on the page instead of failing silently to a black canvas. Press F2 for a state dump."
+ },
+ "render": {
+  "interpolate": true,
+  "_interpolate": "Logic runs at the original frame rate; positions are blended between frames for display only."
+ }
+}
