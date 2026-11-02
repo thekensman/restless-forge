@@ -76,7 +76,7 @@ You'll see ads on this site. Side banners and a slot below the content. I made a
 
 Here's the deal. I need some revenue to justify the time I spend building these tools. Subscriptions would defeat the entire point. Donation-only models don't reliably cover hosting costs. Ads are the middle ground that lets me keep everything free without pretending I don't have a mortgage. If you see something interesting, click it. If you don't, keep using the tools. That's the arrangement, and I think it's fair.
 
-I chose not to use analytics tracking. I don't run Google Analytics or any equivalent. Server logs rotate out after 14 days. The ads are served by Google AdSense, and Google's own privacy controls are available to you through their [Ads Settings](https://www.google.com/settings/ads) page. Beyond that, I don't want to know who you are or what you're doing. I just want the tools to be useful.
+I chose not to use analytics that track people. I don't run Google Analytics. Cloudflare, which serves the site, counts page views and where they came from, and it sets no cookies. All I see are totals. Server logs rotate out after 14 days. The ads are served by Google AdSense, and Google's own privacy controls are available to you through their [Ads Settings](https://www.google.com/settings/ads) page. Beyond that, I don't want to know who you are or what you're doing. I just want the tools to be useful.
 
 ## What's ahead
 

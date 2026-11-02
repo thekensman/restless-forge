@@ -132,10 +132,18 @@ footer shows the build number and a red bar appears for any uncaught error. F2 d
 - Bosses on levels 2 to 4, the barricade machines and the rarer yummies come from the code
   alone. Nobody has filmed them.
 - The Time Zone and Volume menus have not been read.
-- Mobile: the page has invisible touch zones from an early build, never tried on a phone.
-  Ken would like a mobile version and wants to test how missiles and bombs should work once
-  the game is on the site. `RF_INTEGRATION.md` has a proposal. Until then the `/games/`
+- Mobile controls: the page still has the invisible touch zones from an early build. Ken has
+  played it on his phone and finds they clash; the scheme is being decided with him (tilt was
+  his first idea). `RF_INTEGRATION.md` has the original proposal. Until then the `/games/`
   card says the game needs a keyboard (`note` in `games/games.json`).
+- Screen fit (done on RF, still build 25): the page has three layouts. A tall desktop gets
+  the cabinet at its 2x size. A short, wide screen (under 820 px tall and at least 4:3: a
+  laptop at 1366 x 768, a phone on its side) gets the fit layout, where the playfield takes
+  the screen's height and the panels sit either side; under 450 px tall the left panel pairs
+  up in two columns. A narrow, tall screen gets the stacked layout. Overlays scroll instead
+  of clipping in the small layouts. Before this, a 1366 x 768 laptop lost the top 60 px of
+  the playfield, and the desktop canvas always lost its right and bottom 3 game pixels to
+  the stage border.
 - When the lead ship is lost, a surviving clone becomes the lead. The original lets the clone
   fly on alone and later builds a new clone off a freed record; the rebuild does not copy
   that.

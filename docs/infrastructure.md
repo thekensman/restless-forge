@@ -150,8 +150,13 @@ If a specific crawler ever misbehaves (hammering the origin), prefer a
 Cloudflare **rate-limiting rule scoped to that user agent** over
 re-enabling the blanket AI block.
 
-> **Known drift (checked 2026-08-16):** the live `/robots.txt` currently
-> serves a `# BEGIN Cloudflare Managed content` block that `Disallow: /`s
+> **Resolved (checked 2026-11-02):** the live `/robots.txt` no longer
+> carries the Cloudflare managed block described below; it serves
+> `site/robots.txt` as written. Re-check after any Cloudflare dashboard
+> change.
+>
+> **Previous drift (checked 2026-08-16):** the live `/robots.txt` then
+> served a `# BEGIN Cloudflare Managed content` block that `Disallow: /`s
 > ClaudeBot, GPTBot, CCBot, Google-Extended and others, immediately
 > followed by our own `Allow: /` stanzas for the same agents. So item 3
 > above is **not** currently satisfied. It does not affect Google Search
@@ -193,6 +198,39 @@ This is the second setting where the Cloudflare dashboard silently
 changes what the site serves. When something is verifiably correct in
 `dist/` but wrong over HTTPS, check the dashboard before re-debugging the
 build.
+
+## Cloudflare injects its Web Analytics beacon into every HTML page
+
+Checked 2026-11-02: Cloudflare Web Analytics is on for the zone with
+automatic setup, so every HTML page served to a browser gains
+
+```html
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/…"
+  data-cf-beacon='…' integrity="…" crossorigin="anonymous"></script>
+```
+
+before `</body>`. It is injected only for browser-like requests (an
+`Accept: text/html` header), so `curl` and the offline checks never see
+it; a headless browser does.
+
+Two consequences:
+
+- **`/privacy` describes it.** It used to say the site used no
+  third-party analytics. Ken kept Cloudflare Web Analytics (November 2026),
+  so the Analytics section now says what the beacon reports, measured from
+  a real page load: the page address without its query string, the
+  referrer, the navigation type, the browser engine and version, and load
+  timings, sent to the same-origin `/cdn-cgi/rum`, with no cookies and
+  nothing in local or session storage. If the dashboard setting changes,
+  or Cloudflare changes the beacon, re-measure and update `/privacy`. To
+  turn it off: Cloudflare dashboard → Analytics & Logs → Web Analytics →
+  the site → disable automatic setup.
+- **Restored game pages opt out.** A game page must make no request outside
+  the site (`docs/games.md`), so nginx sends `Cache-Control: … no-transform`
+  on `/games/<slug>/`. Cloudflare's Web Analytics FAQ: with it, "the Beacon
+  script will not be automatically injected". `check-urls` asserts the
+  header; after a deploy, the game's own browser test run against the live
+  URL proves the beacon is gone (it fails on any request outside the site).
 
 ## Disaster recovery
 

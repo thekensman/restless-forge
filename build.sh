@@ -143,6 +143,22 @@ find "${DIST_DIR}" -name "*.html" -exec sed -i \
   {} \;
 echo "  → /shared.js?v=${site_shared_hash}"
 
+# Cache-bust the self-hosted /fonts.css. Two kinds of reference: the @import
+# at the top of /styles.css and /tool-chrome.css (how nearly every page gets
+# its fonts) and a <link> on the few pages that load neither. This runs BEFORE
+# those two stylesheets are hashed below, so a fonts.css change changes their
+# hashes too. The woff2 files carry a content hash in their names already.
+if [ -f "${DIST_DIR}/fonts.css" ]; then
+  fonts_css_hash=$(md5sum "${DIST_DIR}/fonts.css" | cut -c1-8)
+  for css in "${DIST_DIR}/styles.css" "${DIST_DIR}/tool-chrome.css"; do
+    [ -f "${css}" ] && sed -i -e "s|@import url(\"/fonts\.css\");|@import url(\"/fonts.css?v=${fonts_css_hash}\");|" "${css}"
+  done
+  find "${DIST_DIR}" -name "*.html" -exec sed -i \
+    -e "s|\"/fonts\.css\"|\"/fonts.css?v=${fonts_css_hash}\"|g" \
+    {} \;
+  echo "  → /fonts.css?v=${fonts_css_hash}"
+fi
+
 # Cache-bust the global /styles.css across ALL html files in dist.
 # This one was missed for a long time and the failure was ugly: nginx serves
 # css as `immutable, max-age=1y` while HTML is `no-cache`, so returning

@@ -42,7 +42,10 @@
  *   9. Restored games (docs/games.md): every module script answers with a
  *      JavaScript type at its ?v= URL (browsers refuse module scripts served as
  *      anything else), the page's og:image gets a short cache (it is named bare
- *      in the page, so ?v= cannot bust it), and sounds go out as audio/wav.
+ *      in the page, so ?v= cannot bust it), sounds go out as audio/wav, and the
+ *      game page itself carries Cache-Control no-transform, which stops
+ *      Cloudflare injecting its analytics beacon into a page that must make no
+ *      request outside the site.
  *      The slashless game URL is covered by 2 like every directory page.
  */
 import { spawnSync } from "node:child_process";
@@ -517,6 +520,16 @@ for (const g of loadGames()) {
     else if (!/javascript/.test(String(r.h["content-type"]))) {
       problem("game", `/games/${g.slug}/${rel} Content-Type "${r.h["content-type"]}"; browsers refuse a module script without a JavaScript type`);
     }
+  }
+  {
+    tally("game");
+    const r = await headers(base);
+    const cc = String(r.h["cache-control"] || "");
+    if (r.status !== 200) problem("game", `/games/${g.slug}/ → ${r.status}`);
+    else if (!/no-transform/.test(cc) || !/no-cache/.test(cc)) {
+      problem("game", `/games/${g.slug}/ Cache-Control "${cc}", want no-cache plus no-transform (or Cloudflare injects its beacon)`);
+    }
+    if (!r.h["strict-transport-security"]) problem("game", `/games/${g.slug}/ lost the security headers (add_header gotcha)`);
   }
   const html = readFileSync(join(dir, "index.html"), "utf8");
   const og = attr(html, /<meta[^>]+property=["']og:image["'][^>]*>/i, "content");
