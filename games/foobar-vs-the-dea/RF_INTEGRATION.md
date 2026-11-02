@@ -3,6 +3,15 @@
 Integration notes for Claude Code, written against build 25 (November 2026). Read this before
 touching the RF monorepo for the game. Items marked **Ask Ken** are his call.
 
+**Status, 2 November 2026: integrated.** The game is at `/games/foobar-vs-the-dea/` and its
+full source, tests included, lives in the RF repo at `games/foobar-vs-the-dea/`. Ken's
+answers: the long slug (Foobar sequels exist), option A with the game's own footer, and a
+Games link next to Tools in the site nav and footer. The FreeRoll Vegas question did not
+arise, because that link is not in the global footer. The sections below up to "Putting it
+on the site" record how the decision was made and still name the old `/games/foobar/` path;
+the hosting details and the checklist use the real one. How restored games work in the RF
+repo (layout, sync, checks, sequels): `docs/games.md`.
+
 ## The short version
 
 1. Put the `foobar/` folder from `foobar_vs_dea_v25_deploy.zip` at `/games/foobar/` as static
@@ -191,7 +200,7 @@ and he may not want it under a memorial section.
 
 ## Hosting details
 
-**Trailing slash.** `/games/foobar` has to answer with a 301 or 308 to `/games/foobar/`. Every
+**Trailing slash.** `/games/foobar-vs-the-dea` has to answer with a 301 or 308 to `/games/foobar-vs-the-dea/`. Every
 path in the page is relative, so a page served at the slashless URL resolves `js/game.js`
 against `/games/` and loads nothing. Many static hosts redirect directory URLs to the slashed
 form, but it depends on the host and its settings. Test it after deploy and add an explicit
@@ -306,8 +315,8 @@ Run the tests from the source zip before shipping a new build:
     python3 test/browser_e2e.py http://localhost:8122/ shots/
 
 The browser test needs Playwright and Chromium. It also runs under a subfolder, which is the
-better test for RF: serve a folder that contains `games/foobar/` and pass
-`http://localhost:8122/games/foobar/`. It fails on any console error, any failed request and
+better test for RF: serve a folder that contains `games/foobar-vs-the-dea/` and pass
+`http://localhost:8122/games/foobar-vs-the-dea/`. It fails on any console error, any failed request and
 any request outside the page's origin.
 
 Leave the rules alone. `js/sim.js`, `data/levels.json` and `data/enemies.json` are the
@@ -325,19 +334,19 @@ change is a house rule: a setting in `data/config.json` with the original value 
 
 ## Checklist after deploy
 
-- [ ] `https://restless-forge.dev/games/foobar` redirects to `/games/foobar/` with a 301 or 308
+- [ ] `https://restless-forge.dev/games/foobar-vs-the-dea` redirects to `/games/foobar-vs-the-dea/` with a 301 or 308
 - [ ] the page loads, START works, and the footer shows build 25
 - [ ] no red error bar, and the browser console is clean
 - [ ] in the Network panel every request goes to restless-forge.dev and none fail
-- [ ] `curl -sI "https://restless-forge.dev/games/foobar/js/game.js?v=25"` shows a JavaScript
+- [ ] `curl -sI "https://restless-forge.dev/games/foobar-vs-the-dea/js/game.js?v=25"` shows a JavaScript
       content type
 - [ ] the page source has no `adsbygoogle`, `googlesyndication` or `ko-fi.com`, and neither
       does `/games/`
 - [ ] other pages still show their ads and donation links as before
-- [ ] `https://restless-forge.dev/games/foobar/assets/ui/share.png` opens
+- [ ] `https://restless-forge.dev/games/foobar-vs-the-dea/assets/ui/share.png` opens
 - [ ] a link preview (pasted into Slack or Discord, or LinkedIn's Post Inspector) shows the
       share image, the title and the description
-- [ ] `/games/` and `/games/foobar/` are in the sitemap, allowed by robots.txt and not
+- [ ] `/games/` and `/games/foobar-vs-the-dea/` are in the sitemap, allowed by robots.txt and not
       noindexed, and indexing is requested for both in Search Console
 - [ ] `bbb` jumps to the level 1 boss; losing on purpose with a score opens the name dialog,
       and after a reload the score is still in HIGH SCORES

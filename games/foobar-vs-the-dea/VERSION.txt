@@ -7,6 +7,19 @@ HANDOFF.md              status, decisions and open items for whoever picks this 
 RF_INTEGRATION.md       putting the game on restless-forge.dev
 tools/README.md         regenerating the assets and rerunning the checks
 
+ON RESTLESS FORGE (still build 25: these landed before its first deploy, so
+no cached ?v=25 file can be stale)
+  - route: https://restless-forge.dev/games/foobar-vs-the-dea/, with the
+    source at games/foobar-vs-the-dea/ in the restless-forge repo. The
+    canonical, Open Graph and Twitter URLs name that address.
+  - <title> carries the site's suffix, and the footer's Restless Forge link
+    opens in the same tab.
+  - memorial: the photo that was assets/ui/PICT_137.png now sits beside the
+    dedication on the title screen. Its source is games/memorials/tom-kluge/
+    in the RF repo, shared with the Foobar sequels; npm run sync writes the
+    block into index.html and copies the photo to assets/memorial/. It is no
+    longer in the preload manifest.
+
 CHANGED IN 25
   - fonts: the four faces the page uses are served from assets/fonts under
     the SIL Open Font License, so the page makes no request outside its own

@@ -68,6 +68,8 @@ ok('raw PICT_136 (old address) is not shipped', !fs.existsSync(path.join(ROOT, '
 }
 ok('no font or script requests outside the site', !/fonts\.googleapis|fonts\.gstatic|<script[^>]+src="https?:/i.test(html));
 for (const m of html.matchAll(/url\((assets\/fonts\/[^)?]+)/g)) ok(`font file ${m[1]}`, fs.existsSync(path.join(ROOT, m[1])));
+// Images written into the markup (the memorial photo that RF's `npm run sync` copies in).
+for (const m of html.matchAll(/<img[^>]+src="(assets\/[^"?]+)/g)) ok(`image ${m[1]}`, fs.existsSync(path.join(ROOT, m[1])));
 for (const f of ['OFL-DMSerifDisplay.txt', 'OFL-IBMPlexMono.txt', 'OFL-Lora.txt']) ok(`font licence ${f}`, fs.existsSync(path.join(ROOT, 'assets/fonts', f)));
 ok('no donation links on this page (restored games carry none)', !/ko-fi\.com|buymeacoffee|patreon\.com|paypal\.me|github\.com\/sponsors/i.test(html));
 ok('PICT_136 is not preloaded', !manifest.ui.includes('PICT_136'));

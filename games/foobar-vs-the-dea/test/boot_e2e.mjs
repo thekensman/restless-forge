@@ -29,7 +29,10 @@ let n=0; global.requestAnimationFrame=f=>{if(n++<1500)setTimeout(()=>{clock+=100
 global.cancelAnimationFrame=()=>{};
 global.localStorage={getItem:()=>null,setItem(){},removeItem(){}};
 global.AudioContext=class{createGain(){return{gain:{},connect(){}}}get destination(){return{}}get state(){return 'running'}
- resume(){}createBufferSource(){return{connect(){},start(){},stop(){}}}decodeAudioData(){return Promise.reject(new Error('x'))}};
+ resume(){}createBufferSource(){return{connect(){},start(){},stop(){}}}decodeAudioData(){return Promise.reject(new Error('x'))}
+ // beep() (protection and freeze pickups) builds its tone with createBuffer. Without these, a
+ // run where the ship happened to pick one up crashed the loop: a flaky failure, not a bug.
+ get sampleRate(){return 44100}createBuffer(c,n){const d=new Float32Array(n);return{getChannelData:()=>d}}};
 global.window={AudioContext:global.AudioContext};
 global.fetch=u=>{const p=path.join(ROOT,String(u).split('?')[0]);
  if(!fs.existsSync(p))return Promise.reject(new Error('404'));

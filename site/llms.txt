@@ -19,6 +19,14 @@ free to use immediately, with no login wall.
 
 All tools: https://restless-forge.dev/tools/
 
+## Games
+
+Old games restored to play in the browser, free and without ads.
+
+- [Foobar vs. the DEA](https://restless-forge.dev/games/foobar-vs-the-dea/) (Funner Software, 1996): Richard Cross and Tom Kluge’s Mac shooter, rebuilt for the browser from the original code.
+
+All games: https://restless-forge.dev/games/
+
 ## Essays
 
 - [Self-Publishing: Dreaming with Eyes Open](https://restless-forge.dev/essays/self-publishing-dreaming-with-eyes-open): Five hats, zero budget, one debut short story. Real numbers, real dead ends, no sales pitch.

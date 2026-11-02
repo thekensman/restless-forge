@@ -477,6 +477,85 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
   color: var(--accent-cloud, #50b8d0);
 }
 
+/* ── Game Cards (/games/) ──
+   Rendered by sync-static from games/games.json. The share image leads the
+   card, and the width/height attributes on it reserve its box before it loads.
+   Selectors are two classes deep because the cards sit inside .page, whose
+   `.page h2` and `.page p` rules would otherwise win. min(100%, 320px) keeps
+   the column from forcing a 320px track onto a narrower phone. */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.game-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.game-card:hover { border-color: var(--accent-dim); }
+
+.game-card .game-card__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid var(--border);
+}
+
+.game-card .game-card__body { padding: 1.5rem 2rem 2rem; }
+
+.game-card .game-card__meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-dim);
+  margin-bottom: 0.75rem;
+}
+
+.game-card .game-card__title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: none;
+}
+
+.game-card .game-card__desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.game-card .game-card__note {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-bottom: 1.25rem;
+}
+
+.game-card .game-card__link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.game-card .game-card__link:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
 /* ── Essay Cards ── */
 .essay-card {
   background: var(--bg-card);

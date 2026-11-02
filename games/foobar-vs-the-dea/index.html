@@ -3,26 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Foobar vs. the DEA</title>
+<title>Foobar vs. the DEA — Restless Forge</title>
 <meta name="description" content="Foobar vs. the DEA (Funner Software, 1996) by Richard Cross and Tom Kluge, rebuilt for the web from the original Macintosh resource fork.">
 <link rel="icon" type="image/png" sizes="72x72" href="assets/ui/icon.png?v=25">
-<!-- Sharing. Link previews need absolute URLs, so these name the page's final address.
-     If the game ends up somewhere other than /games/foobar/, change all four together:
-     canonical, og:url, og:image and twitter:image. -->
-<link rel="canonical" href="https://restless-forge.dev/games/foobar/">
+<!-- Sharing. Link previews need absolute URLs, so these name the page's address on
+     restless-forge.dev. If the game ever moves, change all four together: canonical,
+     og:url, og:image and twitter:image. RF's check-links and check-urls fail the build
+     when the canonical is not the URL the page is served at. -->
+<link rel="canonical" href="https://restless-forge.dev/games/foobar-vs-the-dea/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Restless Forge">
 <meta property="og:title" content="Foobar vs. the DEA">
 <meta property="og:description" content="Richard Cross and Tom Kluge's 1996 Mac shooter, rebuilt for the browser from the original code. Free to play, in memory of Tom.">
-<meta property="og:url" content="https://restless-forge.dev/games/foobar/">
-<meta property="og:image" content="https://restless-forge.dev/games/foobar/assets/ui/share.png">
+<meta property="og:url" content="https://restless-forge.dev/games/foobar-vs-the-dea/">
+<meta property="og:image" content="https://restless-forge.dev/games/foobar-vs-the-dea/assets/ui/share.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The Foobar vs. the DEA title logo next to three red jets flying over the level 1 desert canal.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Foobar vs. the DEA">
 <meta name="twitter:description" content="Richard Cross and Tom Kluge's 1996 Mac shooter, rebuilt for the browser from the original code. Free to play, in memory of Tom.">
-<meta name="twitter:image" content="https://restless-forge.dev/games/foobar/assets/ui/share.png">
+<meta name="twitter:image" content="https://restless-forge.dev/games/foobar-vs-the-dea/assets/ui/share.png">
 <style>
 /* Fonts are served from this folder (SIL Open Font License, see assets/fonts), so the page
    makes no request outside its own site. Latin subsets, only the faces the page uses. */
@@ -199,6 +200,9 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
   .side>*{flex:1 1 auto}
   .portrait,#bossmeter,.keys{display:none}
   #touch{display:block}
+  /* On a phone the title screen is taller than the playfield (its heading was already cut
+     off at 390 px), so let it scroll from the top instead of clipping both ends. */
+  #ov-title{overflow-y:auto;justify-content:safe center}
 }
 </style>
 </head>
@@ -261,8 +265,15 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
         X or Shift bombs ground targets &middot; Esc or P pause &middot; M music<br>
         The pink triangle is your bomb sight: bombs land where it points. Missiles
         destroy yummies, so fly into them instead.</p>
-      <p class="ded">In memory of Tom Kluge, LSU Physics &rsquo;95.<br>
-        Foobar was something he was proud of.</p>
+      <!-- generated:memorial — do not edit; run `npm run sync-static` -->
+      <figure style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px auto 0;text-align:left">
+        <img src="assets/memorial/tom-kluge.png?v=25" width="187" height="124" alt="Richard Cross and Tom Kluge"
+          style="flex:none;box-sizing:content-box;width:min(187px,30vw);height:auto;border:2px solid var(--gold-dim,#8B6914)">
+        <figcaption style="font-family:'Lora',Georgia,serif;font-style:italic;font-size:.6rem;line-height:1.7;color:var(--dim,#9A917E);max-width:220px">
+          In memory of Tom Kluge, LSU Physics ’95.<br>
+          Foobar was something he was proud of.</figcaption>
+      </figure>
+<!-- /generated:memorial -->
     </div>
 
     <div class="ovl solid" id="ov-intro" style="padding:0;justify-content:flex-start">
@@ -340,7 +351,7 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
      purpose. The site-wide footer keeps it; this is a page-level override. -->
 <div id="foot">
   Foobar vs. the DEA, Funner Software, 1996 &middot; rebuilt by
-  <a href="https://restless-forge.dev" target="_blank" rel="noopener">Restless Forge</a><br>
+  <a href="/">Restless Forge</a><br>
   <a href="https://restlessforge.substack.com" target="_blank" rel="noopener">Substack</a> &middot;
   <a href="https://github.com/thekensman" target="_blank" rel="noopener">GitHub</a>
   &middot; <span id="buildstamp"></span>

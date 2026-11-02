@@ -33,7 +33,7 @@ jobs:
       - name: Check generated HTML is in sync
         run: |
           npm run sync
-          git diff --exit-code site/ tools/
+          git diff --exit-code site/ tools/ games/
 
       # Guards the rules an AdSense rejection taught us: live tools don't ship
       # their own legal pages, ad-bearing prose sub-pages clear a word floor,

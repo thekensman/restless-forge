@@ -3,6 +3,7 @@
   <!-- Global pages -->
   <url><loc>https://restless-forge.dev/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://restless-forge.dev/tools/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://restless-forge.dev/games/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://restless-forge.dev/essays/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://restless-forge.dev/articles/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://restless-forge.dev/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -63,4 +64,7 @@
   <url><loc>https://restless-forge.dev/tools/tattoosafe/articles/sizing-a-tattoo-to-a-body-part/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://restless-forge.dev/tools/tattoosafe/faq/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://restless-forge.dev/tools/tattoosafe/pricing/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Games -->
+  <url><loc>https://restless-forge.dev/games/foobar-vs-the-dea/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

@@ -86,6 +86,14 @@ function sourceCandidates(urlPath) {
     else push(`${base}/${rest}.html`, `${base}/${rest}.md`, `${base}/${rest}/index.html`, `${base}/${rest}/index.md`);
     return out;
   }
+  // A restored game is one page that ships from games/<slug>/ unchanged (the
+  // memorial block sync writes into it lands in the same file). "/games/"
+  // itself has no slug and falls through to site/games/.
+  const game = p.match(/^games\/([^/]+)\/$/);
+  if (game) {
+    push(`games/${game[1]}/index.html`);
+    return out;
+  }
   if (p === "") push("site/index.html", "site/index.md");
   else if (p.endsWith("/")) push(`site/${p}index.html`, `site/${p}index.md`);
   else push(`site/${p}.html`, `site/${p}.md`, `site/${p}/index.html`);
