@@ -140,6 +140,13 @@
   // content would land on the hidden rail. So a rail joins only when it has a
   // width, at mount time on a wide screen or on a later resize past the
   // breakpoint, and an ad is never requested for a slot nobody can see.
+  //
+  // Only slots AdSense has not processed are mounted. Its own Auto Ads anchor is
+  // an ins.adsbygoogle with no data-ad-client but data-adsbygoogle-status set,
+  // so a mount that ran after AdSense had created it (any resize mount, or an
+  // inline call when adsbygoogle.js loaded early) stamped our client id on it
+  // and pushed for it, and AdSense threw "All 'ins' elements ... already have
+  // ads in them". Found in November 2026 by a live resize test.
   var railWatcher = null;
   window.rfMountAdsenseSlots = function () {
     var rails = document.querySelectorAll('ins.rf-ad-rail-slot');
@@ -149,7 +156,7 @@
       rails[r].classList.remove('rf-ad-rail-slot');
       rails[r].classList.add('adsbygoogle');
     }
-    var slots = document.querySelectorAll('.adsbygoogle:not([data-ad-client])');
+    var slots = document.querySelectorAll('.adsbygoogle:not([data-ad-client]):not([data-adsbygoogle-status])');
     for (var i = 0; i < slots.length; i++) {
       slots[i].setAttribute('data-ad-client', window.rfAdsenseClientId);
       (window.adsbygoogle = window.adsbygoogle || []).push({});

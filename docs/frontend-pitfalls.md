@@ -118,6 +118,10 @@ Four separate failures, all silent:
   visible slot's request to a hidden rail. A rail `<ins>` is now
   `class="rf-ad-rail-slot"`, and `rfMountAdsenseSlots()` makes it an AdSense
   slot only once it is laid out, at load or on a resize past the breakpoint.
+  The mount also skips anything AdSense has processed: its own Auto Ads anchor is
+  an `ins.adsbygoogle` with no `data-ad-client`, so a mount after AdSense
+  created it pushed for an element with nothing to fill and threw "All 'ins'
+  elements ... already have ads in them" (the first resize mount did, on live).
   *Guard:* `check-links.mjs` fails on a rail `<ins>` with `class="adsbygoogle"`.
 
 ---
