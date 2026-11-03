@@ -1,4 +1,4 @@
-# Foobar vs. the DEA: handoff, build 25
+# Foobar vs. the DEA: handoff, build 26
 
 Status as of November 2026. For a fresh chat that picks this up.
 
@@ -74,11 +74,11 @@ Conventions worth knowing before reading any routine:
     index.html        page, overlays, HUD, high score dialog and table
     js/sim.js         the original rules, one frame per step(), no DOM
     js/game.js        timing, drawing, sound routing, cheats
-    js/core.js        input, assets, SAT-style sound channels
+    js/core.js        keys and touch controls (TouchPad), assets, SAT-style sound channels
     js/scores.js      the high score rules
     data/*.json       config, Levl maps, BadG waves, preload manifest
     assets/           sprites, decoded PICTs, WAVs, self-hosted fonts, share image, favicon
-    test/             harness (269 checks), soak test, DOM boot test, Playwright test
+    test/             harness (288 checks), soak test, DOM boot test, two Playwright tests
     tools/            re/ and validate/
 
 The deploy package is `index.html`, `js/`, `data/` and `assets/`. Nothing else goes on the
@@ -123,6 +123,9 @@ footer shows the build number and a red bar appears for any uncaught error. F2 d
   carries an email address. The game page itself needs no contact line.
 - Cheating is fine. Nobody minds if players use the cheats or edit browser storage.
 - The QA shortcuts `bbb` and `fff` can stay in the live build.
+- Touch controls are a stick and FIRE / BOMB buttons that a toggle turns on and off (Ken's
+  scheme, build 26). Tilt was his first idea and was dropped: turning the phone fights the
+  screen rotation, and iOS asks for permission to read motion.
 
 ## Still open
 
@@ -132,10 +135,14 @@ footer shows the build number and a red bar appears for any uncaught error. F2 d
 - Bosses on levels 2 to 4, the barricade machines and the rarer yummies come from the code
   alone. Nobody has filmed them.
 - The Time Zone and Volume menus have not been read.
-- Mobile controls: the page still has the invisible touch zones from an early build. Ken has
-  played it on his phone and finds they clash; the scheme is being decided with him (tilt was
-  his first idea). `RF_INTEGRATION.md` has the original proposal. Until then the `/games/`
-  card says the game needs a keyboard (`note` in `games/games.json`).
+- Touch controls (build 26) have only been played through emulated touch in Chromium
+  (`test/touch_e2e.py`). They need real thumbs on an iPhone and an Android phone: the stick's
+  size, its 8 px dead zone and how it follows the thumb, the 26 px gap that holds FIRE and BOMB
+  together, and whether the smaller upright playfield on a short phone (about 270 px wide on
+  an iPhone SE) is acceptable. Upright, the boss name gives way to the controls. Pausing in
+  the background was checked with a simulated visibilitychange, since headless Chromium never
+  hides a tab, so lock a real phone mid-game and come back. The `/games/` card no longer says
+  the game needs a keyboard.
 - Screen fit (done on RF, still build 25): the page has three layouts. A tall desktop gets
   the cabinet at its 2x size. A short, wide screen (under 820 px tall and at least 4:3: a
   laptop at 1366 x 768, a phone on its side) gets the fit layout, where the playfield takes

@@ -19,13 +19,6 @@ export class Input {
     });
     addEventListener('keyup', e => { this.k[e.key.toLowerCase()] = 0; });
     addEventListener('blur', () => { this.k = {}; });
-    for (const [id, a] of Object.entries({ 't-left': 'left', 't-right': 'right', 't-up': 'up',
-      't-down': 'down', 't-fire': 'fire', 't-bomb': 'bomb' })) {
-      const el = document.getElementById(id); if (!el) continue;
-      el.addEventListener('touchstart', e => { e.preventDefault(); this.t[a] = 1; }, { passive: false });
-      el.addEventListener('touchend', () => this.t[a] = 0);
-      el.addEventListener('touchcancel', () => this.t[a] = 0);
-    }
   }
   // The original flew on W A S D by default, fired with Command and bombed with Option.
   // In a browser Command+W closes the tab and Alt+Left goes back a page, so fire and bomb
@@ -47,7 +40,93 @@ export class Input {
   endFrame() { this._jp = {}; }
 }
 
-export const V = '25';
+// Touch controls, beside or under the playfield so no thumb covers it: a stick for the left
+// thumb, FIRE and BOMB for the right. They set Input.t, the same six flags as the keys, so the
+// ship still moves 4 px a frame on each axis, all or nothing, and a held button repeats on the
+// original's own timers like a held key.
+//  - The stick centres where the thumb lands and is dragged along past its rim, so turning
+//    round never takes more than a short slide. Its offset reads as one of eight directions.
+//  - A thumb in the gap between the two buttons (the +) holds both, as a second finger does.
+// el: { stick, base, knob, btns, fire, bomb }. onButton runs when a button goes down, so a
+// screen that waits for a key (the briefing) can take a button press as one.
+export class TouchPad {
+  constructor(input, el, onButton) {
+    this.t = input.t; this.el = el; this.onButton = onButton || null;
+    this.ptr = new Map();          // pointerId -> where that finger is and which zone it holds
+    const zone = (z, name) => {
+      if (!z) return;
+      z.addEventListener('pointerdown', e => this._down(e, name));
+      z.addEventListener('pointermove', e => this._move(e));
+      for (const t of ['pointerup', 'pointercancel', 'lostpointercapture'])
+        z.addEventListener(t, e => this._up(e));
+      // iOS: no selection loupe, callout or double-tap zoom under a held thumb
+      z.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+      z.addEventListener('contextmenu', e => e.preventDefault());
+    };
+    zone(el.stick, 'stick'); zone(el.btns, 'btns');
+    addEventListener('blur', () => this.reset());
+  }
+  _down(e, zone) {
+    e.preventDefault();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+    const p = { zone, x: e.clientX, y: e.clientY };
+    if (zone === 'stick') {
+      for (const [id, q] of this.ptr) if (q.zone === 'stick') this.ptr.delete(id);  // newest thumb steers
+      const b = this.el.base, k = this.el.knob;
+      p.box = this.el.stick.getBoundingClientRect();
+      p.R = Math.max(16, ((b.offsetWidth || 110) - (k.offsetWidth || 50)) / 2);    // knob travel
+      p.ox = e.clientX; p.oy = e.clientY;
+    } else {
+      p.fr = this.el.fire.getBoundingClientRect().right;   // FIRE on the left, BOMB on the right
+      p.bl = this.el.bomb.getBoundingClientRect().left;
+    }
+    this.ptr.set(e.pointerId, p);
+    this._apply();
+    if (zone === 'btns' && this.onButton) this.onButton();
+  }
+  _move(e) {
+    const p = this.ptr.get(e.pointerId); if (!p) return;
+    p.x = e.clientX; p.y = e.clientY;
+    this._apply();
+  }
+  _up(e) { if (this.ptr.delete(e.pointerId)) this._apply(); }
+  reset() { this.ptr.clear(); this._apply(); }
+  _apply() {
+    const t = this.t; t.left = t.right = t.up = t.down = t.fire = t.bomb = 0;
+    let stick = null;
+    for (const p of this.ptr.values()) {
+      if (p.zone === 'stick') { stick = p; continue; }
+      if (p.x < p.bl) t.fire = 1;                       // in the gap between them, both
+      if (p.x > p.fr) t.bomb = 1;
+    }
+    const { base, knob, fire, bomb } = this.el;
+    if (stick) {
+      let dx = stick.x - stick.ox, dy = stick.y - stick.oy, d = Math.hypot(dx, dy);
+      if (d > stick.R) {                                // drag the centre along behind the thumb
+        stick.ox = stick.x - dx * stick.R / d; stick.oy = stick.y - dy * stick.R / d;
+        const B = stick.box;                            // but keep it over the stick's own zone
+        stick.ox = Math.min(B.right, Math.max(B.left, stick.ox));
+        stick.oy = Math.min(B.bottom, Math.max(B.top, stick.oy));
+        dx = stick.x - stick.ox; dy = stick.y - stick.oy; d = Math.hypot(dx, dy);
+      }
+      if (d >= 8) {                                     // dead zone, then 45 degree sectors
+        const c = d * 0.3827;                           // sin 22.5
+        t.left = dx < -c ? 1 : 0; t.right = dx > c ? 1 : 0;
+        t.up = dy < -c ? 1 : 0; t.down = dy > c ? 1 : 0;
+      }
+      const kd = Math.min(d, stick.R), kx = d ? dx / d * kd : 0, ky = d ? dy / d * kd : 0;
+      base.style.left = (stick.ox - stick.box.left) + 'px'; base.style.top = (stick.oy - stick.box.top) + 'px';
+      knob.style.transform = `translate(calc(-50% + ${kx.toFixed(1)}px), calc(-50% + ${ky.toFixed(1)}px))`;
+      base.classList.add('on');
+    } else if (base) {
+      base.style.left = base.style.top = knob.style.transform = '';
+      base.classList.remove('on');
+    }
+    if (fire) { fire.classList.toggle('on', !!t.fire); bomb.classList.toggle('on', !!t.bomb); }
+  }
+}
+
+export const V = '26';
 
 export class Assets {
   constructor() { this.img = {}; this.snd = {}; this.n = 0; this.total = 0; }
@@ -83,7 +162,7 @@ export class Audio {
     this.musicOn = true; this.sfxOn = true; this.musicTimer = null; this.musicName = null;
   }
   init() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    if (this.ctx) { this.wake(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     this.ctx = new AC();
@@ -141,5 +220,17 @@ export class Audio {
     this.musicOn = !this.musicOn;
     if (!this.musicOn) this.stopMusic();
     return this.musicOn;
+  }
+  // The page left the screen: hold every sound, the intro's music included, where it is. A
+  // phone otherwise plays on with the screen off, and a background tab plays on unseen.
+  suspend() {
+    const c = this.ctx; if (!c || c.state !== 'running' || typeof c.suspend !== 'function') return;
+    const p = c.suspend(); if (p && p.catch) p.catch(() => {});
+  }
+  // Back on screen, or a tap. iOS can leave the context 'interrupted' after a call or a trip to
+  // another app, not only 'suspended', so anything short of running is resumed.
+  wake() {
+    const c = this.ctx; if (!c || c.state === 'running' || c.state === 'closed') return;
+    const p = c.resume(); if (p && p.catch) p.catch(() => {});
   }
 }

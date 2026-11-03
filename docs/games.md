@@ -43,7 +43,7 @@ A `games.json` entry:
 | `slug` | folder under `games/` and the URL, `/games/<slug>/`. Use the full title, since sequels exist |
 | `title`, `studio`, `year`, `desc` | the card and the `llms.txt` line (plain text, escaped at render) |
 | `image`, `imageAlt` | card image, a path inside the game (Foobar uses its 1200 x 630 share image) |
-| `note` | optional caveat on the card. Foobar's says it needs a keyboard until touch controls exist |
+| `note` | optional caveat on the card, such as a game that needs a keyboard. Foobar has none since build 26 added touch controls |
 | `memorial` | optional, a folder name in `games/memorials/` |
 | `files` | the runtime subset that ships. Everything else in the folder stays in the repo |
 | `tests` | node scripts `npm test` runs from the game's folder with `.` as the argument |

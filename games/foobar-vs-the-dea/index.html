@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Foobar vs. the DEA — Restless Forge</title>
 <meta name="description" content="Foobar vs. the DEA (Funner Software, 1996) by Richard Cross and Tom Kluge, rebuilt for the web from the original Macintosh resource fork.">
-<link rel="icon" type="image/png" sizes="72x72" href="assets/ui/icon.png?v=25">
+<link rel="icon" type="image/png" sizes="72x72" href="assets/ui/icon.png?v=26">
 <!-- Sharing. Link previews need absolute URLs, so these name the page's address on
      restless-forge.dev. If the game ever moves, change all four together: canonical,
      og:url, og:image and twitter:image. RF's check-links and check-urls fail the build
@@ -28,13 +28,13 @@
 /* Fonts are served from this folder (SIL Open Font License, see assets/fonts), so the page
    makes no request outside its own site. Latin subsets, only the faces the page uses. */
 @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
-  src:url(assets/fonts/ibm-plex-mono-latin-400-normal.woff2?v=25) format('woff2')}
+  src:url(assets/fonts/ibm-plex-mono-latin-400-normal.woff2?v=26) format('woff2')}
 @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:600;font-display:swap;
-  src:url(assets/fonts/ibm-plex-mono-latin-600-normal.woff2?v=25) format('woff2')}
+  src:url(assets/fonts/ibm-plex-mono-latin-600-normal.woff2?v=26) format('woff2')}
 @font-face{font-family:'DM Serif Display';font-style:normal;font-weight:400;font-display:swap;
-  src:url(assets/fonts/dm-serif-display-latin-400-normal.woff2?v=25) format('woff2')}
+  src:url(assets/fonts/dm-serif-display-latin-400-normal.woff2?v=26) format('woff2')}
 @font-face{font-family:'Lora';font-style:italic;font-weight:400;font-display:swap;
-  src:url(assets/fonts/lora-latin-400-italic.woff2?v=25) format('woff2')}
+  src:url(assets/fonts/lora-latin-400-italic.woff2?v=26) format('woff2')}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --gold:#C8A04A; --gold-dim:#8B6914; --darker:#070707; --dark:#0D0D0D;
@@ -43,7 +43,7 @@
   --panel:#9A9A9A; --panel-hi:#D0D0D0; --panel-lo:#5E5E5E;
 }
 html,body{height:100%;background:var(--darker);color:var(--text);
-  font-family:'IBM Plex Mono',monospace;overflow:hidden}
+  font-family:'IBM Plex Mono',monospace;overflow:hidden;touch-action:manipulation}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
 
 /* ---- cabinet ---- */
@@ -179,15 +179,42 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
   border:1px solid #000;border-radius:4px;cursor:pointer;
   font:9px/12px Chicago,Charcoal,'Helvetica Neue',Arial,sans-serif}
 
-/* touch */
-#touch{display:none;position:absolute;inset:0;z-index:15}
-#touch div{position:absolute;opacity:0}
-#t-left{left:0;top:0;width:22%;height:100%}
-#t-right{right:0;top:0;width:22%;height:100%}
-#t-up{left:22%;top:0;width:56%;height:32%}
-#t-down{left:22%;bottom:0;width:56%;height:32%}
-#t-fire{left:22%;top:32%;width:28%;height:36%}
-#t-bomb{right:22%;top:32%;width:28%;height:36%}
+#p-btns{display:flex;flex-direction:column;gap:4px}
+
+/* ---- touch controls (TouchPad in js/core.js) ----
+   TOUCH CONTROLS, on the title and pause screens, puts .touch-on on #cab. A stick for the left
+   thumb and FIRE / BOMB for the right, never over the playfield. On the full cabinet they take
+   the foot of each side panel, in place of the key legend; the layouts below move them. Every
+   grid item is placed by hand here, because auto-placement would skip the cells they share. */
+#cab{--pad-h:160px}
+.pad{display:none;position:relative;touch-action:none;-webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+#cab.touch-on .pad{display:block}
+#cab.touch-on>.side.left{grid-area:1/1}
+#cab.touch-on>#stage{grid-area:1/2}
+#cab.touch-on>.side.right{grid-area:1/3}
+#cab.touch-on>.pad{grid-row:1;align-self:end;height:var(--pad-h)}
+#pad-stick{grid-column:1}
+#pad-btns{grid-column:3}
+#cab.touch-on>.side{padding-bottom:calc(var(--pad-h) + 8px)}
+#cab.touch-on .keys{display:none}
+#cab.touch-on canvas{touch-action:none}
+#cab.touch-on .side{-webkit-user-select:none;user-select:none}
+.stick-base{position:absolute;left:50%;top:50%;width:min(110px,calc(var(--pad-h) - 8px));
+  aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:#0A0A0A;
+  border:3px solid var(--panel-lo);box-shadow:inset 0 0 0 5px #161616}
+.stick-base.on{border-color:var(--panel-hi)}
+.stick-knob{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:1;
+  transform:translate(-50%,-50%);border-radius:50%;background:var(--panel);border:3px solid;
+  border-color:var(--panel-hi) var(--panel-lo) var(--panel-lo) var(--panel-hi)}
+#cab.touch-on #pad-btns{display:flex;align-items:center;justify-content:center}
+.pbtn{flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:var(--panel);border:3px solid;
+  border-color:var(--panel-hi) var(--panel-lo) var(--panel-lo) var(--panel-hi);
+  color:#111;font-size:.62rem;font-weight:600;letter-spacing:.06em}
+.pbtn.on{background:#FFE800;border-color:var(--panel-lo) var(--panel-hi) var(--panel-hi) var(--panel-lo)}
+/* the gap that holds both */
+.pseam{flex:none;width:26px;text-align:center;color:var(--chassis-lo);font-size:1rem;font-weight:600}
 
 #foot{font-size:.52rem;color:var(--dim);text-align:center;line-height:1.8}
 #foot a{color:var(--gold-dim);text-decoration:none}
@@ -202,10 +229,36 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
   .side{flex-direction:row;flex-wrap:wrap;gap:6px;justify-content:center}
   .side>*{flex:1 1 auto}
   .portrait,#bossmeter,.keys{display:none}
-  #touch{display:block}
   /* On a phone an overlay can be taller than the playfield (the title screen's heading was
      already cut off at 390 px), so it scrolls from the top instead of clipping both ends. */
   .ovl{overflow-y:auto;justify-content:safe center}
+}
+
+/* ---- touch controls, upright (the stacked layout, minus the short wide screens below) ----
+   The controls take a row under the playfield, the panel above packs into two fixed rows, and
+   the playfield shrinks if it must so that panel, playfield and controls fit on the screen
+   together: 262 px is everything in that column but the playfield itself. The controls' row
+   takes whatever is left over, and the footer and the boss name sit below the fold. */
+@media(max-width:1060px) and (min-height:820px),(max-width:1060px) and (max-aspect-ratio:4/3){
+  #cab.touch-on{grid-template-rows:auto auto minmax(124px,1fr);--pad-h:124px;
+    min-height:calc(100vh - 6px);min-height:calc(100dvh - 6px)}
+  #cab.touch-on>.side.left{grid-area:1/1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-rows:42px 50px;gap:4px;padding:0}
+  #cab.touch-on>.side.left>.plate{display:flex;min-width:0;overflow:hidden;padding:2px}
+  #cab.touch-on>.side.left>.plate:first-child{display:none}
+  #cab.touch-on>.side.left>.plate:nth-child(6),#cab.touch-on>.side.left>.plate:last-child{grid-column:span 2}
+  #cab.touch-on .readout,#cab.touch-on .lifebar{flex:1 1 auto;min-width:0}
+  #cab.touch-on .readout{display:flex;flex-direction:column;justify-content:center;padding:2px 5px}
+  #cab.touch-on .lifebar{padding:3px 6px}
+  #cab.touch-on #p-btns{flex-direction:row;align-items:center}
+  #cab.touch-on #p-btns .btn{flex:1 1 0;min-width:0}
+  #cab.touch-on>#stage{grid-area:2/1;justify-self:center;box-sizing:content-box;width:auto;
+    height:min(calc((100vw - 24px) * 1.0625),calc(100vh - 262px));
+    height:min(calc((100vw - 24px) * 1.0625),calc(100dvh - 262px))}
+  #cab.touch-on>.side.right{display:none}
+  #cab.touch-on>.pad{grid-area:3/1;align-self:stretch;width:50%;height:auto}
+  #cab.touch-on>#pad-btns{justify-self:end}
+  .pbtn{width:68px;height:68px}
 }
 
 /* ---- a short, wide screen: a phone on its side, or a laptop under ~820 px of browser ----
@@ -230,6 +283,16 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
   .ovl{overflow-y:auto;justify-content:safe center}
   #foot br{display:none}
   #foot .foot-sep{display:inline}
+  /* Touch controls here sit at the foot of each side panel, as tall as the screen can spare
+     (232 px is what the panels above them need). The panels pack in above them: Foobar's
+     picture goes, PAUSE and MUSIC share a row and the boss arrow gives up height. */
+  #cab.touch-on{--pad-h:clamp(96px,calc(100vh - 232px),150px);--pad-h:clamp(96px,calc(100dvh - 232px),150px)}
+  #cab.touch-on>.side{padding-bottom:calc(var(--pad-h) + 6px);justify-content:flex-start}
+  #cab.touch-on>.side.left>.plate:first-child{display:none}
+  #cab.touch-on #p-btns{flex-direction:row}
+  #cab.touch-on #p-btns .btn{flex:1 1 0;min-width:0}
+  #cab.touch-on #bossmeter{flex:0 1 auto;min-height:0}
+  #cab.touch-on #arrow{min-height:16px}
 }
 /* A phone on its side leaves about 350 px for the left panel's seven plates, so there they
    pair up in two columns, without the "Foobar" nameplate (its portrait is already hidden on
@@ -239,6 +302,12 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
   .side.left>.plate:first-child{display:none}
   .side.left>.plate:nth-child(6),.side.left>.plate:last-child{grid-column:1/-1}
   .plate{padding:4px}
+  /* with the touch controls under them, tighter still, and ACTIVE on one line */
+  #cab.touch-on>.side.left{align-content:start}
+  #cab.touch-on>.side.left>.plate{padding:2px}
+  #cab.touch-on .readout{padding:2px 5px}
+  #cab.touch-on .lifebar{padding:3px 6px}
+  #cab.touch-on #r-fx .v{height:1.35em;white-space:nowrap;text-overflow:ellipsis}
 }
 </style>
 </head>
@@ -262,7 +331,7 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
       <span class="k">YUMMIES</span><span class="v" id="v-yum">0</span></div></div>
     <div class="plate"><div class="readout" id="r-fx">
       <span class="k">ACTIVE</span><span class="v" id="v-fx">-</span></div></div>
-    <div class="plate" style="display:flex;flex-direction:column;gap:4px">
+    <div class="plate" id="p-btns">
       <button class="btn sm" id="b-pause">PAUSE</button>
       <button class="btn sm" id="b-music">MUSIC: ON</button>
     </div>
@@ -271,11 +340,6 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
   <!-- PLAYFIELD -->
   <div id="stage">
     <canvas id="c" width="320" height="340"></canvas>
-
-    <div id="touch">
-      <div id="t-left"></div><div id="t-right"></div><div id="t-up"></div>
-      <div id="t-down"></div><div id="t-fire"></div><div id="t-bomb"></div>
-    </div>
 
     <div id="loadwrap">
       <img id="titleart" alt="Loading Foobar">
@@ -296,6 +360,7 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
       <button class="mbtn" id="b-continue" style="display:none">CONTINUE</button>
       <button class="mbtn" id="b-help">CONTROLS</button>
       <button class="mbtn" id="b-scores">HIGH SCORES</button>
+      <button class="mbtn" id="b-touch" style="display:none">TOUCH CONTROLS: OFF</button>
       <p id="helptext" style="display:none;margin-top:10px">
         WASD or arrows to fly &middot; Z or Space fires at aircraft &middot;
         X or Shift bombs ground targets &middot; Esc or P pause &middot; M music<br>
@@ -303,7 +368,7 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
         destroy yummies, so fly into them instead.</p>
       <!-- generated:memorial — do not edit; run `npm run sync-static` -->
       <figure style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px auto 0;text-align:left">
-        <img src="assets/memorial/tom-kluge.png?v=25" width="187" height="124" alt="Richard Cross and Tom Kluge"
+        <img src="assets/memorial/tom-kluge.png?v=26" width="187" height="124" alt="Richard Cross and Tom Kluge"
           style="flex:none;box-sizing:content-box;width:min(187px,30vw);height:auto;border:2px solid var(--gold-dim,#8B6914)">
         <figcaption style="font-family:'Lora',Georgia,serif;font-style:italic;font-size:.6rem;line-height:1.7;color:var(--dim,#9A917E);max-width:220px">
           In memory of Tom Kluge, LSU Physics ’95.<br>
@@ -330,7 +395,8 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
     </div>
 
     <div class="ovl dim" id="ov-pause"><h1>PAUSED</h1>
-      <button class="mbtn pri" id="b-resume">RESUME</button></div>
+      <button class="mbtn pri" id="b-resume">RESUME</button>
+      <button class="mbtn" id="b-touch-p" style="display:none">TOUCH CONTROLS: OFF</button></div>
 
     <div class="ovl solid" id="ov-over"><h2>GAME OVER</h2>
       <div class="big">SCORE: <span id="over-score">0</span></div>
@@ -381,6 +447,14 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
       <div class="row"><span class="lbl">BOMB</span><span class="keycap">X</span></div>
     </div>
   </div>
+
+  <!-- TOUCH CONTROLS (TouchPad in js/core.js), shown while #cab has .touch-on -->
+  <div class="pad" id="pad-stick" aria-hidden="true">
+    <div class="stick-base" id="stick-base"><div class="stick-knob" id="stick-knob"></div></div>
+  </div>
+  <div class="pad" id="pad-btns" aria-hidden="true">
+    <div class="pbtn" id="pad-fire">FIRE</div><span class="pseam">+</span><div class="pbtn" id="pad-bomb">BOMB</div>
+  </div>
 </div>
 
 <!-- Restored games carry no donation links, so this page's footer leaves Ko-fi out on
@@ -395,11 +469,11 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
 </div>
 
 <script type="module">
-import {Input,Assets,Audio} from './js/core.js?v=25';
-import {Game} from './js/game.js?v=25';
-import {HighScores,PROMPT,CONTINUE,DEFAULT_NAME} from './js/scores.js?v=25';
+import {Input,Assets,Audio,TouchPad} from './js/core.js?v=26';
+import {Game} from './js/game.js?v=26';
+import {HighScores,PROMPT,CONTINUE,DEFAULT_NAME} from './js/scores.js?v=26';
 
-const BUILD='25';
+const BUILD='26';
 function fatal(msg){
   console.error(msg);
   let bar=document.getElementById('errbar');
@@ -414,20 +488,42 @@ addEventListener('unhandledrejection',e=>fatal('unhandled promise: '+((e.reason&
 console.log('%cFoobar vs. the DEA - build '+BUILD,'color:#C8A04A;font-weight:bold');
 const $=id=>document.getElementById(id);
 const canvas=$('c');
-let cfg,game,assets,audio,input,manifest,hs;
+let cfg,game,assets,audio,input,manifest,hs,pad;
+
+// ---- touch controls: on by default where the main pointer is a finger, offered wherever
+// there is a touchscreen, and remembered once changed. Set before loading, so the playfield
+// is already its final size when the title appears.
+const mq=q=>typeof matchMedia==='function'&&matchMedia(q).matches;
+let touchSaved=null; try{ touchSaved=localStorage.getItem('foobar_touch'); }catch(e){}
+function setTouch(on,save){
+  $('cab').classList.toggle('touch-on',on);
+  $('b-touch').textContent=$('b-touch-p').textContent='TOUCH CONTROLS: '+(on?'ON':'OFF');
+  if(save){ try{ localStorage.setItem('foobar_touch',on?'1':'0'); }catch(e){} }
+  if(pad) pad.reset();
+  fitMac();
+}
+if(mq('(any-pointer: coarse)')||touchSaved==='1') $('b-touch').style.display=$('b-touch-p').style.display='block';
+setTouch(touchSaved===null?mq('(pointer: coarse)'):touchSaved==='1',false);
+// A pad button does what any key does on the two screens that wait for one.
+function padKey(){
+  if($('ov-brief').classList.contains('on')) $('b-brief-go').click();
+  else if($('ov-intro').classList.contains('on')) $('b-skip').click();
+}
 
 async function boot(){
   [cfg,manifest]=await Promise.all([
-    fetch('data/config.json?v=25').then(r=>r.json()),
-    fetch('data/manifest.json?v=25').then(r=>r.json())]);
+    fetch('data/config.json?v=26').then(r=>r.json()),
+    fetch('data/manifest.json?v=26').then(r=>r.json())]);
   canvas.width=cfg.playfield.width; canvas.height=cfg.playfield.height;
   input=new Input(); assets=new Assets(); audio=new Audio(assets);
+  pad=new TouchPad(input,{stick:$('pad-stick'),base:$('stick-base'),knob:$('stick-knob'),
+    btns:$('pad-btns'),fire:$('pad-fire'),bomb:$('pad-bomb')},padKey);
   game=new Game(cfg,assets,audio,input,canvas);
   let store=null; try{ store=window.localStorage; }catch(e){}
   hs=new HighScores(store);
   window.__foobar=game; window.__foobarScores=hs;
 
-  $('titleart').src='assets/ui/PICT_156.png?v=25';
+  $('titleart').src='assets/ui/PICT_156.png?v=26';
   const tick=setInterval(()=>{$('loadfill').style.width=(assets.progress()*100).toFixed(0)+'%';},80);
   await Promise.all([assets.load(manifest),game.loadData()]);
   clearInterval(tick); $('loadfill').style.width='100%';
@@ -443,10 +539,10 @@ async function boot(){
       'font:600 12px/1.5 monospace;padding:6px 10px;text-align:center';
     document.body.appendChild(bar);
   }
-  $('foobar-art').src='assets/ui/hero.png?v=25';
-  $('endart').src='assets/ui/'+cfg.intro.ending+'.png?v=25';
-  $('life-icon').src=`assets/sprites/cicn_${cfg.player.lifeIcon}.png?v=25`;
-  $('hs-pow').src='assets/sprites/cicn_181.png?v=25';
+  $('foobar-art').src='assets/ui/hero.png?v=26';
+  $('endart').src='assets/ui/'+cfg.intro.ending+'.png?v=26';
+  $('life-icon').src=`assets/sprites/cicn_${cfg.player.lifeIcon}.png?v=26`;
+  $('hs-pow').src='assets/sprites/cicn_181.png?v=26';
   $('hs-prompt').textContent=PROMPT;
   $('hs-foot').textContent=CONTINUE;
   fitMac(); addEventListener('resize',fitMac);
@@ -494,7 +590,7 @@ function wire(){
     if(sv){ game.diff=sv.diff||1; beginLevel(sv.lvl,{score:sv.score,lives:sv.lives,rapid:sv.rapid,
       rapidT:sv.rapidT,clones:sv.clones,clone:sv.clone},true); }
     else runIntro();};
-  $('b-help').onclick=()=>{ $('helpart').src='assets/ui/'+cfg.intro.instructions+'.png?v=25';
+  $('b-help').onclick=()=>{ $('helpart').src='assets/ui/'+cfg.intro.instructions+'.png?v=26';
     $('helpart').style.top='0px'; show('ov-help'); helpScroll(); };
   $('b-help-done').onclick=()=>{ stopScroll(); show('ov-title'); };
   $('b-scores').onclick=()=>hsTable(true);
@@ -521,6 +617,15 @@ function wire(){
   $('b-music').onclick=()=>{ const on=audio.toggle();
     $('b-music').textContent='MUSIC: '+(on?'ON':'OFF');
     if(on&&game.state==='play'){ audio.init(); game.startMusic(); } };
+  $('b-touch').onclick=$('b-touch-p').onclick=()=>setTouch(!$('cab').classList.contains('touch-on'),true);
+
+  // Out of sight (another tab or app, or the screen locked), a game in progress pauses and
+  // every sound holds, the intro's music too: a phone otherwise plays on with the screen off.
+  // Back on screen the sound returns, and the game waits on RESUME.
+  const away=()=>{ if(game.state==='play') game.pause(); pad.reset(); audio.suspend(); };
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) away(); else audio.wake(); });
+  addEventListener('pagehide',away);
+  addEventListener('pageshow',()=>{ if(!document.hidden) audio.wake(); });
 
   game.onHud=h=>{
     setText('v-score',h.score);
@@ -550,6 +655,9 @@ function wire(){
       return;
     }
     if(hsMode==='table'){ e.preventDefault(); hsClose(); return; }
+    // Only a fresh press from here on. A key held through a boss kill auto-repeats, and must not
+    // clear the next briefing; a held P or M must not flicker the pause or the music either.
+    if(e.repeat) return;
     const k=e.key.toLowerCase();
     if(k==='f2'){ e.preventDefault(); const d=JSON.stringify(game.diagnostics(),null,1);
       console.log(d); fatal('F2 state dump\n'+d); return; }
@@ -578,7 +686,7 @@ function hudLevel(lvl){
   setText('v-level',lvl+1); setText('boss-name',L.boss.name);
   const want='assets/ui/'+L.portrait+'.png';
   if(hudLast.portrait!==want){ hudLast.portrait=want;
-    $('boss-portrait').innerHTML='<img src="'+want+'?v=25" alt="" style="width:100%;image-rendering:pixelated">'; }
+    $('boss-portrait').innerHTML='<img src="'+want+'?v=26" alt="" style="width:100%;image-rendering:pixelated">'; }
 }
 
 // ---- high scores (js/scores.js has the rules and where they come from)
@@ -653,7 +761,7 @@ function runIntro(){
   const next=()=>{
     if(i>=seq.length){ beginLevel(0,{},true); return; }
     const art=seq[i++];
-    $('scrollart').src='assets/ui/'+art+'.png?v=25';
+    $('scrollart').src='assets/ui/'+art+'.png?v=26';
     scrollImage($('scrollart'), next);
   };
   next();
@@ -669,7 +777,7 @@ function beginLevel(lvl,carry,fresh){
     const fx=[]; if(carry.rapid) fx.push('RAPID'); const n=carry.clones ?? (carry.clone?1:0);
     if(n) fx.push(n>1?'FOO++ x'+n:'FOO++'); setText('v-fx',fx.length?fx.join('  '):'-');
   }
-  $('briefart').src='assets/ui/'+cfg.levels[lvl].briefing+'.png?v=25';
+  $('briefart').src='assets/ui/'+cfg.levels[lvl].briefing+'.png?v=26';
   show('ov-brief');
 }
 
