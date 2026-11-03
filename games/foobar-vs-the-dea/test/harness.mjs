@@ -1,4 +1,4 @@
-// test/harness.mjs - checks build 25 against what the original 68k code does.
+// test/harness.mjs - checks build 26 against what the original 68k code does.
 //
 //   node test/harness.mjs .
 //
@@ -52,10 +52,10 @@ const quiet = s => {
 // ---------------------------------------------------------------------------
 section('Build and assets');
 const html = rd('index.html');
-eq('config build', cfg.build, '25');
-ok('index.html BUILD constant is 25', /const BUILD='25'/.test(html));
-ok('no stale ?v=24 stamps in index.html', !/v=24/.test(html));
-for (const f of ['js/game.js', 'js/core.js']) ok(`no stale ?v=24 in ${f}`, !/v=24/.test(rd(f)));
+eq('config build', cfg.build, '26');
+ok('index.html BUILD constant is 26', /const BUILD='26'/.test(html));
+ok('no stale ?v=25 stamps in index.html', !/v=25/.test(html));
+for (const f of ['js/game.js', 'js/core.js']) ok(`no stale ?v=25 in ${f}`, !/v=25/.test(rd(f)));
 ok('raw PICT_136 (old address) is not shipped', !fs.existsSync(path.join(ROOT, 'assets/ui/PICT_136.png')));
 {
   const base = (html.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
@@ -613,6 +613,85 @@ section('QA cheats');
   ok('index.html switches the panel to the briefed level', /function beginLevel[\s\S]{0,120}hudLevel\(lvl\)/.test(html));
   ok('the boss meter scales a cover instead of animating height', /id="arrowcover"/.test(html) && !/style\.height=/.test(html));
   ok('HUD writes go through the change check', !/\$\('v-score'\)\.textContent=/.test(html));
+}
+
+section('Touch controls (TouchPad in js/core.js) and pausing in the background');
+{
+  const { TouchPad, Audio } = await import(pathToFileURL(path.join(ROOT, 'js/core.js')).href);
+  if (typeof globalThis.addEventListener !== 'function') globalThis.addEventListener = () => {};
+  // Stand-ins for the pad's elements: listeners, a fixed box, a style and a class list.
+  const R = (left, top, width, height) => ({ left, top, width, height, right: left + width, bottom: top + height });
+  const el = (box, w = 0) => { const L = {}, cls = new Set();
+    return { L, style: {}, offsetWidth: w, getBoundingClientRect: () => box,
+      addEventListener: (t, f) => { (L[t] = L[t] || []).push(f); },
+      classList: { add: c => cls.add(c), remove: c => cls.delete(c), contains: c => cls.has(c),
+        toggle: (c, on) => { if (on) cls.add(c); else cls.delete(c); } } }; };
+  const stick = el(R(0, 400, 200, 140)), btns = el(R(200, 400, 200, 140));
+  const pads = { stick, btns, base: el(R(0, 0, 0, 0), 110), knob: el(R(0, 0, 0, 0), 50),
+    fire: el(R(220, 438, 64, 64)), bomb: el(R(310, 438, 64, 64)) };   // the gap: x 284 to 310
+  const input = { t: { left: 0, right: 0, up: 0, down: 0, fire: 0, bomb: 0 } };
+  let presses = 0;
+  const pad = new TouchPad(input, pads, () => presses++);
+  const ev = (z, type, id, x, y) => (z.L[type] || []).forEach(f => f({ pointerId: id, clientX: x, clientY: y,
+    preventDefault() {}, currentTarget: { setPointerCapture() {} } }));
+  const F = () => ['left', 'right', 'up', 'down', 'fire', 'bomb'].filter(k => input.t[k])
+    .map(k => k[0].toUpperCase()).join('') || '-';
+  const want = { 0: 'R', 22: 'R', 23: 'RD', 45: 'RD', 90: 'D', 135: 'LD', 180: 'L', 225: 'LU',
+    270: 'U', 315: 'RU', 337: 'RU', 338: 'R' }, got = {};
+  for (const a of Object.keys(want)) {
+    ev(stick, 'pointerdown', 1, 100, 470);
+    ev(stick, 'pointermove', 1, 100 + 25 * Math.cos(a * Math.PI / 180), 470 + 25 * Math.sin(a * Math.PI / 180));
+    got[a] = F(); ev(stick, 'pointerup', 1, 0, 0);
+  }
+  eq('stick: eight directions, borders at 22.5 degrees either side of each axis', got, want);
+  ev(stick, 'pointerdown', 1, 100, 470); ev(stick, 'pointermove', 1, 106, 472);
+  eq('stick: a 6 px nudge is inside the dead zone', F(), '-');
+  ev(stick, 'pointermove', 1, 190, 470); ev(stick, 'pointermove', 1, 150, 470);
+  eq('stick: dragged past its rim it follows, so 40 px back turns the ship round', F(), 'L');
+  ev(stick, 'pointerdown', 2, 60, 470);
+  eq('stick: a second thumb on the stick takes over from the first', F(), '-');
+  ev(stick, 'pointermove', 2, 60, 440);
+  eq('stick: and steers', F(), 'U');
+  ev(stick, 'pointerup', 2, 0, 0); ev(stick, 'lostpointercapture', 2, 0, 0); ev(stick, 'pointerup', 1, 0, 0);
+  eq('stick: let go, centred, the knob back in the middle', [F(), pads.knob.style.transform, pads.base.classList.contains('on')], ['-', '', false]);
+  ev(btns, 'pointerdown', 5, 252, 470); const p1 = [F(), presses, pads.fire.classList.contains('on')];
+  ev(btns, 'pointermove', 5, 297, 470); const p2 = F();
+  ev(btns, 'pointermove', 5, 342, 470); const p3 = F();
+  ev(btns, 'pointermove', 5, 395, 470); const p4 = F();
+  ev(btns, 'pointerup', 5, 0, 0);
+  eq('buttons, one thumb: FIRE, the gap holds both, BOMB, past BOMB', [p1, p2, p3, p4], [['F', 1, true], 'FB', 'B', 'B']);
+  ev(btns, 'pointerdown', 5, 205, 520);
+  eq('buttons: anywhere left of BOMB fires, at any height in the zone', F(), 'F');
+  ev(btns, 'pointerdown', 6, 342, 470); const q1 = F(); ev(btns, 'pointerup', 5, 0, 0); const q2 = F();
+  ev(btns, 'pointerup', 6, 0, 0);
+  eq('buttons, two fingers: both, then the one still down', [q1, q2, F(), presses], ['FB', 'B', '-', 3]);
+  ev(stick, 'pointerdown', 1, 100, 470); ev(stick, 'pointermove', 1, 100, 440); ev(btns, 'pointerdown', 5, 252, 470);
+  const both = F(); pad.reset();
+  eq('steering and firing at once; reset lets go of everything', [both, F(), pads.fire.classList.contains('on')], ['UF', '-', false]);
+  ev(stick, 'pointermove', 9, 120, 470);
+  eq('a finger the pad never saw go down is ignored', F(), '-');
+
+  const A = new Audio({ snd: {} }); A.suspend(); A.wake();       // before START: no context, no-ops
+  let st = 'running'; const calls = [];
+  A.ctx = { get state() { return st; }, suspend() { calls.push('suspend'); st = 'suspended'; return Promise.resolve(); },
+    resume() { calls.push('resume'); st = 'running'; return Promise.resolve(); } };
+  A.suspend(); A.suspend(); A.wake(); A.wake(); st = 'interrupted'; A.init();
+  eq('sound: held once, back once, and an iOS "interrupted" context resumes on a tap', calls, ['suspend', 'resume', 'resume']);
+
+  const core = rd('js/core.js');
+  ok('the invisible touch zones are gone', !/id="touch"|t-left|t-fire/.test(html) && !/t-left|t-fire/.test(core));
+  ok('pad markup: stick, knob, FIRE, BOMB', ['pad-stick', 'stick-base', 'stick-knob', 'pad-btns', 'pad-fire', 'pad-bomb']
+    .every(id => html.includes(`id="${id}"`)));
+  ok('TOUCH CONTROLS on the title screen and the pause screen',
+    /id="ov-title"[\s\S]*id="b-touch"[\s\S]*id="ov-intro"/.test(html) && /id="ov-pause"[\s\S]{0,200}id="b-touch-p"/.test(html));
+  ok('the pad takes no scrolling, zoom, selection or callout',
+    /\.pad\{[^}]*touch-action:none[^}]*user-select:none[^}]*-webkit-touch-callout:none/.test(html));
+  ok('the choice is remembered', /localStorage\.setItem\('foobar_touch'/.test(html));
+  ok('hidden: a game in play pauses and the sound is held',
+    /const away=\(\)=>\{ if\(game\.state==='play'\) game\.pause\(\);[^}]*audio\.suspend\(\); \}/.test(html) &&
+    /'visibilitychange',\(\)=>\{ if\(document\.hidden\) away\(\); else audio\.wake\(\); \}/.test(html) &&
+    /addEventListener\('pagehide',away\)/.test(html));
+  ok('only a fresh key press clears a briefing (no auto-repeat)', /if\(e\.repeat\) return;[\s\S]{0,300}ov-brief/.test(html));
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -1,7 +1,7 @@
 // game.js - runs the original rules (sim.js) at the original frame rate, draws them at the
 // display rate, and turns the simulation's events into sound, craters and HUD updates.
 
-import {Sim, W, H, LEVEL_END} from './sim.js?v=25';
+import {Sim, W, H, LEVEL_END} from './sim.js?v=26';
 
 export class Game {
   constructor(cfg, assets, audio, input, canvas) {
@@ -22,8 +22,8 @@ export class Game {
 
   async loadData() {
     const [L, E] = await Promise.all([
-      fetch('data/levels.json?v=25').then(r => r.json()),
-      fetch('data/enemies.json?v=25').then(r => r.json())]);
+      fetch('data/levels.json?v=26').then(r => r.json()),
+      fetch('data/enemies.json?v=26').then(r => r.json())]);
     this.LEV = L; this.ENE = E;
   }
 

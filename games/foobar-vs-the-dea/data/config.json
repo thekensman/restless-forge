@@ -1,6 +1,6 @@
 {
  "_note": "Build 25. Game rules come from the original 68k code (js/sim.js, REVERSE_ENGINEERING.md); this file holds the per-level data that code reads, the house rules that depart from it on purpose, and the presentation settings around them.",
- "build": "25",
+ "build": "26",
  "screen": {
   "width": 511,
   "height": 384,

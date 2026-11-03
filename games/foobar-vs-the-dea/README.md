@@ -38,6 +38,20 @@ deploy package holds only what the server needs (`index.html`, `js/`, `data/`, `
 Command and Option are left out on purpose: in a browser Command+W closes the tab and
 Alt+Left goes back a page.
 
+On a touchscreen, TOUCH CONTROLS on the title and pause screens turns on a stick for the left
+thumb and FIRE and BOMB for the right. They start on where the main pointer is a finger (phones
+and tablets) and the choice is remembered. They sit beside the playfield on a phone held on
+its side and under it held upright, never on it, and upright the playfield gives up a little
+size on short phones so everything fits. The stick centres where the thumb lands and reads as
+eight directions, so the ship moves 4 px a frame like it does on the keys, and dragged past
+its rim it follows the thumb, so turning round takes a short slide. FIRE and BOMB repeat while
+held, like their keys; a thumb on the + between them holds both, and so does a second finger.
+A pad button skips the intro and clears a briefing as a key does. There is no auto-fire,
+because missiles destroy yummies.
+
+Leaving the page, for another tab or app or with the screen locked, pauses a game in play and
+holds the sound, and the game waits on RESUME when you come back.
+
 The pink triangle is the bomb sight. A bomb lands on the ground point under the sight and
 only does damage when it gets there. Missiles destroy yummies, so fly into them.
 
@@ -51,7 +65,7 @@ slowest frame of the last second in the corner of the playfield.
     index.html          cabinet shell, overlays, HUD wiring, main loop
     js/sim.js           the original game rules, one original frame per step() (no DOM)
     js/game.js          runs sim.js on the original frame timer, draws, routes sound
-    js/core.js          input, asset loader, SAT-style sound channels
+    js/core.js          keys and touch controls, asset loader, SAT-style sound channels
     js/scores.js        the original's high score table rules
     data/config.json    per-level data the rules read, timing, presentation settings
     data/levels.json    4 levels x 2000 tile indices (original Levl resources)
@@ -62,7 +76,7 @@ slowest frame of the last second in the corner of the playfield.
                         plus share.png (link previews) and icon.png (favicon)
     assets/sounds/      decoded snd resources as WAV, named by resource id
     assets/fonts/       IBM Plex Mono, DM Serif Display and Lora as woff2, with their licences
-    test/               rules harness, soak test, DOM boot test, real-browser test
+    test/               rules harness, soak test, DOM boot test, real-browser tests
     tools/re/           disassembler and decoders that pulled all of this out of the original
     tools/validate/     scripts that check the port against captured footage
 
@@ -133,16 +147,24 @@ stutters, type `fff` during play and note the three numbers it shows.
 
 ## Tests
 
-    node test/harness.mjs .                         # 269 checks: original rules, house rules, the page
+    node test/harness.mjs .                         # 288 checks: original rules, house rules, touch, the page
     node test/soak.mjs .                            # 48 games of random play, checked every frame
     node test/boot_e2e.mjs .                        # boots index.html in a DOM shim, plays 25 s
     python3 serve.py 8122 & python3 test/browser_e2e.py http://localhost:8122/ shots/
+    python3 test/touch_e2e.py http://localhost:8122/ shots/      # with serve.py still running
 
 The browser test needs Playwright and Chromium. It plays real key events, jumps to the boss,
 skips to level 2 with the cheat and checks the briefing's side panel, flies three planes
 with rapid fire while counting how often the side panels change, loses on purpose to walk
 through the high score dialog and table, and fails on any console error, any failed request
 and any request outside the page's own origin.
+
+The touch test drives the page on a phone-sized screen, upright and on its side, with real
+multi-touch (CDP touch events, which Chromium turns into the pointer events a phone sends):
+the stick's eight directions, dead zone and follow, the ship moving under it, FIRE and BOMB
+alone, together through the gap and with two fingers, the toggle and its memory, and the game
+pausing with its sound held when the page is hidden. Headless Chromium never hides a tab, so
+that last part dispatches the visibilitychange a real browser would send.
 
 ## Credits
 

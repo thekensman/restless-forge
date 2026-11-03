@@ -259,7 +259,11 @@ Ken would like a mobile version, and he wants to try it once the game is on the 
 it isn't obvious how missiles and bombs should work on a touchscreen. Treat it as design work
 to test with him, not a port to ship unseen.
 
-**What exists.** Under 1060 px of viewport the page stacks the left panel, the playfield and the
+**Built in build 26.** The scheme below, with the stick and buttons that a TOUCH CONTROLS
+toggle turns on, replaced the invisible zones; `README.md` describes it and `HANDOFF.md` says
+what still needs a real phone. The rest of this section is the proposal as it was written.
+
+**What existed.** Under 1060 px of viewport the page stacks the left panel, the playfield and the
 right panel in one column, and lays six invisible touch zones over the playfield (`#touch` in
 `index.html`, wired up in `js/core.js`): strips down the left and right edges, bands across
 the top and bottom, and fire and bomb side by side in the middle. Nobody has tried it on a

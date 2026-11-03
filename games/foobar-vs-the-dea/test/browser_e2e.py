@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Real-browser end-to-end check for build 25.
+"""Real-browser end-to-end check for build 26.
 
 Boots index.html in headless Chromium through serve.py, starts a game, plays with real key
 events, jumps to the boss, skips to level 2, then loses on purpose to walk through the high
@@ -72,6 +72,12 @@ with sync_playwright() as p:
     if brief_hud != ['2', 'Telehead']:
         errors.append('briefing panel shows ' + json.dumps(brief_hud) + ', want level 2 and Telehead')
     if brief:
+        # a key still held from the boss fight (the browser's auto-repeat) must not clear it
+        page.evaluate("dispatchEvent(new KeyboardEvent('keydown', {key: 'z', repeat: true}))")
+        time.sleep(0.2)
+        if not page.evaluate("document.getElementById('ov-brief').classList.contains('on')"):
+            errors.append('an auto-repeated key cleared the briefing')
+        page.evaluate("dispatchEvent(new KeyboardEvent('keyup', {key: 'z'}))")
         page.click('#b-brief-go'); time.sleep(4)
         shot(page, 'level2_start')
     d3 = page.evaluate('window.__foobar.diagnostics()')
