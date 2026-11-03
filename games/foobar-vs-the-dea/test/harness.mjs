@@ -691,6 +691,9 @@ section('Touch controls (TouchPad in js/core.js) and pausing in the background')
     /const away=\(\)=>\{ if\(game\.state==='play'\) game\.pause\(\);[^}]*audio\.suspend\(\); \}/.test(html) &&
     /'visibilitychange',\(\)=>\{ if\(document\.hidden\) away\(\); else audio\.wake\(\); \}/.test(html) &&
     /addEventListener\('pagehide',away\)/.test(html));
+  ok('back on the title the panel resets to a new game', /b-win-home'\)\.onclick=\(\)=>\{[^}]*resetHud\(\)/.test(html)
+    && /function resetHud\(\)\{[\s\S]{0,200}startLives[\s\S]{0,200}setMeter\(0\)/.test(html));
+  ok('upright, the controls sit right under the playfield', !/minmax\(124px,1fr\)/.test(html) && /grid-template-rows:auto auto clamp\(124px/.test(html));
   ok('only a fresh key press clears a briefing (no auto-repeat)', /if\(e\.repeat\) return;[\s\S]{0,300}ov-brief/.test(html));
 }
 
