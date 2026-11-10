@@ -179,7 +179,7 @@ export function generateSilhouetteSvg(
   <text x="${cx}" y="${labelY}" text-anchor="middle" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${options.labels?.w ?? dim(tattooWCm)}</text>
   <line x1="${Math.min(tx + tw + 6, vw - 28)}" y1="${ty}" x2="${Math.min(tx + tw + 6, vw - 28)}" y2="${ty + th}" stroke="#c9b0ff" stroke-width="0.4"/>
   <text x="${Math.min(tx + tw + 10, vw - 24)}" y="${cy + 2}" fill="#c9b0ff" font-size="6" font-family="Inter, sans-serif">${options.labels?.h ?? dim(tattooHCm)}</text>
-  <text x="100" y="${vh - 10}" text-anchor="middle" fill="#706b82" font-size="7" font-family="Inter, sans-serif">${bp.label}</text>
+  <text x="100" y="${vh - 10}" text-anchor="middle" fill="#878298" font-size="7" font-family="Inter, sans-serif">${bp.label}</text>
 </svg>`;
 }
 

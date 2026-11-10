@@ -15,13 +15,13 @@
   --border:      #252a35;
   --border-hover:#3a4050;
   --text:        #d0ccc4;
-  --text-dim:    #7a7770;
+  --text-dim:    #8a8780;
   --text-bright: #eae6d8;
   --accent:      #d4a44e;
   --accent-dim:  #a88540;
   --accent-glow: rgba(212, 164, 78, 0.15);
   --green:       #6bbd7a;
-  --red:         #d45d5d;
+  --red:         #d66363;
   --radius:      12px;
   --radius-lg:   20px;
   --max-width:   960px;
@@ -44,6 +44,23 @@ body {
 
 a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
 a:hover { color: var(--text-bright); }
+
+/* Links inside running text are underlined. The accent is only 1.42:1 away
+   from the body text colour, and WCAG asks for 3:1 when colour is the only
+   thing marking a link, so in a paragraph the links were findable by hue
+   alone. Classless anchors in text containers only: nav, footer, cards and
+   buttons are classed or sit outside these containers and keep their look. */
+.page :is(p, li, dd, td, figcaption, blockquote) a:not([class]) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  /* Fainter than the text so a paragraph with several links stays calm.
+     Browsers without color-mix() draw the underline in the link colour. */
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+}
+.page :is(p, li, dd, td, figcaption, blockquote) a:not([class]):hover {
+  text-decoration-color: currentColor;
+}
 
 img { max-width: 100%; height: auto; }
 
@@ -732,7 +749,7 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
   text-transform: uppercase; color: var(--accent, #d4a44e);
 }
 .tool-directory__teaser {
-  margin-top: 2rem; font-style: italic; color: var(--text-dim, #7a7770);
+  margin-top: 2rem; font-style: italic; color: var(--text-dim, #8a8780);
 }
 /* Markdown-generated article rules (essays): style the semantic <hr> the
    content pipeline emits, instead of inline styles in prose. */
