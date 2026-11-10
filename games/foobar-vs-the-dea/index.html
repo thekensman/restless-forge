@@ -237,11 +237,15 @@ canvas{display:block;width:640px;height:680px;image-rendering:pixelated}
 /* ---- touch controls, upright (the stacked layout, minus the short wide screens below) ----
    The controls take a row under the playfield, the panel above packs into two fixed rows, and
    the playfield shrinks if it must so that panel, playfield and controls fit on the screen
-   together: 262 px is everything in that column but the playfield itself. The controls' row
-   takes whatever is left over, and the footer and the boss name sit below the fold. */
+   together: 262 px is everything in that column but the playfield itself. On a taller phone,
+   where the playfield is already as wide as the screen, the controls' row grows by up to 46 px
+   and the rest of the height is shared above and below the cabinet, so no gap opens between
+   playfield and controls. The boss name gives way upright. */
 @media(max-width:1060px) and (min-height:820px),(max-width:1060px) and (max-aspect-ratio:4/3){
-  #cab.touch-on{grid-template-rows:auto auto minmax(124px,1fr);--pad-h:124px;
-    min-height:calc(100vh - 6px);min-height:calc(100dvh - 6px)}
+  #cab.touch-on{--pad-h:124px;grid-template-rows:auto auto
+    clamp(124px,calc(100vh - 138px - (100vw - 24px) * 1.0625),170px);
+    grid-template-rows:auto auto clamp(124px,calc(100dvh - 138px - (100vw - 24px) * 1.0625),170px)}
+  body:has(#cab.touch-on){justify-content:safe center}
   #cab.touch-on>.side.left{grid-area:1/1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
     grid-template-rows:42px 50px;gap:4px;padding:0}
   #cab.touch-on>.side.left>.plate{display:flex;min-width:0;overflow:hidden;padding:2px}
@@ -611,7 +615,7 @@ function wire(){
   };
   $('b-again').onclick=()=>{ beginLevel(0,{},true); };
   $('b-win-again').onclick=()=>{ beginLevel(0,{},true); };
-  $('b-home').onclick=$('b-win-home').onclick=()=>{game.state='title';audio.stopMusic();show('ov-title');};
+  $('b-home').onclick=$('b-win-home').onclick=()=>{game.state='title';audio.stopMusic();resetHud();show('ov-title');};
   $('b-resume').onclick=()=>{ hideAll(); game.resume(); };
   $('b-pause').onclick=()=>{ if(game.state==='play') game.pause(); else if(game.state==='pause'){ hideAll(); game.resume(); } };
   $('b-music').onclick=()=>{ const on=audio.toggle();
@@ -681,6 +685,13 @@ function setMeter(p){ const k=(1-Math.max(0,Math.min(1,p))).toFixed(2);
   if(hudLast.meter!==k){ hudLast.meter=k; $('arrowcover').style.transform='scaleY('+k+')'; } }
 // The level number, boss name and portrait. The original sets the new level and redraws this
 // panel (fn3_4FFE) before its briefing waits for a key, so the briefing shows the boss to come.
+// Back on the title screen the panel shows what a new game starts with, as it did at load,
+// instead of the lives, score and level the last game ended on.
+function resetHud(){
+  setText('v-lives',cfg.player.startLives); setText('v-level',1); setText('v-score',0);
+  setText('v-yum',0); setText('v-fx','-'); setText('boss-name','-'); setMeter(0);
+  if(hudLast.portrait){ delete hudLast.portrait; $('boss-portrait').textContent='?'; }
+}
 function hudLevel(lvl){
   const L=cfg.levels[lvl]; if(!L) return;
   setText('v-level',lvl+1); setText('boss-name',L.boss.name);

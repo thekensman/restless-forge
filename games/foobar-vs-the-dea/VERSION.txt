@@ -25,6 +25,15 @@ CHANGED IN 26
   - an iOS audio context left "interrupted" by a call or another app now
     resumes on the next tap, not only a "suspended" one.
 
+AFTER BUILD 26 WENT LIVE (index.html only, never cached, so still 26)
+  - back on the title screen after a game, the side panel resets to what a
+    new game starts with. It used to keep the last game's lives, score,
+    level and boss.
+  - upright with touch controls on a tall phone, the controls sit right
+    under the playfield and the spare height is shared above and below the
+    cabinet. They used to sit a third of the screen lower, with empty green
+    between.
+
 ON RESTLESS FORGE (still build 25: these landed before its first deploy, so
 no cached ?v=25 file can be stale)
   - route: https://restless-forge.dev/games/foobar-vs-the-dea/, with the
