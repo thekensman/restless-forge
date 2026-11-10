@@ -94,11 +94,21 @@ for frontend in "${SCRIPT_DIR}"/tools/*/frontend; do
   build_vite_tool "${name}" "${name}"
 done
 
+# ── Preload each page's fonts ──
+# A page reaches its fonts through page → stylesheet → @import /fonts.css →
+# woff2, so they were the last thing to load and swapped in after the first
+# paint, re-wrapping the text (layout shift 0.16 to 0.24 on a first visit).
+# This writes <link rel="preload"> tags for the fonts each page's own CSS asks
+# for, and for /fonts.css itself. It must run BEFORE the cache-busting below:
+# the /fonts.css preload is written bare and needs the same ?v= hash as the
+# @import it stands in for. See the script header.
+echo "[5/6] Preloading fonts, then cache-busting shared static files..."
+node "${SCRIPT_DIR}/scripts/inject-font-preloads.mjs"
+
 # ── Cache-bust shared static files ──
 # shared.js and pages.css have static filenames, so nginx's immutable
 # 1-year cache would serve stale versions after updates. Inject a content
 # hash into the HTML references so browsers re-fetch only when files change.
-echo "[5/6] Cache-busting shared static files..."
 
 bust_cache() {
   local dir="$1"
