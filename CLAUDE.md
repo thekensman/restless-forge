@@ -341,11 +341,12 @@ rules): `docs/authoring-content.md`.
 | `/games/` | `site/games/index.html` |
 | `/games/<slug>/` | `games/<slug>/`, runtime files only, unchanged (nginx `location /`; the slashless URL 301s) |
 | `/api/*` | FastAPI service on 127.0.0.1:8000 (nginx `^~ /api/` proxy; `backend/`) |
+| any URL with nothing behind it | `site/404.html`, served with a 404 status at the URL that was asked for (nginx `error_page`). It is not a page: `/404` and `/404.html` are 404s too (`docs/indexing.md`) |
 
 Every page has exactly **one** URL, set by its file (`about.html` → `/about`,
 `about/index.html` → `/about/`). Its `.html` spelling, a directory page
 without its slash, retired URLs, and `http://`/`www.` all 301 there in one
-hop; a URL with nothing behind it is a plain 404. Canonical, `og:url`,
+hop; a URL with nothing behind it is a 404 showing the site's error page. Canonical, `og:url`,
 JSON-LD, sitemap and every internal link use that one URL. Policy, the
 retired-URL table, and how to add to it: `docs/indexing.md`.
 

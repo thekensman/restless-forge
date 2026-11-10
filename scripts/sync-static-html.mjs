@@ -423,6 +423,11 @@ ${essays.map((e) => `- [${e.title}](https://restless-forge.dev/essays/${e.slug})
     ["/privacy", ["yearly", "0.3"]],
     ["/terms", ["yearly", "0.3"]],
     ["/faq", ["monthly", "0.6"]],
+    // The error page (site/404.html). Noindexed, so it gets no sitemap line,
+    // and it has no URL at all: nginx serves it with a 404 status at whatever
+    // address was asked for, and /404 itself answers 404 (check-urls asserts
+    // both). Listed for the same reason as the guide above.
+    ["/404", ["yearly", "0.1"]],
   ]);
   const ESSAY_RULE = ["monthly", "0.8"];
   const TOOL_MAIN_RULE = ["monthly", "0.9"];

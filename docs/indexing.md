@@ -28,7 +28,7 @@ Every other spelling answers with a single 301 to that URL:
 | `/tools/holopath/about` (directory page, no slash) | 301 → `/tools/holopath/about/` |
 | a retired URL in the legacy table (below) | 301 → its replacement |
 | `http://`, `www.` (any path) | 301 → `https://restless-forge.dev` + same path |
-| anything else that has no page behind it | 404, never a redirect to something "close" |
+| anything else that has no page behind it | 404, never a redirect to something "close". The body is the site's own error page (`site/404.html`, with the nav and links back in); the status stays 404 |
 
 Query strings are carried through every redirect.
 
@@ -73,6 +73,26 @@ if an entry ever shadows a real page.
 | `/tools/<id>/sitemap.xml`, `/tools/<id>/robots.txt` | Leftovers from the standalone domains that re-advertised retired URLs. Removed; `check-links` fails if one ships again. |
 | Never-published shapes: `/about/`, `/tools/holopath/articles/<slug>/`, `/tools/sandpath/about.html` | No page was ever there. |
 | `/tools/holopath/articles/` best-hologram-projectors, colour-theory-holographic-art, future-of-holographic-displays, history-of-holograms, hologram-displays-for-business, holograms-in-pop-culture (also `.html` and `/articles/…`) | Removed on 2026-10-13 as generic content unrelated to what HoloPath does (`docs/adsense-readiness.md`, F1). No page replaces them, so a redirect would be a soft 404. |
+
+## The error page
+
+`site/404.html` is what a missing URL shows. nginx serves it through
+`error_page 404`, at the address that was asked for and with the 404 status, so
+a retired URL still reads as gone to Google while a visitor gets the navigation
+and a way back in. Until November 2026 it was nginx's bare "404 Not Found".
+
+It is a file, not a page, and has no URL of its own:
+
+- no `rel=canonical` and no `og:url`, `noindex`, no sitemap line, and every
+  path in it absolute, since it can be served at any depth;
+- `/404` and `/404.html` answer 404 like any other missing URL. Without the
+  `location = /404` rule, `try_files` would find `404.html` behind `/404` and
+  serve the error page as a 200: a soft 404 with an address;
+- no AdSense loader. An error page is not content, and ads on one are against
+  AdSense policy.
+
+`check-urls` asserts the status, the body and the headers at seven kinds of
+missing URL.
 
 ## Known limits
 
