@@ -94,7 +94,7 @@ Served at `/shared.js` in dev and prod. Single source of truth for:
 - `window.rfDonateHtml()` — renders the "Support Restless Forge" donate block
 - `window.rfNavSep` / `window.rfFooterSep` — `<span class="nav-sep">|</span>` / `<span class="footer-sep">|</span>` separators between tool and RF links
 - `window.rfGlobalNavLinks` / `window.rfGlobalFooterLinks` — the Restless Forge / All Tools (nav) and Privacy / Terms / Restless Forge / All Tools (footer) tails every tool appends after its own links
-- `window.rfMountToolChrome(config)` — the shared tool header/footer engine. Every `tools/<name>/frontend/public/shared.js` calls this once with `{ base, idPrefix, brand, navLinks, footerLinks, copyrightHtml, extraSupportLinks? }` — `navLinks`/`footerLinks` are tool-specific only (the engine appends the global tails), and `extraSupportLinks` lets a tool prepend its own support link (e.g. SandPath's Ko-fi shop) before the shared Substack/Ko-fi/Buy Me a Coffee links. Returns `{ header, footer }` render functions and wires the `<div id="<prefix>-header">`/`<div id="<prefix>-footer">` DOMContentLoaded injection.
+- `window.rfMountToolChrome(config)` — the shared tool header/footer engine. Every `tools/<name>/frontend/public/shared.js` calls this once with `{ base, idPrefix, brand, navLinks, footerLinks, copyrightHtml, extraSupportLinks? }` — `navLinks`/`footerLinks` are tool-specific only (the engine appends the global tails), and `extraSupportLinks` lets a tool prepend its own support link (e.g. SandPath's Ko-fi shop) before the shared Substack/Ko-fi/Buy Me a Coffee links. Returns `{ header, footer }` render functions and mounts the `<div id="<prefix>-header">`/`<div id="<prefix>-footer">` placeholders. It swaps each one for the real markup as soon as the parser has passed it (`mountPlaceholder`, a `MutationObserver` with `DOMContentLoaded` as the fallback), so the header exists before first paint and the page does not jump; the site's own `rfNav`/`rfFooter` mount the same way (`docs/frontend-pitfalls.md` §8).
 - `window.rfRelatedToolsEnabled` (**currently `false`**) + `rfRelatedTools()` /
   `rfMountRelatedTools()` — the "if you enjoyed this, you might like…" section
   above every tool's footer. Scaffolding only: while the flag is false nothing
@@ -208,6 +208,12 @@ also updating the build output checks.
 
 ## Development Workflow
 
+**Node 24** (`.nvmrc`). Every workflow reads the version from that file
+(`node-version-file`), so it is the one place to change it; `engines` in the
+root `package.json` states the range the toolchain accepts (Node 22.22+,
+24.15+ or 26+). The toolchain is Vite 8, Vitest 5, jsdom 31 and TypeScript 5.9
+in the root and in every tool, each with its own `package-lock.json`.
+
 ### Everything at once
 
 ```bash
@@ -311,8 +317,10 @@ rules): `docs/authoring-content.md`.
 ## Build System
 
 - **Tools**: TypeScript → `tsc` → Vite build → `tools/<name>/frontend/dist/`.
+- **Browser floor**: `build.target` in `tools/vite-tool-config.ts` (ES2020, Chrome 87, Edge 88, Firefox 78, Safari 14). It is pinned because Vite's own default is newer, and at that default the CSS minifier emits `@media (width<=520px)`, which older browsers discard, so they would get the desktop layout of every tool. Raise it on purpose, never by leaving it out (`docs/frontend-pitfalls.md` §10).
 - **Global pages**: static files in `site/` — no compilation.
 - **Assembly**: `build.sh` copies `site/*` + each tool's `dist/*` into top-level `dist/`, then each game's runtime files (`files` in `games/games.json`) into `dist/games/<slug>/` unchanged; `check-links` verifies the copy byte for byte.
+- **Font preloads**: after assembly, `scripts/inject-font-preloads.mjs` reads each built page's CSS and writes `<link rel="preload">` for `/fonts.css` and up to four of the fonts that page uses, so text is not painted in a fallback and then swapped. Restored games are skipped. `check-links` fails on a page that uses the shared fonts without one.
 - **Cache-busting**: `build.sh` computes md5 hashes and injects `?v=<hash>` on
   `/fonts.css` (in HTML and in the `@import` of `styles.css`/`tool-chrome.css`),
   `/styles.css`, `/shared.js`, `/tool-chrome.css`, `/tools-data.js`, each
