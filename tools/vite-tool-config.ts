@@ -86,6 +86,17 @@ export function defineToolConfig({ base, port, dir, proxy }: ToolConfigOptions) 
     base: base + "/",
     appType: "mpa",
     build: {
+      // The browser floor, stated here so a Vite upgrade cannot move it.
+      // These are the browsers Vite 5 targeted by default. Vite 7 and later
+      // default to "baseline-widely-available" (Chrome 111, Firefox 114,
+      // Safari 16.4), and at that target the CSS minifier rewrites
+      // `@media (max-width: 520px)` as `@media (width<=520px)`. A browser
+      // older than the target ignores that rule whole, so a phone on iOS 15
+      // would get the desktop layout of every tool. The hand-written CSS in
+      // site/ and public/ is served as written and keeps working there, which
+      // is why the bundled CSS must too. Raise the floor on purpose, never by
+      // default (docs/frontend-pitfalls.md §10).
+      target: ["es2020", "edge88", "firefox78", "chrome87", "safari14"],
       outDir: "../dist",
       emptyOutDir: true,
       // Only the TypeScript SPA is a Rollup entry. Sub-pages are static HTML

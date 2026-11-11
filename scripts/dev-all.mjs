@@ -16,5 +16,5 @@ const commands = [
 ];
 
 console.log(`Starting site proxy + ${tools.length} tool dev servers...`);
-const { result } = concurrently(commands, { killOthers: ["failure"] });
+const { result } = concurrently(commands, { killOthersOn: ["failure"] });
 result.catch(() => process.exit(1));
