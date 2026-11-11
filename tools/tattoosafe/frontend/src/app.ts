@@ -47,12 +47,16 @@ const unitLabel = (): "cm" | "in" => (units === "imperial" ? "in" : "cm");
 const fmtLen = (cm: number): string => `${toDisplay(cm)} ${unitLabel()}`;
 const round1 = (v: number): number => Math.round(v * 10) / 10;
 
+let toastTimer: number | undefined;
 function showError(msg: string): void {
   const toast = $("#error-toast"), text = $("#error-msg");
   if (!toast || !text) return;
   text.textContent = msg;
   toast.hidden = false;
-  setTimeout(() => { toast.hidden = true; }, 4000);
+  // One timer, restarted: an earlier message's timer used to close a later
+  // message early, sometimes within a second of it appearing.
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => { toast.hidden = true; }, 6000);
 }
 
 function populateBodyParts(): void {
@@ -104,13 +108,29 @@ function setSizeInputs(except?: HTMLInputElement | null): void {
     [input("#tattoo-height-range"), tattooHCm],
   ];
   for (const [el, cm] of pairs) {
-    if (el && el !== except) el.value = String(toDisplay(cm));
+    if (!el || el === except) continue;
+    el.value = String(toDisplay(cm));
+    el.removeAttribute("aria-invalid");
   }
 }
 
-/** One size control changed: update canonical cm, apply the aspect lock. */
+/**
+ * One size control changed: update canonical cm, apply the aspect lock.
+ *
+ * A typed size outside the range (or empty, zero, negative) is handled the way
+ * a typed height is: the field is flagged, the last accepted size stays in
+ * force, and leaving the field puts that size back. It used to be dropped
+ * without a sign, so a width of 0 sat beside the price for the previous width,
+ * and 9999 was quietly priced as 100 while the field went on saying 9999.
+ */
 function onSizeEdit(dim: "w" | "h", raw: number, source?: HTMLInputElement | null): void {
-  if (!Number.isFinite(raw) || raw <= 0) return;
+  // The field's own min and max are the range, in whichever unit is showing
+  // (applyUnits sets them); sliders cannot leave theirs.
+  const lo = source ? parseFloat(source.min) : -Infinity;
+  const hi = source ? parseFloat(source.max) : Infinity;
+  const ok = Number.isFinite(raw) && raw > 0 && raw >= lo && raw <= hi;
+  source?.setAttribute("aria-invalid", String(!ok));
+  if (!ok) return;
   const cm = clampCm(fromDisplay(raw));
   if (dim === "w") {
     tattooWCm = cm;
@@ -335,6 +355,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const wRange = input("#tattoo-width-range"), hRange = input("#tattoo-height-range");
   wNum?.addEventListener("input", () => onSizeEdit("w", parseFloat(wNum.value), wNum));
   hNum?.addEventListener("input", () => onSizeEdit("h", parseFloat(hNum.value), hNum));
+  // Leaving a size field shows the size in force (and clears a flagged entry).
+  wNum?.addEventListener("change", () => setSizeInputs());
+  hNum?.addEventListener("change", () => setSizeInputs());
   wRange?.addEventListener("input", () => onSizeEdit("w", parseFloat(wRange.value)));
   hRange?.addEventListener("input", () => onSizeEdit("h", parseFloat(hRange.value)));
   // Aspect lock: prefer the uploaded design's ratio, else freeze the current one.

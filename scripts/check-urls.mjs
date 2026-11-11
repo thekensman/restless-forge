@@ -31,7 +31,9 @@
  *   4. Each retired URL in LEGACY below 301s to its replacement in one hop,
  *      and no LEGACY entry shadows a real page.
  *   5. The URLs in GONE stay 404 (a deleted page is not redirected to some
- *      loosely related one).
+ *      loosely related one), and a 404 is the site's own error page, with
+ *      its navigation, not nginx's bare one. The error page has no URL of its
+ *      own: /404 and /404.html answer 404 as well.
  *   6. http:// and www. variants 301 to the https apex, path and query intact.
  *   7. No internal link the site emits points at a redirect or an error: the
  *      static HTML, the JSON-LD, and the nav/footer that shared.js renders at
@@ -329,9 +331,13 @@ function* walkHtml(dir) {
 const attr = (html, re, name) => ((html.match(re) || [""])[0].match(new RegExp(`${name}=["']([^"']+)["']`)) || [])[1];
 const noindex = (html) => /<meta(?=[^>]*\bname=["']robots["'])(?=[^>]*\bcontent=["'][^"']*noindex)[^>]*>/i.test(html);
 
+/* The error page is a file nginx serves for a missing URL, not a page with a
+   URL of its own, so it is not in `pages`; check 5 covers it. */
+const ERROR_PAGE = "404.html";
 const pages = [];
 for (const file of walkHtml(dist)) {
   const rel = relative(dist, file).split("\\").join("/");
+  if (rel === ERROR_PAGE) continue;
   const path = rel === "index.html" ? "/"
     : rel.endsWith("/index.html") ? `/${rel.slice(0, -"index.html".length)}`
     : `/${rel.slice(0, -".html".length)}`;
@@ -390,6 +396,32 @@ for (const path of GONE) {
   tally("gone");
   const r = await get(SITE + path);
   if (r.status !== 404) problem("gone", `${path} → ${r.status}${r.location ? ` ${r.location}` : ""}, want 404`);
+}
+
+/* A missing URL gets the site's error page, still as a 404. Until November
+   2026 it got nginx's bare "404 Not Found": no navigation and no way back into
+   the site, at exactly the URLs search results still point to. The marker is
+   the id on the page's <main>. /404 is the trap: try_files would find
+   404.html behind it and serve the error page as a 200, a soft 404 with its
+   own URL. */
+{
+  const MARKER = 'id="rf-404"';
+  if (!existsSync(join(dist, ERROR_PAGE))) {
+    problem("error-page", `dist/${ERROR_PAGE} is missing; nginx's error_page has nothing to serve`);
+  } else if (!readFileSync(join(dist, ERROR_PAGE), "utf8").includes(MARKER)) {
+    problem("error-page", `dist/${ERROR_PAGE} has no ${MARKER} on its <main>; this check looks for it in every 404 response`);
+  } else {
+    for (const path of ["/no-such-page", "/tools/no-such-tool/", "/tools/holopath/no-such-page", GONE[0], "/404", "/404.html", "/404/"]) {
+      tally("error-page");
+      const r = await get(SITE + path);
+      if (r.status !== 404) { problem("error-page", `${path} → ${r.status}${r.location ? ` ${r.location}` : ""}, want 404`); continue; }
+      if (!r.body.includes(MARKER)) problem("error-page", `${path} is a 404 without the site's error page (nginx's bare page has no way back into the site)`);
+      if (!/no-cache/.test(r.cacheControl)) problem("error-page", `${path}: the error page is served with Cache-Control "${r.cacheControl}", want no-cache`);
+    }
+    tally("error-page");
+    const { h } = await headers(`${SITE}/no-such-page`);
+    if (!h["strict-transport-security"]) problem("error-page", "the error page lost the security headers (add_header gotcha)");
+  }
 }
 
 // ── 6: host and protocol ─────────────────────────────────────────────────────

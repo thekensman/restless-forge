@@ -102,5 +102,5 @@ the moment the stencil goes on, when you have already chosen the design, booked
 the slot, and paid the deposit.
 
 Ready to size something?
-[Open TattooSafe](/tools/tattoosafe/) — camera and silhouette views, sixteen
+[Open TattooSafe](/tools/tattoosafe/) — camera and silhouette views, seventeen
 placements, everything in your browser.

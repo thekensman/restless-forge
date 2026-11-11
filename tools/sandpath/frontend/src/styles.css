@@ -10,7 +10,7 @@
   --sand-light: #f0cc72;
   --sand-dim: #8a6d2e;
   --text: #c8c4b8;
-  --text-muted: #7a766a;
+  --text-muted: #8a8678;
   --text-bright: #eae6d8;
   --accent: #e8b84a;
   --accent-glow: #e8b84a33;
@@ -240,6 +240,11 @@ body {
 .seo-content h3 { font-family: var(--font-display); font-size: 1.15rem; color: var(--text); font-weight: 400; margin: 1.5rem 0 0.5rem; }
 .seo-content p { margin-bottom: 0.75rem; }
 .seo-content strong { color: var(--sand); font-weight: 500; }
+/* Links here had no rule at all, so they fell through to the browser default:
+   #0000ee on a near-black page (2:1), and purple once visited. This is the
+   first block on the page. The underline comes from /tool-chrome.css. */
+.seo-content a { color: var(--sand); }
+.seo-content a:hover { color: var(--sand-light); }
 
 /* ─── NOSCRIPT FALLBACK ────────────────────────────── */
 /* ─── Explanatory content below the converter ───

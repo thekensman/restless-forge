@@ -159,11 +159,11 @@ watch moves:
 | Channel | Watches | Latency | Configured by |
 |---|---|---|---|
 | **Webhook** (`ALERT_WEBHOOK_URL`) | daily spend crossing 80% and 100% of `DAILY_SPEND_CAP`; circuit breaker opening | real time, from the request that crosses the line | `api.env` on the droplet |
-| **GitHub issue** (`.github/workflows/health-check.yml`) | API unreachable; breaker still open; the cap having been hit; trailing-30-day spend projecting past `MONTHLY_BUDGET_USD` | every 30 min (budget review once a day, 13:00 UTC) | `RF_METRICS_TOKEN` repo secret |
+| **GitHub issue** (`.github/workflows/health-check.yml`) | API unreachable; breaker still open; the cap having been hit; trailing-30-day spend projecting past `MONTHLY_BUDGET_USD` | scheduled every 30 min, in practice every few hours (see `docs/infrastructure.md` § Monitoring); budget review once a day, on its own 13:07 UTC cron line | `RF_METRICS_TOKEN` repo secret |
 
 The split exists because a per-request alert can't see a slow bleed (a month of
-$3 days never crosses a $10 cap), and a 30-minute poll is too slow for "the cap
-just closed the tool for the day". Neither channel is load-bearing on its own.
+$3 days never crosses a $10 cap), and a poll that runs a few times a day is far
+too slow for "the cap just closed the tool for the day". Neither channel is load-bearing on its own.
 
 ### The `/health` metrics
 
@@ -299,7 +299,8 @@ journalctl -u restless-forge-api --since '7 days ago' --no-pager | grep ALERT
 ```
 
 Monitoring: `.github/workflows/health-check.yml` probes the health
-endpoint every 30 minutes and opens a `site-health` issue when it fails;
+endpoint (scheduled every 30 minutes, run by GitHub every few hours) and
+opens a `site-health` issue when it fails, closing it when it passes again;
 with `RF_METRICS_TOKEN` set it also watches the Anthropic spend. Full
 picture in § Monitoring the bill.
 

@@ -7,7 +7,7 @@ import { describe, it, expect } from "vitest";
 import {
   clampCenter, pinchScale, wheelScale, drawSize, hitTest, coverCrop,
   computeWrapStrips, wrapProjectedWidth, MIN_SCALE, MAX_SCALE,
-  overlaySize, frameWidthFromCard, scaleSize, cameraHint, CARD_W_CM, CARD_H_CM,
+  overlaySize, frameWidthFromCard, scaleSize, cameraHint, cameraErrorMessage, CARD_W_CM, CARD_H_CM,
 } from "../camera";
 
 describe("clampCenter", () => {
@@ -144,6 +144,40 @@ describe("cameraHint", () => {
   });
   it("explains the card step while calibrating", () => {
     expect(cameraHint({ calibrating: true, calibrated: false, sizeLabel: "x" })).toContain("card");
+  });
+});
+
+describe("cameraErrorMessage", () => {
+  // getUserMedia rejects with a DOMException whose name says why. Plain objects
+  // stand in for it here: only the name is read.
+  const named = (name: string) => ({ name, message: "" });
+
+  it("sends a refused permission to the browser's site settings", () => {
+    const text = cameraErrorMessage(named("NotAllowedError"));
+    expect(text).toContain("blocked");
+    expect(text).toContain("site settings");
+  });
+
+  it("does not suggest retrying when there is no camera", () => {
+    const text = cameraErrorMessage(named("NotFoundError"));
+    expect(text).toContain("No camera");
+    expect(text).not.toContain("try again");
+  });
+
+  it("names another app when the camera is busy", () => {
+    expect(cameraErrorMessage(named("NotReadableError"))).toContain("Another app");
+  });
+
+  it("points an in-app browser to a real one when there is no camera API", () => {
+    // navigator.mediaDevices is undefined there, so the call throws a TypeError.
+    expect(cameraErrorMessage(new TypeError("Cannot read properties of undefined"))).toContain("Safari or Chrome");
+    expect(cameraErrorMessage(undefined)).toContain("Safari or Chrome");
+  });
+
+  it("always says the rest of the tool still works", () => {
+    for (const n of ["NotAllowedError", "NotFoundError", "NotReadableError", "SomethingNew"]) {
+      expect(cameraErrorMessage(named(n))).toContain("work without the camera");
+    }
   });
 });
 

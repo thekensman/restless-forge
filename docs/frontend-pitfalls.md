@@ -104,7 +104,13 @@ Four separate failures, all silent:
   collapse it, the container's border, padding and "Advertisement" label render
   around nothing. That is every page before the account is approved.
   *Handled:* `ins.adsbygoogle[data-ad-status="unfilled"] { display: none }` in
-  `site/styles.css`, plus `:has()` rules for our own containers.
+  `site/styles.css`, plus `:has()` rules for our own containers. Tool pages do
+  not load `styles.css`, so for a long time they had no such rule: AdSense
+  leaves an inline height on the `<ins>` it could not fill, and every tool page
+  carried a blank band above its footer. The same rule now lives in
+  `site/tool-chrome.css`, with `!important` because the height it has to beat
+  is an inline style. A rule that every page needs belongs in a stylesheet
+  every page loads.
 - **Ads on thin pages are a policy problem, not just an aesthetic one.**
   *Guard:* `check-content-health.mjs` rules 2, 4 and 5 (250-word floor on
   indexable ad-bearing prose; unlaunched tools stay ad-free).
@@ -184,6 +190,95 @@ free.
 EXIF block (JPEG APP1, PNG `eXIf`, WebP RIFF EXIF). It fails on the block's
 presence rather than on GPS specifically — "this one only has DPI tags" is how
 the habit erodes.
+
+---
+
+## 8. Chrome mounted late, fonts found late
+
+Two causes of the same symptom: the page jumps while it loads. Measured in
+November 2026, the header alone moved every tool page by its own height.
+
+- **The header was injected on `DOMContentLoaded`.** Its placeholder is an
+  empty `<div>`, so the page was laid out without a header and then pushed
+  down when the script ran. `mountPlaceholder()` in `site/shared.js` now swaps
+  the placeholder for the real markup as soon as the parser has passed it (a
+  `MutationObserver` on the document, with `DOMContentLoaded` kept as the
+  fallback), which is before first paint.
+- **Fonts were three requests deep.** A page links `styles.css` or
+  `tool-chrome.css`, which `@import`s `/fonts.css`, which names the `woff2`
+  files. The browser learned about the fonts only after two stylesheets had
+  arrived, painted in the fallback, then swapped. `build.sh` now runs
+  `scripts/inject-font-preloads.mjs`, which reads each built page's CSS and
+  writes `<link rel="preload">` for `/fonts.css` and for up to four of the
+  fonts that page uses.
+
+**Rule.** Anything that takes up space above the content has to exist before
+first paint. Never mount page chrome from `DOMContentLoaded` or later.
+
+**Guard.** `check-links.mjs` fails on a page that uses the shared fonts and has
+no font preload, or has one without `crossorigin` (a font preload without it is
+fetched twice). The mount timing has no automated check.
+
+**Still open.** On a slow link a font can still arrive after first paint, and
+the swap moves text on a few pages (0.16 to 0.24 CLS on `/about`, `/essays/`,
+`/tools/` and SandPath at 1366px under a slow-4G profile). Fallback fonts with
+matched metrics would close it.
+
+---
+
+## 9. `no-store` on HTML turns off the back/forward cache
+
+Every HTML response carried `Cache-Control: no-cache, no-store,
+must-revalidate`. `no-cache` is what makes a deploy show up at once. `no-store`
+added nothing to that and told the browser not to keep the page for Back, so
+pressing Back from an article reloaded the tool and threw away what the visitor
+had typed or loaded.
+
+**Rule.** HTML is `no-cache`. `no-store` is for responses that must never be
+written to disk, and the only pages here that ask for it are the restored games
+(`docs/games.md`).
+
+**Guard.** `check-urls.mjs` asserts the `Cache-Control` of pages, error pages
+and game pages against the real vhost.
+
+Two limits. Google's ad script sometimes registers an `unload` handler, which
+blocks the back/forward cache on desktop Chrome whatever the headers say. And a
+page restored by the browser's form restore (which is what happens when the
+cache is not used) has its inputs filled in after the tool's script has
+already run, so a tool that computes on load has to compute again on
+`pageshow`. The wage calculator and HoloPath do.
+
+---
+
+## 10. A toolchain default moved the browser floor
+
+Caught during the Vite 5 to 8 upgrade in November 2026, before it shipped.
+
+Vite decides which browsers to build for from `build.target`, and the default
+changed: Vite 5 targeted Chrome 87, Firefox 78 and Safari 14, while Vite 7 and
+later target Chrome 111, Firefox 114 and Safari 16.4. Nothing in the build
+output says so. At the new target the CSS minifier rewrites
+`@media (max-width: 520px)` as `@media (width<=520px)`, and a browser older than
+the target does not read that form as a narrower query: it discards the rule.
+An iPhone on iOS 15 would have been given the desktop layout of every tool,
+while the site pages around them (hand-written CSS, served as written) still
+looked right.
+
+**Rule.** The browser floor is a decision, written down as `build.target` in
+`tools/vite-tool-config.ts`. Change it there, on purpose.
+
+**How it was found.** By diffing the built CSS of the old and new toolchains,
+then comparing full-page screenshots of every tool from both builds. The test
+suites and every guard passed with the default target, because none of them
+loads a page in an old browser.
+
+**Guard.** None automated. After any bundler upgrade, check the built CSS:
+
+```bash
+cat dist/tools/*/assets/*.css | grep -oE "@media ?\([a-z-]+ ?[:<>=]+" | sort | uniq -c
+```
+
+Every line should be a `max-width:`, `min-width:` or `prefers-…:` form.
 
 ---
 

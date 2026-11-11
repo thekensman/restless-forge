@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page not found — Restless Forge</title>
+  <meta name="description" content="There is no page at this address on Restless Forge. The tools, essays and articles are all still here.">
+  <!-- The error page. nginx serves this file, with a 404 status, at whatever
+       address was asked for (error_page in nginx/restless-forge.conf), so it
+       has no URL of its own: no canonical and no og:url, and every path in it
+       is absolute. /404 and /404.html themselves answer 404 too; check-urls
+       asserts all of it. No AdSense loader: an error page is not content, and
+       ads on one are against AdSense policy. -->
+  <meta name="robots" content="noindex">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:image" content="https://restless-forge.dev/og-image.png">
+
+  <meta property="og:title" content="Page not found — Restless Forge">
+  <meta property="og:description" content="There is no page at this address on Restless Forge.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/shared.js"></script>
+</head>
+<body>
+
+  <div id="rf-nav"></div>
+
+  <main class="page" id="rf-404">
+    <h1>Page not found</h1>
+    <p>
+      There is nothing at this address. If a link on another site or a search
+      result brought you here, the page was most likely moved or retired: a
+      few early pages and some older articles have been taken down.
+    </p>
+    <p>Everything that is published is one step from here:</p>
+    <ul>
+      <li><a href="/tools/">Tools</a>: the calculators, converters and generators, all free and all in your browser</li>
+      <li><a href="/articles/">Articles</a>: how each tool works, written from its own code</li>
+      <li><a href="/essays/">Essays</a>: why the site exists and how it is built</li>
+      <li><a href="/games/">Games</a>: old games restored to play in the browser</li>
+      <li><a href="/">Home</a></li>
+    </ul>
+    <p>
+      If a link on this site sent you here, that is a bug and I would like to
+      fix it. The <a href="/contact">contact page</a> has my email address.
+    </p>
+
+    <h2>The Tools</h2>
+    <div id="rf-tools-landing"><!-- generated:tools-landing — do not edit; run `npm run sync-static` -->
+<div class="tool-card"><div class="tool-card__category">Financial</div><h3 class="tool-card__title">What Is My Time Worth?</h3><p class="tool-card__desc">Calculate your real hourly wage after commute, taxes, work clothes, and decompression time. Then use the decision engine to know when to DIY and when to hire.</p><a href="/tools/what-is-my-time-worth/" class="tool-card__link">Launch Calculator</a></div><div class="tool-card"><div class="tool-card__category">Creative</div><h3 class="tool-card__title">HoloPath</h3><p class="tool-card__desc">Transform any image, GIF, or video into animated hologram art with scan lines, glow, and glitch effects. Supports pyramid projectors, LED fans, and Pepper’s Ghost displays.</p><a href="/tools/holopath/" class="tool-card__link">Launch Generator</a></div><div class="tool-card"><div class="tool-card__category">Maker</div><h3 class="tool-card__title">SandPath</h3><p class="tool-card__desc">Convert images and SVG files into sand table patterns (.thr and .gcode) for kinetic sand tables like Oasis, Sisyphus, and ZenXY. Automatic image tracing with live preview.</p><a href="/tools/sandpath/" class="tool-card__link">Launch Converter</a></div><div class="tool-card"><div class="tool-card__category">Lifestyle</div><h3 class="tool-card__title">TattooSafe</h3><p class="tool-card__desc">Preview a tattoo design on your body with your camera, check the size against 17 body placements, and estimate pricing by size, style, and artist tier.</p><a href="/tools/tattoosafe/" class="tool-card__link">Launch Preview</a></div><p class="tool-directory__teaser">More tools are in the forge, unlisted until finished — a link to a half-built thing helps nobody.</p>
+<!-- /generated:tools-landing --></div>
+    <script src="/tools-data.js"></script>
+    <script>rfRenderTools("rf-tools-landing", { mode: "landing" });</script>
+  </main>
+
+  <div id="rf-footer"></div>
+
+</body>
+</html>

@@ -1,8 +1,8 @@
 /* TattooSafe — Main Tool Styles (Vite-processed) */
 :root {
   --bg: #0d0d14; --bg-raised: #141420; --bg-card: #1a1a2a;
-  --accent: #a882ff; --accent-light: #c9b0ff; --accent-dim: #6b4fb3;
-  --text: #c4c0d4; --text-muted: #706b82; --text-bright: #e8e4f0;
+  --accent: #a882ff; --accent-light: #c9b0ff; --accent-dim: #6b4fb3; --accent-muted: #8e79c5;
+  --text: #c4c0d4; --text-muted: #878298; --text-bright: #e8e4f0;
   --border: #252535; --error: #c44a5a; --success: #5aab6a;
   --radius: 12px; --radius-lg: 20px;
   --font-display: "Playfair Display", Georgia, serif;

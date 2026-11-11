@@ -5,7 +5,8 @@
  * CURRENT_MILEAGE_YEAR; prior years stay for reference and reversion.
  * Bundled into consuming tools at build time — no runtime fetch.
  *
- * Current consumer: side-hustle-reality.
+ * Current consumers: side-hustle-reality, and what-is-my-time-worth, whose
+ * commute-cost hint quotes the current rate (commuteCostHint in its engine).
  * Source: IRS annual standard-mileage notice (published late December).
  */
 

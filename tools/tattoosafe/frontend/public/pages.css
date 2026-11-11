@@ -1,7 +1,7 @@
 /* TattooSafe — Shared Sub-page Styles */
 :root {
   --bg: #0d0d14; --surface: #141420; --card: #1a1a2a; --border: #252535;
-  --accent: #a882ff; --text: #c4c0d4; --muted: #706b82; --dim: #4a4560;
+  --accent: #a882ff; --text: #c4c0d4; --muted: #878298; --dim: #8680a4;
   --font-body: "Inter", system-ui, sans-serif; --font-display: "Playfair Display", Georgia, serif;
 
   /* Aliases for site/tool-chrome.css (shared header/footer across tools). */

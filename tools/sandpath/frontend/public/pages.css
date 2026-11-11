@@ -5,7 +5,7 @@
 :root {
   --bg: #0e0e12; --bg-raised: #16161d; --bg-card: #1c1c26;
   --sand: #d4a44a; --sand-light: #f0cc72; --sand-dim: #8a6d2e;
-  --text: #c8c4b8; --text-muted: #7a766a; --text-bright: #eae6d8;
+  --text: #c8c4b8; --text-muted: #8a8678; --text-bright: #eae6d8;
   --accent: #e8b84a; --border: #2a2a35;
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Outfit", system-ui, sans-serif;

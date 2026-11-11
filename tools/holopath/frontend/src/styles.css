@@ -13,7 +13,7 @@
   --panel: #0d0d18;
   --border: #1a1a2e;
   --text: #c0c0d0;
-  --text-dim: #666;
+  --text-dim: #7c7c7c;
   --glow: 0 0 20px rgba(0, 255, 242, 0.3);
   --font-display: 'Orbitron', monospace;
   --font-mono: 'Share Tech Mono', monospace;
@@ -70,7 +70,7 @@ body::after {
   letter-spacing: 5px;
   margin-top: 6px;
   text-transform: uppercase;
-  opacity: 0.7;
+  opacity: 0.8; /* 0.7 put this line at 4.33:1 on the page background; AA needs 4.5 */
 }
 
 /* Nav + support banner now live in site/tool-chrome.css (shared across tools). */
@@ -152,6 +152,7 @@ body::after {
 }
 
 .upload.has-file { border-color: var(--green); border-style: solid; }
+.upload:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
 .upload__icon { font-size: 2.2rem; margin-bottom: 8px; display: block; }
 .upload__label { font-size: 0.78rem; color: var(--cyan-dim); letter-spacing: 2px; }
@@ -504,7 +505,7 @@ select:focus { border-color: var(--cyan); }
 }
 .footer__legal a:hover { color: var(--cyan); }
 .footer__copy {
-  color: rgba(136, 136, 160, 0.4);
+  color: rgba(136, 136, 160, 0.9);
   font-size: 0.68rem;
   margin-top: 0.5rem;
   letter-spacing: 1px;
@@ -525,7 +526,7 @@ select:focus { border-color: var(--cyan); }
   letter-spacing: 1px;
   text-align: center;
   background: rgba(0,0,0,0.3);
-  color: #555;
+  color: var(--text-dim);
   border: 1px solid var(--border);
   border-radius: 2px;
   cursor: pointer;
@@ -537,7 +538,7 @@ select:focus { border-color: var(--cyan); }
 
 .gif-note {
   font-size: 0.62rem;
-  color: #555;
+  color: var(--text-dim);
   letter-spacing: 1px;
   margin-bottom: 8px;
   line-height: 1.5;

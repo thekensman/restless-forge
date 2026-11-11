@@ -370,6 +370,33 @@ for (const file of walkHtml(dist)) {
   }
 })(dist);
 
+/* ── A page's fonts are preloaded in its HTML ──
+ *
+ * Pages reach their fonts through page → stylesheet → @import /fonts.css →
+ * woff2, so the fonts arrived last, after the first paint, and the swap
+ * re-wrapped the text: a layout shift of 0.16 to 0.24 on every first visit.
+ * scripts/inject-font-preloads.mjs (run by build.sh) writes preload tags so
+ * they download with the first batch of requests instead. Nothing on a page
+ * looks different when that step is skipped or stops matching, so the build
+ * checks for its output. A font preload without `crossorigin` is worse than
+ * none: fonts are always fetched in CORS mode, so the browser cannot reuse the
+ * preloaded response and downloads the file twice.
+ * Restored game pages ship unchanged and are exempt.
+ */
+for (const file of walkHtml(dist)) {
+  const rel = relative(dist, file).split("\\").join("/");
+  if (/^games\/[^/]+\//.test(rel)) continue;
+  const html = readFileSync(file, "utf8");
+  if (!/href=["']\/(?:styles|tool-chrome|fonts)\.css/.test(html)) continue;
+  const preloads = (html.match(/<link\b[^>]*rel=["']preload["'][^>]*>/gi) || []).filter((t) => /as=["']font["']/.test(t));
+  if (!preloads.length) {
+    problems.push(`${rel}: uses the shared fonts but preloads none; build.sh must run scripts/inject-font-preloads.mjs before cache-busting`);
+  }
+  for (const tag of preloads) {
+    if (!/\scrossorigin\b/.test(tag)) problems.push(`${rel}: a font preload has no crossorigin attribute, so the font is downloaded twice: ${tag}`);
+  }
+}
+
 /* ── Rail ads reach AdSense only once they are visible ──
  *
  * The 160x600 side rails are hidden below 1540px. A rail written as

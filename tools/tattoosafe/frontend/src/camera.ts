@@ -125,6 +125,41 @@ export function cameraHint(o: { calibrating: boolean; calibrated: boolean; sizeL
     : `${size}approximate size until you calibrate with a card · drag to move · pinch or scroll to zoom`;
 }
 
+/**
+ * What to tell a visitor whose camera did not start, from the error
+ * getUserMedia rejected with.
+ *
+ * Every failure used to produce one sentence, "Camera unavailable. Check
+ * browser permissions and try again.", in a toast that closed after four
+ * seconds and left the page exactly as it was. A refused permission is the
+ * commonest way a camera tool fails on a phone, and the cases need different
+ * advice: a visitor who blocked the camera has to change a browser setting, one
+ * inside an app's built-in browser has to leave it, and one with no camera can
+ * stop trying. The text stays in the status line under the preview until the
+ * camera starts.
+ */
+export function cameraErrorMessage(err: unknown): string {
+  const name = err instanceof Error || (typeof err === "object" && err !== null && "name" in err)
+    ? String((err as { name: unknown }).name)
+    : "";
+  const rest = " The size check and price estimate above work without the camera.";
+  if (name === "NotAllowedError" || name === "SecurityError") {
+    return "The camera is blocked for this page. Allow it in your browser's site settings " +
+      "(the icon beside the address), then press Start Camera again." + rest;
+  }
+  if (name === "NotFoundError" || name === "OverconstrainedError") {
+    return "No camera was found on this device." + rest;
+  }
+  if (name === "NotReadableError" || name === "AbortError") {
+    return "The camera could not be started. Another app or tab may be using it: " +
+      "close that, then press Start Camera again." + rest;
+  }
+  // No navigator.mediaDevices at all: an app's built-in browser, or a page not
+  // served over HTTPS.
+  return "This browser will not open the camera here. Browsers built into other apps often " +
+    "refuse: open this page in Safari or Chrome and try again." + rest;
+}
+
 export interface WrapStrip {
   /** Source x range, in design pixels. */
   u0: number;
@@ -414,6 +449,8 @@ export function setupCameraPreview(
   let ar: ArSession | null = null;
   let arLoading = false;
   let arStatus = "";
+  /** Why the camera did not start, shown until it does. "" when there is nothing to say. */
+  let cameraError = "";
 
   // Pointer tracking for drag + pinch
   const pointers = new Map<number, { x: number; y: number }>();
@@ -1022,13 +1059,18 @@ export function setupCameraPreview(
       }
       stream = s;
       video = v;
+      cameraError = "";
       watchFrames(v);
       // Desktop webcams often don't report a facing mode; they face the
       // user, but the standard preview has always shown them unmirrored.
       mirror = (s.getVideoTracks()[0]?.getSettings().facingMode ?? facing) === "user";
-    } catch {
+    } catch (e) {
       s?.getTracks().forEach((t) => t.stop());
-      onError("Camera unavailable. Check browser permissions and try again.");
+      // Said twice on purpose: the toast is where the eye is, and it closes;
+      // the status line under the preview keeps the advice on the page.
+      cameraError = cameraErrorMessage(e);
+      onError(cameraError);
+      refs.hint.textContent = cameraError;
       return;
     } finally {
       starting = false;
@@ -1049,8 +1091,9 @@ export function setupCameraPreview(
     // The next Start Camera is a fresh standard preview: rear camera again.
     facing = "environment";
     notice = "";
+    cameraError = "";
     syncControls();
-    refs.hint.textContent = "";
+    refs.hint.textContent = idleHint();
     ctx?.clearRect(0, 0, refs.canvas.width, refs.canvas.height);
   }
 
@@ -1182,12 +1225,25 @@ export function setupCameraPreview(
     return `${sizeLabel}${side} · size estimated from your height · drag to adjust · pinch or scroll to resize`;
   }
 
+  /** The status line while the camera is off. */
+  function idleHint(): string {
+    if (cameraError) return cameraError;
+    return design ? "Design loaded — start the camera to preview it on your body." : "";
+  }
+
   function updateHint(): void {
     if (arLoading) {
       refs.hint.textContent = arStatus;
       return;
     }
-    if (!stream) return;
+    if (!stream) {
+      // Written rather than left alone: when Full AR's camera was refused the
+      // line stayed on "Downloading body mapping…" for good, promising a
+      // download that had been abandoned.
+      const idle = idleHint();
+      if (refs.hint.textContent !== idle) refs.hint.textContent = idle;
+      return;
+    }
     const text = ar ? trackingHint()
       : notice ? `${notice} ${cameraHint({ calibrating, calibrated, sizeLabel })}`
       : cameraHint({ calibrating, calibrated, sizeLabel });
@@ -1210,7 +1266,7 @@ export function setupCameraPreview(
       design = img;
       rebuildProcessedDesign();
       syncControls();
-      if (!stream) refs.hint.textContent = "Design loaded — start the camera to preview it on your body.";
+      if (!stream) refs.hint.textContent = idleHint();
     },
     setTattooSize(wCm: number, hCm: number, label: string): void {
       tattooWCm = wCm;

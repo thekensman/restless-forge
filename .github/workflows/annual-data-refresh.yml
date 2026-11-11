@@ -53,21 +53,21 @@ jobs:
             echo "::notice::No CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY secret set — skipping the automated refresh. The Jan 20 freshness check (annual-data-check.yml) will open an issue if the data goes stale; run the canonical prompt from docs/automation.md manually to refresh."
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.creds.outputs.mode != 'skip'
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.creds.outputs.mode != 'skip'
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       # The state income tax step (docs/automation.md, step 1) parses Tax
       # Foundation's .xlsx with openpyxl, PolicyEngine's YAML with pyyaml,
       # and state PDFs with pdftotext. setup-python installs into the
       # interpreter's own site-packages, so `python3 -I` still finds them.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: steps.creds.outputs.mode != 'skip'
         with:
           python-version: "3.12"

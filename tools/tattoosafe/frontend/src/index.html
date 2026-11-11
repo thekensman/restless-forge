@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0d0d14">
   <title>TattooSafe — AR Tattoo Preview &amp; Pricing Calculator</title>
-  <meta name="description" content="Free AR tattoo preview tool. Use your camera to see how a tattoo design looks on your body in real time. Includes sizing calculator with 16 body placements and pricing estimator based on size, style, and placement.">
+  <meta name="description" content="Free AR tattoo preview tool. Use your camera to see how a tattoo design looks on your body in real time. Includes sizing calculator with 17 body placements and pricing estimator based on size, style, and placement.">
   <meta name="keywords" content="tattoo preview AR, tattoo size calculator, tattoo price estimator, tattoo placement preview, how big will my tattoo be, tattoo cost calculator, tattoo mockup camera, tattoo proportion calculator">
   <link rel="canonical" href="https://restless-forge.dev/tools/tattoosafe/">
 
@@ -69,7 +69,7 @@
     <!-- ─── Upload ─── -->
     <section class="upload" aria-label="Design upload">
       <h2 class="sr-only">Upload your design</h2>
-      <div class="upload__circle" id="drop-zone" role="button" tabindex="0" aria-label="Drop a design here or click to browse">
+      <div class="upload__circle" id="drop-zone" role="button" tabindex="0">
         <div class="upload__inner">
           <svg class="upload__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M24 32V16m0 0l-7 7m7-7l7 7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -101,7 +101,7 @@
         <label class="field__label" for="body-part-select">Body Part</label>
         <select class="field__select" id="body-part-select"></select>
         <p class="field__desc" id="body-part-desc"></p>
-        <p class="field__desc" id="max-dimensions" style="color:var(--accent-dim)"></p>
+        <p class="field__desc" id="max-dimensions" style="color:var(--accent-muted)"></p>
         <p class="fit-indicator" id="fit-indicator"></p>
       </div>
 
@@ -336,6 +336,10 @@
       an artist's judgement. A good artist will adjust your design for the body part it is going
       on, and that conversation goes better when you already know the size you are asking for is
       physically reasonable.</p>
+      <p>Why it was built, how the silhouette and the body mapping work, and where each one
+      stops being accurate are on the <a href="/tools/tattoosafe/about/">About page</a>. The
+      <a href="/tools/tattoosafe/articles/">articles</a> go further into how studios price
+      work and how to size a design to a body part.</p>
   </div>
 
   <aside class="ad-slot ad-slot--bottom" aria-label="Advertisement">

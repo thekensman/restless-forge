@@ -89,8 +89,10 @@
       <!-- Upload -->
       <div class="panel" id="upload-section">
         <h2 class="panel__title">⬡ Source</h2>
-        <div class="upload" id="drop-zone">
-          <span class="upload__icon">◈</span>
+        <!-- A div standing in for a button: role and tabindex make it reachable
+             by keyboard, and app.ts answers Enter and Space. -->
+        <div class="upload" id="drop-zone" role="button" tabindex="0">
+          <span class="upload__icon" aria-hidden="true">◈</span>
           <div class="upload__label">Drop image / GIF / video or click to upload</div>
           <p class="upload__name" id="file-name"></p>
           <img class="upload__thumb" id="file-thumb" alt="preview">
@@ -108,42 +110,42 @@
         <div class="presets" id="presets"></div>
 
         <div class="ctrl">
-          <div class="ctrl__header">Scan Lines <span class="ctrl__val" id="val-scan">60%</span></div>
+          <label class="ctrl__header" for="scan-lines">Scan Lines <span class="ctrl__val" aria-hidden="true" id="val-scan">60%</span></label>
           <input type="range" id="scan-lines" min="0" max="100" value="60">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Glow Intensity <span class="ctrl__val" id="val-glow">70%</span></div>
+          <label class="ctrl__header" for="glow">Glow Intensity <span class="ctrl__val" aria-hidden="true" id="val-glow">70%</span></label>
           <input type="range" id="glow" min="0" max="100" value="70">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Flicker <span class="ctrl__val" id="val-flicker">40%</span></div>
+          <label class="ctrl__header" for="flicker">Flicker <span class="ctrl__val" aria-hidden="true" id="val-flicker">40%</span></label>
           <input type="range" id="flicker" min="0" max="100" value="40">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Glitch <span class="ctrl__val" id="val-glitch">30%</span></div>
+          <label class="ctrl__header" for="glitch">Glitch <span class="ctrl__val" aria-hidden="true" id="val-glitch">30%</span></label>
           <input type="range" id="glitch" min="0" max="100" value="30">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Noise / Static <span class="ctrl__val" id="val-noise">25%</span></div>
+          <label class="ctrl__header" for="noise">Noise / Static <span class="ctrl__val" aria-hidden="true" id="val-noise">25%</span></label>
           <input type="range" id="noise" min="0" max="100" value="25">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Color Shift <span class="ctrl__val" id="val-shift">50%</span></div>
+          <label class="ctrl__header" for="color-shift">Color Shift <span class="ctrl__val" aria-hidden="true" id="val-shift">50%</span></label>
           <input type="range" id="color-shift" min="0" max="100" value="50">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Edge Detect <span class="ctrl__val" id="val-edge">0%</span></div>
+          <label class="ctrl__header" for="edge-detect">Edge Detect <span class="ctrl__val" aria-hidden="true" id="val-edge">0%</span></label>
           <input type="range" id="edge-detect" min="0" max="100" value="0">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Brightness <span class="ctrl__val" id="val-brightness">47%</span></div>
+          <label class="ctrl__header" for="brightness">Brightness <span class="ctrl__val" aria-hidden="true" id="val-brightness">47%</span></label>
           <input type="range" id="brightness" min="0" max="100" value="47">
         </div>
 
         <hr class="divider">
 
         <div class="ctrl">
-          <div class="ctrl__header">Hue</div>
+          <label class="ctrl__header" for="hue-select">Hue</label>
           <select id="hue-select">
             <option value="cyan">Cyan Hologram</option>
             <option value="green">Green Matrix</option>
@@ -173,15 +175,15 @@
         </div>
 
         <div class="ctrl" id="frame-count-group">
-          <div class="ctrl__header">Frames <span class="ctrl__val" id="val-frames">24</span></div>
+          <label class="ctrl__header" for="frame-count">Frames <span class="ctrl__val" aria-hidden="true" id="val-frames">24</span></label>
           <input type="range" id="frame-count" min="8" max="120" value="24" step="4">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Speed (ms/frame) <span class="ctrl__val" id="val-speed">80</span></div>
+          <label class="ctrl__header" for="speed">Speed (ms/frame) <span class="ctrl__val" aria-hidden="true" id="val-speed">80</span></label>
           <input type="range" id="speed" min="20" max="200" value="80" step="10">
         </div>
         <div class="ctrl">
-          <div class="ctrl__header">Resolution</div>
+          <label class="ctrl__header" for="resolution">Resolution</label>
           <select id="resolution">
             <option value="256">256px (fast)</option>
             <option value="400">400px</option>
@@ -227,8 +229,8 @@
     <div class="preview">
       <div class="preview__frame" id="preview-frame">
         <div class="preview__empty" id="empty-state">
-          <div class="preview__empty-icon">◈</div>
-          <p class="preview__empty-hint">Upload an image or GIF to begin</p>
+          <div class="preview__empty-icon" aria-hidden="true">◈</div>
+          <p class="preview__empty-hint">Upload an image, GIF or video to begin</p>
         </div>
         <canvas id="preview-canvas" style="display:none;max-width:100%;image-rendering:auto;"></canvas>
         <img id="preview-img" alt="Hologram preview" style="display:none;">

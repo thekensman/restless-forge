@@ -11,8 +11,8 @@
   --border: #252a35;
   --border-focus: #d4a44e;
   --text: #d8d4cc;
-  --text-dim: #7a7770;
-  --text-muted: #4a4840;
+  --text-dim: #95928b;
+  --text-muted: #8b8778;
   --accent: #d4a44e;
   --accent-dim: #a88540;
   --green: #6bbd7a;
@@ -123,6 +123,24 @@ a:hover { text-decoration: underline; }
 }
 .tab__icon { margin-right: 6px; }
 
+/* On a phone the three tabs did not fit and the bar scrolled sideways with
+   its scrollbar hidden: at 390px the second tab was cut off after "Is It" and
+   the third, Compare Two Jobs, was off-screen with nothing to say it existed.
+   Share the width three ways instead and let each label wrap under its icon. */
+@media (max-width: 640px) {
+  .tabs { padding: 16px 12px 0; gap: 4px; overflow-x: visible; }
+  .tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 4px 12px;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: normal;
+    text-align: center;
+  }
+  .tab__icon { display: block; margin: 0 0 4px; font-size: 16px; }
+}
+
 /* ─── Main & Panels ─── */
 .main { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
 .panel { padding: 36px 0; display: none; }
@@ -171,6 +189,12 @@ a:hover { text-decoration: underline; }
   transition: border-color 0.15s;
 }
 .input-group:focus-within { border-color: var(--border-focus); }
+/* A value outside the field's own min/max. app.ts clamps it for the sum and
+   sets aria-invalid, so the visitor can see the number shown is not the one
+   being used. Not :invalid, which also fires on a step mismatch: the salary
+   field steps by 1,000 and $65,500 is a perfectly good salary. */
+.input-group:has(input[aria-invalid="true"]),
+.input-group:has(input[aria-invalid="true"]):focus-within { border-color: var(--red); }
 
 .input-prefix, .input-suffix {
   font-family: var(--font-mono);

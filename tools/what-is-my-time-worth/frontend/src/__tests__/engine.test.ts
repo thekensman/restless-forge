@@ -14,6 +14,9 @@ import {
   fmtPercent,
   fmtHoursMinutes,
   fmtNumber,
+  fmtSignedCurrency,
+  commuteCostHint,
+  wageGapNote,
   taxTooltips,
   TAX_YEAR,
   STATES,
@@ -23,6 +26,7 @@ import {
   type JobInputs,
 } from "../engine";
 import { TAX } from "../../../../../data/tax";
+import { MILEAGE, CURRENT_MILEAGE_YEAR } from "../../../../../data/mileage";
 
 // ─── Defaults ────────────────────────────────────────────────
 
@@ -658,6 +662,62 @@ describe("taxTooltips", () => {
     expect(tips.fica).toContain(fmtCurrency(TAX.medicareSurtaxThreshold));
     expect(tips.fica).toContain("6.2%");
     expect(tips.fica).toContain("1.45%");
+  });
+});
+
+describe("commuteCostHint", () => {
+  // The hint was hard-coded and quoted 2025's rate ($0.70, "$14/day") through
+  // 2026. It is built from data/mileage.ts now, so these follow the data.
+  it("quotes the current IRS rate and year", () => {
+    const hint = commuteCostHint();
+    expect(hint).toContain(String(CURRENT_MILEAGE_YEAR));
+    expect(hint).toContain("$" + MILEAGE.rate.toFixed(3).replace(/0$/, "") + "/mile");
+  });
+
+  it("works the example out from that rate", () => {
+    const perDay = fmtCurrency(MILEAGE.rate * 20, 2).replace(/\.00$/, "");
+    expect(commuteCostHint()).toContain("= " + perDay + "/day");
+  });
+
+  it("reads as a rate, not as a float", () => {
+    // 0.725 * 20 is 14.499999999999998 in floating point.
+    expect(commuteCostHint()).not.toMatch(/\d\.\d{4,}/);
+  });
+});
+
+describe("wageGapNote", () => {
+  const note = (realHourlyWage: number, advertisedHourlyWage: number) =>
+    wageGapNote({
+      realHourlyWage,
+      advertisedHourlyWage,
+      wageGapPercent:
+        advertisedHourlyWage > 0 ? (advertisedHourlyWage - realHourlyWage) / advertisedHourlyWage : 0,
+    });
+
+  it("gives the share lost in the ordinary case", () => {
+    expect(note(17.88, 31.25)).toBe("vs. $31.25 advertised — you're losing 42.8% to hidden costs");
+  });
+
+  it("does not report a percentage over 100 when work costs exceed pay", () => {
+    const text = note(-76.9, 31.25);
+    expect(text).not.toContain("%");
+    expect(text).toContain("more than your take-home pay");
+  });
+
+  it("does not say 'losing' a negative share", () => {
+    expect(note(33, 31.25)).toBe("vs. $31.25 advertised");
+  });
+});
+
+describe("fmtSignedCurrency", () => {
+  it("writes the sign once, either way", () => {
+    expect(fmtSignedCurrency(3.04, 2)).toBe("+$3.04");
+    expect(fmtSignedCurrency(-4.98, 2)).toBe("-$4.98");
+    expect(fmtSignedCurrency(0, 2)).toBe("$0.00");
+  });
+
+  it("returns a dash for a non-finite value", () => {
+    expect(fmtSignedCurrency(Infinity, 2)).toBe("—");
   });
 });
 

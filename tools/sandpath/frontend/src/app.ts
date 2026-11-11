@@ -201,6 +201,13 @@ function handleFile(file: File) {
 }
 
 dropZone.addEventListener("click", () => fileInput.click());
+// The drop zone is a div with role="button" and tabindex="0", so a keyboard
+// can focus it, but until November 2026 nothing answered a key press: Enter
+// and Space did nothing, and the file picker was out of reach without a
+// pointer.
+dropZone.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+});
 fileInput.addEventListener("change", () => {
   if (fileInput.files?.[0]) handleFile(fileInput.files[0]);
 });
