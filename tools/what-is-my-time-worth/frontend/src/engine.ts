@@ -6,6 +6,7 @@
  */
 
 import { TAX, CURRENT_TAX_YEAR } from "../../../../data/tax";
+import { MILEAGE, CURRENT_MILEAGE_YEAR } from "../../../../data/mileage";
 import type { Allowance, TaxBracket } from "../../../../data/tax";
 
 // ─── Types ───────────────────────────────────────────────────
@@ -691,6 +692,40 @@ export function taxTooltips(): { federal: string; state: string; fica: string } 
   };
 }
 
+// ─── Commute Cost Hint ───────────────────────────────────────
+
+/**
+ * The hint under "Daily commute cost", built from the IRS mileage rate in
+ * data/mileage.ts so the yearly data refresh cannot leave it behind. It was
+ * hard-coded in index.html and kept quoting 2025's $0.70 a mile, and the
+ * $14 a day worked out from it, through 2026, when the rate was $0.725.
+ */
+export function commuteCostHint(): string {
+  const miles = 20;
+  // Rates are quoted to half a cent: $0.725, but $0.70 rather than $0.700.
+  const perMile = "$" + MILEAGE.rate.toFixed(3).replace(/0$/, "");
+  const perDay = fmtCurrency(MILEAGE.rate * miles, 2).replace(/\.00$/, "");
+  return `IRS rate is ${perMile}/mile for ${CURRENT_MILEAGE_YEAR}. ${miles} miles round-trip = ${perDay}/day.`;
+}
+
+// ─── Result Notes ────────────────────────────────────────────
+
+/**
+ * The line under the real hourly wage. The usual case compares it with the
+ * advertised wage. Two cases need other words: work costs above take-home pay
+ * (a negative wage, where "you're losing 346.1%" says nothing useful), and a
+ * real wage at or above the advertised one, which enough paid leave on a
+ * low-tax income can produce (the sentence then read "losing -5.0%").
+ */
+export function wageGapNote(
+  r: Pick<WageResult, "realHourlyWage" | "advertisedHourlyWage" | "wageGapPercent">
+): string {
+  const advertised = `vs. ${fmtCurrency(r.advertisedHourlyWage, 2)} advertised`;
+  if (r.realHourlyWage < 0) return `${advertised}. Your work costs are more than your take-home pay.`;
+  if (r.wageGapPercent <= 0) return advertised;
+  return `${advertised} — you're losing ${fmtPercent(r.wageGapPercent)} to hidden costs`;
+}
+
 // ─── Formatting Helpers ──────────────────────────────────────
 
 export function fmtCurrency(value: number, decimals: number = 0): string {
@@ -700,6 +735,22 @@ export function fmtCurrency(value: number, decimals: number = 0): string {
     currency: "USD",
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
+  }).format(value);
+}
+
+/**
+ * Currency with its sign written out, for a difference: "+$3.04", "-$4.98".
+ * The remote-work figure was built as "+" followed by fmtCurrency(), which
+ * printed "+-$4.98/hr" once the difference went negative.
+ */
+export function fmtSignedCurrency(value: number, decimals: number = 0): string {
+  if (!isFinite(value)) return "—";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+    signDisplay: "exceptZero",
   }).format(value);
 }
 

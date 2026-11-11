@@ -12,10 +12,13 @@ import {
   normalizeToMonthly,
   compareJobs,
   taxTooltips,
+  commuteCostHint,
+  wageGapNote,
   STATES,
   DECISION_PRESETS,
   FREQUENCY_LABELS,
   fmtCurrency,
+  fmtSignedCurrency,
   fmtPercent,
   fmtHoursMinutes,
   fmtNumber,
@@ -36,8 +39,49 @@ function $(id: string): HTMLElement {
   return el;
 }
 
+/**
+ * A field's number, held to the range the field itself declares.
+ *
+ * Every number input carries a `min` (and some a `max`), but those attributes
+ * only stop the spinner arrows: typed or pasted values came through as they
+ * were. A commute of -30 minutes raised the wage, 400 vacation days produced
+ * "$0.00, losing 100%", and 0 days a week was silently swapped for the default
+ * 5 while the field went on showing 0. The value is clamped here instead, and
+ * a field holding something outside its range is marked so the visitor can see
+ * the number on screen is not the one in the sum.
+ *
+ * An empty or unreadable field is 0, as before, which callers that need a
+ * default turn into one (`|| 5`). It is not marked: that is what a field looks
+ * like halfway through being retyped.
+ */
 function numVal(id: string): number {
-  return parseFloat(($(id) as HTMLInputElement).value) || 0;
+  const el = $(id) as HTMLInputElement;
+  const raw = parseFloat(el.value);
+  if (Number.isNaN(raw)) {
+    markRange(el, null);
+    return 0;
+  }
+  const min = el.min === "" ? -Infinity : parseFloat(el.min);
+  const max = el.max === "" ? Infinity : parseFloat(el.max);
+  const value = Math.min(max, Math.max(min, raw));
+  markRange(el, value === raw ? null : value);
+  return value;
+}
+
+function markRange(el: HTMLInputElement, used: number | null): void {
+  if (used === null) {
+    if (!el.hasAttribute("aria-invalid")) return;
+    el.removeAttribute("aria-invalid");
+    el.removeAttribute("title");
+    return;
+  }
+  el.setAttribute("aria-invalid", "true");
+  el.title = `Outside the range this field allows. The calculation uses ${used}.`;
+}
+
+/** Text typed by the visitor, made safe to place in innerHTML. */
+function esc(text: string): string {
+  return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 function strVal(id: string): string {
@@ -84,6 +128,15 @@ function applyTaxTooltips(): void {
   for (const [row, text] of Object.entries(taxTooltips())) {
     document.getElementById(`tip-${row}`)?.setAttribute("data-tip", text);
   }
+}
+
+// ─── Commute hint ────────────────────────────────────────────
+
+// Same arrangement as the tooltips: index.html holds a figure-free sentence,
+// and this puts in the IRS rate the shared data has for the current year.
+function applyCommuteHint(): void {
+  const hint = document.getElementById("commute-cost-hint");
+  if (hint) hint.textContent = commuteCostHint();
 }
 
 // ─── Tab Switching ───────────────────────────────────────────
@@ -230,26 +283,35 @@ function updateWage(): void {
   updateEnergyConverter();
 
   // ── Hero ──
-  setText("res-real-wage", fmtCurrency(r.realHourlyWage, 2));
+  // With no salary there is nothing to compare. The other inputs alone used
+  // to produce "-$2.39" here, which is also what a visitor saw every time
+  // they cleared the field to type their own figure.
+  const hasSalary = inputs.annualGrossSalary > 0;
+  setText("res-real-wage", hasSalary ? fmtCurrency(r.realHourlyWage, 2) : "—");
   setText(
     "res-wage-gap-note",
-    `vs. ${fmtCurrency(r.advertisedHourlyWage, 2)} advertised — you're losing ${fmtPercent(r.wageGapPercent)} to hidden costs`
+    hasSalary ? wageGapNote(r) : "Enter your annual gross salary to see your real hourly wage."
   );
 
   // ── Gap bar ──
+  // Held to 0–100: a negative wage made a negative width, which CSS rejects,
+  // so the bar kept whatever width the previous inputs had given it.
   const pct =
-    r.advertisedHourlyWage > 0
-      ? Math.min(100, (r.realHourlyWage / r.advertisedHourlyWage) * 100)
+    hasSalary && r.advertisedHourlyWage > 0
+      ? Math.max(0, Math.min(100, (r.realHourlyWage / r.advertisedHourlyWage) * 100))
       : 0;
   ($("gap-bar-real") as HTMLElement).style.width = `${pct}%`;
-  setText("gap-label-real", `Real: ${fmtCurrency(r.realHourlyWage, 2)}/hr`);
-  setText("gap-label-adv", `Advertised: ${fmtCurrency(r.advertisedHourlyWage, 2)}/hr`);
+  setText("gap-label-real", hasSalary ? `Real: ${fmtCurrency(r.realHourlyWage, 2)}/hr` : "Real: —");
+  setText(
+    "gap-label-adv",
+    hasSalary ? `Advertised: ${fmtCurrency(r.advertisedHourlyWage, 2)}/hr` : "Advertised: —"
+  );
 
   // ── Insights ──
   setText("res-commute-total", fmtCurrency(r.totalCommuteCostWithTime));
   setText("res-commute-hours", `${fmtNumber(r.commuteHoursPerYear)} hours of life energy`);
   setText("res-100-hours", fmtHoursMinutes(r.hoursPer100Dollars));
-  setText("res-remote-boost", `+${fmtCurrency(r.remoteWageBoost, 2)}/hr`);
+  setText("res-remote-boost", hasSalary ? `${fmtSignedCurrency(r.remoteWageBoost, 2)}/hr` : "—");
 
   // ── Breakdown ──
   setText("bd-gross", fmtCurrency(r.grossAnnual));
@@ -457,7 +519,7 @@ function renderQueueTable(): void {
       : fmtCurrency(result.adjustedTimeCost);
 
     return `<tr class="queue-row queue-row--${result.verdict}">
-      <td class="queue-row__task">${inputs.taskDescription}</td>
+      <td class="queue-row__task">${esc(inputs.taskDescription)}</td>
       <td>${FREQUENCY_LABELS[frequency]}</td>
       <td>${inputs.hoursToComplete}h</td>
       <td>${enjoymentLabels[inputs.enjoyment]}</td>
@@ -721,9 +783,33 @@ function initBreakdown(): void {
 
 // ─── Init ────────────────────────────────────────────────────
 
+// ─── Coming back to the page ─────────────────────────────────
+
+/**
+ * Recompute from whatever the form holds now.
+ *
+ * When a page is reached with Back or Forward, or restored along with its
+ * tab, the browser puts the visitor's values back into the form fields. It
+ * does that after this module has run, so init() had already computed from
+ * the HTML defaults: the page came back showing a $123,456 salary in
+ * California next to the result for the $65,000 Illinois example ($17.88
+ * where $32.53 belonged). `pageshow` fires once the fields are restored, and
+ * also when the page is taken whole from the back/forward cache, where
+ * recomputing is harmless.
+ *
+ * The wage tab goes first because the other two read its result.
+ */
+function resync(): void {
+  updateWage();
+  recalculate();
+}
+
+// ─── Init ────────────────────────────────────────────────────
+
 function init(): void {
   populateStates();
   applyTaxTooltips();
+  applyCommuteHint();
   initTabs();
   renderPresets();
   initInputListeners();
@@ -733,6 +819,7 @@ function init(): void {
   initBreakdown();
   initAddToQueue();
   recalculate("wage");
+  window.addEventListener("pageshow", resync);
 }
 
 if (document.readyState === "loading") {
