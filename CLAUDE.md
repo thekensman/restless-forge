@@ -211,7 +211,7 @@ also updating the build output checks.
 **Node 24** (`.nvmrc`). Every workflow reads the version from that file
 (`node-version-file`), so it is the one place to change it; `engines` in the
 root `package.json` states the range the toolchain accepts (Node 22.22+,
-24.15+ or 26+). The toolchain is Vite 8, Vitest 5, jsdom 31 and TypeScript 5.9
+24.15+ or 26+). The toolchain is Vite 8, Vitest 5, jsdom 31 and TypeScript 6.0
 in the root and in every tool, each with its own `package-lock.json`.
 
 ### Everything at once
