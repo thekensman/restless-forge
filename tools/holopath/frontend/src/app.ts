@@ -83,10 +83,15 @@ let isGenerating = false;
 
 // ─── Helpers ─────────────────────────────────────────────────
 
+let toastTimer: number | undefined;
 function showError(msg: string) {
   errorMsg.textContent = msg;
   errorToast.hidden = false;
-  setTimeout(() => { errorToast.hidden = true; }, 6000);
+  // One timer, restarted. Each message used to start its own, so the timer
+  // from an earlier message closed a later one early: a second bad file could
+  // show its error for under a second.
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => { errorToast.hidden = true; }, 6000);
 }
 
 function setLoading(btn: HTMLButtonElement, on: boolean) {
@@ -288,16 +293,40 @@ function setSlider(id: string, val: number) {
 
 // ─── File handling ──────────────────────────────────────────
 
-async function handleFile(file: File) {
-  const err = validateFile(file.name, file.size);
-  if (err) { showError(err); return; }
+/**
+ * Back to the empty state, after a file that could not be read.
+ *
+ * A failed load used to leave the page half-changed: the new file's name and
+ * badge sat in the source panel beside the previous file's hologram, its
+ * statistics and a working Download button, so "corrupt.png" appeared to have
+ * produced the output on screen. Nothing of the earlier source survives a
+ * failed load now, and the reason stays in the status line after the toast
+ * has closed.
+ */
+function clearSource(message: string) {
+  parsedMedia = null;
+  stopAnimation();
+  if (lastGifUrl) { URL.revokeObjectURL(lastGifUrl); lastGifUrl = null; }
+  fileNameEl.textContent = "";
+  fileThumb.removeAttribute("src");
+  dropZone.classList.remove("has-file");
+  sourceBadge.classList.remove("active");
+  showAnimatedControls(false);
+  previewCanvas.style.display = "none";
+  previewImg.style.display = "none";
+  previewImg.removeAttribute("src");
+  const videoEl = document.querySelector<HTMLVideoElement>("#preview-video");
+  if (videoEl) { videoEl.pause(); videoEl.removeAttribute("src"); videoEl.style.display = "none"; }
+  emptyState.style.display = "";
+  downloadEl.classList.remove("active");
+  statsEl.classList.remove("active");
+  progressEl.classList.remove("active");
+  previewBtn.disabled = true;
+  generateBtn.disabled = true;
+  setStatus(message, "error");
+}
 
-
-  sourceType = detectSourceType(file.name);
-  fileNameEl.textContent = file.name;
-  dropZone.classList.add("has-file");
-
-  // Show thumbnail
+function showThumbnail(file: File) {
   if (sourceType === "video") {
     const video = document.createElement("video");
     video.muted = true;
@@ -318,6 +347,20 @@ async function handleFile(file: File) {
     reader.onload = (e) => { fileThumb.src = e.target?.result as string; };
     reader.readAsDataURL(file);
   }
+}
+
+async function handleFile(file: File) {
+  const err = validateFile(file.name, file.size);
+  if (err) {
+    // The source already loaded, if there is one, is untouched and still usable.
+    showError(`${file.name}: ${err}`);
+    if (!parsedMedia) setStatus(`${file.name}: ${err}`, "error");
+    return;
+  }
+
+  sourceType = detectSourceType(file.name);
+  fileNameEl.textContent = file.name;
+  dropZone.classList.add("has-file");
 
   // Show animated-source controls
   const hasMultiFrames = sourceType === "gif" || sourceType === "video";
@@ -345,6 +388,10 @@ async function handleFile(file: File) {
     previewBtn.disabled = false;
     generateBtn.disabled = false;
 
+    // The thumbnail waits for a successful parse: it used to be read first,
+    // so a file the browser could not decode still got a (broken) thumbnail.
+    showThumbnail(file);
+
     // Auto-start preview
     emptyState.style.display = "none";
     previewImg.style.display = "none";
@@ -355,8 +402,9 @@ async function handleFile(file: File) {
 
     startAnimation();
   } catch (e: unknown) {
-    showError(e instanceof Error ? e.message : "Failed to parse file");
-    setStatus("", "error");
+    const reason = e instanceof Error ? e.message : "Failed to parse file";
+    showError(`${file.name}: ${reason}`);
+    clearSource(`Could not read ${file.name} (${reason}). Choose another file.`);
   }
 }
 
@@ -381,8 +429,18 @@ function showAnimatedControls(show: boolean) {
 }
 
 dropZone.addEventListener("click", () => fileInput.click());
+// The drop zone is a div acting as a button (role and tabindex in index.html),
+// so it needs the keys a button answers to. Without them the file picker could
+// only be opened with a pointer.
+dropZone.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+});
 fileInput.addEventListener("change", () => {
-  if (fileInput.files?.[0]) handleFile(fileInput.files[0]);
+  const file = fileInput.files?.[0];
+  // Cleared so that choosing the same file again fires `change` again, which
+  // is what a visitor does after fixing a file or dismissing an error.
+  fileInput.value = "";
+  if (file) handleFile(file);
 });
 dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
@@ -699,3 +757,15 @@ function showStats(stats: GenerateStats) {
 
 loadPresets();
 initFormatSelector();
+
+// When this page is reached with Back or Forward, the browser puts the sliders
+// and selects back where the visitor left them, after this module has run. The
+// percentages beside the sliders and the notes under the selects are written
+// from `input` and `change` events, so they stayed at their defaults: a Glow
+// slider at 95 beside a label reading 70%. Replay those events once the form
+// has been restored. With no source loaded the listeners only redraw text.
+window.addEventListener("pageshow", () => {
+  for (const [sliderId] of SLIDERS) document.getElementById(sliderId)?.dispatchEvent(new Event("input"));
+  layoutSelect.dispatchEvent(new Event("change"));
+  formatSelect.dispatchEvent(new Event("change"));
+});
