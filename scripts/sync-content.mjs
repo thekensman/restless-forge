@@ -264,6 +264,7 @@ function essayHead(slug, meta, mdPath) {
   <meta property="og:type" content="article">
   <meta property="og:url" content="${url}">
   <meta property="og:image" content="${ogImage}">
+  <meta name="twitter:card" content="summary_large_image">
 
   <script type="application/ld+json">
   {
