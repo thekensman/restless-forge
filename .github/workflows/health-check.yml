@@ -1,10 +1,23 @@
 name: Health check
 
 # Uptime + TLS + spend monitoring for restless-forge.dev. Nothing else watches
-# the droplet, so this is the "know when it's down" layer: every 30 minutes it
-# checks the homepage, a tool page, the nginx vhost fingerprint, the backend
-# API, and cert expiry, and opens (or updates) a `site-health` issue on failure
-# — GitHub's notification email is the alert channel.
+# the droplet, so this is the "know when it's down" layer: it checks the
+# homepage, a tool page, the nginx vhost fingerprint, the backend API, and cert
+# expiry, and opens (or updates) a `site-health` issue on failure — GitHub's
+# notification email is the alert channel. When a later run passes, it closes
+# that issue, so an open one always means something is wrong now.
+#
+# HOW OFTEN IT REALLY RUNS. The cron asks for every 30 minutes. GitHub does not
+# promise that for scheduled workflows: it runs them late and drops runs when
+# its runners are busy, and in November 2026 this one was actually running
+# every 3 to 10 hours. Treat it as a few checks a day, not a pager. For a
+# faster signal, use an outside uptime monitor (docs/infrastructure.md).
+#
+# Two checks need to happen once a day, not every run: the Anthropic budget
+# review and the domain's expiry date. They used to be gated on the wall
+# clock ("the first run of hour 13 UTC"), which a workflow that runs a few
+# times a day at unpredictable minutes almost never hits, so they almost never
+# ran. They have their own cron line now, and the job asks which line fired.
 #
 # It is also the slow half of the API's alerting. The backend itself pages in
 # real time through ALERT_WEBHOOK_URL (daily cap at 80% and 100%); this workflow
@@ -18,7 +31,8 @@ name: Health check
 
 on:
   schedule:
-    - cron: "13,43 * * * *"
+    - cron: "13,43 * * * *"   # uptime checks
+    - cron: "7 13 * * *"      # the same, plus the once-a-day checks (DAILY below)
   workflow_dispatch:
 
 permissions:
@@ -34,6 +48,10 @@ env:
   # The Claude API is the only thing on the site that costs per use, so this is
   # the number that protects the Anthropic balance from a slow bleed.
   MONTHLY_BUDGET_USD: "50"
+  # Alert when the domain registration has fewer than this many days left. A
+  # lapsed domain takes the whole site and its email with it, and nothing else
+  # in the repo watches the date.
+  DOMAIN_EXPIRY_WARN_DAYS: "30"
 
 jobs:
   check:
@@ -43,7 +61,9 @@ jobs:
         id: checks
         env:
           RF_METRICS_TOKEN: ${{ secrets.RF_METRICS_TOKEN }}
-          EVENT_NAME: ${{ github.event_name }}
+          # true on the daily cron line and on a manual run (clicking "Run
+          # workflow" is asking for everything).
+          DAILY: ${{ github.event.schedule == '7 13 * * *' || github.event_name == 'workflow_dispatch' }}
         run: |
           fails=""
           note() { fails="$fails- $1"$'\n'; }
@@ -109,12 +129,10 @@ jobs:
               echo "spend: today \$$spend_today / \$$cap · 30d \$$spend_30d ($gens_30d songs) · projected \$$projected/mo"
 
               # The daily cap and its 80% warning already page in real time via
-              # ALERT_WEBHOOK_URL. Repeating them here every 30 minutes until
-              # UTC midnight would bury the issue thread, so the budget review
-              # runs once a day — on the first scheduled run of hour 13 UTC.
-              # A manual run always reviews: clicking "Run workflow" is asking.
-              hh=$(date -u +%H); mm=$(date -u +%M)
-              if [ "$EVENT_NAME" = "workflow_dispatch" ] || { [ "$hh" = "13" ] && [ "$mm" -lt 30 ]; }; then
+              # ALERT_WEBHOOK_URL. Repeating them here on every run until UTC
+              # midnight would bury the issue thread, so the budget review
+              # runs once a day, on the daily cron line (see the header).
+              if [ "$DAILY" = "true" ]; then
                 if awk -v a="$spend_today" -v b="$cap" 'BEGIN{exit !(a>=b)}'; then
                   note "Daily spend cap reached: \$$spend_today of \$$cap — song generation is refusing new requests until 00:00 UTC"
                 fi
@@ -138,6 +156,25 @@ jobs:
               note "TLS cert expires in ${days} days ($end) — certbot renewal may be broken; see docs/infrastructure.md § Certificate renewal"
             fi
             echo "cert days remaining: $days"
+          fi
+
+          # Domain registration, once a day. RDAP is the registries' own lookup
+          # service (rdap.org forwards to the right one). A lookup that fails
+          # is reported in the log, not as an alert: it is someone else's
+          # service, and the next day's run asks again.
+          if [ "$DAILY" = "true" ]; then
+            expiry=$(curl -sfL --max-time 20 https://rdap.org/domain/restless-forge.dev \
+              | jq -r '[.events[]? | select(.eventAction == "expiration") | .eventDate][0] // empty' || true)
+            if [ -z "$expiry" ]; then
+              echo "domain expiry: RDAP lookup returned no expiration date (not alerting)"
+            else
+              exp_s=$(date -d "$expiry" +%s); now_s=$(date +%s)
+              ddays=$(( (exp_s - now_s) / 86400 ))
+              echo "domain days remaining: $ddays ($expiry)"
+              if [ "$ddays" -lt "$DOMAIN_EXPIRY_WARN_DAYS" ]; then
+                note "The restless-forge.dev registration expires in ${ddays} days ($expiry) — renew it at the registrar, or confirm auto-renew is on and its payment method is valid"
+              fi
+            fi
           fi
 
           if [ -n "$fails" ]; then
@@ -174,4 +211,24 @@ jobs:
               --label site-health \
               --assignee "${{ github.repository_owner }}" \
               --body-file report.md
+          fi
+
+      # An open site-health issue should mean "something is wrong now". The
+      # workflow used to open one and never close it: #54 was opened on
+      # 2026-09-01, collected 183 comments, and was still open in November,
+      # weeks after the checks had gone back to passing, so a new failure would
+      # have landed as comment 184 on a thread nobody reads.
+      - name: Close the site-health issue on recovery
+        if: steps.checks.outputs.failed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --repo "${{ github.repository }}" \
+            --label site-health --state open --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ] && [ "$existing" != "null" ]; then
+            gh issue close "$existing" --repo "${{ github.repository }}" --reason completed \
+              --comment "All checks passing again as of $(date -u '+%Y-%m-%d %H:%M UTC'). Closing; the next failure opens a new issue."
+            echo "closed issue #$existing"
+          else
+            echo "no open site-health issue"
           fi

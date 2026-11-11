@@ -41,10 +41,24 @@ state, so recovery is "make a new box and press deploy", not archaeology.
 
 ## Monitoring
 
-- `.github/workflows/health-check.yml` runs every 30 minutes: homepage
-  content, a tool page, the vhost cache-header fingerprint, and TLS cert
+- `.github/workflows/health-check.yml` checks homepage content, a tool
+  page, the vhost cache-header fingerprint, the backend API and TLS cert
   expiry (alerts at <14 days). Failures open/update a GitHub issue labeled
-  `site-health` — GitHub emails you.
+  `site-health` — GitHub emails you. The first passing run afterwards closes
+  the issue, so an open one means something is wrong now. (It never closed
+  them before November 2026: #54 sat open for ten weeks with 183 comments.)
+- **It is scheduled every 30 minutes and does not run that often.** GitHub
+  runs scheduled workflows late and drops runs when its runners are busy;
+  measured over a week in November 2026, this one ran every 3 to 10 hours. An
+  outage can go that long before the issue appears. If that matters, add an
+  outside uptime monitor (UptimeRobot, Better Stack and Cloudflare Health
+  Checks all have a free tier) pointed at the homepage and at
+  `/api/v1/rise-and-rhyme/health`; nothing in the repo needs to change.
+- Once a day (its own cron line, 13:07 UTC, and on any manual run) the same
+  workflow reviews the Anthropic budget and looks up the domain's expiry
+  date over RDAP, alerting under 30 days. The registration runs to
+  **2027-03-15**; the workflow is the only thing watching it, so check that
+  auto-renew is on at the registrar.
 - DigitalOcean side (do once, in the dashboard): enable **alert policies**
   (CPU >80%, disk >80%, droplet down → email) and **weekly automated
   backups** (~$1.20/mo) so there's always a recent snapshot you didn't
@@ -167,7 +181,12 @@ re-enabling the blanket AI block.
 
 ## Cloudflare rewrites email addresses in the HTML it serves
 
-Scrape Shield's **Email Address Obfuscation** is ON, and it rewrites the
+> **Resolved (checked 2026-11-10):** the setting is off. `/contact` and
+> `/privacy` now arrive with the address as plain text and a real `mailto:`
+> link, and no page served contains `__cf_email__`. The rest of this section
+> describes what the setting does, for the day it is switched back on.
+
+Scrape Shield's **Email Address Obfuscation** was ON, and it rewrites the
 origin's markup at the edge. An address that leaves the origin as plain
 text arrives at the client like this:
 
