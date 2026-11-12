@@ -17,7 +17,7 @@ Currently live:
 4. **TattooSafe** — AR tattoo scale/placement preview and pricing calculator
 
 Restored games live in their own section, **`/games/`** (`games/`, `docs/games.md`):
-currently *Foobar vs. the DEA* (Richard Cross and Tom Kluge, 1996) at
+currently *Foobar vs. the DEA* (Richard Cross and Tom Cruse, 1996) at
 `/games/foobar-vs-the-dea/`. They carry no ads, donation or sales links, and a
 game page ships byte for byte, never wrapped in the site layout.
 

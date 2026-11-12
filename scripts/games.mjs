@@ -16,7 +16,7 @@
  *   scripts/test-all.mjs          each game's own tests (`tests` in games.json)
  *
  * Memorials (games/memorials/<id>/) are shared by every game that names one,
- * so the Foobar sequels carry Tom Kluge's without a second copy to drift.
+ * so the Foobar sequels carry Tom Cruse's without a second copy to drift.
  */
 import {
   cpSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync,
