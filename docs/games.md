@@ -1,7 +1,7 @@
 # Restored games
 
 `/games/` holds old games restored to play in the browser. The first is *Foobar vs. the
-DEA* (Richard Cross and Tom Kluge, Funner Software, 1996), and its sequels may follow. This
+DEA* (Richard Cross and Tom Cruse, Funner Software, 1996), and its sequels may follow. This
 page covers how a game lives in the repo, how it ships, and the rules that come with the
 section. Each game's own notes (its `README.md`, `HANDOFF.md` and, for Foobar,
 `RF_INTEGRATION.md`) cover the game itself.
@@ -94,10 +94,10 @@ their own footers carry no donation links, which Foobar's harness also checks.
 
 ## Memorials
 
-`games/memorials/tom-kluge/` holds the photo from Foobar's resources (PICT 137) and its
+`games/memorials/tom-cruse/` holds the photo from Foobar's resources (PICT 137) and its
 dedication, shared by every Foobar game so the sequels carry it without a copy to drift.
 
-- A game opts in with `"memorial": "tom-kluge"` in `games.json` and a pair of markers in its
+- A game opts in with `"memorial": "tom-cruse"` in `games.json` and a pair of markers in its
   `index.html` where the block should sit (Foobar: the title screen):
 
   ```html

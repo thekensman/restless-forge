@@ -36,10 +36,10 @@ on) belongs to you and is covered by neither license.
 
 ## Restored games
 
-`games/foobar-vs-the-dea/` is © 1996-97 Richard Cross and Tom Kluge (Funner
+`games/foobar-vs-the-dea/` is © 1996-97 Richard Cross and Tom Cruse (Funner
 Software), published with Richard Cross's permission. All rights reserved. The
 fonts are under the SIL Open Font License. The same terms cover the memorial
-photo and dedication in `games/memorials/tom-kluge/`, which the game pages show.
+photo and dedication in `games/memorials/tom-cruse/`, which the game pages show.
 
 ## MIT License
 
