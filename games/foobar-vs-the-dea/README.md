@@ -1,6 +1,6 @@
 # Foobar vs. the DEA, web rebuild
 
-Original: **Funner Software, 1996.** Written by **Richard Cross** and **Tom Kluge** with
+Original: **Funner Software, 1996.** Written by **Richard Cross** and **Tom Cruse** with
 Ingemar Ragnemalm's Sprite Animation Toolkit. Dedicated to Tom's memory.
 
 This is a browser rebuild that uses the original artwork, sound, level maps and wave
@@ -168,7 +168,7 @@ that last part dispatches the visibilitychange a real browser would send.
 
 ## Credits
 
-Original game by Richard Cross and Tom Kluge, Funner Software. Sprite Animation Toolkit by
+Original game by Richard Cross and Tom Cruse, Funner Software. Sprite Animation Toolkit by
 Ingemar Ragnemalm. The music loops are short samples of commercial records, kept because
 this is a non-commercial memorial with no ads. They will be removed on request, through the
 contact page on restless-forge.dev.

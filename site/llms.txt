@@ -23,7 +23,7 @@ All tools: https://restless-forge.dev/tools/
 
 Old games restored to play in the browser, free and without ads.
 
-- [Foobar vs. the DEA](https://restless-forge.dev/games/foobar-vs-the-dea/) (Funner Software, 1996): Richard Cross and Tom Kluge’s Mac shooter, rebuilt for the browser from the original code.
+- [Foobar vs. the DEA](https://restless-forge.dev/games/foobar-vs-the-dea/) (Funner Software, 1996): Richard Cross and Tom Cruse’s Mac shooter, rebuilt for the browser from the original code.
 
 All games: https://restless-forge.dev/games/
 

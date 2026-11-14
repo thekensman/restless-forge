@@ -25,7 +25,7 @@ repo (layout, sync, checks, sequels): `docs/games.md`.
 ## What this is
 
 *Foobar vs. the DEA* is a Classic Mac OS shooter that Ken's brother Richard Cross wrote with
-his friend Tom Kluge in 1996 and 1997, as Funner Software. Tom died while moving to California
+his friend Tom Cruse in 1996 and 1997, as Funner Software. Tom died while moving to California
 and the game is dedicated to him. The rebuild runs in the browser from the original artwork,
 sound, level maps and wave tables, and since build 22 its rules are a port of the original
 68k code. Richard has approved it for release. On RF it is a memorial, and it may be the first
@@ -104,8 +104,8 @@ one is fine for search, since the title carries the full name.
 A normal RF page in the shared layout, with:
 
 - one entry for Foobar: `assets/ui/share.png` as the image, the title, a line such as "Richard
-  Cross and Tom Kluge's 1996 Mac shooter, rebuilt from the original code", and "In memory of
-  Tom Kluge"
+  Cross and Tom Cruse's 1996 Mac shooter, rebuilt from the original code", and "In memory of
+  Tom Cruse"
 - a sentence on what the section is: old games restored to play in the browser, free and
   without ads
 - the monetisation override switched on (below)

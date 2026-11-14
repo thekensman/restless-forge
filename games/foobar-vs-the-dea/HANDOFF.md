@@ -5,7 +5,7 @@ Status as of November 2026. For a fresh chat that picks this up.
 ## What this is
 
 A browser rebuild of *Foobar vs. the DEA*, a Classic Mac OS vertical shooter by Richard
-Cross (Ken's brother) and Tom Kluge of Funner Software, 1996/97, written with Ingemar
+Cross (Ken's brother) and Tom Cruse of Funner Software, 1996/97, written with Ingemar
 Ragnemalm's Sprite Animation Toolkit (SAT). Tom died while moving to California and the game
 is dedicated to him. The rebuild is a non-commercial memorial on restless-forge.dev at
 `/games/foobar-vs-the-dea/`, and its source lives in the restless-forge repo at
@@ -113,7 +113,7 @@ footer shows the build number and a red bar appears for any uncaught error. F2 d
 - The page keeps its own footer and gets no RF header or nav (option A in
   `RF_INTEGRATION.md`). The footer links back to the site.
 - The memorial (the photo from the original's resources that was `PICT_137`, and the
-  dedication) is shared by every Foobar game. It lives in `games/memorials/tom-kluge/` in the
+  dedication) is shared by every Foobar game. It lives in `games/memorials/tom-cruse/` in the
   RF repo, and `npm run sync` writes it into the title screen and copies the photo to
   `assets/memorial/`. Edit it there, not in this page.
 - The game, music included, is public in the RF repo. If a takedown ever needs a file gone

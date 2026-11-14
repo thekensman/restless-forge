@@ -1,9 +1,0 @@
-{
-  "_note": "Shown on the title screen of every game whose entry in games/games.json names this memorial. npm run sync writes the block into that game's index.html and copies photo.png to its assets/memorial/tom-kluge.png. Edit it here, never in a game page. The photo is PICT 137 from the original Foobar vs. the DEA resource fork, with its metadata chunk removed.",
-  "photo": "photo.png",
-  "photoAlt": "Richard Cross and Tom Kluge",
-  "lines": [
-    "In memory of Tom Kluge, LSU Physics ’95.",
-    "Foobar was something he was proud of."
-  ]
-}

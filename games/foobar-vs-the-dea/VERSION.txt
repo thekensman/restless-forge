@@ -26,6 +26,10 @@ CHANGED IN 26
     resumes on the next tap, not only a "suspended" one.
 
 AFTER BUILD 26 WENT LIVE (index.html only, never cached, so still 26)
+  - Tom's surname is Cruse. Kluge was a joke between him and Richard, so the
+    memorial, the credits, the page's descriptions and the /games/ card now
+    use his real name. The memorial lives in games/memorials/tom-cruse/ and
+    its photo ships as assets/memorial/tom-cruse.png.
   - back on the title screen after a game, the side panel resets to what a
     new game starts with. It used to keep the last game's lives, score,
     level and boss.
@@ -42,7 +46,7 @@ no cached ?v=25 file can be stale)
   - <title> carries the site's suffix, and the footer's Restless Forge link
     opens in the same tab.
   - memorial: the photo that was assets/ui/PICT_137.png now sits beside the
-    dedication on the title screen. Its source is games/memorials/tom-kluge/
+    dedication on the title screen. Its source is games/memorials/tom-cruse/
     in the RF repo, shared with the Foobar sequels; npm run sync writes the
     block into index.html and copies the photo to assets/memorial/. It is no
     longer in the preload manifest.

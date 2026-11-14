@@ -6,10 +6,10 @@
       "title": "Foobar vs. the DEA",
       "studio": "Funner Software",
       "year": 1996,
-      "desc": "Richard Cross and Tom Kluge’s Mac shooter, rebuilt for the browser from the original code.",
+      "desc": "Richard Cross and Tom Cruse’s Mac shooter, rebuilt for the browser from the original code.",
       "image": "assets/ui/share.png",
       "imageAlt": "The Foobar vs. the DEA title logo next to three red jets flying over the level 1 desert canal.",
-      "memorial": "tom-kluge",
+      "memorial": "tom-cruse",
       "files": ["index.html", "js", "data", "assets"],
       "tests": ["test/harness.mjs", "test/soak.mjs", "test/boot_e2e.mjs"]
     }
