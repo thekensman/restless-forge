@@ -75,9 +75,10 @@ clothing covers the skin.
 Three things come with that. It downloads about 30 MB from this site the first
 time. It finds you by your face, so the camera has to see your face and the
 body part together, which means propping the phone up or using a mirror. And it
-follows nine placements: inner and outer forearm, upper arm, shoulder, chest,
-sternum, thigh, calf and the face. Its size comes from the height you entered
-and typical body proportions, so for an exact size the card calibration is
+follows eleven placements: inner and outer forearm, upper arm, shoulder, wrist,
+back of the hand, chest, sternum, thigh, calf and the face. Its size comes from
+the height you entered and typical body proportions, so for an exact size the
+card calibration is
 still the way.
 
 The face works differently. A separate face model maps 478 points across your
@@ -85,6 +86,14 @@ face into a mesh of about 900 triangles, and the design is drawn onto that mesh
 piece by piece, so it follows the shape of the cheekbone and nose. It works at
 selfie distance, adds 4 MB the first time you pick the face, and sizes the
 design against an average adult face.
+
+The wrist and the back of the hand work differently again. A hand model finds
+21 points on a hand, close up and with no face in view. The design is fitted to
+the wrist and knuckles, so it turns and tilts with the hand, travels round the
+wrist as the wrist turns, and goes out of sight when the other side faces the
+camera. The same model tells an inner forearm from an outer one when your hand
+is large enough in the picture. It adds 8 MB the first time you pick a forearm,
+the wrist or the hand.
 
 ## Your data
 
@@ -103,8 +112,8 @@ change. Full details in the [privacy policy](/privacy) and
 **It is a preview, not a simulation.** The standard overlay does not track your
 arm or respond to how skin moves, and its curve setting bends the design around
 a cylinder whose curvature you choose. Full AR follows the limb and measures its
-width, but only from far enough away to see your face, and its size is an
-estimate from your height. Treat placement and scale as a good approximation,
+width, but (the hand, wrist and face aside) only from far enough away to see
+your face, and its size is an estimate from your height. Treat placement and scale as a good approximation,
 not a rendering.
 
 **Lighting affects the illusion.** Compositing a flat image onto a lit body

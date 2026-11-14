@@ -20,12 +20,17 @@
 
 import { removeFlatBackground, invertForDarkBackdrop, getBodyPart, MIN_TATTOO_CM, MAX_TATTOO_CM } from "./engine";
 import {
-  AR_PLACEMENTS, MASK_CLASS, OneEuro, canvasToVideo, computeAnchor, isLimb, maskRunWidth, pickSide,
-  unwrapAngle, videoToCanvas, wrapSpanFor, type Anchor, type Crop, type Pt, type Side,
+  AR_PLACEMENTS, LM, MASK_CLASS, OneEuro, canvasToVideo, computeAnchor, isLimb, maskRunWidth, pickSide,
+  unwrapAngle, videoToCanvas, wrapSpanFor, type Anchor, type Crop, type Landmark, type Pt, type Side,
 } from "./ar-anchor";
 import {
   CHEEK_LANDMARK, affineFromTriangles, cmPerUv, compose, designToUv, faceAxes, facingSign, uvOf, windingOf,
 } from "./ar-face";
+import {
+  PALM_POINTS, backFacing, computeRolledStrips, forearmFace, handCenterCm, handLengthCm, isHandPlacement,
+  limbRadiusCm, nearestPoint, palmAffine, palmFacing, palmNormal, pickHand, rollAbout, rolledShadeAt, sideGate,
+  toVideoPx, wrapPi, wristAnchor, type HandObservation,
+} from "./ar-hand";
 // Type-only: the runtime chunk loads when the visitor turns Full AR on.
 import type { Tracker, TrackerOutput } from "./ar-tracking";
 
@@ -307,7 +312,10 @@ interface ArSession {
   uncoveredImg: ImageData | null;
   /** ?ar-debug: the categories tinted, drawn over the feed. */
   tint: HTMLCanvasElement | null;
-  filters: { x: OneEuro; y: OneEuro; angle: OneEuro; scale: OneEuro; fore: OneEuro; width: OneEuro };
+  filters: {
+    x: OneEuro; y: OneEuro; angle: OneEuro; scale: OneEuro; fore: OneEuro; width: OneEuro;
+    roll: OneEuro; facing: OneEuro;
+  };
   /** Face placement: the 478 smoothed landmarks in canvas px, null while no face is found. */
   face: Pt[] | null;
   faceFilters: OneEuro[] | null;
@@ -315,14 +323,30 @@ interface ArSession {
   faceCenter: Pt | null;
   /** Face model download/start status, for the hint; "" once ready. */
   faceStatus: string;
+  /** Hand and wrist placements: the hand being followed, its five palm points smoothed, canvas px. */
+  hand: { side: Side; palm: Pt[] } | null;
+  handFilters: OneEuro[] | null;
+  /** Hand model download/start status; "" once ready. Shown for the hand and wrist placements only. */
+  handStatus: string;
+  /** Wrist: the palm's turn about the arm, radians (0 = palm to the camera); null until a hand is found. */
+  roll: number | null;
+  /** Forearm: how squarely the palm of the followed arm faces the camera, -1…1; null while no hand is matched. */
+  palmFacing: number | null;
+  palmSeen: number;
+  /** The design is on the side turned away from the camera, so nothing is drawn. */
+  hidden: boolean;
 }
 
 const FACE = "face";
+const HAND = "hand";
+const WRIST = "wrist";
 
 /** A body part on screen for longer than this without being found is "lost". */
 const AR_LOST_MS = 600;
 /** How far the design can be nudged from its anchor, cm. */
 const AR_MAX_OFFSET_CM = 30;
+/** A forearm keeps the side it last showed for this long after its hand goes out of view. */
+const AR_SIDE_HOLD_MS = 3000;
 /**
  * `?ar-debug` in the page URL tints the segmentation over the feed (skin
  * peach, clothes blue, face pink, hair brown), to check on a real device that
@@ -332,7 +356,7 @@ const AR_DEBUG = typeof location !== "undefined" && new URLSearchParams(location
 const DEBUG_TINT: Record<number, [number, number, number, number]> = {
   1: [140, 80, 20, 110], 2: [255, 170, 120, 110], 3: [255, 110, 150, 110], 4: [60, 120, 255, 110],
 };
-const AR_PLACEMENT_LIST = "inner or outer forearm, upper arm, shoulder, chest, sternum, thigh, calf or face";
+const AR_PLACEMENT_LIST = "inner or outer forearm, upper arm, shoulder, wrist, back of the hand, chest, sternum, thigh, calf or face";
 
 export function setupCameraPreview(
   getRotation: () => number,
@@ -381,6 +405,7 @@ export function setupCameraPreview(
   const clothesLabel = document.querySelector<HTMLElement>("#ar-clothes-label");
   const progress = document.querySelector<HTMLProgressElement>("#ar-progress");
   let wrapCanvas: HTMLCanvasElement | null = null;
+  let decalCanvas: HTMLCanvasElement | null = null;
   let clipCanvas: HTMLCanvasElement | null = null;
   let designProc: HTMLCanvasElement | null = null;
 
@@ -479,9 +504,11 @@ export function setupCameraPreview(
     refs.stopBtn.hidden = !active;
     refs.shotBtn.hidden = !active;
     if (calBtn) calBtn.hidden = !active || ar !== null;
-    // On the face, the mesh does the curving and there is no clothing to clip.
-    const faceAr = ar !== null && placementId === FACE;
-    for (const el of [wrapLabel, curveLabel]) if (el) el.hidden = !active || faceAr;
+    // On the face the mesh does the curving, the back of a hand is flat, and
+    // neither has clothing to clip. The wrist's curve comes from its own size.
+    const flatAr = ar !== null && (placementId === FACE || placementId === HAND);
+    if (wrapLabel) wrapLabel.hidden = !active || flatAr;
+    if (curveLabel) curveLabel.hidden = !active || flatAr || (ar !== null && placementId === WRIST);
     if (removeBgLabel) removeBgLabel.hidden = !active;
     if (flipBtn) flipBtn.hidden = !active;
     if (arBtn) {
@@ -490,7 +517,7 @@ export function setupCameraPreview(
     }
     if (arStdBtn) arStdBtn.hidden = ar === null;
     if (sideLabel) sideLabel.hidden = ar === null;
-    if (clothesLabel) clothesLabel.hidden = ar === null || faceAr;
+    if (clothesLabel) clothesLabel.hidden = ar === null || flatAr;
     if (progress) progress.hidden = !arLoading;
   }
 
@@ -623,7 +650,19 @@ export function setupCameraPreview(
   const newFilters = (): ArSession["filters"] => ({
     x: new OneEuro(1.2, 0.01), y: new OneEuro(1.2, 0.01), angle: new OneEuro(1.2, 0.3),
     scale: new OneEuro(0.4, 0), fore: new OneEuro(0.6, 0), width: new OneEuro(0.6, 0),
+    roll: new OneEuro(1.2, 0.3), facing: new OneEuro(1, 0.3),
   });
+
+  // ?ar-debug: how long each model took on its last frames, ms (a running average), read through tsAr().
+  const debugMs: Record<string, number> = {};
+  function timed<T>(label: string, run: () => T): T {
+    if (!AR_DEBUG) return run();
+    const t0 = performance.now();
+    const out = run();
+    const ms = performance.now() - t0;
+    debugMs[label] = label in debugMs ? debugMs[label] * 0.8 + ms * 0.2 : ms;
+    return out;
+  }
 
   function resetTracking(): void {
     if (!ar) return;
@@ -634,6 +673,11 @@ export function setupCameraPreview(
     ar.filters = newFilters();
     ar.face = null;
     ar.faceFilters = null;
+    ar.hand = null;
+    ar.handFilters = null;
+    ar.roll = null;
+    ar.palmFacing = null;
+    ar.hidden = false;
   }
 
   const sideChoice = (): Side | "auto" => {
@@ -708,12 +752,17 @@ export function setupCameraPreview(
       trackFace(now, crop);
       return;
     }
+    if (isHandPlacement(placementId)) {
+      trackHand(now, crop);
+      return;
+    }
     const spec = AR_PLACEMENTS[placementId];
     const wantMask = !!spec && ar.frame % 2 === 0 &&
       (clothesToggle?.checked === true || wrapToggle?.checked === true);
     let out: TrackerOutput;
     try {
-      out = ar.tracker.detect(video, now, wantMask);
+      const session = ar, v = video;
+      out = timed(wantMask ? "pose+mask" : "pose", () => session.tracker.detect(v, now, { pose: true, mask: wantMask }));
     } catch (e) {
       endAr();
       onError(`Body mapping stopped (${(e as Error).message}). The standard preview still works.`);
@@ -727,6 +776,9 @@ export function setupCameraPreview(
       const pts = out.landmarks.map((p) => ({ ...videoToCanvas(p.x, p.y, vw, vh, crop, cw, ch, mirror), visibility: p.visibility }));
       ar.side = pickSide(spec, pts, sideChoice(), ar.side);
       raw = computeAnchor(placementId, pts, heightCm, ar.side);
+      // Which side of the arm is showing changes slowly: the hand model looks every
+      // fourth frame, on one the segmenter (even frames) leaves free.
+      if (raw && ar.side && forearmFace(placementId) && ar.frame % 4 === 1) trackForearmSide(now, crop, pts, ar.side);
     }
     if (!raw) {
       if (ar.anchor && now - ar.lastSeen > AR_LOST_MS) resetTracking();
@@ -746,6 +798,121 @@ export function setupCameraPreview(
     if (spec.kind === "limb" && out.mask) {
       const wpx = measureLimb(ar.anchor, crop);
       if (wpx !== null) ar.limbWidth = f.width.filter(wpx, now);
+    }
+  }
+
+  /** Start the hand model's download once; the hand and wrist hints report on it. */
+  function ensureHand(session: ArSession): void {
+    if (session.handStatus) return; // on its way, or failed (said once, until another placement is picked)
+    session.handStatus = "Downloading hand mapping…";
+    const mb = (n: number): string => (n / 1e6).toFixed(1);
+    session.tracker.loadHand((loaded, total) => {
+      session.handStatus = loaded >= total ? "Starting hand mapping…"
+        : `Downloading hand mapping: ${mb(loaded)} of ${mb(total)} MB`;
+    }).then(() => { session.handStatus = ""; }).catch((e: Error) => {
+      session.handStatus = `Hand mapping couldn't start on this device (${e.message}). ` +
+        "Pick another placement, or switch to the standard preview.";
+    });
+  }
+
+  /**
+   * Back of the hand and wrist: follow the hand itself. The body model is not
+   * run, so nothing else has to be in view.
+   */
+  function trackHand(now: number, crop: Crop): void {
+    if (!ar || !video) return;
+    const session = ar;
+    if (!session.tracker.handReady()) {
+      ensureHand(session);
+      return;
+    }
+    const wrist = placementId === WRIST;
+    let hands: HandObservation[];
+    try {
+      // A sleeve can cover a wrist; nothing covers the back of a hand.
+      if (wrist && clothesToggle?.checked === true && session.frame % 2 === 0) {
+        const v = video;
+        const out = timed("mask", () => session.tracker.detect(v, now, { pose: false, mask: true }));
+        if (out.mask) takeMask(out.mask);
+      }
+      const v = video;
+      // One hand to follow unless the visitor named a side: then the other one has to be told apart.
+      const maxHands = sideChoice() === "auto" ? 1 : 2;
+      hands = timed("hand", () => session.tracker.detectHands(v, now, maxHands));
+    } catch (e) {
+      endAr();
+      onError(`Hand mapping stopped (${(e as Error).message}). The standard preview still works.`);
+      return;
+    }
+    const i = pickHand(hands, sideChoice(), session.hand?.side ?? null);
+    if (i < 0) {
+      if (session.hand && now - session.lastSeen > AR_LOST_MS) resetTracking();
+      return;
+    }
+    const h = hands[i];
+    const cw = refs.canvas.width, ch = refs.canvas.height;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (session.hand && session.hand.side !== h.side) {
+      // The other hand took over: don't glide the design across from the first.
+      session.handFilters = null;
+      session.filters = newFilters();
+      session.roll = null;
+    }
+    const f = (session.handFilters ??= PALM_POINTS.flatMap(() => [new OneEuro(1.5, 0.02), new OneEuro(1.5, 0.02)]));
+    const palm = PALM_POINTS.map((idx, k) => {
+      const c = videoToCanvas(h.lm[idx].x, h.lm[idx].y, vw, vh, crop, cw, ch, mirror);
+      return { x: f[2 * k].filter(c.x, now), y: f[2 * k + 1].filter(c.y, now) };
+    });
+    session.hand = { side: h.side, palm };
+    session.lastSeen = now;
+    if (!wrist) return;
+    const m = palmAffine(palm, h.side, heightCm);
+    const a = m && wristAnchor(palm, m, h.side, heightCm);
+    const n = palmNormal(toVideoPx(h.lm, vw, vh), h.side);
+    if (!a || !n) return;
+    session.anchor = a;
+    const raw = rollAbout({ x: mirror ? -n.x : n.x, y: n.y, z: n.z }, a.angle);
+    session.roll = session.filters.roll.filter(session.roll === null ? raw : unwrapAngle(session.roll, raw), now);
+  }
+
+  /**
+   * Inner and outer forearm: the body model cannot tell which side of the arm
+   * is showing, but the hand on the end of it can. Finds the hand at the
+   * followed arm's wrist and notes which way its palm faces. Until the hand
+   * model has loaded, and whenever the hand is too small or out of view, the
+   * design shows on whichever side faces the camera, as it always did.
+   *
+   * Which hand it is (left or right) is the hand model's own reading, taken
+   * from the hand close up. The body model's naming of the arm is only the
+   * fallback: on a photo of crossed arms it called a right arm the left one,
+   * which turned the palm into the back of the hand and hid the design.
+   */
+  function trackForearmSide(now: number, crop: Crop, pts: Landmark[], side: Side): void {
+    if (!ar || !video) return;
+    const session = ar;
+    if (!session.tracker.handReady()) {
+      ensureHand(session);
+      return;
+    }
+    const s = side === "left" ? 0 : 1;
+    const elbow = pts[[LM.L_ELBOW, LM.R_ELBOW][s]], wrist = pts[[LM.L_WRIST, LM.R_WRIST][s]];
+    const vw = video.videoWidth, vh = video.videoHeight;
+    let hands: HandObservation[] = [];
+    try {
+      const v = video;
+      hands = timed("hand", () => session.tracker.detectHands(v, now, 2));
+    } catch {
+      // The forearm works without its side; the body model reports its own failures.
+    }
+    const at = hands.map((h) => videoToCanvas(h.lm[0].x, h.lm[0].y, vw, vh, crop, refs.canvas.width, refs.canvas.height, mirror));
+    const i = nearestPoint(at, wrist, 0.5 * Math.hypot(elbow.x - wrist.x, elbow.y - wrist.y));
+    const n = i >= 0 ? palmNormal(toVideoPx(hands[i].lm, vw, vh), hands[i].score >= 0.8 ? hands[i].side : side) : null;
+    if (n) {
+      session.palmFacing = session.filters.facing.filter(palmFacing(n), now);
+      session.palmSeen = now;
+    } else if (session.palmFacing !== null && now - session.palmSeen > AR_SIDE_HOLD_MS) {
+      session.palmFacing = null;
+      session.filters.facing.reset();
     }
   }
 
@@ -891,23 +1058,143 @@ export function setupCameraPreview(
     c.restore();
   }
 
+  /**
+   * Back of the hand: the design is laid out in centimetres on the back of
+   * the hand and carried to the screen by the transform fitted to the wrist
+   * and knuckles, so it turns, tilts and foreshortens with the hand. Nothing
+   * is drawn while the palm is showing.
+   */
+  function drawHand(): void {
+    if (!ar || !ctx || !design) return;
+    const h = ar.hand;
+    const m = h && palmAffine(h.palm, h.side, heightCm);
+    if (!h || !m) return;
+    const facing = backFacing(m, mirror);
+    ar.hidden = facing <= 0.05;
+    if (ar.hidden) return;
+    const c0 = handCenterCm(h.side, heightCm);
+    // Flipped in a mirrored view so the design reads the right way round, as on the face.
+    const toCm = designToUv(design.naturalWidth, design.naturalHeight,
+      { x: c0.x + ar.offset.u, y: c0.y + ar.offset.v }, tattooWCm, tattooHCm, getRotation(), { u: 1, v: 1 }, mirror);
+    ctx.save();
+    ctx.globalCompositeOperation = "multiply";
+    // Fades out as the hand comes edge on, where the knuckles stop being reliable.
+    ctx.globalAlpha = getOpacity() * Math.min(1, facing / 0.3);
+    ctx.setTransform(...compose(m, toCm));
+    ctx.drawImage(designProc ?? design, 0, 0);
+    ctx.restore();
+  }
+
+  /**
+   * Paint the design on a limb that has turned: c's origin is on the limb's
+   * axis, x runs across it. The design's middle is `turn` radians round the
+   * limb from the side facing the camera, so it slides toward the edge as the
+   * limb turns and is gone once it is round the back. Curved, it wraps the
+   * limb; flat, it stays a flat sticker that narrows as it turns away.
+   * Returns the x range drawn, or null when nothing is in view.
+   */
+  function paintRolled(
+    c: CanvasRenderingContext2D, w: number, h: number, radius: number, turn: number, curved: boolean
+  ): { x0: number; x1: number } | null {
+    if (!design) return null;
+    const src: CanvasImageSource = designProc ?? design;
+    const r = (getRotation() * Math.PI) / 180;
+    // The rotated design's bounding box: what the limb carries round.
+    const bw = Math.abs(w * Math.cos(r)) + Math.abs(h * Math.sin(r));
+    const bh = Math.abs(w * Math.sin(r)) + Math.abs(h * Math.cos(r));
+    if (!curved) {
+      const facing = Math.cos(turn);
+      if (facing <= 0.02) return null;
+      const x = radius * Math.sin(turn);
+      c.save();
+      c.translate(x, 0);
+      c.scale(facing, 1);
+      c.rotate(r);
+      c.globalAlpha *= Math.min(1, facing / 0.3);
+      c.drawImage(src, -w / 2, -h / 2, w, h);
+      c.restore();
+      return { x0: x - (bw * facing) / 2, x1: x + (bw * facing) / 2 };
+    }
+    // The design, turned as the visitor set it, on a canvas of its own; strips of that wrap the limb.
+    const k = Math.min(1, 1024 / Math.max(bw, bh, 1));
+    const decal = (decalCanvas ??= document.createElement("canvas"));
+    const dw = Math.max(2, Math.ceil(bw * k)), dh = Math.max(2, Math.ceil(bh * k));
+    if (decal.width !== dw || decal.height !== dh) {
+      decal.width = dw;
+      decal.height = dh;
+    }
+    const dctx = decal.getContext("2d");
+    if (!dctx) return null;
+    dctx.setTransform(1, 0, 0, 1, 0, 0);
+    dctx.clearRect(0, 0, dw, dh);
+    dctx.translate(dw / 2, dh / 2);
+    dctx.scale(k, k);
+    dctx.rotate(r);
+    dctx.drawImage(src, -w / 2, -h / 2, w, h);
+    dctx.setTransform(1, 0, 0, 1, 0, 0);
+    const pieces = computeRolledStrips(dw, bw, radius, turn, 64);
+    const off = (wrapCanvas ??= document.createElement("canvas"));
+    const octx = off.getContext("2d");
+    if (!pieces.length || !octx) return null;
+    for (const p of pieces) {
+      const pw = p.x1 - p.x0;
+      const offW = Math.max(2, Math.ceil(pw)), offH = Math.max(2, Math.ceil(bh));
+      if (off.width !== offW || off.height !== offH) {
+        off.width = offW;
+        off.height = offH;
+      }
+      octx.globalCompositeOperation = "source-over";
+      octx.clearRect(0, 0, offW, offH);
+      for (const st of p.strips) {
+        if (st.u1 - st.u0 < 1e-6) continue;
+        octx.drawImage(decal, st.u0, 0, st.u1 - st.u0, dh, ((st.x0 - p.x0) / pw) * offW, 0, ((st.x1 - st.x0) / pw) * offW, offH);
+      }
+      const g = octx.createLinearGradient(0, 0, offW, 0);
+      for (let i = 0; i <= 8; i++) {
+        g.addColorStop(i / 8, `rgba(0,0,0,${rolledShadeAt(p.x0 + (pw * i) / 8, radius).toFixed(3)})`);
+      }
+      octx.globalCompositeOperation = "destination-in";
+      octx.fillStyle = g;
+      octx.fillRect(0, 0, offW, offH);
+      octx.globalCompositeOperation = "source-over";
+      c.drawImage(off, p.x0, -bh / 2, pw, bh);
+    }
+    return { x0: Math.min(...pieces.map((p) => p.x0)), x1: Math.max(...pieces.map((p) => p.x1)) };
+  }
+
+  /** Radius of the wrist, cm, for the height entered. */
+  const wristRadiusCm = (): number => limbRadiusCm(getBodyPart(WRIST)?.circumferenceCm ?? 17, heightCm);
+
   function drawTracked(crop: Crop): void {
     if (!ar || !design || !ctx) return;
     if (placementId === FACE) {
       drawFace();
       return;
     }
-    const a = ar.anchor;
-    if (!AR_PLACEMENTS[placementId] || !a) {
-      // Untracked placement: the design stays where the visitor drags it.
-      if (!AR_PLACEMENTS[placementId]) drawStandard(ctx);
+    if (placementId === HAND) {
+      drawHand();
       return;
     }
+    const a = ar.anchor;
+    const followed = placementId in AR_PLACEMENTS || placementId === WRIST;
+    if (!followed || !a) {
+      // Untracked placement: the design stays where the visitor drags it.
+      if (!followed) drawStandard(ctx);
+      return;
+    }
+    // A forearm design is on one side of the arm: gone while the other side is showing.
+    const face = forearmFace(placementId);
+    const vis = face && ar.palmFacing !== null ? sideGate(face === "palm" ? ar.palmFacing : -ar.palmFacing) : 1;
+    ar.hidden = vis <= 0;
+    if (ar.hidden) return;
+    const alpha = getOpacity() * vis;
     const w = tattooWCm * a.pxPerCm;
     const h = tattooHCm * a.pxPerCm;
     const across = { x: Math.cos(a.angle), y: Math.sin(a.angle) };
     const along = { x: -Math.sin(a.angle), y: Math.cos(a.angle) };
-    const du = ar.offset.u * a.pxPerCm, dv = ar.offset.v * a.pxPerCm * a.foreshorten;
+    // The wrist turns with the hand, so there the nudge across the limb goes round it instead.
+    const rolled = placementId === WRIST && ar.roll !== null;
+    const du = rolled ? 0 : ar.offset.u * a.pxPerCm, dv = ar.offset.v * a.pxPerCm * a.foreshorten;
     const cx = a.x + across.x * du + along.x * dv;
     const cy = a.y + across.y * du + along.y * dv;
     const span = !wrapToggle?.checked ? 0
@@ -930,26 +1217,38 @@ export function setupCameraPreview(
     // foreshortened, then apply the visitor's own rotation on the skin.
     target.rotate(a.angle);
     target.scale(1, a.foreshorten);
-    target.rotate((getRotation() * Math.PI) / 180);
-    if (!clip) {
+    if (target === ctx) {
       target.globalCompositeOperation = "multiply";
-      target.globalAlpha = getOpacity();
+      target.globalAlpha = alpha;
     }
-    const dw = paintDesign(target, w, h, span);
+    let mid = 0, dw = 0;
+    if (rolled) {
+      const radiusCm = wristRadiusCm();
+      const ext = paintRolled(target, w, h, radiusCm * a.pxPerCm, wrapPi((ar.roll ?? 0) + ar.offset.u / radiusCm),
+                              wrapToggle?.checked === true);
+      ar.hidden = ext === null;
+      if (ext) {
+        mid = (ext.x0 + ext.x1) / 2;
+        dw = ext.x1 - ext.x0;
+      }
+    } else {
+      target.rotate((getRotation() * Math.PI) / 180);
+      dw = paintDesign(target, w, h, span);
+    }
     target.restore();
-    if (clip && clipCanvas) {
+    if (target !== ctx) {
       target.globalCompositeOperation = "destination-in";
       drawMaskCanvas(target, ar.uncovered, crop);
       target.globalCompositeOperation = "source-over";
       ctx.save();
       ctx.globalCompositeOperation = "multiply";
-      ctx.globalAlpha = getOpacity();
-      ctx.drawImage(clipCanvas, 0, 0);
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(clipCanvas!, 0, 0);
       ctx.restore();
     }
     Object.assign(drawn, {
-      x: cx, y: cy, w: dw, h: h * a.foreshorten,
-      rotation: (a.angle * 180) / Math.PI + getRotation(),
+      x: cx + across.x * mid, y: cy + across.y * mid, w: dw, h: h * a.foreshorten,
+      rotation: (a.angle * 180) / Math.PI + (rolled ? 0 : getRotation()),
     });
   }
 
@@ -1139,8 +1438,8 @@ export function setupCameraPreview(
       pinchStartW = tattooWCm;
       pinchStartH = tattooHCm;
       dragging = false;
-    } else if (calibrating || (ar && placementId === FACE)) {
-      dragging = true; // the card outline, or the design on a face, moves from anywhere
+    } else if (calibrating || (ar && (placementId === FACE || isHandPlacement(placementId)))) {
+      dragging = true; // the card outline, or the design on a face, hand or wrist, moves from anywhere
     } else if (design && hitTest(p.x, p.y, drawn, drawn.w, drawn.h, drawn.rotation)) {
       dragging = true;
     }
@@ -1169,11 +1468,24 @@ export function setupCameraPreview(
             y: clamp01(ar.faceCenter.y + (dx * ax.ev.x + dy * ax.ev.y) / ax.sv),
           };
         }
-      } else if (ar && a && AR_PLACEMENTS[placementId]) {
+      } else if (ar && placementId === HAND) {
+        // Move over the back of the hand in its own centimetres, whichever way it is turned.
+        const m = ar.hand && palmAffine(ar.hand.palm, ar.hand.side, heightCm);
+        const det = m ? m[0] * m[3] - m[1] * m[2] : 0;
+        if (m && Math.abs(det) > 1e-6) {
+          const lim = handLengthCm(heightCm);
+          const clampCm = (v: number): number => Math.min(Math.max(v, -lim), lim);
+          ar.offset.u = clampCm(ar.offset.u + (m[3] * dx - m[2] * dy) / det);
+          ar.offset.v = clampCm(ar.offset.v + (-m[1] * dx + m[0] * dy) / det);
+        }
+      } else if (ar && a && (AR_PLACEMENTS[placementId] || placementId === WRIST)) {
         // Nudge in the limb's own frame, so the offset rides along with it.
         const clampCm = (v: number): number => Math.min(Math.max(v, -AR_MAX_OFFSET_CM), AR_MAX_OFFSET_CM);
         const cos = Math.cos(a.angle), sin = Math.sin(a.angle);
-        ar.offset.u = clampCm(ar.offset.u + (dx * cos + dy * sin) / a.pxPerCm);
+        const du = (dx * cos + dy * sin) / a.pxPerCm;
+        // Sideways on the wrist goes round it: keep the offset within one turn.
+        ar.offset.u = placementId === WRIST ? wrapPi((ar.offset.u + du) / wristRadiusCm()) * wristRadiusCm()
+          : clampCm(ar.offset.u + du);
         ar.offset.v = clampCm(ar.offset.v + (-dx * sin + dy * cos) / (a.pxPerCm * a.foreshorten));
       } else {
         const target = calibrating ? card : state;
@@ -1211,6 +1523,21 @@ export function setupCameraPreview(
       if (!ar.face) return "Looking for your face. Hold the phone at arm's length, facing you.";
       return `${sizeLabel} · mapped onto your face · size based on an average face · drag to move · pinch or scroll to resize`;
     }
+    if (isHandPlacement(placementId)) {
+      if (ar.handStatus) return ar.handStatus;
+      const wrist = placementId === WRIST;
+      if (!ar.hand) {
+        return wrist ? "Looking for your hand. Hold your wrist and hand up to the camera; your face doesn't need to be in view."
+          : "Looking for your hand. Hold it up to the camera, fingers apart; your face doesn't need to be in view.";
+      }
+      if (ar.hidden) {
+        return wrist ? "The design is round the other side of your wrist. Turn your wrist over, or drag sideways to bring the design round."
+          : "That's your palm. Turn the back of your hand to the camera.";
+      }
+      return wrist
+        ? `${sizeLabel}, ${ar.hand.side} wrist · size estimated from your height · drag sideways to move it round your wrist · pinch or scroll to resize`
+        : `${sizeLabel}, ${ar.hand.side} hand · size estimated from your height · drag to move · pinch or scroll to resize`;
+    }
     const spec = AR_PLACEMENTS[placementId];
     const name = (getBodyPart(placementId)?.label ?? "this placement").toLowerCase();
     if (!spec) {
@@ -1220,6 +1547,11 @@ export function setupCameraPreview(
     if (!ar.anchor) {
       return `Looking for you. Step back until ${spec.needs} are in view. ` +
         "It finds your face first, then the rest of you.";
+    }
+    if (ar.hidden) {
+      return forearmFace(placementId) === "palm"
+        ? "That's the outer side of your forearm. Turn your palm to the camera to see the design."
+        : "That's the inner side of your forearm. Turn the back of your hand to the camera to see the design.";
     }
     const side = ar.anchor.side ? `, ${ar.anchor.side} side` : "";
     return `${sizeLabel}${side} · size estimated from your height · drag to adjust · pinch or scroll to resize`;
@@ -1257,6 +1589,7 @@ export function setupCameraPreview(
     (window as unknown as { tsAr: () => unknown }).tsAr = () => ar && {
       placementId, delegate: ar.tracker.delegate, side: ar.side, anchor: ar.anchor,
       faceCenter: ar.faceCenter, faceStatus: ar.faceStatus, mirror,
+      frame: ar.frame, ms: debugMs, hand: ar.hand, handStatus: ar.handStatus, roll: ar.roll, palmFacing: ar.palmFacing, hidden: ar.hidden, offset: ar.offset,
       facePoints: ar.face && { 10: ar.face[10], 152: ar.face[152], 234: ar.face[234], 454: ar.face[454], 1: ar.face[1] },
     };
   }
@@ -1281,6 +1614,7 @@ export function setupCameraPreview(
         ar.offset = { u: 0, v: 0 };
         ar.faceCenter = null;
         if (!ar.tracker.faceReady()) ar.faceStatus = "";
+        if (!ar.tracker.handReady()) ar.handStatus = "";
       }
       placementId = id;
       heightCm = h;
@@ -1323,6 +1657,7 @@ export function setupCameraPreview(
           tracker, side: null, anchor: null, lastSeen: 0, lastVideoTime: -1, frame: 0,
           offset: { u: 0, v: 0 }, limbWidth: null, mask: null, uncovered: null, uncoveredImg: null, tint: null, filters: newFilters(),
           face: null, faceFilters: null, faceCenter: null, faceStatus: "",
+          hand: null, handFilters: null, handStatus: "", roll: null, palmFacing: null, palmSeen: 0, hidden: false,
         };
       } catch (e) {
         onError(`Full AR couldn't start on this device (${(e as Error).message}). The standard preview still works.`);

@@ -40,8 +40,9 @@ width when **Curve around a limb** is on, and disappears under clothing that
 covers the skin when **Hide under clothing** is on.
 
 It runs MediaPipe, Google's open-source body-mapping library, inside your
-browser. The first time, that means a download of about 30 MB from this site;
-your browser keeps it, so later visits start faster. Body mapping works the
+browser. The first time, that means a download of about 30 MB from this site,
+and 8 MB more for a forearm, wrist or hand placement; your browser keeps it, so
+later visits start faster. Body mapping works the
 processor hard, so older phones may slow down or get warm. The standard preview
 stays the default, and **Standard preview** switches back at any time.
 
@@ -60,19 +61,45 @@ takes up a small part of the screen. That is the trade-off for having it
 follow you. If it loses you, the hint under the preview says what it
 needs to see.
 
+The wrist and the back of the hand are exceptions too. A separate hand model
+finds a hand on its own, so hold your hand up to the camera, as close as you
+like, with or without your face in the picture.
+
 Full AR starts with the front camera and mirrors the picture. **Flip camera**
 switches to the rear camera when someone else is holding the phone.
 
 ## Which placements does Full AR follow?
 
-Nine: inner and outer forearm, upper arm, shoulder, chest, sternum, thigh, calf,
-and the face. Choose a side with the **Side** menu, or leave it on **Either** to
-follow whichever side is more visible.
+Eleven: inner and outer forearm, upper arm, shoulder, wrist, back of the hand,
+chest, sternum, thigh, calf, and the face. Choose a side with the **Side** menu,
+or leave it on **Either** to follow whichever side is more visible.
 
-The other eight stay where you drag them, even in Full AR. The wrist, the back
-of the hand and the spot behind the ear are too small for body mapping to
-place a design on reliably, and nobody can film their own upper back, lower
-back or back of the neck.
+The other six stay where you drag them, even in Full AR. The spot behind the
+ear is too small for body mapping to place a design on reliably, and nobody can
+film their own upper back, lower back or back of the neck.
+
+## How does Full AR follow a hand or a wrist?
+
+With a separate hand model, which finds 21 points on a hand. It works on a
+close-up, so your face does not need to be in the picture.
+
+On the back of the hand, the wrist and the four knuckles form a patch that does
+not bend. TattooSafe fits your design to that patch, so it turns, tilts and
+shortens with your hand. Turn your palm to the camera and the design goes out
+of sight, as a real one would.
+
+On the wrist, the design sits just above the wrist joint and travels round your
+wrist as you turn it. It starts on the inner wrist; drag sideways to move it
+round to the outside.
+
+The same model tells the inner forearm from the outer. A design on the inner
+forearm shows while the palm side of your arm faces the camera and fades out
+when you turn your arm over. For that your hand has to be reasonably large in
+the picture, which means framing yourself from about the waist up. From further
+back, the design shows on whichever side of the forearm faces the camera.
+
+The hand model is another 8 MB, downloaded the first time you choose a forearm,
+the wrist or the back of the hand.
 
 ## How does Full AR map a design onto a face?
 
@@ -97,7 +124,9 @@ percent, and the model's idea of where your joints are can be off by a few
 percent more. It leans on the limbs that look longest, because a limb pointing
 at the camera looks shorter than it is.
 
-On the face, the scale comes from an average adult face instead.
+On the face, the scale comes from an average adult face instead. On the wrist
+and the back of the hand it comes from the size of your hand in the picture,
+taking a hand to be about 11% of your height.
 
 For an exact size, use the standard preview and calibrate it with a card.
 
@@ -153,7 +182,9 @@ reflects your proportions rather than a generic model's.
 ## Does the preview wrap around my arm automatically?
 
 In Full AR, yes. With **Curve around a limb** on, it measures the limb's width in
-the camera picture and curves the design to match.
+the camera picture and curves the design to match. On the wrist it uses a
+typical wrist for your height, and the design goes round your wrist as you turn
+it.
 
 In the standard preview, the same toggle bends the design around a cylinder
 whose curvature you set by hand with the **Curvature** slider. That approximates
