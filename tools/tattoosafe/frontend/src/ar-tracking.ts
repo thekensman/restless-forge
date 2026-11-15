@@ -5,15 +5,17 @@
  * itself never pays for it. Wraps MediaPipe Tasks Vision: the pose
  * landmarker says where the body is, and the multiclass selfie segmenter
  * says which pixels are skin and which are clothes. The face landmarker
- * (478-point face mesh) loads only when the face placement is first chosen.
- * All of them run in this tab.
+ * (478-point face mesh) loads only when the face placement is first chosen,
+ * and the hand landmarker (21 points a hand) when a hand, wrist or forearm
+ * placement is. All of them run in this tab.
  * The WASM runtime and the models are served from this site (see
  * scripts/fetch-ar-assets.mjs); nothing about the visitor goes anywhere.
  */
-import { FaceLandmarker, FilesetResolver, ImageSegmenter, PoseLandmarker } from "@mediapipe/tasks-vision";
+import { FaceLandmarker, FilesetResolver, HandLandmarker, ImageSegmenter, PoseLandmarker } from "@mediapipe/tasks-vision";
 import assets from "./ar-assets.json";
 import { FACE_TRIANGLES, FACE_UV, FACE_XYZ } from "./face-mesh";
 import type { FaceMesh } from "./ar-face";
+import type { HandObservation } from "./ar-hand";
 
 const AR_BASE = "/tools/tattoosafe/ar";
 /** Width the segmenter sees; its model works at 256×256 anyway. */
@@ -30,17 +32,30 @@ export interface Tracker {
   readonly delegate: "GPU" | "CPU";
   /** The canonical face mesh the face placement maps onto. */
   readonly faceMesh: FaceMesh;
-  detect(video: HTMLVideoElement, tMs: number, withMask: boolean): TrackerOutput;
+  /** Run the body model, the segmenter, or both on this frame; what was not asked for comes back null. */
+  detect(video: HTMLVideoElement, tMs: number, want: { pose: boolean; mask: boolean }): TrackerOutput;
   /** True once loadFace() has finished. */
   faceReady(): boolean;
   /** Download and start the face landmarker (first time the face is chosen). */
   loadFace(onProgress: (loaded: number, total: number) => void): Promise<void>;
   /** 478 face landmarks normalized to the video frame, or null if no face is found. */
   detectFace(video: HTMLVideoElement, tMs: number): { x: number; y: number }[] | null;
+  /** True once loadHand() has finished. */
+  handReady(): boolean;
+  /** Download and start the hand landmarker (first time a hand, wrist or forearm placement is chosen). */
+  loadHand(onProgress: (loaded: number, total: number) => void): Promise<void>;
+  /**
+   * The hands in view, at most `maxHands`; empty when none is found or the
+   * model isn't loaded. Following one hand costs about half of looking for
+   * two (the tracker keeps searching for the second), so ask for two only
+   * when the other hand matters. Changing the number restarts the hand model,
+   * which takes a few frames; those come back empty.
+   */
+  detectHands(video: HTMLVideoElement, tMs: number, maxHands: 1 | 2): HandObservation[];
   close(): void;
 }
 
-/** Download size of the body models (the face model loads later, on demand). */
+/** Download size of the body models (the face and hand models load later, on demand). */
 export const MODEL_BYTES = assets.models.pose.bytes + assets.models.segmenter.bytes;
 
 async function download(file: string, sha256: string, onChunk: (n: number) => void): Promise<Uint8Array> {
@@ -122,6 +137,12 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
   let face: FaceLandmarker | null = null;
   let faceLoad: Promise<void> | null = null;
   let lastFace = -1;
+  let hand: HandLandmarker | null = null;
+  let handLoad: Promise<void> | null = null;
+  let lastHand = -1;
+  let handCount: 1 | 2 = 1;
+  let handRestart: Promise<void> | null = null;
+  let closed = false;
 
   const small = document.createElement("canvas");
   const sctx = small.getContext("2d", { willReadFrequently: true });
@@ -137,11 +158,13 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
         const m = assets.models.face;
         let loaded = 0;
         const buf = await download(m.file, m.sha256, (n) => { loaded += n; onProgress(loaded, m.bytes); });
-        face = await FaceLandmarker.createFromOptions(fileset, {
+        const task = await FaceLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetBuffer: buf, delegate },
           runningMode: "VIDEO",
           numFaces: 1,
         });
+        // Full AR was turned off while this loaded: nothing will close it later.
+        if (closed) task.close(); else face = task;
       })();
       // A failed load can be retried by choosing the face again.
       faceLoad.catch(() => { faceLoad = null; });
@@ -155,16 +178,64 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
       const first = r.faceLandmarks[0];
       return first ? first.map((p) => ({ x: p.x, y: p.y })) : null;
     },
-    detect(video, tMs, withMask) {
-      const tp = Math.max(tMs, lastPose + 1);
-      lastPose = tp;
-      const r = pose.detectForVideo(video, tp);
-      const first = r.landmarks[0];
-      const landmarks = first ? first.map((p) => ({ x: p.x, y: p.y, visibility: p.visibility ?? 0 })) : null;
-      r.close();
+    handReady: () => hand !== null,
+    loadHand(onProgress) {
+      handLoad ??= (async () => {
+        const m = assets.models.hand;
+        let loaded = 0;
+        const buf = await download(m.file, m.sha256, (n) => { loaded += n; onProgress(loaded, m.bytes); });
+        const task = await HandLandmarker.createFromOptions(fileset, {
+          baseOptions: { modelAssetBuffer: buf, delegate },
+          runningMode: "VIDEO",
+          numHands: handCount,
+        });
+        if (closed) task.close(); else hand = task;
+      })();
+      // A failed load can be retried by choosing the placement again.
+      handLoad.catch(() => { handLoad = null; });
+      return handLoad;
+    },
+    detectHands(video, tMs, maxHands) {
+      if (!hand || handRestart) return [];
+      if (maxHands !== handCount) {
+        const task = hand;
+        handRestart = task.setOptions({ numHands: maxHands })
+          .then(() => { handCount = maxHands; }, () => undefined)
+          .finally(() => { handRestart = null; });
+        return [];
+      }
+      const t = Math.max(tMs, lastHand + 1);
+      lastHand = t;
+      const r = hand.detectForVideo(video, t);
+      const out: HandObservation[] = [];
+      r.landmarks.forEach((lm, i) => {
+        const side = r.handedness[i]?.[0];
+        if (!side) return;
+        // The tracker names a hand by how it looks in the picture it is given.
+        // The picture here is the camera's own, unmirrored (the preview mirrors
+        // it afterwards), so "Left" is the person's left: checked on photos of
+        // known hands with this runtime (docs/tattoosafe-full-ar.md).
+        out.push({
+          side: side.categoryName === "Left" ? "left" : "right",
+          score: side.score,
+          lm: lm.map((p) => ({ x: p.x, y: p.y, z: p.z })),
+        });
+      });
+      return out;
+    },
+    detect(video, tMs, want) {
+      let landmarks: TrackerOutput["landmarks"] = null;
+      if (want.pose) {
+        const tp = Math.max(tMs, lastPose + 1);
+        lastPose = tp;
+        const r = pose.detectForVideo(video, tp);
+        const first = r.landmarks[0];
+        landmarks = first ? first.map((p) => ({ x: p.x, y: p.y, visibility: p.visibility ?? 0 })) : null;
+        r.close();
+      }
 
       let mask: TrackerOutput["mask"] = null;
-      if (withMask && sctx && video.videoWidth) {
+      if (want.mask && sctx && video.videoWidth) {
         const h = Math.max(1, Math.round((MASK_WIDTH * video.videoHeight) / video.videoWidth));
         if (small.width !== MASK_WIDTH || small.height !== h) {
           small.width = MASK_WIDTH;
@@ -181,9 +252,11 @@ export async function createTracker(onProgress: (loaded: number, total: number) 
       return { landmarks, mask };
     },
     close() {
+      closed = true;
       pose.close();
       seg.close();
       face?.close();
+      hand?.close();
     },
   };
 }

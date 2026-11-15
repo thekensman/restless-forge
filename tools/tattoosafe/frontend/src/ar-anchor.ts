@@ -76,7 +76,11 @@ const HIP: Pair = [LM.L_HIP, LM.R_HIP];
 const KNEE: Pair = [LM.L_KNEE, LM.R_KNEE];
 const ANKLE: Pair = [LM.L_ANKLE, LM.R_ANKLE];
 
-/** The placements Full AR can follow. The rest stay manual. */
+/**
+ * The placements the body model follows. The face (ar-face.ts) and the back
+ * of the hand and wrist (ar-hand.ts) have models of their own; the rest stay
+ * manual.
+ */
 export const AR_PLACEMENTS: Record<string, AnchorSpec> = {
   inner_forearm: { kind: "limb", from: ELBOW, to: WRIST, t: 0.5, ratio: SEGMENT_RATIO.forearm, needs: "your face, shoulders and the whole arm" },
   outer_forearm: { kind: "limb", from: ELBOW, to: WRIST, t: 0.5, ratio: SEGMENT_RATIO.forearm, needs: "your face, shoulders and the whole arm" },
@@ -88,9 +92,9 @@ export const AR_PLACEMENTS: Record<string, AnchorSpec> = {
   calf: { kind: "limb", from: KNEE, to: ANKLE, t: 0.4, ratio: SEGMENT_RATIO.shank, needs: "your face and both legs down to the ankles" },
 };
 
-/** Placements Full AR follows: the eight above, plus the face (face mesh, ar-face.ts). */
+/** Placements Full AR follows: the eight above, plus the face, the back of the hand and the wrist. */
 export function isTrackable(placementId: string): boolean {
-  return placementId in AR_PLACEMENTS || placementId === "face";
+  return placementId in AR_PLACEMENTS || placementId === "face" || placementId === "hand" || placementId === "wrist";
 }
 
 export interface Anchor {

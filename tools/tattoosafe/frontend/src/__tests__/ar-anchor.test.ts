@@ -42,8 +42,14 @@ describe("AR_PLACEMENTS", () => {
     expect(isTrackable("face")).toBe(true);
     expect("face" in AR_PLACEMENTS).toBe(false);
   });
+  it("follows the back of the hand and the wrist with the hand model, not the body model", () => {
+    for (const id of ["hand", "wrist"]) {
+      expect(isTrackable(id), id).toBe(true);
+      expect(id in AR_PLACEMENTS, id).toBe(false);
+    }
+  });
   it("leaves the hard-to-film placements manual", () => {
-    for (const id of ["upper_back", "lower_back", "back_of_neck", "behind_ear", "wrist", "hand", "ribs", "ankle"]) {
+    for (const id of ["upper_back", "lower_back", "back_of_neck", "behind_ear", "ribs", "ankle"]) {
       expect(isTrackable(id), id).toBe(false);
     }
   });

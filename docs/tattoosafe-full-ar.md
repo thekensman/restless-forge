@@ -5,7 +5,9 @@ static overlay the visitor drags into place; Full AR finds their body with
 MediaPipe and keeps the design on the placement they picked as they move:
 turned with the limb, foreshortened with it, curved to its measured width, and
 hidden where clothing covers the skin. On the face it maps the design onto
-MediaPipe's face mesh instead. Everything runs in the visitor's tab.
+MediaPipe's face mesh instead, and on the back of the hand and the wrist it
+follows MediaPipe's hand landmarks, close up, with no face in view. Everything
+runs in the visitor's tab.
 Nothing is uploaded, so the tool stays client-side (not `tier: 'cloud'`).
 
 Visitor-facing copy calls it **body mapping**, never "tracking": on a site whose
@@ -16,6 +18,10 @@ landmarks).
 It costs a download of about 30 MB, so nothing loads until the visitor presses
 **Full AR (body mapping)** and accepts the notice, which states the download,
 the face-first requirement, the device load, and that the size is an estimate.
+The hand model (8 MB) and the face model (4 MB) are not in that figure: each
+downloads the first time a placement that uses it is chosen, and the notice
+says so. The inner forearm is the default placement and uses the hand model,
+so most visitors download 38 MB in all.
 
 ## Files
 
@@ -24,7 +30,8 @@ the face-first requirement, the device load, and that the size is an estimate.
 | `src/ar-anchor.ts` | Pure geometry, unit-tested: which landmarks each placement anchors to, px-per-cm from the entered height, side choice, smoothing, limb width from the mask. No MediaPipe import. |
 | `src/ar-face.ts` | Pure face-mapping geometry, unit-tested: per-triangle affine maps from the mesh's texture space to the live landmarks, local cm-per-UV, which triangles face the camera, drag axes. |
 | `src/face-mesh.ts` | MediaPipe's canonical face mesh (468 landmarks' UV and cm positions, 898 triangles), generated from `canonical_face_model.obj`, Apache-2.0. Bundled into the lazy chunk only. |
-| `src/ar-tracking.ts` | The lazily loaded chunk: downloads and hash-checks the models, creates the pose landmarker and the segmenter, picks GPU or CPU; loads the face landmarker the first time the face is chosen. Imported only after the notice. |
+| `src/ar-hand.ts` | Pure hand geometry, unit-tested on landmarks from real photos: the affine fit from the wrist and knuckles to the screen, which side of the hand is showing, the palm's direction, the wrist anchor, choosing a hand, and strips for a design on a turning cylinder. |
+| `src/ar-tracking.ts` | The lazily loaded chunk: downloads and hash-checks the models, creates the pose landmarker and the segmenter, picks GPU or CPU; loads the face landmarker the first time the face is chosen, and the hand landmarker the first time a hand, wrist or forearm placement is. Imported only after the notice. |
 | `src/camera.ts` | The camera preview. Full AR is a mode of it (`startAr` / `stopAr`): front camera, mirrored view, tracking per frame, drawing on the anchor. |
 | `src/ar-assets.json` | Single source for the runtime version and each model's URL, SHA-256, size and served file name. Read by the build script and the browser. |
 | `scripts/fetch-ar-assets.mjs` | Fills `public/ar/` (gitignored) before every `npm run dev` and `npm run build`. |
@@ -38,6 +45,7 @@ the face-first requirement, the device load, and that the size is an estimate.
 | `models/pose_landmarker_full-<sha12>.task` | 9.4 MB | Google's versioned model URL, checked against the pinned SHA-256 |
 | `models/selfie_multiclass_256x256-<sha12>.tflite` | 16.4 MB | same |
 | `models/face_landmarker-<sha12>.task` | 3.8 MB | same; downloaded by the browser only when the face placement is first chosen |
+| `models/hand_landmarker-<sha12>.task` | 7.8 MB | same; downloaded by the browser only when a hand, wrist or forearm placement is first chosen |
 
 `fetch-ar-assets.mjs` copies the runtime, then for each model tries the
 pinned upstream URL and, if that fails or serves different bytes, the copy
@@ -108,6 +116,50 @@ networks, repackaged with new zip timestamps), which would fail the hash.
   each clipped 0.6 px wide so no seams show, triangles winding the wrong way
   (facing away) are skipped, and the result is multiplied onto the frame once.
   Size uses the canonical mesh's centimetres, an average adult face.
+- **Hand: the hand landmarker, 2D landmarks only.** It returns 21 points a
+  hand and finds a hand on its own, so the wrist and the back of the hand work
+  on a close-up. How each of its outputs is used was settled by running it
+  (runtime 1.1.1, CPU delegate, headless Chromium) on MediaPipe's test photos
+  `left_hands.jpg`, `right_hands.jpg`, `woman_hands.jpg`, `victory.jpg`,
+  `thumb_up.jpg`, `pointing_up.jpg` and `fist.jpg`:
+  - *Its metric "world landmarks" are not used.* They put the wrist-to-fingertip
+    length at 12.6 cm on `left_hands.jpg` and 20.1 cm on `thumb_up.jpg`, and on
+    `left_hands.jpg` they describe a hand lying flat to the camera as edge on.
+    Scale comes from the entered height instead (a hand is 10.8% of it,
+    Drillis and Contini), and shape from a fixed layout of the wrist and four
+    knuckles (`PALM_LAYOUT_LEFT`), measured from the 2D landmarks of the four
+    flat hands in the two `*_hands.jpg` photos, which agree to 0.01 hand
+    lengths.
+  - *Back of the hand:* a least-squares affine fit from that layout, in
+    centimetres, to the five points on screen. Its largest scale is px per
+    cm, the ratio of its scales is the foreshortening, and its determinant's
+    sign says whether the back or the palm is showing (the design is hidden
+    on the palm). No depth is involved.
+  - *Wrist:* the design sits on a cylinder 1.8% of height (3 cm) up the arm
+    from the wrist joint, on the line from the middle knuckle through the
+    wrist. The palm's direction (wrist→index knuckle × wrist→little-finger
+    knuckle, with the landmarks' relative depth) is the wrist's turn about
+    the arm, so the design moves round the cylinder and is cut off at its
+    edge. The radius is the catalogue's wrist circumference scaled by height.
+    This is the one place depth is used, and it only sets the turn.
+  - *Left or right:* the label names the hand as it looks in the picture it
+    was given. The picture here is the camera's own, unmirrored, so "Left"
+    is the person's left: `woman_hands.jpg` shows both arms attached, and the
+    labels match them. MediaPipe's documentation says the opposite (that the
+    input is assumed mirrored), so recheck this whenever the runtime changes;
+    the `real hands` tests in `ar-hand.test.ts` hold the expected answers.
+  - *One hand or two:* asked for two hands, the tracker keeps searching for
+    the second (77 ms a frame with one hand in view, against 42 ms when asked
+    for one). So it is asked for one, unless the visitor chose a side, when
+    the other hand has to be told apart. Changing the number restarts the
+    hand model for a few frames.
+- **Forearm side.** The body model gives the inner and outer forearm the same
+  anchor: it cannot see which side of the arm is showing. The hand at the
+  followed wrist can, so the design fades out when the other side of the hand
+  faces the camera (`sideGate`). The hand model looks every fourth frame. The
+  side of the hand is the hand model's own reading, not the body model's name
+  for the arm: on `woman_hands.jpg` (arms crossed in front of the face) the
+  body model called the right arm the left one, which hid the design.
 - **GPU or CPU.** The GPU delegate is tried first, except when WebGL is a
   software renderer (SwiftShader, llvmpipe): there it measured about five times
   slower than the CPU delegate, so the CPU delegate is used.
@@ -117,11 +169,27 @@ networks, repackaged with new zip timestamps), which would fail the hash.
 - **It finds the face first.** MediaPipe's pose detector locates a person by
   their face, so a close-up of one limb never locks on. The visitor has to prop
   the phone up or use a mirror, which makes the design small on screen.
-- **Nine placements:** inner and outer forearm, upper arm, shoulder, chest,
-  sternum, thigh, calf, and the face (face mesh, works at selfie distance).
-  Wrist, hand and behind the ear are too small for a body model; upper and
-  lower back and the back of the neck can't be filmed by the wearer. Those stay
-  manual inside Full AR.
+  The wrist, the back of the hand and the face are the exceptions: each has a
+  model that finds it on its own.
+- **Eleven placements:** inner and outer forearm, upper arm, shoulder, chest,
+  sternum, thigh, calf, the face (face mesh, works at selfie distance), and
+  the wrist and back of the hand (hand landmarks, work close up). Behind the
+  ear is too small for a body model; upper and lower back and the back of the
+  neck can't be filmed by the wearer. Those stay manual inside Full AR.
+- **A hand has to be big enough.** In a 1280×720 frame the hand model stopped
+  finding hands somewhere between 120 and 70 px long (wrist to fingertip),
+  depending on the photo: a sixth to a tenth of the frame's height. Hands cut
+  out on white needed to be far larger.
+  With the whole body in view a hand is smaller than that, so the forearm's
+  side is only known from about waist-up framing. Without it the design shows
+  on whichever side faces the camera, as before.
+- **The forearm's turn is taken from the hand.** That is right at the wrist
+  and less so toward the elbow, which turns less. So the forearm design is
+  only shown or hidden by side; it does not slide round the arm the way the
+  wrist design does.
+- **The wrist is drawn as a round cylinder** of a typical circumference for
+  the height entered, in line with the hand. A real wrist is wider than it is
+  deep, and a bent wrist puts the design off the arm's line.
 - **Size is an estimate.** Scale comes from the entered height and typical
   segment proportions (Drillis and Contini), using the longest-looking
   segments, since a limb pointing at the camera looks short. Individual
@@ -130,7 +198,14 @@ networks, repackaged with new zip timestamps), which would fail the hash.
   the exact route.
 - **Real phones.** First tried on a phone on 2026-11-02: it locked onto a
   forearm in mirror framing, and that test found the skin-only clip bug above.
-  Frame rates across devices are still unmeasured.
+  Frame rates across devices are still unmeasured. The hand, wrist and
+  forearm-side tracking (2026-11-14) has only been run on photos in headless
+  Chromium, never on a phone or on a moving hand.
+- **Cost per frame**, CPU delegate in a cloud container (a phone's GPU will
+  differ, the proportions less so): body model 65 ms, segmenter about 400 ms, hand
+  model 50 ms following one hand and 80–130 ms looking for two. The segmenter
+  runs every second frame, and only when a toggle needs it; it is what holds
+  the frame rate down.
 
 ## Debugging on a device
 
@@ -138,12 +213,16 @@ Add `?ar-debug` to the page URL. Full AR then tints the segmentation over the
 feed (skin peach, clothes blue, face pink, hair brown), which shows at a glance
 whether the mask lines up with the picture, and `tsAr()` in the browser console
 returns the live state: placement, GPU or CPU, side, anchor, the face center
-and a few face landmarks, and whether the view is mirrored.
+and a few face landmarks, whether the view is mirrored, the hand being
+followed, the wrist's turn (`roll`), which way the palm of a followed forearm
+faces (`palmFacing`), whether the design is hidden on the far side, and `ms`,
+a running average of how long each model took on its last frames.
 
 ## Testing
 
-- Unit: `src/__tests__/ar-anchor.test.ts` and `ar-face.test.ts` (on the real
-  mesh) cover the geometry.
+- Unit: `src/__tests__/ar-anchor.test.ts`, `ar-face.test.ts` (on the real
+  mesh) and `ar-hand.test.ts` (on landmarks from real photos) cover the
+  geometry.
 - End to end (manual, not in CI): Chromium accepts a video file as a fake
   camera. Convert MediaPipe's test photo
   (`https://storage.googleapis.com/mediapipe-assets/pose.jpg`) with
@@ -151,11 +230,23 @@ and a few face landmarks, and whether the view is mirrored.
   and launch Chromium with `--use-fake-device-for-media-stream
   --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=person.y4m`.
   Turning Full AR on should reach the tracking hint within seconds, and the
-  design should sit on each of the eight placements. The figure in that photo
+  design should sit on each of the eight body placements. The figure in that photo
   wears a tank top and shorts, so the chest design vanishes with "Hide under
   clothing" on and the thigh design is cut off at the shorts. For the face,
   MediaPipe's `portrait.jpg` cropped to head and shoulders works; a checkerboard
   with letters shows both the bending and that text reads the right way round.
+  For the hand, `left_hands.jpg` and `right_hands.jpg` from the same bucket
+  show the backs of two hands (scale them to fill the frame, since small
+  hands on white are missed): the back-of-hand design should sit between the
+  wrist and knuckles with its top toward the wrist, on one hand, and choosing
+  the other side in the **Side** menu should lose it. `victory.jpg` shows a
+  right palm: the back-of-hand placement should draw nothing and say so, and
+  the wrist placement should put the design just below the hand, wrapped to
+  the wrist's width with **Curve around a limb** on; dragging it sideways
+  should take it round the wrist and out of sight.
+  `https://storage.googleapis.com/mediapipe-tasks/hand_landmarker/woman_hands.jpg`
+  shows a face, both arms and both palms: the inner forearm should show its
+  design and the outer forearm should hide it and say why.
   When a test scrolls the canvas into view, scroll instantly: the page has
   `scroll-behavior: smooth`, and a drag during the animation reads as a huge
   move.
