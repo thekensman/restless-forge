@@ -30,6 +30,9 @@ AFTER BUILD 26 WENT LIVE (index.html only, never cached, so still 26)
     memorial, the credits, the page's descriptions and the /games/ card now
     use his real name. The memorial lives in games/memorials/tom-cruse/ and
     its photo ships as assets/memorial/tom-cruse.png.
+  - the share image (assets/ui/share.png) says Cruse too, in its blurb and
+    its dedication line. Only those two lines were repainted, in the page's
+    own fonts and colours; the logo and the gameplay panel are untouched.
   - back on the title screen after a game, the side panel resets to what a
     new game starts with. It used to keep the last game's lives, score,
     level and boss.
